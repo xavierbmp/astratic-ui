@@ -105,7 +105,7 @@ export function CobrosView({
     },
     { id: "invoice", header: "Factura", hideBelow: "lg", sortValue: (p) => p.invoiceCode, cell: (p) => <span className="text-muted-foreground">{p.invoiceCode}</span> },
     { id: "date", header: "Fecha", hideBelow: "md", sortValue: (p) => p.paidAt, cell: (p) => <span className="text-muted-foreground">{fmt.date(p.paidAt)}</span> },
-    { id: "method", header: "Método", hideBelow: "xl", sortValue: (p) => p.method, cell: (p) => <span className="text-muted-foreground">{paymentMethods[p.method].label}</span> },
+    { id: "method", header: "Método", hideBelow: "2xl", sortValue: (p) => p.method, cell: (p) => <span className="text-muted-foreground">{paymentMethods[p.method].label}</span> },
     { id: "state", header: "Conciliación", cell: (p) => <ReconciledBadge reconciled={p.reconciled} /> },
     { id: "amount", header: "Importe", align: "right", sortValue: (p) => p.amount, cell: (p) => <span className="font-semibold">{fmt.eur(p.amount)}</span> },
   ]
