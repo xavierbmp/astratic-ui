@@ -22,6 +22,7 @@ import {
   RulerIcon,
   SearchIcon,
   ShapesIcon,
+  SignpostIcon,
   SlidersHorizontalIcon,
   SparklesIcon,
   SquareIcon,
@@ -39,10 +40,10 @@ export const dsUser: CurrentUser = { name: "Astratic Devs", role: "Documentació
 
 export const componentPages: { slug: string; label: string; summary: string; icon: NavItem["icon"] }[] = [
   { slug: "shell", label: "Shell de aplicación", summary: "Sidebar, cabecera, migas, buscador ⌘K y usuario.", icon: PanelLeftIcon },
-  { slug: "page-header", label: "Cabecera de página", summary: "Título, descripción y acciones de página.", icon: HeadingIcon },
+  { slug: "page-header", label: "Cabecera de página", summary: "Título, descripción, pestañas de subpágina y acciones de página.", icon: HeadingIcon },
   { slug: "kpi", label: "Cifras (KPI)", summary: "Fila de tarjetas de cifra con delta y alerta.", icon: GaugeIcon },
   { slug: "section", label: "Sección", summary: "El bloque con cabecera, contador y acción.", icon: SquareIcon },
-  { slug: "toolbar", label: "Toolbar", summary: "Buscador, filtros, conmutador de vistas y acción principal.", icon: SearchIcon },
+  { slug: "toolbar", label: "Toolbar", summary: "Buscador, filtros, conmutador de vistas y acción principal, encima del bloque.", icon: SearchIcon },
   { slug: "data-table", label: "Tabla de datos", summary: "Columnas tipadas, orden, selección y paginación.", icon: Table2Icon },
   { slug: "kanban", label: "Kanban", summary: "Columnas por fase con arrastre y fases plegables.", icon: SquareKanbanIcon },
   { slug: "insights-panel", label: "Panel de información", summary: "Columna derecha con bloques personalizables.", icon: PanelRightIcon },
@@ -80,6 +81,7 @@ export const dsNav: NavGroup[] = [
     items: [
       { id: "anatomia", label: "Anatomía de página", href: "/ds/patrones/anatomia", icon: LayoutTemplateIcon },
       { id: "convenciones", label: "Convenciones", href: "/ds/patrones/convenciones", icon: MousePointerClickIcon },
+      { id: "navegacion", label: "Navegación y subpáginas", href: "/ds/patrones/navegacion", icon: SignpostIcon },
       { id: "filtros", label: "Filtros y vistas", href: "/ds/patrones/filtros", icon: FilterIcon },
       { id: "paneles", label: "Paneles personalizables", href: "/ds/patrones/paneles", icon: SlidersHorizontalIcon },
       { id: "datos", label: "Arquitectura de datos", href: "/ds/patrones/datos", icon: DatabaseIcon },

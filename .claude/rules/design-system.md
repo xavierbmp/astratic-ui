@@ -8,14 +8,21 @@
 - Nunca colores de Tailwind sueltos ni valores hex en JSX: solo tokens (`bg-card`, `text-muted-foreground`, `border`, `bg-brand-soft`, `text-success`…).
 
 ## Anatomía de una página de operación (orden fijo)
-1. `PageBody` → `PageHeader` (título 27 px, descripción, acciones de página a la derecha: tabs o botones outline).
+1. `PageBody` → `PageHeader` (título 27 px, descripción; a la derecha, `tabs` con las pestañas de subpágina si las hay y `actions` con botones outline).
 2. `KpiRow` con 3 a 5 `KpiCard`.
-3. `Toolbar`: `ToolbarSearch` · `FilterMenu`(s) · `ToolbarSpacer` · `ViewSwitcher` · botón principal (negro, único).
-4. `ActiveFilters` (chips) si hay filtros aplicados.
-5. `WorkGrid` con **un** `Section` (bloque de operación) y `aside={<InsightsPanel storageKey=… blocks=… />}`.
-6. `DetailSheet` para el registro abierto. Nunca un modal para ver un registro.
+3. `WorkGrid` con:
+   - `toolbar`: `Toolbar` con `ToolbarSearch` · `FilterMenu`(s) · `ToolbarActions` (`ViewSwitcher` + botón principal negro y único), y debajo `ActiveFilters`. La toolbar mide lo que el bloque: nunca queda encima del panel de información.
+   - **un** `Section` (bloque de operación) como hijo.
+   - `aside={<InsightsPanel storageKey=… blocks=… />}`: empieza a la altura del bloque y mide lo mismo.
+4. `DetailSheet` para el registro abierto. Nunca un modal para ver un registro.
 
 Dashboards: cifras + grid de secciones de resumen + panel «Hoy». Ajustes: navegación vertical + un bloque con campos y pie de guardado.
+
+## Subpáginas
+- Un módulo con partes distintas que comparten título (Facturas y Cobros en Facturación) usa subpáginas: una ruta por parte (`/facturacion`, `/facturacion/cobros`) y `PageTabs` en la prop `tabs` de `PageHeader`.
+- Las pestañas se definen una vez en `nav.ts` (campo `tabs` del ítem): la sidebar marca el módulo y las migas y ⌘K incluyen la subpágina.
+- Mismo título en todas las subpáginas; cada una con su descripción, cifras, toolbar, bloque y panel. De 2 a 6; sin anidar.
+- No son subpáginas: otra forma de ver los mismos datos (vista, `ViewSwitcher`) ni un recorte de la lista (filtro o segmento). Un solo segmentado por cabecera.
 
 ## Estructura de archivos de una página
 - `page.tsx` de servidor: `metadata`, carga de datos desde `lib/db/`, lectura de `searchParams`. Pasa los datos por props.

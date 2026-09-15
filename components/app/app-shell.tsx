@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { BellIcon, ChevronsUpDownIcon, SearchIcon } from "lucide-react"
 import { cn } from "cn"
-import type { Brand, CurrentUser, NavGroup } from "@/lib/nav"
+import { activeTab, type Brand, type CurrentUser, type NavGroup } from "@/lib/nav"
 import {
   Sidebar,
   SidebarContent,
@@ -34,12 +34,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
+  CommandShortcut,
 } from "@/components/ui/command"
 import { AvatarInitials } from "@/components/app/avatar-initials"
 import { ThemeToggle } from "@/components/app/theme-toggle"
@@ -101,9 +103,12 @@ export function AppShell({
     return () => window.removeEventListener("keydown", onKey)
   }, [])
 
+  // La primera subpágina vive en la ruta del módulo; las demás añaden su miga: «Grupo › Página › Subpágina».
+  const tab = current?.item.tabs ? activeTab(current.item.tabs, pathname) : undefined
   const crumbs: Crumb[] = [
     ...(current?.group.label ? [{ label: current.group.label }] : []),
     ...(current ? [{ label: current.item.label, href: current.item.href }] : []),
+    ...(tab && tab.href !== current?.item.href ? [{ label: tab.label, href: tab.href }] : []),
     ...extra,
   ]
 
@@ -234,27 +239,46 @@ export function AppShell({
         </SidebarInset>
 
         <CommandDialog open={paletteOpen} onOpenChange={setPaletteOpen} title="Buscar" description="Ir a una página">
-          <CommandInput placeholder="Buscar páginas…" />
-          <CommandList>
-            <CommandEmpty>Sin resultados.</CommandEmpty>
-            {nav.map((group, gi) => (
-              <CommandGroup key={group.label ?? gi} heading={group.label}>
-                {group.items.map((item) => (
-                  <CommandItem
-                    key={item.id}
-                    value={`${group.label ?? ""} ${item.label}`}
-                    onSelect={() => {
-                      setPaletteOpen(false)
-                      router.push(item.href)
-                    }}
-                  >
-                    <item.icon />
-                    {item.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ))}
-          </CommandList>
+          <Command>
+            <CommandInput placeholder="Buscar páginas…" />
+            <CommandList>
+              <CommandEmpty>Sin resultados.</CommandEmpty>
+              {nav.map((group, gi) => (
+                <CommandGroup key={group.label ?? gi} heading={group.label}>
+                  {group.items.map((item) => (
+                    <React.Fragment key={item.id}>
+                      <CommandItem
+                        value={`${group.label ?? ""} ${item.label}`}
+                        onSelect={() => {
+                          setPaletteOpen(false)
+                          router.push(item.href)
+                        }}
+                      >
+                        <item.icon />
+                        {item.label}
+                      </CommandItem>
+                      {item.tabs
+                        ?.filter((t) => t.href !== item.href)
+                        .map((t) => (
+                          <CommandItem
+                            key={t.href}
+                            value={`${group.label ?? ""} ${item.label} ${t.label}`}
+                            onSelect={() => {
+                              setPaletteOpen(false)
+                              router.push(t.href)
+                            }}
+                          >
+                            <item.icon />
+                            {t.label}
+                            <CommandShortcut className="tracking-normal">{item.label}</CommandShortcut>
+                          </CommandItem>
+                        ))}
+                    </React.Fragment>
+                  ))}
+                </CommandGroup>
+              ))}
+            </CommandList>
+          </Command>
         </CommandDialog>
       </SidebarProvider>
     </BreadcrumbContext.Provider>

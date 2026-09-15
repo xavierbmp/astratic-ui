@@ -26,7 +26,7 @@ export default function FiltrosPage() {
             [
               "Búsqueda de texto",
               <>
-                <code>ToolbarSearch</code>, 256 px, siempre el primero
+                <code>ToolbarSearch</code>, hasta 256 px, siempre el primero
               </>,
               "Siempre. Busca en los campos de texto principales del registro: nombre, código y categoría. Filtra al escribir, sin botón.",
             ],
@@ -130,20 +130,27 @@ const chips = [
   ...owner.map((v) => ({ label: \`Responsable: \${ownerLabel(v)}\`, onRemove: () => setOwner(owner.filter((x) => x !== v)) })),
 ]
 
-<Toolbar>
-  <ToolbarSearch placeholder="Buscar registro o código…" value={query} onChange={(e) => setQuery(e.target.value)} />
-  <FilterMenu label="Fase" options={fases.map((f) => ({ value: f.id, label: f.label, count: countBy("fase", f.id) }))} value={fase} onChange={setFase} />
-  <FilterMenu label="Responsable" icon={UserIcon} multiple={false} options={owners} value={owner} onChange={setOwner} />
-  <ToolbarSpacer />
-  <ViewSwitcher views={["table", "list", "kanban"]} value={view} onChange={setView} />
-  <Button><PlusIcon /> Nuevo registro</Button>
-</Toolbar>
-<ActiveFilters chips={chips} onClear={() => { setFase([]); setOwner([]) }} />
-
-<Section>
-  <SectionHeader title="Registros" count={filtered.length} />
-  …
-</Section>`}
+<WorkGrid
+  toolbar={
+    <>
+      <Toolbar>
+        <ToolbarSearch placeholder="Buscar registro…" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <FilterMenu label="Fase" options={fases.map((f) => ({ value: f.id, label: f.label, count: countBy("fase", f.id) }))} value={fase} onChange={setFase} />
+        <FilterMenu label="Responsable" icon={UserIcon} multiple={false} options={owners} value={owner} onChange={setOwner} />
+        <ToolbarActions>
+          <ViewSwitcher views={["table", "list", "kanban"]} value={view} onChange={setView} />
+          <Button><PlusIcon /> Nuevo registro</Button>
+        </ToolbarActions>
+      </Toolbar>
+      <ActiveFilters chips={chips} onClear={() => { setFase([]); setOwner([]) }} />
+    </>
+  }
+>
+  <Section>
+    <SectionHeader title="Registros" count={filtered.length} />
+    …
+  </Section>
+</WorkGrid>`}
         />
       </DocSection>
 
@@ -183,6 +190,10 @@ const chips = [
               ellos: «Míos» + Fase: Propuesta muestra mis propuestas.
             </>,
             <>El primero es siempre «Todos». Después, de 2 a 4 segmentos. Si hacen falta más, es que son filtros normales.</>,
+            <>
+              Un solo segmentado por cabecera: si la página tiene subpáginas, sus pestañas ocupan ese sitio y los segmentos pasan a un{" "}
+              <code>FilterMenu</code> de selección única, el primero de la toolbar.
+            </>,
             <>
               El segmento activo va en la URL como <code>?segmento=mios</code>, igual que el resto de filtros, y el contador del bloque lo refleja.
             </>,

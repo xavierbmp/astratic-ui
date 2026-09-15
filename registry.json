@@ -89,8 +89,18 @@
       "name": "page-header",
       "type": "registry:component",
       "title": "Cabecera de página",
-      "description": "Título, descripción y acciones de página, más el contenedor PageBody con el padding del sistema.",
+      "description": "Título, descripción, pestañas de subpágina y acciones de página, más el contenedor PageBody con el padding del sistema.",
       "files": [{ "path": "components/app/page-header.tsx", "type": "registry:component" }]
+    },
+    {
+      "name": "page-tabs",
+      "type": "registry:component",
+      "title": "Pestañas de subpágina",
+      "description": "Pestañas de texto para las subpáginas de un módulo, en la cabecera de página. Una ruta por pestaña, con contador de pendientes.",
+      "files": [
+        { "path": "components/app/page-tabs.tsx", "type": "registry:component" },
+        { "path": "lib/nav.ts", "type": "registry:lib" }
+      ]
     },
     {
       "name": "kpi",
@@ -111,14 +121,14 @@
       "name": "work-grid",
       "type": "registry:component",
       "title": "Rejilla de trabajo",
-      "description": "Bloque de operación a la izquierda y panel de información de 320 px a la derecha, misma altura.",
+      "description": "Toolbar encima del bloque de operación y con su mismo ancho; bloque a la izquierda y panel de información de 320 px a la derecha, que empieza a la altura del bloque y mide lo mismo.",
       "files": [{ "path": "components/app/work-grid.tsx", "type": "registry:component" }]
     },
     {
       "name": "toolbar",
       "type": "registry:component",
       "title": "Toolbar",
-      "description": "Buscador, menús de filtro con opciones y contadores, chips de filtros activos y conmutador de vistas con su estado por página (usePageView).",
+      "description": "Buscador, menús de filtro con opciones y contadores, chips de filtros activos, grupo final (ToolbarActions) y conmutador de vistas con su estado por página (usePageView).",
       "dependencies": ["lucide-react", "radix-ui"],
       "registryDependencies": ["button", "input-group", "dropdown-menu", "tooltip"],
       "files": [
@@ -232,7 +242,7 @@
       "name": "operations-page",
       "type": "registry:block",
       "title": "Página de operación",
-      "description": "Todo el kit de una página de operación: cabecera, cifras, toolbar, tabla, kanban, panel de información, sheet, barra de selección y estados.",
+      "description": "Todo el kit de una página de operación: cabecera con pestañas de subpágina, cifras, toolbar, tabla, kanban, panel de información, sheet, barra de selección y estados.",
       "dependencies": ["lucide-react", "radix-ui", "next-themes", "@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "sonner"],
       "registryDependencies": [
         "sidebar", "breadcrumb", "button", "kbd", "command", "separator", "dropdown-menu", "tooltip",
@@ -242,6 +252,7 @@
         { "path": "components/app/app-shell.tsx", "type": "registry:component" },
         { "path": "components/app/theme-toggle.tsx", "type": "registry:component" },
         { "path": "components/app/page-header.tsx", "type": "registry:component" },
+        { "path": "components/app/page-tabs.tsx", "type": "registry:component" },
         { "path": "components/app/kpi.tsx", "type": "registry:component" },
         { "path": "components/app/section.tsx", "type": "registry:component" },
         { "path": "components/app/work-grid.tsx", "type": "registry:component" },

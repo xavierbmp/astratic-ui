@@ -3,12 +3,15 @@ import { cn } from "cn"
 export function PageHeader({
   title,
   description,
+  tabs,
   actions,
   className,
   ...props
 }: React.ComponentProps<"div"> & {
   title: React.ReactNode
   description?: React.ReactNode
+  /** Pestañas de subpágina (`PageTabs`) o un segmentado de toda la página. Van antes de las acciones. */
+  tabs?: React.ReactNode
   actions?: React.ReactNode
 }) {
   return (
@@ -21,8 +24,13 @@ export function PageHeader({
         <h1 className="text-[27px] leading-tight font-semibold tracking-tight">{title}</h1>
         {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
       </div>
-      {actions && (
-        <div className="flex flex-none items-center gap-2.5 whitespace-nowrap">{actions}</div>
+      {(tabs || actions) && (
+        <div className="flex max-w-full min-w-0 flex-wrap items-center gap-2.5">
+          {tabs}
+          {actions && (
+            <div className="flex flex-none items-center gap-2.5 whitespace-nowrap">{actions}</div>
+          )}
+        </div>
       )}
     </div>
   )

@@ -16,11 +16,12 @@ export default function ConvencionesPage() {
             ["Navegación", "Sidebar izquierda, 256 px", "Grupos con etiqueta (por bloque o área), ítems con icono y contador ámbar de pendientes. Se colapsa a iconos."],
             ["Migas y buscador", "Cabecera de 48 px", "Migas «Bloque › Página › Registro» a la izquierda; buscador global ⌘K, campana y tema a la derecha."],
             ["Título y descripción", "Arriba de la página", "Título 27 px semibold y una línea de descripción. Sin icono."],
-            ["Acciones de página", "Derecha del título", "Sub-navegación de la página (tabs) y acciones secundarias de toda la página (Exportar, Editar fases). Nunca la acción principal."],
+            ["Subpáginas", "Derecha del título, antes de las acciones", "Pestañas de texto (PageTabs), una ruta por pestaña. El título del módulo no cambia entre subpáginas. Ver Navegación y subpáginas."],
+            ["Acciones de página", "Derecha del título", "Acciones secundarias de toda la página (Exportar, Editar fases) y, si no hay subpáginas, un segmentado de toda la página (periodo, segmentos). Nunca la acción principal ni el conmutador de vistas."],
             ["Cifras", "Fila bajo el título", "De 3 a 5 tarjetas, nunca más. Cada una: icono + etiqueta, cifra grande, una línea de apoyo (delta o alerta)."],
-            ["Toolbar", "Justo encima del bloque de operación", "Buscador · filtros · [espacio] · conmutador de vistas · acción principal. En ese orden y sin excepciones."],
+            ["Toolbar", "Justo encima del bloque de operación y con su mismo ancho", "Buscador · filtros · [espacio] · conmutador de vistas · acción principal. En ese orden y sin excepciones. Termina en el borde derecho del bloque: nada de la toolbar queda encima del panel de información."],
             ["Bloque de operación", "Centro, ocupa el resto de la altura", "Un solo bloque. Cabecera con icono, nombre, contador y acciones del bloque; cuerpo con la vista activa; pie con paginación."],
-            ["Panel de información", "Derecha, 320 px, misma altura que el bloque", "Bloques de apoyo apilados y personalizables. Nunca contiene acciones sobre los registros."],
+            ["Panel de información", "Derecha, 320 px, misma altura que el bloque", "Empieza a la altura del bloque, no de la toolbar. Bloques de apoyo apilados y personalizables. Nunca contiene acciones sobre los registros."],
             ["Detalle de un registro", "Sheet lateral derecho, 440 px", "Se abre al pulsar la fila o la tarjeta, por encima de la página. La página sigue debajo con su estado."],
             ["Barra de selección", "Flotante, fija al pie de la ventana y centrada", "Aparece con la primera fila marcada: contador, acciones con icono y X para deseleccionar. Se ve aunque la tabla sea más larga que la pantalla."],
             ["Toasts", "Abajo a la derecha", "Éxito y error. Con «Deshacer» cuando la acción sea reversible."],
@@ -32,7 +33,7 @@ export default function ConvencionesPage() {
         <SpecTable
           columns={["Variante", "Uso", "Ubicación"]}
           rows={[
-            ["Primario (negro)", "La única acción principal de la página: crear el registro que gestiona la página («Nuevo registro», «Nueva campaña»).", "Último elemento de la toolbar, a la derecha. Uno por página."],
+            ["Primario (negro)", "La única acción principal de la página: crear el registro que gestiona la página («Nuevo registro», «Nueva campaña»).", "Último elemento de la toolbar, pegado al borde derecho del bloque de operación. Uno por página."],
             ["Outline", "Acciones secundarias con peso: Exportar, Importar, Editar fases, Configurar.", "Acciones de página (derecha del título) o cabecera del bloque."],
             ["Ghost", "Acciones dentro de listas y barras: acciones en bloque, acciones de fila al pasar el ratón, «Ver todas».", "Barra de selección, filas, cabeceras de sección."],
             ["Icono (ghost)", "Menú «más» (…), cerrar, ajustes de un panel.", "Extremo derecho del elemento al que afecta."],
@@ -56,7 +57,8 @@ export default function ConvencionesPage() {
             Cuando la naturaleza de la página admite más de una forma de ver los mismos datos (una tabla para comparar,
             un kanban para mover por fase, un calendario para plazos), el <strong>conmutador de vistas</strong> es un control
             segmentado de iconos (fondo gris, la vista activa en blanco, igual que las pestañas), siempre en la toolbar, justo
-            antes de la acción principal. Iconos fijos:
+            antes de la acción principal. No se confunde con las pestañas de subpágina: esas son de texto, van en la
+            cabecera de página y cambian la URL. Iconos fijos:
           </p>
         </Prose>
         <SpecTable
@@ -71,7 +73,7 @@ export default function ConvencionesPage() {
         />
         <Rules
           items={[
-            <>La vista elegida se recuerda por página con <code>usePageView</code> (en <code>localStorage</code> con la clave de la página). En móvil la tabla desaparece del conmutador y se usa la siguiente vista: lista o tarjetas.</>,
+            <>La vista elegida se recuerda por página con <code>usePageView</code> (en <code>localStorage</code> con la clave de la página). En móvil la tabla desaparece del conmutador y se usa la siguiente vista: lista o tarjetas. Si solo queda una vista, el conmutador no se pinta.</>,
             <>Cambiar de vista <strong>no</strong> cambia búsqueda, filtros ni selección: los tres se comparten entre vistas.</>,
             <>El contador de la cabecera del bloque cuenta lo filtrado, no el total.</>,
             <>Los filtros de la toolbar se aplican a la vista; los ajustes de una vista (columnas visibles, agrupar) van en el menú «…» de la cabecera del bloque.</>,
@@ -131,6 +133,7 @@ export default function ConvencionesPage() {
         <DoDont
           dos={[
             "Una acción principal negra al final de la toolbar.",
+            "Toolbar con el ancho del bloque de operación, no de la página.",
             "Fila clicable que abre el sheet; checkbox que selecciona.",
             "Badges de estado con los cinco tonos fijos.",
             "Confirmación en diálogo para borrar; toast con «Deshacer» para archivar.",
@@ -141,6 +144,7 @@ export default function ConvencionesPage() {
             "Acciones en bloque en la parte superior de la tabla.",
             "Avisos de texto en la toolbar o encima de la tabla.",
             "Varios bloques de operación apilados en la misma página.",
+            "Toolbar a todo el ancho, con las vistas y «Nuevo» encima del panel de información.",
             "Modales para ver un registro: el detalle es un sheet.",
           ]}
         />

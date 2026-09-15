@@ -17,9 +17,9 @@ const tareas: { id: string; title: string; record: string; owner: string; due: s
   { id: "t3", title: "Tarea 3", record: "Registro 14", owner: "Usuario 3", due: "Mañana", tone: "neutral" },
 ]
 
-function Box({ label }: { label: string }) {
+function Box({ label, className = "h-60" }: { label: string; className?: string }) {
   return (
-    <div className="flex h-60 items-center justify-center rounded-lg border border-dashed border-foreground/30 bg-muted/40 text-xs text-muted-foreground">
+    <div className={`flex items-center justify-center rounded-lg border border-dashed border-foreground/30 bg-muted/40 text-xs text-muted-foreground ${className}`}>
       {label}
     </div>
   )
@@ -40,9 +40,10 @@ export default function SectionPage() {
             lo que en un portal tiene borde, cabecera y contenido es una <code>Section</code>.
           </p>
           <p>
-            <code>WorkGrid</code> es la rejilla de la página de operación: el bloque a la izquierda ocupando todo el
-            ancho disponible y, si se pasa <code>aside</code>, el panel de información de 320 px a la derecha con la
-            misma altura.
+            <code>WorkGrid</code> es la rejilla de la página de operación: la toolbar (<code>toolbar</code>) encima del
+            bloque y con su mismo ancho; el bloque a la izquierda ocupando todo el ancho disponible y, si se pasa{" "}
+            <code>aside</code>, el panel de información de 320 px a la derecha, que empieza a la altura del bloque y
+            mide lo mismo que él.
           </p>
         </Prose>
         <Rules
@@ -137,13 +138,16 @@ export default function SectionPage() {
         </Example>
 
         <Example
-          title="WorkGrid con panel"
-          description="A partir de 1280 px, dos columnas: 1fr y 320 px. Por debajo, el panel pasa debajo del bloque a todo el ancho. Estrecha la ventana para verlo."
-          code={`<WorkGrid aside={<InsightsPanel storageKey="registros" blocks={blocks} />}>
+          title="WorkGrid con toolbar y panel"
+          description="A partir de 1280 px, dos columnas: 1fr y 320 px. La toolbar solo ocupa la columna del bloque y el panel arranca a la altura del bloque. Por debajo, todo va en una columna y el panel pasa debajo del bloque. Estrecha la ventana para verlo."
+          code={`<WorkGrid
+  toolbar={<Toolbar>…</Toolbar>}
+  aside={<InsightsPanel storageKey="registros" blocks={blocks} />}
+>
   <Section>…</Section>
 </WorkGrid>`}
         >
-          <WorkGrid aside={<Box label="aside · 320 px" />}>
+          <WorkGrid toolbar={<Box label="toolbar · ancho del bloque" className="h-8" />} aside={<Box label="aside · 320 px" className="h-full min-h-60" />}>
             <Box label="children · 1fr" />
           </WorkGrid>
         </Example>
@@ -159,11 +163,12 @@ export default function SectionPage() {
             paginación siempre visible.
           </p>
           <p>
-            <strong>El panel no empuja la altura.</strong> <code>WorkGrid</code> es un grid con{" "}
-            <code>grid-rows-[minmax(0,1fr)]</code> a partir de <code>xl</code>; la celda del <code>aside</code> es{" "}
-            <code>relative</code> y el panel va dentro en <code>absolute inset-0</code>. Así el panel mide lo que mide el
-            bloque, aunque tenga más contenido: hace su propio scroll. Por debajo de <code>xl</code> vuelve al flujo
-            normal con <code>min-h-80</code>.
+            <strong>El panel no empuja la altura.</strong> <code>WorkGrid</code> es un grid que, a partir de{" "}
+            <code>xl</code>, pone la toolbar en una primera fila (<code>auto</code>) solo sobre la columna del bloque, y
+            el bloque y el panel en la segunda (<code>minmax(0,1fr)</code>). La celda del <code>aside</code> es{" "}
+            <code>relative</code> y el panel va dentro en <code>absolute inset-0</code>. Así el panel empieza donde
+            empieza el bloque y mide lo que mide él, aunque tenga más contenido: hace su propio scroll. Por debajo de{" "}
+            <code>xl</code> vuelve al flujo normal con <code>min-h-80</code>.
           </p>
         </Prose>
         <Rules
@@ -190,7 +195,7 @@ export default function SectionPage() {
           dos={[
             "SectionHeader con icono, título, count y una acción ghost sm.",
             "SectionFooter con TablePagination en las vistas de tabla y lista.",
-            "WorkGrid con un Section y un InsightsPanel.",
+            "WorkGrid con la toolbar, un Section y un InsightsPanel.",
           ]}
           donts={[
             "Dos Section apilados como bloque de operación.",
@@ -227,6 +232,7 @@ export default function SectionPage() {
         <SpecTable
           columns={["Prop", "Tipo", "Descripción"]}
           rows={[
+            [<code key="toolbar">toolbar</code>, <code key="toolbar-t">ReactNode</code>, "La Toolbar del bloque y, debajo, los chips de ActiveFilters (gap 8 px). Va encima del bloque, con su mismo ancho. Opcional."],
             [<code key="aside">aside</code>, <code key="aside-t">ReactNode</code>, "El panel de la derecha, normalmente un InsightsPanel. Sin él, la rejilla es una sola columna."],
             [<code key="asideWidth">asideWidth</code>, <code key="asideWidth-t">number</code>, "Ancho del panel en píxeles. Por defecto 320."],
             [<code key="children">children</code>, <code key="children-t">ReactNode</code>, "El bloque de operación. Va en una columna flex con min-h-0 min-w-0."],
@@ -234,7 +240,10 @@ export default function SectionPage() {
         />
         <CodeBlock
           title="Composición mínima"
-          code={`<WorkGrid aside={<InsightsPanel storageKey="registros" blocks={blocks} />}>
+          code={`<WorkGrid
+  toolbar={<Toolbar>…</Toolbar>}
+  aside={<InsightsPanel storageKey="registros" blocks={blocks} />}
+>
   <Section>
     <SectionHeader icon={KanbanSquareIcon} title="Registros" count={filtered.length} />
     <SectionBody>
@@ -259,7 +268,7 @@ npx shadcn@latest add https://ui.astraticnetwork.com/r/work-grid.json`}
       <DocSection id="siguiente" title="Relacionado">
         <NextLinks
           links={[
-            { href: "/ds/patrones/anatomia", label: "Anatomía de página", text: "Zonas 6 y 7: bloque y panel." },
+            { href: "/ds/patrones/anatomia", label: "Anatomía de página", text: "Zonas 5, 6 y 7: toolbar, bloque y panel." },
             { href: "/ds/componentes/data-table", label: "Tabla de datos", text: "Lo que suele ir dentro del bloque." },
             { href: "/ds/componentes/insights-panel", label: "Panel de información", text: "Lo que va en el aside." },
             { href: "/ds/componentes/kanban", label: "Kanban", text: "La otra vista del bloque." },

@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { PageBody, PageHeader } from "@/components/app/page-header"
 import { KpiCard, KpiRow } from "@/components/app/kpi"
 import { Section, SectionBody, SectionHeader } from "@/components/app/section"
-import { FilterMenu, Toolbar, ToolbarSearch, ToolbarSpacer, ViewSwitcher } from "@/components/app/toolbar"
+import { FilterMenu, Toolbar, ToolbarActions, ToolbarSearch, ViewSwitcher } from "@/components/app/toolbar"
+import { WorkGrid } from "@/components/app/work-grid"
 import { CellPrimary, DataTable, type Column } from "@/components/app/data-table"
 import { StatusBadge } from "@/components/app/status-badge"
 import { AvatarInitials } from "@/components/app/avatar-initials"
@@ -50,41 +51,46 @@ export function EquipoView({ people }: { people: Person[] }) {
         <KpiCard icon={PlaneIcon} label="Ausentes hoy" value={people.filter((p) => p.status === "ausente").length} />
         <KpiCard icon={BriefcaseIcon} label="En onboarding" value={people.filter((p) => p.status === "onboarding").length} />
       </KpiRow>
-      <Toolbar>
-        <ToolbarSearch placeholder="Buscar persona o rol…" value={query} onChange={(e) => setQuery(e.target.value)} />
-        <FilterMenu label="Área" options={areas.map((a) => ({ value: a, label: a, count: people.filter((p) => p.area === a).length }))} value={areaFilter} onChange={setAreaFilter} />
-        <ToolbarSpacer />
-        <ViewSwitcher views={views} value={view} onChange={setView} />
-        <Button onClick={() => toast("Aquí se daría de alta a una persona")}><PlusIcon /> Nueva persona</Button>
-      </Toolbar>
-
-      <Section className="min-h-[480px]">
-        <SectionHeader icon={UsersIcon} title="Directorio" count={filtered.length} />
-        <SectionBody>
-          {filtered.length === 0 ? (
-            <EmptyState title="Nadie coincide" description="Prueba con otro nombre o quita el filtro de área." />
-          ) : view === "table" ? (
-            <DataTable rows={filtered} columns={columns} getRowId={(p) => p.id} onRowClick={(p) => setOpenId(p.id)} />
-          ) : (
-            <ul className="grid gap-3 p-4 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
-              {filtered.map((p) => (
-                <li key={p.id}>
-                  <button type="button" onClick={() => setOpenId(p.id)} className="flex w-full flex-col gap-3 rounded-lg border bg-card p-4 text-left shadow-xs transition-shadow hover:shadow-sm">
-                    <div className="flex items-start justify-between gap-2">
-                      <AvatarInitials name={p.name} size="lg" />
-                      <StatusBadge tone={statusMeta[p.status].tone}>{statusMeta[p.status].label}</StatusBadge>
-                    </div>
-                    <span className="grid leading-tight">
-                      <span className="text-[13.5px] font-semibold">{p.name}</span>
-                      <span className="text-xs text-muted-foreground">{p.role} · {p.area}</span>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionBody>
-      </Section>
+      <WorkGrid
+        toolbar={
+          <Toolbar>
+            <ToolbarSearch placeholder="Buscar persona o rol…" value={query} onChange={(e) => setQuery(e.target.value)} />
+            <FilterMenu label="Área" options={areas.map((a) => ({ value: a, label: a, count: people.filter((p) => p.area === a).length }))} value={areaFilter} onChange={setAreaFilter} />
+            <ToolbarActions>
+              <ViewSwitcher views={views} value={view} onChange={setView} />
+              <Button onClick={() => toast("Aquí se daría de alta a una persona")}><PlusIcon /> Nueva persona</Button>
+            </ToolbarActions>
+          </Toolbar>
+        }
+      >
+        <Section className="min-h-[480px]">
+          <SectionHeader icon={UsersIcon} title="Directorio" count={filtered.length} />
+          <SectionBody>
+            {filtered.length === 0 ? (
+              <EmptyState title="Nadie coincide" description="Prueba con otro nombre o quita el filtro de área." />
+            ) : view === "table" ? (
+              <DataTable rows={filtered} columns={columns} getRowId={(p) => p.id} onRowClick={(p) => setOpenId(p.id)} />
+            ) : (
+              <ul className="grid gap-3 p-4 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
+                {filtered.map((p) => (
+                  <li key={p.id}>
+                    <button type="button" onClick={() => setOpenId(p.id)} className="flex w-full flex-col gap-3 rounded-lg border bg-card p-4 text-left shadow-xs transition-shadow hover:shadow-sm">
+                      <div className="flex items-start justify-between gap-2">
+                        <AvatarInitials name={p.name} size="lg" />
+                        <StatusBadge tone={statusMeta[p.status].tone}>{statusMeta[p.status].label}</StatusBadge>
+                      </div>
+                      <span className="grid leading-tight">
+                        <span className="text-[13.5px] font-semibold">{p.name}</span>
+                        <span className="text-xs text-muted-foreground">{p.role} · {p.area}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SectionBody>
+        </Section>
+      </WorkGrid>
 
       <DetailSheet open={open !== null} onOpenChange={(o) => !o && setOpenId(null)} width={400}>
         {open && (

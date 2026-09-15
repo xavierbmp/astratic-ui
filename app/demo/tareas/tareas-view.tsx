@@ -12,7 +12,7 @@ import { PageBody, PageHeader } from "@/components/app/page-header"
 import { KpiCard, KpiRow } from "@/components/app/kpi"
 import { Section, SectionBody, SectionHeader } from "@/components/app/section"
 import { WorkGrid } from "@/components/app/work-grid"
-import { FilterMenu, Toolbar, ToolbarSearch, ToolbarSpacer, ViewSwitcher } from "@/components/app/toolbar"
+import { FilterMenu, Toolbar, ToolbarActions, ToolbarSearch, ViewSwitcher } from "@/components/app/toolbar"
 import { Kanban } from "@/components/app/kanban"
 import { BulkBar } from "@/components/app/bulk-bar"
 import { StatusBadge } from "@/components/app/status-badge"
@@ -72,15 +72,17 @@ export function TareasView({ initialTasks }: { initialTasks: Task[] }) {
         <KpiCard icon={CircleCheckIcon} label="Completadas esta semana" value={done.length} delta={{ value: 25, label: "vs semana pasada" }} />
       </KpiRow>
 
-      <Toolbar>
-        <ToolbarSearch placeholder="Buscar tarea…" value={query} onChange={(e) => setQuery(e.target.value)} />
-        <FilterMenu label="Responsable" icon={UserIcon} options={owners.map((o) => ({ value: o, label: o, count: tasks.filter((t) => t.owner === o).length }))} value={ownerFilter} onChange={setOwnerFilter} />
-        <ToolbarSpacer />
-        <ViewSwitcher views={views} value={view} onChange={setView} />
-        <Button onClick={() => toast("Aquí se crearía la tarea")}><PlusIcon /> Nueva tarea</Button>
-      </Toolbar>
-
       <WorkGrid
+        toolbar={
+          <Toolbar>
+            <ToolbarSearch placeholder="Buscar tarea…" value={query} onChange={(e) => setQuery(e.target.value)} />
+            <FilterMenu label="Responsable" icon={UserIcon} options={owners.map((o) => ({ value: o, label: o, count: tasks.filter((t) => t.owner === o).length }))} value={ownerFilter} onChange={setOwnerFilter} />
+            <ToolbarActions>
+              <ViewSwitcher views={views} value={view} onChange={setView} />
+              <Button onClick={() => toast("Aquí se crearía la tarea")}><PlusIcon /> Nueva tarea</Button>
+            </ToolbarActions>
+          </Toolbar>
+        }
         aside={
           <InsightsPanel
             storageKey="demo-tareas"

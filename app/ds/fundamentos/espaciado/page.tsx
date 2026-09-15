@@ -45,7 +45,7 @@ export default function EspaciadoPage() {
           columns={["Medida", "Valor", "Clase", "Dónde"]}
           rows={[
             ["Padding de página", "26 px arriba · 34 px a los lados", <code key="a">pt-[26px] px-[34px]</code>, "PageBody y DocPage. Compensa la cabecera de 48 px y la sidebar."],
-            ["Gap entre bloques", "16 px", <code key="b">gap-4</code>, "PageBody (título, cifras, toolbar, bloque) y WorkGrid (bloque y panel)."],
+            ["Gap entre bloques", "16 px", <code key="b">gap-4</code>, "PageBody (título, cifras, WorkGrid) y WorkGrid (toolbar, bloque y panel)."],
             ["Gap entre cifras", "12 px", <code key="c">gap-3</code>, "KpiRow."],
             ["Gap de la toolbar", "8 px", <code key="d">gap-2</code>, "Entre buscador, filtros, conmutador de vistas y acción principal."],
             ["Padding de tarjeta y sección", "16 px lateral", <code key="e">px-4</code>, "KpiCard (py-3), cabecera y pie de Section (py-2), cabecera del sheet (p-4)."],
@@ -55,7 +55,7 @@ export default function EspaciadoPage() {
             ["Cabecera de la app", "48 px", <code key="i">h-12</code>, "AppShell: migas a la izquierda, buscador y acciones a la derecha."],
             ["Sidebar", "256 px", <code key="j">--sidebar-width</code>, "AppShell. Colapsa a 48 px."],
             ["Sheet de detalle", "440 px", <code key="k">width</code>, "DetailSheet. 400 px para fichas simples."],
-            ["Panel de información", "320 px", <code key="l">WorkGrid aside</code>, "Misma altura que el bloque de operación."],
+            ["Panel de información", "320 px", <code key="l">WorkGrid aside</code>, "Empieza a la altura del bloque de operación y mide lo mismo."],
           ]}
         />
         <Rules
@@ -162,8 +162,7 @@ export default function EspaciadoPage() {
 <PageBody>
   <PageHeader title="Registros" description="…" />
   <KpiRow>…</KpiRow>
-  <Toolbar>…</Toolbar>
-  <WorkGrid aside={<InsightsPanel storageKey="registros" blocks={…} />}>
+  <WorkGrid toolbar={<Toolbar>…</Toolbar>} aside={<InsightsPanel storageKey="registros" blocks={…} />}>
     <Section>…</Section>
   </WorkGrid>
 </PageBody>`}
@@ -171,7 +170,7 @@ export default function EspaciadoPage() {
         <Prose>
           <p>
             <code>KpiRow</code> trae <code>gap-3</code>, <code>Toolbar</code> trae <code>gap-2</code> y controles de 32 px, y <code>WorkGrid</code>{" "}
-            separa bloque y panel con <code>gap-4</code>. Si al maquetar hace falta escribir un valor que no está en esta página, es
+            separa toolbar, bloque y panel con <code>gap-4</code>. Si al maquetar hace falta escribir un valor que no está en esta página, es
             que falta un componente, no una clase.
           </p>
         </Prose>

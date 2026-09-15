@@ -8,8 +8,8 @@ import {
   ActiveFilters,
   FilterMenu,
   Toolbar,
+  ToolbarActions,
   ToolbarSearch,
-  ToolbarSpacer,
   ViewSwitcher,
   type ViewKind,
 } from "@/components/app/toolbar"
@@ -148,11 +148,12 @@ export function FiltersDemo() {
           value={owner}
           onChange={setOwner}
         />
-        <ToolbarSpacer />
-        <ViewSwitcher views={["table", "list", "kanban"]} value={view} onChange={setView} />
-        <Button onClick={() => toast("Aquí se abriría el formulario de alta")}>
-          <PlusIcon /> Nuevo registro
-        </Button>
+        <ToolbarActions>
+          <ViewSwitcher views={["table", "list", "kanban"]} value={view} onChange={setView} />
+          <Button onClick={() => toast("Aquí se abriría el formulario de alta")}>
+            <PlusIcon /> Nuevo registro
+          </Button>
+        </ToolbarActions>
       </Toolbar>
       <ActiveFilters chips={chips} onClear={clear} />
 

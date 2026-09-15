@@ -39,8 +39,18 @@ export function Toolbar({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-export function ToolbarSpacer() {
-  return <div className="flex-1" aria-hidden />
+/**
+ * Final de la toolbar: conmutador de vistas y acción principal, pegados al borde derecho del bloque.
+ * Con `ml-auto` siguen a la derecha también cuando la toolbar no cabe y pasan a una segunda línea.
+ */
+export function ToolbarActions({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="toolbar-actions"
+      className={cn("ml-auto flex flex-none items-center gap-2", className)}
+      {...props}
+    />
+  )
 }
 
 export function ToolbarSearch({
@@ -48,11 +58,11 @@ export function ToolbarSearch({
   ...props
 }: React.ComponentProps<typeof InputGroupInput>) {
   return (
-    <InputGroup className={cn("h-8 w-full bg-background sm:w-64", className)}>
+    <InputGroup className={cn("h-8 w-full bg-background sm:w-auto sm:max-w-64 sm:min-w-40 sm:flex-1", className)}>
       <InputGroupAddon>
         <SearchIcon />
       </InputGroupAddon>
-      <InputGroupInput type="search" {...props} />
+      <InputGroupInput type="search" className="text-ellipsis" {...props} />
     </InputGroup>
   )
 }
@@ -206,6 +216,8 @@ export function ViewSwitcher<V extends ViewKind>({
 }) {
   const [inner, setInner] = React.useState<V>(defaultValue ?? views[0])
   const current = value ?? inner
+  // Con una sola vista (p. ej. en móvil, cuando usePageView quita la tabla) no hay nada que conmutar.
+  if (views.length < 2) return null
   return (
     <ToggleGroupPrimitive.Root
       type="single"

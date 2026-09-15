@@ -57,8 +57,7 @@ const alert = `<PageBody>
       </AlertAction>
     </Alert>
   )}
-  <Toolbar>…</Toolbar>
-  <WorkGrid>…</WorkGrid>
+  <WorkGrid toolbar={<Toolbar>…</Toolbar>}>…</WorkGrid>
 </PageBody>`
 
 export default function FeedbackPage() {

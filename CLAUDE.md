@@ -17,7 +17,8 @@ Design system y kit de arranque de Astratic Network Devs para portales operativo
 
 ## Reglas de diseño (resumen; la verdad está en `/ds/patrones/convenciones` y `.claude/rules/design-system.md`)
 - Una página de operación = cabecera + cifras (3 a 5) + toolbar + **un** bloque de operación + panel de información de 320 px a la derecha. Detalle en `DetailSheet` (overlay derecho).
-- Toolbar en este orden: buscador · filtros · espacio · conmutador de vistas · **acción principal negra, una por página**.
+- Toolbar en este orden: buscador · filtros · espacio · conmutador de vistas · **acción principal negra, una por página**. Va en `WorkGrid toolbar`: mide lo que el bloque y el panel empieza a la altura del bloque.
+- Subpáginas: pestañas `PageTabs` en la cabecera (prop `tabs`), una ruta por pestaña, definidas en `nav.ts`. Ejemplo en `/demo/facturacion`; reglas en `/ds/patrones/navegacion`.
 - Fila clicable abre el sheet; checkbox selecciona; selección → `BulkBar` flotante abajo. Destructivo → `ConfirmDialog`. Feedback → `toast` de sonner.
 - Badges de estado solo con `StatusBadge` y sus cinco tonos. Botones con icono + verbo + objeto.
 - Toda página sale con filtros, orden, vistas que apliquen, selección, detalle y estados vacío/cargando/error. Sin UI muerta.

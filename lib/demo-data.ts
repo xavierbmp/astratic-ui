@@ -102,3 +102,100 @@ export const demoSeries = Array.from({ length: 12 }, (_, i) => {
 export type DemoActivity = (typeof demoActivity)[number]
 export type DemoTask = (typeof demoTasks)[number]
 export type DemoPoint = (typeof demoSeries)[number]
+
+/* ── Facturación: página de ejemplo con subpáginas (Facturas y Cobros) ───────────────────────── */
+
+/** Hoy en la demo: las fechas de facturas y cobros se calculan desde aquí. */
+const DEMO_TODAY = "2026-09-15"
+
+function addDays(isoDay: string, days: number) {
+  const d = new Date(`${isoDay}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+export type InvoiceStatus = "borrador" | "enviada" | "vencida" | "pagada"
+
+export const invoiceStatus: Record<InvoiceStatus, { label: string; tone: StatusTone }> = {
+  borrador: { label: "Borrador", tone: "neutral" },
+  enviada: { label: "Enviada", tone: "info" },
+  vencida: { label: "Vencida", tone: "danger" },
+  pagada: { label: "Pagada", tone: "success" },
+}
+
+export type DemoInvoice = {
+  id: string
+  code: string
+  recordId: string
+  recordName: string
+  issuedAt: string
+  dueAt: string
+  /** Base imponible; el total lleva un 21 % de IVA. */
+  base: number
+  status: InvoiceStatus
+  paidAt?: string
+}
+
+export type PaymentMethod = "transferencia" | "tarjeta" | "domiciliacion"
+
+export const paymentMethods: Record<PaymentMethod, { label: string }> = {
+  transferencia: { label: "Transferencia" },
+  tarjeta: { label: "Tarjeta" },
+  domiciliacion: { label: "Domiciliación" },
+}
+
+export type DemoPayment = {
+  id: string
+  code: string
+  invoiceId: string
+  invoiceCode: string
+  recordName: string
+  paidAt: string
+  amount: number
+  method: PaymentMethod
+  reconciled: boolean
+}
+
+export const invoiceTotal = (base: number) => Math.round(base * 121) / 100
+
+// Estado por posición (de la más reciente a la más antigua) para que la demo cuente siempre lo mismo:
+// 1 borrador, 4 enviadas que aún no vencen, 3 vencidas y el resto pagadas.
+const invoicePlan: InvoiceStatus[] = ["borrador", "enviada", "enviada", "pagada", "enviada", "enviada", "vencida", "pagada", "pagada", "vencida", "pagada", "pagada", "pagada", "vencida", "pagada", "pagada", "pagada", "pagada"]
+
+export const demoInvoices: DemoInvoice[] = invoicePlan.map((status, i) => {
+  const r = seeded(i + 300)
+  const record = demoRecords[(i * 5 + 3) % demoRecords.length]
+  const issuedAt = addDays(DEMO_TODAY, -(2 + i * 5 + Math.floor(r() * 3)))
+  return {
+    id: `fac-${invoicePlan.length - i}`,
+    code: `F-2026-${String(invoicePlan.length - i).padStart(4, "0")}`,
+    recordId: record.id,
+    recordName: record.name,
+    issuedAt,
+    dueAt: addDays(issuedAt, 30),
+    base: Math.round((900 + r() * 13000) / 10) * 10,
+    status,
+    paidAt: status === "pagada" ? addDays(issuedAt, Math.min(8 + Math.floor(r() * 24), i * 5)) : undefined,
+  }
+})
+
+const methodKeys = Object.keys(paymentMethods) as PaymentMethod[]
+
+/** Un cobro por factura pagada, del más reciente al más antiguo. Los dos últimos están sin conciliar. */
+export const demoPayments: DemoPayment[] = demoInvoices
+  .filter((f) => f.status === "pagada")
+  .sort((a, b) => (a.paidAt! < b.paidAt! ? 1 : -1))
+  .map((f, i, all) => {
+    const r = seeded(i + 400)
+    return {
+      id: `cob-${all.length - i}`,
+      code: `C-2026-${String(all.length - i).padStart(4, "0")}`,
+      invoiceId: f.id,
+      invoiceCode: f.code,
+      recordName: f.recordName,
+      paidAt: f.paidAt!,
+      amount: invoiceTotal(f.base),
+      method: methodKeys[r() < 0.6 ? 0 : r() < 0.5 ? 1 : 2],
+      reconciled: i >= 2,
+    }
+  })

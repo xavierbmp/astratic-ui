@@ -43,7 +43,7 @@ import { PageBody, PageHeader } from "@/components/app/page-header"
 import { KpiCard, KpiRow } from "@/components/app/kpi"
 import { Section, SectionBody, SectionFooter, SectionHeader } from "@/components/app/section"
 import { WorkGrid } from "@/components/app/work-grid"
-import { ActiveFilters, FilterMenu, Toolbar, ToolbarSearch, ToolbarSpacer, ViewSwitcher } from "@/components/app/toolbar"
+import { ActiveFilters, FilterMenu, Toolbar, ToolbarActions, ToolbarSearch, ViewSwitcher } from "@/components/app/toolbar"
 import { CellPrimary, DataTable, TablePagination, type Column } from "@/components/app/data-table"
 import { RecordList, RecordListItem } from "@/components/app/record-list"
 import { Kanban } from "@/components/app/kanban"
@@ -228,20 +228,24 @@ export function RegistrosView({
         <KpiCard icon={UsersIcon} label="Responsables" value={owners.length} hint="activos" />
       </KpiRow>
 
-      <Toolbar>
-        <ToolbarSearch placeholder="Buscar registro o código…" value={query} onChange={(e) => setQuery(e.target.value)} />
-        <FilterMenu label="Fase" options={stages.map((s) => ({ value: s.id, label: s.label, count: records.filter((r) => r.stage === s.id).length }))} value={stageFilter} onChange={setStageFilter} />
-        <FilterMenu label="Estado" options={Object.entries(recordStatus).map(([v, s]) => ({ value: v, label: s.label }))} value={statusFilter} onChange={setStatusFilter} />
-        <FilterMenu label="Responsable" icon={UserIcon} options={owners.map((o) => ({ value: o, label: o }))} value={ownerFilter} onChange={setOwnerFilter} />
-        <ToolbarSpacer />
-        <ViewSwitcher views={views} value={view} onChange={setView} />
-        <Button onClick={() => toast("Aquí se abriría el formulario de alta")}>
-          <PlusIcon /> Nuevo registro
-        </Button>
-      </Toolbar>
-      <ActiveFilters chips={chips} onClear={clearFilters} />
-
       <WorkGrid
+        toolbar={
+          <>
+            <Toolbar>
+              <ToolbarSearch placeholder="Buscar registro…" value={query} onChange={(e) => setQuery(e.target.value)} />
+              <FilterMenu label="Fase" options={stages.map((s) => ({ value: s.id, label: s.label, count: records.filter((r) => r.stage === s.id).length }))} value={stageFilter} onChange={setStageFilter} />
+              <FilterMenu label="Estado" options={Object.entries(recordStatus).map(([v, s]) => ({ value: v, label: s.label }))} value={statusFilter} onChange={setStatusFilter} />
+              <FilterMenu label="Responsable" icon={UserIcon} options={owners.map((o) => ({ value: o, label: o }))} value={ownerFilter} onChange={setOwnerFilter} />
+              <ToolbarActions>
+                <ViewSwitcher views={views} value={view} onChange={setView} />
+                <Button onClick={() => toast("Aquí se abriría el formulario de alta")}>
+                  <PlusIcon /> Nuevo registro
+                </Button>
+              </ToolbarActions>
+            </Toolbar>
+            <ActiveFilters chips={chips} onClear={clearFilters} />
+          </>
+        }
         aside={
           <InsightsPanel
             storageKey="demo-registros"
