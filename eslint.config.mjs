@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Widget de notas para Claude: copiado tal cual de la skill /localhost y solo de desarrollo.
+    "components/dev/**",
+    "app/api/dev/**",
   ]),
 ]);
 

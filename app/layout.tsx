@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
+import ClaudeNotesWidget from "@/components/dev/ClaudeNotesWidget"
 import "./globals.css"
 
 const sans = Geist({ variable: "--font-sans", subsets: ["latin"] })
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
           <Toaster position="bottom-right" />
         </ThemeProvider>
+        {process.env.NODE_ENV !== "production" && <ClaudeNotesWidget />}
       </body>
     </html>
   )
