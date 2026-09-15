@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Astratic UI
 
-## Getting Started
+Design system y kit de arranque de **Astratic Network Devs** para portales operativos (CRM, campañas, facturación, equipo, eventos). Código real sobre Next.js 16, Tailwind v4 y shadcn/ui, basado en los mockups de la propuesta a Twic y generalizado para cualquier cliente.
 
-First, run the development server:
+Este repositorio es cuatro cosas a la vez:
+
+| Qué | Dónde |
+|---|---|
+| Documentación del design system | `app/ds` → `/ds` |
+| Demo: un mini-portal con datos genéricos | `app/demo` → `/demo` |
+| Plantilla que se clona para un proyecto nuevo | `components/app`, `lib`, `hooks`, `app/globals.css` |
+| Registry de shadcn para instalar piezas en proyectos existentes | `registry.json` → `public/r/*.json` |
+
+## Arrancar
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev -- --port 3020
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `/` hub · `/ds` documentación · `/demo` demo.
+- `npm run typecheck` · `npm run lint` · `npm run registry:build` (genera `public/r`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usar en un proyecto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Nuevo:** clona este repo y sigue `content/nuevo-proyecto.md` (también en `/ds/nuevo-proyecto`).
 
-## Learn More
+**Existente:** instala el tema y luego las piezas que necesites.
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx shadcn@latest add https://ui.astraticnetwork.com/r/theme.json
+npx shadcn@latest add https://ui.astraticnetwork.com/r/operations-page.json
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Estructura
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+app/
+  globals.css          tokens (claro y oscuro), acento brand, colores de estado
+  layout.tsx           Geist, ThemeProvider, Toaster
+  ds/                  documentación
+  demo/                mini-portal de ejemplo
+components/
+  ui/                  shadcn/ui (preset Nova sobre Radix)
+  app/                 kit de aplicación: app-shell, page-header, kpi, section, work-grid,
+                       toolbar, data-table, record-list, kanban, insights-panel,
+                       detail-sheet, bulk-bar, status-badge, states, confirm-dialog,
+                       avatar-initials, social-icons, theme-toggle
+  docs/                componentes de la documentación y ejemplos en vivo
+lib/                   format, status, nav, demo-data
+hooks/                 use-page-view, use-local-storage, use-mobile
+content/               nuevo-proyecto.md
+registry.json          definición del registry
+.claude/rules/         reglas que se copian a cada portal
+```
 
-## Deploy on Vercel
+## Reglas en una frase
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Una página de operación es: cabecera, de 3 a 5 cifras, toolbar (buscador · filtros · vistas · acción principal), **un** bloque de operación y un panel de información a la derecha; el detalle se abre en un sheet lateral. Todo lo demás está en `/ds/patrones/convenciones`.

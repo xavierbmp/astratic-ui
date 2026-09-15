@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // El indicador flotante de desarrollo tapa el usuario de la sidebar; los errores se siguen mostrando.
+  devIndicators: false,
+}
 
-export default nextConfig;
+export default nextConfig
