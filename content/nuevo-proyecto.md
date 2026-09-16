@@ -22,7 +22,7 @@ Estas respuestas las da Xavier al inicio. Sin ellas no se crea nada.
 - [ ] Clonar `astratic-ui` en la carpeta del cliente: `02_Devs/03_Clientes/<cliente>/portal/` (o la ruta acordada).
 - [ ] Borrar el origen remoto y crear el repo nuevo con el nombre `<cliente>-portal`, **privado**, en la cuenta decidida en el paso 0.
 - [ ] Renombrar en `package.json` (`name`), `app/layout.tsx` (`metadata.title`) y `README.md`.
-- [ ] Eliminar `app/ds`, `app/demo`, `content/`, `components/docs/`, `lib/demo-data.ts`, `registry.json` y `public/r`. Se quedan `components/ui`, `components/app`, `lib`, `hooks`, `app/globals.css`, `CLAUDE.md` y `.claude/rules/`.
+- [ ] Eliminar `app/ds`, `app/demo`, `app/documentos`, `content/`, `components/docs/`, `components/document/`, `lib/demo-data.ts`, `registry.json` y `public/r`. Se quedan `components/ui`, `components/app`, `lib`, `hooks`, `app/globals.css`, `CLAUDE.md` y `.claude/rules/`.
 - [ ] En `package.json`, el script `build` pasa a ser `next build` y se borra `registry:build` (sin `registry.json`, `shadcn build` falla). En `eslint.config.mjs` se quita la excepción de las páginas de documentación.
 - [ ] Sustituir la página de inicio (`app/page.tsx`) por una redirección al primer módulo o al login.
 - [ ] Crear la rama `main` con el primer commit: «chore: arranque del portal sobre astratic-ui vX».

@@ -14,6 +14,7 @@ Design system y kit de arranque de Astratic Network Devs para portales operativo
 - `public/r` es generado (`npm run registry:build`, también dentro de `npm run build`) y está en `.gitignore`.
 - Docs: páginas servidor en `app/ds/**`; los ejemplos interactivos son componentes cliente en `components/docs/examples/`. `CodeBlock` es un componente servidor async (Shiki).
 - La guía de arranque es `content/nuevo-proyecto.md` (una sola fuente, se renderiza en `/ds/nuevo-proyecto`).
+- Documentos A4 y PDF (propuestas, presupuestos) en `components/document/`, documentados en `/ds/documentos`. Dos formatos: **elaborada** (portales y software, maqueta Twic, demo `/documentos/propuesta-elaborada`) y **simple** (servicios y trabajos cortos, maqueta Feel The Diving, demo `/documentos/propuesta-simple`). Cada hoja recorta lo que no cabe: revisar el PDF exportado hoja a hoja. El tema claro se fuerza con `.theme-light` y la impresión vive en el bloque «Documentos A4 y PDF» de `globals.css`.
 
 ## Reglas de diseño (resumen; la verdad está en `/ds/patrones/convenciones` y `.claude/rules/design-system.md`)
 - Una página de operación = cabecera + cifras (3 a 5) + toolbar + **un** bloque de operación + panel de información de 320 px a la derecha. Detalle en `DetailSheet` (overlay derecho).
@@ -24,7 +25,7 @@ Design system y kit de arranque de Astratic Network Devs para portales operativo
 - Toda página sale con filtros, orden, vistas que apliquen, selección, detalle y estados vacío/cargando/error. Sin UI muerta.
 
 ## Al clonar para un cliente
-Seguir `content/nuevo-proyecto.md` de arriba abajo. Borrar `app/ds`, `app/demo`, `content`, `components/docs`, `registry.json`. Copiar `.claude/rules/design-system.md` tal cual.
+Seguir `content/nuevo-proyecto.md` de arriba abajo. Borrar `app/ds`, `app/demo`, `app/documentos`, `content`, `components/docs`, `components/document`, `registry.json`. Copiar `.claude/rules/design-system.md` tal cual.
 
 ## Workflow
 - Commits en español, describiendo el porqué. Push solo con confirmación explícita.

@@ -68,7 +68,9 @@
   --shadow-pop: 0 10px 30px oklch(0 0 0 / 0.12), 0 2px 6px oklch(0 0 0 / 0.06);
 }
 
-:root {
+/* `.theme-light` fuerza el tema claro en un subárbol (documentos A4 y PDF). */
+:root,
+.theme-light {
   --radius: 0.625rem;
 
   --background: oklch(1 0 0);
@@ -199,6 +201,49 @@
   *::-webkit-scrollbar-thumb:hover {
     background: color-mix(in oklch, var(--foreground) 30%, transparent);
     background-clip: content-box;
+  }
+}
+
+/* Documentos A4 y PDF (components/document): numeración de hojas e impresión. */
+[data-slot="doc-viewer"] {
+  counter-reset: doc-page;
+}
+[data-slot="doc-sheet"] {
+  counter-increment: doc-page;
+  page: doc;
+}
+[data-slot="doc-page-number"]::before {
+  content: counter(doc-page, decimal-leading-zero);
+}
+[data-slot="doc-page-number"]::after {
+  content: " / " var(--doc-pages);
+}
+[data-slot="doc-page-number"][data-format="plain"]::before {
+  content: counter(doc-page);
+}
+[data-slot="doc-page-number"][data-format="plain"]::after {
+  content: " / " var(--doc-pages-plain);
+}
+
+@page doc {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    background: oklch(1 0 0);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  body:has([data-slot="doc-viewer"]) > :not([data-slot="doc-viewer"]) {
+    display: none !important;
+  }
+  /* Vista Previa de macOS pinta las sombras difuminadas como rectángulos. */
+  [data-slot="doc-sheet"],
+  [data-slot="doc-sheet"] * {
+    box-shadow: none !important;
   }
 }
 

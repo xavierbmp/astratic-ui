@@ -111,6 +111,33 @@
       "files": [{ "path": "components/app/kpi.tsx", "type": "registry:component" }]
     },
     {
+      "name": "document-proposal",
+      "type": "registry:component",
+      "title": "Propuesta elaborada",
+      "description": "Documento A4 para propuestas de portales y software: portada, índice, bloques, páginas con precio, paquetes, importes, plazos y aceptación. Necesita el bloque «Documentos A4 y PDF» de globals.css.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button"],
+      "files": [
+        { "path": "components/document/sheet.tsx", "type": "registry:component" },
+        { "path": "components/document/toolbar.tsx", "type": "registry:component" },
+        { "path": "components/document/content.tsx", "type": "registry:component" },
+        { "path": "components/document/commercial.tsx", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "document-simple",
+      "type": "registry:component",
+      "title": "Propuesta simple",
+      "description": "Documento A4 de una o dos hojas para servicios y presupuestos cortos: cifras clave, tablas, condiciones, aviso y conformidad. Necesita el bloque «Documentos A4 y PDF» de globals.css.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button"],
+      "files": [
+        { "path": "components/document/sheet.tsx", "type": "registry:component" },
+        { "path": "components/document/toolbar.tsx", "type": "registry:component" },
+        { "path": "components/document/simple.tsx", "type": "registry:component" }
+      ]
+    },
+    {
       "name": "section",
       "type": "registry:component",
       "title": "Sección",

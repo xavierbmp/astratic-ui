@@ -1,9 +1,11 @@
 import {
   BookOpenIcon,
+  BookOpenTextIcon,
   BoxesIcon,
   ChartColumnIcon,
   CircleUserIcon,
   DatabaseIcon,
+  FileTextIcon,
   FilterIcon,
   GaugeIcon,
   HeadingIcon,
@@ -20,6 +22,7 @@ import {
   RectangleHorizontalIcon,
   RocketIcon,
   RulerIcon,
+  ScrollTextIcon,
   SearchIcon,
   ShapesIcon,
   SignpostIcon,
@@ -93,6 +96,14 @@ export const dsNav: NavGroup[] = [
     items: [
       { id: "componentes", label: "Catálogo", href: "/ds/componentes", icon: BoxesIcon },
       ...componentPages.map((c) => ({ id: `c-${c.slug}`, label: c.label, href: `/ds/componentes/${c.slug}`, icon: c.icon })),
+    ],
+  },
+  {
+    label: "Documentos",
+    items: [
+      { id: "documentos", label: "Documentos y PDF", href: "/ds/documentos", icon: FileTextIcon },
+      { id: "doc-elaborada", label: "Propuesta elaborada", href: "/ds/documentos/elaborada", icon: BookOpenTextIcon },
+      { id: "doc-simple", label: "Propuesta simple", href: "/ds/documentos/simple", icon: ScrollTextIcon },
     ],
   },
 ]
