@@ -205,6 +205,111 @@ const chips = [
         />
       </DocSection>
 
+      <DocSection
+        id="avanzados"
+        title="Filtros avanzados, rápidos y campos visibles"
+        lead="Los menús de arriba resuelven el día a día de un clic. Para lo fino —«empresas con más de tres contactos y sin responsable»— la toolbar monta un constructor de condiciones al estilo de Airtable, y un panel decide qué columnas se ven. Las tres piezas van juntas en FilterBar."
+      >
+        <SpecTable
+          columns={["Pieza", "Componente", "Qué hace"]}
+          rows={[
+            [
+              "Constructor",
+              <>
+                <code>FilterBuilder</code> (botón «Filtros»)
+              </>,
+              "Condiciones campo + operador + valor unidas con Y o con O. Los operadores salen del tipo del campo, así que en texto hay «contiene» y «empieza por», en número «mayor que», en fecha «antes de» y en listas «es alguno de». En todos, «está vacío» y «no está vacío».",
+            ],
+            [
+              "Rápidos",
+              <>
+                <code>QuickFilters</code> + <code>useQuickFilters</code>
+              </>,
+              "Los atajos junto al buscador. O el desplegable de un campo de lista, o una condición guardada con nombre. El usuario elige cuáles ve, los ordena y guarda los suyos desde el engranaje.",
+            ],
+            [
+              "Campos visibles",
+              <>
+                <code>ColumnSettings</code> + <code>useTableConfig</code>
+              </>,
+              "Interruptor por columna y arrastre para ordenar. La primera columna no se puede ocultar porque identifica la fila.",
+            ],
+            [
+              "Definición de campos",
+              <>
+                <code>CampoFiltrable&lt;T&gt;</code> en <code>lib/filtros/</code>
+              </>,
+              "Cada objeto declara sus campos con id, etiqueta, tipo, grupo, opciones y una función valor(fila). Incluidos los calculados: nº de contactos, importe abierto, días en fase.",
+            ],
+          ]}
+        />
+        <CodeBlock
+          lang="tsx"
+          code={`// 1. Los campos del objeto, en un módulo compartido servidor/cliente.
+export function camposEmpresa(ctx: ContextoCampos): CampoFiltrable<EmpresaFila>[] {
+  return [
+    { id: "nombre", label: "Nombre", tipo: "texto", grupo: "Datos", valor: (r) => r.nombre },
+    { id: "relacion", label: "Relación", tipo: "select", grupo: "Relación",
+      opciones: desdeMeta(relacionEmpresa), valor: (r) => r.relacion },
+    { id: "contactos", label: "Nº de contactos", tipo: "numero", grupo: "Actividad", valor: (r) => r.contactos },
+  ]
+}
+
+// 2. El servidor lee ?f= y filtra antes de mandar las filas.
+const filas = filtrarFilas(lista.filas, parseGrupo(leerTexto(sp, "f")), camposEmpresa({ catalogo, opciones }))
+
+// 3. La página monta la toolbar entera con una sola pieza.
+const campos = React.useMemo(() => camposEmpresa({ catalogo, opciones }), [catalogo, opciones])
+const av = useFiltrosAvanzados("crm-marcas", campos, RAPIDOS)
+const cols = useTableConfig("crm-marcas", columns)
+
+<WorkGrid
+  toolbar={
+    <FilterBar
+      filtros={av}
+      campos={campos}
+      filas={filas}
+      objeto="las empresas"
+      buscador={{ value: q, onChange: setQ, placeholder: "Buscar empresa…" }}
+      columnas={cols}
+      vistas={{ views, value: view, onChange: setView }}
+      actions={<Button><PlusIcon /> Nueva empresa</Button>}
+    />
+  }
+/>`}
+        />
+        <Rules
+          items={[
+            <>
+              <strong>Las condiciones van en la URL</strong> (<code>?f=</code>), como el resto de filtros: un filtro montado se comparte por
+              enlace y el servidor lo aplica antes de mandar las filas. Los rápidos, en cambio, son preferencia de cada uno y se quedan en su
+              navegador, igual que la vista y el panel de información.
+            </>,
+            <>
+              <strong>Rápidos y constructor escriben en el mismo sitio.</strong> Un desplegable rápido no es un filtro aparte: añade una
+              condición al mismo grupo. Por eso todo lo activo se ve junto en los chips y se puede afinar desde «Filtros».
+            </>,
+            <>
+              <strong>Filtrar en memoria sobre las filas ya cargadas</strong> (tope de 1.000) en vez de traducir cada condición a SQL. Así se
+              filtra también por lo calculado, que no es una columna de la base, y el evaluador es el mismo en cliente y servidor. La búsqueda
+              de texto sí va en SQL, porque mira registros relacionados.
+            </>,
+            <>
+              <strong>Una condición a medio escribir no filtra.</strong> Sin valor, o con un campo que ya no existe, deja pasar las filas en
+              vez de vaciar la tabla. Una URL manipulada tampoco rompe la página: se descarta lo que no se entiende.
+            </>,
+            <>
+              <strong>Los campos propios son columna siempre.</strong> «Mostrar en tabla» solo decide si empiezan encendidos; quien quiera ver
+              el resto los enciende en el panel. Un campo nuevo aparece sin que nadie toque su configuración guardada.
+            </>,
+            <>
+              <strong>Crear un campo sin salir de la lista.</strong> Si quien mira es administrador, tanto el selector de campo del
+              constructor como el panel de campos ofrecen «Crear campo nuevo».
+            </>,
+          ]}
+        />
+      </DocSection>
+
       <DocSection id="combinacion" title="Cómo se combinan y dónde se guardan">
         <Rules
           items={[

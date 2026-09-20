@@ -98,7 +98,7 @@ export function FilterMenu({
           variant="outline"
           size="sm"
           data-active={active || undefined}
-          className={cn("h-8 gap-1.5 text-sm", active && "border-foreground/30 bg-muted/60")}
+          className={cn("h-8 flex-none gap-1.5 text-sm", active && "border-foreground/30 bg-muted/60")}
         >
           {Icon && <Icon />}
           <span>{label}</span>

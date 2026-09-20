@@ -42,3 +42,6 @@ next-env.d.ts
 
 # registry generado por `npm run registry:build` (se regenera en cada build)
 /public/r/
+
+# Notas de UI del widget de desarrollo
+.claude/ui-notes.md
