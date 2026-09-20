@@ -29,6 +29,6 @@ Seguir `content/nuevo-proyecto.md` de arriba abajo. Borrar `app/ds`, `app/demo`,
 
 ## Workflow
 - Commits en español, describiendo el porqué. Push solo con confirmación explícita.
-- Ante error o integración externa nueva: skill `errores` antes de tocar código.
+- Ante error o integración externa nueva: skill `stack` antes de tocar código.
 
 @AGENTS.md
