@@ -50,7 +50,7 @@ export const componentPages: { slug: string; label: string; summary: string; ico
   { slug: "data-table", label: "Tabla de datos", summary: "Columnas tipadas, orden, selección y paginación.", icon: Table2Icon },
   { slug: "kanban", label: "Kanban", summary: "Columnas por fase con arrastre y fases plegables.", icon: SquareKanbanIcon },
   { slug: "insights-panel", label: "Panel de información", summary: "Columna derecha con bloques personalizables.", icon: PanelRightIcon },
-  { slug: "detail-sheet", label: "Sheet de detalle", summary: "Panel lateral de un registro con pestañas y acciones.", icon: PanelRightOpenIcon },
+  { slug: "detail-sheet", label: "Sheet de detalle", summary: "La ficha de un registro: bloques, edición en el sitio, flechas y dos columnas.", icon: PanelRightOpenIcon },
   { slug: "bulk-bar", label: "Barra de selección", summary: "Acciones en bloque sobre las filas marcadas.", icon: ListChecksIcon },
   { slug: "status-badge", label: "Badges de estado", summary: "Cinco tonos con significado fijo.", icon: TagIcon },
   { slug: "buttons", label: "Botones", summary: "Variantes, tamaños, iconos y jerarquía.", icon: RectangleHorizontalIcon },

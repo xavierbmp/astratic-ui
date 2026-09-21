@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { DocPage, DocSection, DoDont, NextLinks, Prose, Rules, SpecTable } from "@/components/docs/doc"
 
 export const metadata = { title: "Convenciones" }
@@ -36,7 +37,7 @@ export default function ConvencionesPage() {
             ["Primario (negro)", "La única acción principal de la página: crear el registro que gestiona la página («Nuevo registro», «Nueva campaña»).", "Último elemento de la toolbar, pegado al borde derecho del bloque de operación. Uno por página."],
             ["Outline", "Acciones secundarias con peso: Exportar, Importar, Editar fases, Configurar.", "Acciones de página (derecha del título) o cabecera del bloque."],
             ["Ghost", "Acciones dentro de listas y barras: acciones en bloque, acciones de fila al pasar el ratón, «Ver todas».", "Barra de selección, filas, cabeceras de sección."],
-            ["Icono (ghost)", "Menú «más» (…), cerrar, ajustes de un panel.", "Extremo derecho del elemento al que afecta."],
+            ["Icono (ghost)", "Menú «más» (…), cerrar, personalizar un panel, configurar (engranaje).", "Extremo derecho del elemento al que afecta."],
             ["Destructivo", "Solo en el diálogo de confirmación, nunca como botón suelto en la página.", "Pie del diálogo, a la derecha."],
             ["Link", "Navegar a otra página desde texto («Ver registros»).", "Cabecera de sección o texto de apoyo."],
           ]}
@@ -76,7 +77,7 @@ export default function ConvencionesPage() {
             <>La vista elegida se recuerda por página con <code>usePageView</code> (en <code>localStorage</code> con la clave de la página). En móvil la tabla desaparece del conmutador y se usa la siguiente vista: lista o tarjetas. Si solo queda una vista, el conmutador no se pinta.</>,
             <>Cambiar de vista <strong>no</strong> cambia búsqueda, filtros ni selección: los tres se comparten entre vistas.</>,
             <>El contador de la cabecera del bloque cuenta lo filtrado, no el total.</>,
-            <>Los filtros de la toolbar se aplican a la vista; los ajustes de una vista (columnas visibles, agrupar) van en el menú «…» de la cabecera del bloque.</>,
+            <>Los filtros de la toolbar se aplican a la vista; los campos visibles van en el botón de la cabecera del bloque (<code>ColumnSettings</code>), nunca en la toolbar.</>,
           ]}
         />
       </DocSection>
@@ -98,21 +99,58 @@ export default function ConvencionesPage() {
         />
       </DocSection>
 
-      <DocSection id="sheet" title="El sheet de detalle">
+      <DocSection id="sheet" title="La ficha (sheet de detalle)">
         <Prose>
           <p>
-            El detalle de un registro se abre por encima de la página, en un panel lateral derecho de 440 px (400 para
-            fichas simples). Tiene <strong>tres zonas</strong> fijas:
+            El detalle de un registro se abre por encima de la página, en un panel lateral derecho de 480 px. Se lee de
+            un vistazo y <strong>cada dato se edita donde se lee</strong>: no hay botón «Editar». El componente y sus
+            piezas están en <Link href="/ds/componentes/detail-sheet">Sheet de detalle</Link>.
           </p>
         </Prose>
         <Rules
           items={[
-            <><strong>Cabecera:</strong> avatar o monograma, nombre, subtítulo (código · categoría), badge de estado; debajo, acciones secundarias outline («Editar», «Copiar enlace») y el menú «…» con duplicar, archivar y eliminar.</>,
-            <><strong>Cuerpo:</strong> pestañas de tipo línea si hay más de un bloque de información (Resumen, Actividad, Archivos). Dentro, secciones con título de 13 px y una lista definición «etiqueta · valor».</>,
-            <><strong>Pie:</strong> «Cerrar» ghost a la izquierda de la acción principal del registro («Avanzar fase», «Enviar», «Cobrar»). Una sola acción principal.</>,
-            <>Los campos editables inline (fase, responsable) se editan en el propio cuerpo con un <code>Select</code> pequeño; el resto se edita con «Editar», que abre un formulario en un <code>Dialog</code>.</>,
-            <>Un registro con página propia (campaña, evento) usa el sheet como vista rápida y ofrece «Abrir página» en la cabecera.</>,
-            <>El registro abierto se refleja en la URL (<code>?registro=id</code>) con <code>window.history.replaceState</code>, sin recargar: «Copiar enlace» copia esa dirección y cualquier otra página (el dashboard, un aviso, un email) puede enlazar directamente al registro. La página de servidor lee el parámetro y abre el sheet al cargar.</>,
+            <><strong>Cabecera:</strong> avatar, nombre editable en el sitio, subtítulo corto, badge de estado y, arriba a la derecha, las flechas «‹ 3 de 42 ›» para pasar al anterior o al siguiente de la lista sin cerrar. Debajo, acciones secundarias outline y el menú «…» con eliminar al final.</>,
+            <><strong>Cuerpo por bloques plegables:</strong> campos agrupados por tema, campos propios, listas relacionadas con su contador y «Añadir», notas internas y una última línea con creado, origen y actualizado. Pestañas de tipo línea si hay notas, tareas o actividad aparte.</>,
+            <><strong>Campos sin cajas en reposo:</strong> se leen como texto, insignias o enlaces y pasan a su control al pulsarlos. Enter o salir guarda; Escape cancela ese campo sin cerrar la ficha. Los vacíos no ocupan fila: van al pie del bloque como «+ Campo».</>,
+            <><strong>Pie:</strong> «Cerrar» ghost a la izquierda de la acción principal del registro («Avanzar fase», «Añadir a campaña»). Una sola acción principal.</>,
+            <>Para registros que recorren una secuencia, ficha de dos columnas: el recorrido a la izquierda y el paso elegido en grande a la derecha.</>,
+            <>El registro abierto se refleja en la URL (<code>?registro=id</code>) con <code>window.history.replaceState</code>, sin recargar: «Copiar enlace» copia esa dirección y cualquier otra página (el dashboard, un aviso, un email) puede enlazar directamente al registro. La página de servidor lee el parámetro y abre la ficha al cargar.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="cambios" title="Cambios sin guardar">
+        <Rules
+          items={[
+            <>Los campos sueltos guardan solos al salir: nunca hace falta un «Guardar» para un dato.</>,
+            <>Un editor grande (un email, un texto largo) guarda con su botón o con ⌘+Enter. Si tiene cambios y se va a cambiar de registro, de paso o cerrar, <code>ConfirmDialog</code> «¿Descartar los cambios?» con «Seguir editando» y «Descartar cambios».</>,
+            <>Escape solo sale de un editor sin cambios: con cambios no hace nada, para que una tecla no tire trabajo.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="in-situ" title="Configuración in situ">
+        <Prose>
+          <p>
+            <strong>No hay página de Ajustes.</strong> Cada cosa se configura donde se usa, y solo tiene página propia
+            lo que no pertenece a ninguna pantalla (el equipo y sus permisos).
+          </p>
+        </Prose>
+        <Rules
+          items={[
+            <><strong>Engranaje</strong> (<code>ConfigButton</code>) en la cabecera del bloque o del panel que enseña lo configurable, y junto a la etiqueta de un <code>Select</code> de formulario.</>,
+            <><strong>En la ficha, pulsar el nombre de un campo abre su configuración</strong> (<code>DetailField onConfig</code>): el valor se edita donde se lee y el campo se configura donde se nombra.</>,
+            <><strong>Opciones de un selector:</strong> escribir algo que no existe ofrece «Crear «…»» y el pie «Gestionar …» abre su gestor (<code>MultiSelect</code> e <code>InlineField</code> con <code>onCreate</code> y <code>onManage</code>).</>,
+            <><strong>Kanban:</strong> el título de la columna se pulsa para configurarla, sus opciones van en el menú «…» y al final hay una columna «Añadir».</>,
+            <>Los gestores son <code>Dialog</code> que cargan sus datos al abrirse y solo los ve quien puede configurar: sin permiso no hay engranaje.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="html" title="HTML que no escribe el portal">
+        <Rules
+          items={[
+            <>Emails, firmas pegadas o documentos importados se pintan en <code>HtmlFrame</code>: un marco aislado, sin scripts, que crece con su contenido. Así no pueden cambiar los estilos del portal ni ejecutar nada.</>,
           ]}
         />
       </DocSection>
@@ -120,7 +158,7 @@ export default function ConvencionesPage() {
       <DocSection id="formularios" title="Formularios">
         <Rules
           items={[
-            <>Crear y editar registros sencillos: <code>Dialog</code> centrado, ancho 480 px, campos en una columna. Registros complejos: página propia con secciones.</>,
+            <>Crear registros: <code>Dialog</code> centrado, ancho 480 px, campos en una columna. Editar un registro que ya existe no pasa por un formulario: se hace en su ficha, campo a campo.</>,
             <>Etiqueta encima del campo, ayuda debajo en gris, error debajo en rojo. Nunca placeholder como etiqueta.</>,
             <>Botones del pie: «Cancelar» ghost + acción principal («Guardar cambios», «Crear registro»). Deshabilitados hasta que el formulario cambie o mientras se envía.</>,
             <>Al guardar: toast de éxito, se cierra el diálogo y la fila afectada se actualiza en su sitio. Nunca recargar la página.</>,
@@ -134,7 +172,8 @@ export default function ConvencionesPage() {
           dos={[
             "Una acción principal negra al final de la toolbar.",
             "Toolbar con el ancho del bloque de operación, no de la página.",
-            "Fila clicable que abre el sheet; checkbox que selecciona.",
+            "Fila clicable que abre la ficha; checkbox que selecciona; lo seleccionado en brand-soft.",
+            "Ficha por bloques, editable en el sitio, con los vacíos como «+ Campo».",
             "Badges de estado con los cinco tonos fijos.",
             "Confirmación en diálogo para borrar; toast con «Deshacer» para archivar.",
             "Contadores en pills grises junto al título del bloque.",
@@ -146,6 +185,8 @@ export default function ConvencionesPage() {
             "Varios bloques de operación apilados en la misma página.",
             "Toolbar a todo el ancho, con las vistas y «Nuevo» encima del panel de información.",
             "Modales para ver un registro: el detalle es un sheet.",
+            "Un botón «Editar» que abre un formulario para cambiar un dato.",
+            "Una página de Ajustes: se configura donde se usa.",
           ]}
         />
       </DocSection>

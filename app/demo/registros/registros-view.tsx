@@ -11,15 +11,15 @@ import {
   CopyIcon,
   DownloadIcon,
   EllipsisIcon,
+  GaugeIcon,
   KanbanSquareIcon,
   LayersIcon,
   PaperclipIcon,
-  PenLineIcon,
   PlusIcon,
   SendIcon,
-  TagIcon,
   Trash2Icon,
   TrophyIcon,
+  UserCogIcon,
   UserIcon,
   UsersIcon,
 } from "lucide-react"
@@ -38,7 +38,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PageBody, PageHeader } from "@/components/app/page-header"
 import { KpiCard, KpiRow } from "@/components/app/kpi"
 import { Section, SectionBody, SectionFooter, SectionHeader } from "@/components/app/section"
@@ -52,7 +51,8 @@ import { StatusBadge } from "@/components/app/status-badge"
 import { AvatarInitials, AvatarStack } from "@/components/app/avatar-initials"
 import { EmptyState } from "@/components/app/states"
 import { InsightList, InsightStat, InsightsPanel } from "@/components/app/insights-panel"
-import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, DetailSection, DetailSheet } from "@/components/app/detail-sheet"
+import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, DetailMeta, DetailSection, DetailSectionAction, DetailSheet, RecordPager } from "@/components/app/detail-sheet"
+import { InlineField, InlineTitle, type ValorInline } from "@/components/app/inline-field"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
 
 const PAGE_SIZE = 10
@@ -101,6 +101,13 @@ export function RegistrosView({
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const open = openId ? records.find((r) => r.id === openId) ?? null : null
+  // Posición de la ficha en la lista filtrada, para las flechas.
+  const posicion = openId ? filtered.findIndex((r) => r.id === openId) : -1
+  /** Guarda un campo de la ficha (en la demo, en memoria). */
+  const actualizar = (campo: keyof DemoRecord) => async (v: ValorInline) => {
+    await new Promise((r) => setTimeout(r, 250))
+    setRecords((rs) => rs.map((r) => (r.id === openId ? { ...r, [campo]: v ?? (campo === "tags" ? [] : r[campo]), ...(campo === "stage" ? { columnId: v as Stage } : {}) } : r)))
+  }
 
   const totalValue = filtered.reduce((a, r) => a + r.value, 0)
   const won = filtered.filter((r) => r.stage === "ganado")
@@ -417,12 +424,12 @@ export function RegistrosView({
           <>
             <DetailHeader
               leading={<AvatarInitials name={open.name} size="lg" variant="entity" />}
-              title={open.name}
+              title={<InlineTitle parts={[{ key: "name", value: open.name, placeholder: "Nombre", required: true }]} onSave={async (v) => actualizar("name")(v.name)} />}
               subtitle={`${open.code} · ${open.category}`}
               status={<StatusBadge tone={stages.find((s) => s.id === open.stage)!.tone}>{stages.find((s) => s.id === open.stage)!.label}</StatusBadge>}
+              nav={<RecordPager index={posicion} total={filtered.length} label="registro" onPrev={() => setOpenId(filtered[posicion - 1].id)} onNext={() => setOpenId(filtered[posicion + 1].id)} />}
               actions={
                 <>
-                  <Button variant="outline" size="sm" onClick={() => toast("Aquí se editaría el registro")}><PenLineIcon /> Editar</Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -447,7 +454,7 @@ export function RegistrosView({
                 </>
               }
             />
-            <Tabs defaultValue="resumen" className="flex min-h-0 flex-1 flex-col gap-0">
+            <Tabs key={open.id} defaultValue="resumen" className="flex min-h-0 flex-1 flex-col gap-0">
               <TabsList variant="line" className="w-full justify-start rounded-none border-b px-4">
                 <TabsTrigger value="resumen" className="flex-none">Resumen</TabsTrigger>
                 <TabsTrigger value="actividad" className="flex-none">Actividad</TabsTrigger>
@@ -455,36 +462,81 @@ export function RegistrosView({
               </TabsList>
               <DetailBody>
                 <TabsContent value="resumen">
-                  <DetailSection title="Datos">
+                  <DetailSection title="Gestión" icon={UserCogIcon} collapsible storageKey="registro.gestion" summary={[stages.find((s) => s.id === open.stage)!.label, open.owner].join(" · ")}>
                     <DetailFields>
-                      <DetailField label="Responsable">
-                        <span className="inline-flex items-center gap-2"><AvatarInitials name={open.owner} size="xs" /> {open.owner}</span>
-                      </DetailField>
                       <DetailField label="Fase">
-                        <Select value={open.stage} onValueChange={(v) => setRecords((rs) => rs.map((r) => (r.id === open.id ? { ...r, stage: v as Stage, columnId: v as Stage } : r)))}>
-                          <SelectTrigger size="sm" className="h-7 w-44"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {stages.map((s) => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <InlineField
+                          value={open.stage}
+                          tipo="select"
+                          required
+                          opciones={stages.map((s) => ({ value: s.id, label: s.label }))}
+                          onSave={actualizar("stage")}
+                          render={() => <StatusBadge tone={stages.find((s) => s.id === open.stage)!.tone}>{stages.find((s) => s.id === open.stage)!.label}</StatusBadge>}
+                        />
                       </DetailField>
-                      <DetailField label="Estado"><StatusBadge tone={recordStatus[open.status].tone} dot>{recordStatus[open.status].label}</StatusBadge></DetailField>
-                      <DetailField label="Valor"><span className="font-semibold tabular-nums">{fmt.eur(open.value)}</span></DetailField>
-                      <DetailField label="Vencimiento">{fmt.dateLong(open.dueAt)}</DetailField>
-                      <DetailField label="Etiquetas">
-                        <span className="flex flex-wrap gap-1">{open.tags.map((t) => <StatusBadge key={t} tone="neutral"><TagIcon /> {t}</StatusBadge>)}</span>
+                      <DetailField label="Estado">
+                        <InlineField
+                          value={open.status}
+                          tipo="select"
+                          required
+                          opciones={Object.entries(recordStatus).map(([k, m]) => ({ value: k, label: m.label }))}
+                          onSave={actualizar("status")}
+                          render={() => <StatusBadge tone={recordStatus[open.status].tone} dot>{recordStatus[open.status].label}</StatusBadge>}
+                        />
+                      </DetailField>
+                      <DetailField label="Responsable">
+                        <InlineField
+                          value={open.owner}
+                          tipo="select"
+                          required
+                          opciones={owners.map((o) => ({ value: o, label: o }))}
+                          onSave={actualizar("owner")}
+                          render={(v) => <span className="inline-flex items-center gap-2"><AvatarInitials name={String(v)} size="xs" /> {String(v)}</span>}
+                        />
+                      </DetailField>
+                      <DetailField label="Etiquetas" empty={!open.tags.length}>
+                        <InlineField
+                          value={open.tags}
+                          tipo="multiselect"
+                          opciones={["Etiqueta 1", "Etiqueta 2", "Etiqueta 3"].map((t) => ({ value: t, label: t }))}
+                          placeholder="Añadir etiquetas"
+                          onSave={actualizar("tags")}
+                        />
                       </DetailField>
                     </DetailFields>
                   </DetailSection>
-                  <DetailSection title="Contactos" action={<button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => toast("Aquí se añadiría un contacto")}>Añadir</button>}>
+                  <DetailSection title="Negocio" icon={BanknoteIcon} collapsible storageKey="registro.negocio" summary={`${fmt.eur(open.value)} · vence ${fmt.date(open.dueAt)}`}>
+                    <DetailFields>
+                      <DetailField label="Valor">
+                        <InlineField value={open.value} tipo="numero" onSave={actualizar("value")} render={(v) => <span className="font-semibold tabular-nums">{fmt.eur(Number(v))}</span>} />
+                      </DetailField>
+                      <DetailField label="Vencimiento">
+                        <InlineField value={open.dueAt} tipo="fecha" onSave={actualizar("dueAt")} render={(v) => fmt.dateLong(String(v))} />
+                      </DetailField>
+                      <DetailField label="Categoría">
+                        <InlineField value={open.category} tipo="select" required opciones={["Categoría A", "Categoría B", "Categoría C", "Categoría D"].map((c) => ({ value: c, label: c }))} onSave={actualizar("category")} />
+                      </DetailField>
+                    </DetailFields>
+                  </DetailSection>
+                  <DetailSection
+                    title="Contactos"
+                    icon={UsersIcon}
+                    count={open.contacts.length}
+                    collapsible
+                    defaultOpen={open.contacts.length > 0}
+                    storageKey="registro.contactos"
+                    summary={open.contacts.join(", ") || "Ninguno"}
+                    action={<DetailSectionAction onClick={() => toast("Aquí se añadiría un contacto")}>Añadir</DetailSectionAction>}
+                  >
                     <InsightList items={open.contacts.map((c, i) => ({ key: c, leading: <AvatarInitials name={c} size="sm" />, title: c, subtitle: i === 0 ? "Contacto principal" : "Contacto", trailing: <AvatarStack names={[open.owner]} /> }))} />
                   </DetailSection>
-                  <DetailSection title="Progreso">
+                  <DetailSection title="Progreso" icon={GaugeIcon} collapsible storageKey="registro.progreso" summary={`${open.progress} %`}>
                     <div className="flex items-center gap-3">
                       <Progress value={open.progress} className="h-1.5" />
                       <span className="text-xs whitespace-nowrap tabular-nums text-muted-foreground">{open.progress} %</span>
                     </div>
                   </DetailSection>
+                  <DetailMeta>Actualizado el {fmt.dateLong(open.updatedAt)}</DetailMeta>
                 </TabsContent>
                 <TabsContent value="actividad">
                   <DetailSection title="Últimos cambios">

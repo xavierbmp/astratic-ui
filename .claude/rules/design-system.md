@@ -6,18 +6,19 @@
 - Next.js App Router · Tailwind v4 · shadcn/ui (preset Nova sobre Radix, base neutral) · lucide-react · Geist · Recharts · dnd-kit · react-hook-form + zod · next-themes · sonner.
 - `cn` se importa de `"cn"`. Tokens en `app/globals.css`. Kit en `components/app/`.
 - Nunca colores de Tailwind sueltos ni valores hex en JSX: solo tokens (`bg-card`, `text-muted-foreground`, `border`, `bg-brand-soft`, `text-success`…).
+- Contraste en claro: `border` separa bloques, `input` bordea campos y botones outline, `control` bordea lo que se marca (casillas, radios): tiene que verse sin buscarlo. Lo seleccionado (filas, tarjetas, elementos de lista) va en `bg-brand-soft` con un filo `brand` a la izquierda; el hover, en `bg-muted`.
 
 ## Anatomía de una página de operación (orden fijo)
 1. `PageBody` → `PageHeader` (título 27 px, descripción; a la derecha, `tabs` con las pestañas de subpágina si las hay y `actions` con botones outline).
 2. `WorkGrid`, que reparte el resto de la página en dos columnas:
    - `stats={<KpiRow>}` con 3 a 5 `KpiCard`. Van **dentro** de la columna izquierda, no a ancho completo: `KpiRow` es `auto-fit minmax(180px,1fr)` y se reordena solo al estrecharse.
-   - `toolbar`: **siempre `FilterBar`**, que monta buscador · filtros rápidos · botón «Filtros» · `ToolbarActions` (`ViewSwitcher` + botón principal negro y único) y los chips debajo. «Filtros» es uno más de la fila de rápidos y va **pegado al último**, moviéndose según cuántos haya; solo las acciones se anclan a la derecha. **Todo en una sola línea**: los rápidos son la parte elástica y se desplazan en horizontal si no caben; «Filtros» y las acciones no saltan nunca de línea. La toolbar mide lo que el bloque: nunca queda encima del panel de información.
+   - `toolbar`: **siempre `FilterBar`**, que monta buscador · filtros rápidos · botón «Filtros» · `ToolbarActions` (`ViewSwitcher` + botón principal negro y único) y los chips debajo. «Filtros» es uno más de la fila de rápidos y va **pegado al último visible**; solo las acciones se anclan a la derecha. **Todo en una línea**: los rápidos son la parte elástica y **los que no caben se recogen en un botón «+N» con flecha**, que abre un menú con esos mismos filtros y sus opciones (marcado si alguno está activo). Nunca se tapan ni esconden «Filtros». En móvil el buscador va en su propia línea y, si «+N» y «Filtros» no caben junto a las acciones, estas bajan a la siguiente. La toolbar mide lo que el bloque: nunca queda encima del panel de información.
    - **un** `Section` (bloque de operación) como hijo.
    - `aside={<InsightsPanel storageKey=… blocks=… />}`: ocupa la columna derecha **entera**, desde las cifras hasta el pie del bloque. El panel habla de toda la página, igual que las cifras, así que empiezan a la misma altura; empezar a la altura del bloque lo hacía parecer un apéndice de la tabla.
    - Por debajo de 1280 px todo se apila en una columna y el panel va el último.
-3. `DetailSheet` para el registro abierto, con todos sus datos editables en el sitio. Nunca un modal para ver un registro.
+3. `DetailSheet` para el registro abierto, ordenado por bloques y con todos sus datos editables en el sitio (ver «Fichas»). Nunca un modal para ver un registro.
 
-Dashboards: cifras + grid de secciones de resumen + panel «Hoy». Ajustes: navegación vertical + un bloque con campos y pie de guardado.
+Dashboards: cifras + grid de secciones de resumen + panel «Hoy». No hay página de Ajustes: ver «Configuración in situ».
 
 ## Subpáginas
 - Un módulo con partes distintas que comparten título (Facturas y Cobros en Facturación) usa subpáginas: una ruta por parte (`/facturacion`, `/facturacion/cobros`) y `PageTabs` en la prop `tabs` de `PageHeader`.
@@ -35,18 +36,45 @@ Toda lista lleva las tres piezas, y siempre del kit: nunca se escriben filtros a
 - Si el usuario es administrador, tanto el selector de campo como el panel ofrecen **crear un campo nuevo** sin salir de la lista (`CampoFormDialog`).
 - La página junta todo con `useFiltrosAvanzados(clave, campos, rapidos)` y lo pinta con `FilterBar`. `FilterMenu` suelto solo dentro de `QuickFilters`.
 
-## Fichas editables
-- En el `DetailSheet` **todo dato se edita donde se lee**, con `InlineField`: se pulsa el valor y se convierte en campo. Enter guarda, Escape cancela, el blur guarda. Listas y sí/no llevan su control directamente.
-- Un campo vacío **no se esconde**: muestra «Añadir …» en `text-muted-foreground` e invita a rellenarlo.
-- `onSave` devuelve el mensaje de error o nada; mientras guarda el campo se atenúa y, si falla, un `toast` lo dice y el valor vuelve atrás. Lo calculado (fechas de alta, contadores) va con `readOnly`.
-- El botón «Editar» del `Dialog` se queda solo para crear y para las altas rápidas, no para retocar un dato suelto.
+## Fichas (el `DetailSheet` de un registro)
+Se leen de un vistazo y se editan donde se leen. Orden fijo:
+
+- **Cabecera** (`DetailHeader`): avatar, **nombre editable en el sitio** (`InlineTitle`; nombre y apellidos se editan juntos), subtítulo corto («cargo · empresa»), insignia de estado y, arriba a la derecha, `RecordPager` (‹ 3 de 42 ›) para pasar al anterior o al siguiente de la lista filtrada sin cerrar. Debajo, acciones secundarias outline `sm` y el menú «…» (copiar enlace, eliminar al final en rojo). **No hay botón «Editar»**: el `Dialog` de formulario queda solo para crear.
+- **Cuerpo por bloques** (`DetailSection` con `icon`, `collapsible` y `storageKey`): primero los campos agrupados por tema («Contacto», «Empresa», «Gestión», «Presencia online», «Perfil»), después los campos propios, después las listas relacionadas con su contador y «Añadir» en la cabecera («Contactos», «Oportunidades», «Campañas»), y al final las notas internas y `DetailMeta` (creado, origen, actualizado). Cada bloque se pliega desde su título, se recuerda por persona y plegado enseña una línea de resumen. Las listas vacías empiezan plegadas.
+- **Campos** en `DetailFields`: etiqueta a la izquierda con ancho fijo en toda la ficha, valor a la derecha. **En reposo ningún valor lleva caja**: texto, insignias o enlaces; el control aparece al pulsar (`InlineField`, y los selectores de relación con `variant="inline"`). Enter o salir guarda, Escape cancela ese campo sin cerrar la ficha. Listas obligatorias con `required` (sin «Sin valor»). Sí/no con su interruptor.
+- **Campos vacíos**: no ocupan fila. Van al pie de su bloque como botones «+ Campo» (`DetailField empty`); al pulsar uno, el campo aparece ya editándose. La ficha enseña lo que se sabe y sigue invitando a completar lo que falta.
+- `onSave` devuelve el mensaje de error o nada; mientras guarda el campo se atenúa y, si falla, un `toast` lo dice y el valor vuelve atrás. Lo calculado (contadores, fechas de alta) va en `DetailMeta` o con `readOnly`.
+- **Pie** (`DetailFooter`): «Cerrar» ghost y la acción principal del registro.
+
+### Fichas de dos columnas
+Para un registro que recorre una secuencia (un contacto dentro de una campaña, un pedido por sus fases): `DetailSheet` ancho (960-1040) con `DetailSplit`. A la izquierda el recorrido (`StepTimeline`: hecho, lo que toca ahora, lo que vendrá, lo que no pasará, cada uno con su fecha) y los datos de ese registro en la secuencia; a la derecha, en grande, el paso elegido. Se abre en lo que toca ahora. En móvil las columnas se apilan.
+
+### Contenido que se edita para un solo registro
+Cuando un contenido sale de una plantilla (un email de campaña), se ve **exactamente como le llega** a cada registro y se puede reescribir solo para él: se lee tal cual y, al pulsarlo, pasa a editor; «Guardar para Ana» lo deja solo para esa persona, con la marca «Editado a mano» y «Volver a la plantilla» (con «Deshacer» en el toast). Lo que ya salió se ve pero no se edita. Las flechas recorren los registros empezando por los que lo tienen pendiente.
+
+### Cambios sin guardar
+Si hay un editor con cambios sin guardar y se va a cambiar de registro, de paso o cerrar, `ConfirmDialog` «¿Descartar los cambios?» con «Seguir editando» y «Descartar cambios» (destructivo). ⌘+Enter guarda; Escape solo sale si no hay cambios.
+
+### HTML que no escribe el portal
+Emails, firmas o documentos importados se pintan siempre en `HtmlFrame` (marco aislado, sin scripts, que crece con su contenido). Nunca `dangerouslySetInnerHTML` con HTML de fuera.
+
+## Configuración in situ (sin página de Ajustes)
+Nada se configura en una página de ajustes aparte: cada cosa se configura **donde se usa**. Solo tiene página propia lo que no pertenece a ninguna pantalla (el equipo y sus permisos).
+
+- **Engranaje** (`ConfigButton`, mismo icono que el de campos visibles): en la cabecera del bloque o del panel que enseña lo configurable (líneas en «Por línea», remitentes en su bloque) y junto a la etiqueta de un `Select` simple de formulario (pipeline, remitente).
+- **En la ficha, pulsar el nombre de un campo abre su configuración** (`DetailField onConfig`): el valor se edita donde se lee y el campo se configura donde se nombra.
+- **Opciones de un selector**: `MultiSelect` e `InlineField` con `onCreate` (escribir algo que no existe ofrece «Crear «…»») y `onManage` (pie «Gestionar …» que abre su gestor).
+- **Kanban**: el título de la columna se pulsa para configurarla, sus opciones van en el menú «…» (editar, añadir a la derecha, mover, eliminar) y al final hay una columna «Añadir» (`columnMenu`, `onColumnTitleClick`, `onAddColumn`).
+- **Campos propios en la tabla**: lápiz y papelera en el panel de campos visibles (`ColumnSettings camposPropios`).
+- Los gestores son `Dialog` que cargan sus datos al abrirse (nunca de serie con la página) y cuelgan de un proveedor común. Solo los ve quien puede configurar: sin permiso no hay engranaje.
+- Las listas largas que no son configuración (supresión, archivos) son páginas hijas del módulo que las usa, con flecha de volver y un botón outline en la cabecera del módulo (como Plantillas en Outreach).
 
 ## Estructura de archivos de una página
 - `page.tsx` de servidor: `metadata`, carga de datos desde `lib/db/`, lectura de `searchParams` (incluido `?f=` con `parseGrupo` + `filtrarFilas`). Pasa los datos por props.
 - `<modulo>-view.tsx` cliente: estado de filtros (`useFiltrosAvanzados`), columnas (`useTableConfig`), selección y vista (`usePageView(clave, vistas)`), registro abierto sincronizado con `?registro=id`.
 
 ## Interacción
-- Fila o tarjeta entera clicable → abre el `DetailSheet`. Checkbox → selecciona. Selección → `BulkBar` flotante, fija al pie de la ventana y centrada (nunca acciones en bloque arriba).
+- Fila o tarjeta entera clicable → abre el `DetailSheet`. Checkbox → selecciona. Selección → `BulkBar` flotante, fija al pie de la ventana y centrada (nunca acciones en bloque arriba). Lo seleccionado se ve siempre: fondo `bg-brand-soft` y filo `brand`.
 - Vistas: `table` · `list` · `kanban` · `calendar` · `grid` con sus iconos fijos, en un `ViewSwitcher` segmentado; la vista se recuerda por página y en móvil la tabla cede el sitio a la lista (`RecordList`) o las tarjetas; búsqueda, filtros y selección se comparten entre vistas.
 - Kanban: columnas grises con la cabecera dentro, fases de los extremos plegadas con `defaultCollapsed` cuando no caben; tarjeta con monograma, valor, etiqueta y pie de estado.
 - Filtros: ver «Filtrar, ordenar y elegir campos». Todo filtro activo se marca en su botón y aparece como chip bajo la toolbar.
@@ -63,4 +91,4 @@ Toda lista lleva las tres piezas, y siempre del kit: nunca se escriben filtros a
 - Textos en español, sin guiones largos, sin anglicismos innecesarios. Euros `1.234 €`, porcentajes `32 %`, fechas `24 sep` (usar `lib/format.ts`).
 
 ## Estándar de completitud
-Una página no está terminada sin: `FilterBar` con rápidos y constructor, panel de campos visibles, orden, las vistas que apliquen, selección en bloque, detalle editable en el sitio, estados vacío/cargando/error, toasts y responsive básico (el panel baja debajo del bloque en < 1280 px).
+Una página no está terminada sin: `FilterBar` con rápidos y constructor, panel de campos visibles, orden, las vistas que apliquen, selección en bloque, ficha por bloques editable en el sitio y con flechas, estados vacío/cargando/error, toasts y responsive básico (el panel baja debajo del bloque en < 1280 px). Se revisa también en modo claro: bordes, casillas y selección tienen que verse.

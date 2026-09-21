@@ -14,7 +14,7 @@ const cards = [
     href: "/demo",
     icon: LayoutDashboardIcon,
     title: "Demo",
-    text: "Un mini-portal con datos genéricos: dashboard, registros con tabla, lista y kanban, tareas, equipo y ajustes.",
+    text: "Un mini-portal con datos genéricos: dashboard, registros con tabla, lista y kanban, tareas y equipo.",
   },
   {
     href: "/ds/nuevo-proyecto",

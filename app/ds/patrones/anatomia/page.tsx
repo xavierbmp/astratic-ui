@@ -62,7 +62,6 @@ export default function AnatomiaPage() {
           rows={[
             ["Dashboard", "Cifras del área y un grid de secciones de resumen (gráfico, ranking, lista de atención) + panel «Hoy». Es la única página con varios bloques.", "/demo"],
             ["Operación", "Cifras + toolbar + un bloque de operación con vistas + panel de información. La página tipo; el 80 % de un portal.", "/demo/registros, /demo/tareas, /demo/equipo"],
-            ["Ajustes / formulario", "Navegación vertical de secciones a la izquierda y un bloque con campos y pie de guardado a la derecha. Sin cifras.", "/demo/ajustes"],
             ["Página de registro", "Para registros grandes (una campaña, un evento): cabecera con datos clave, pestañas y dentro de cada pestaña un bloque de operación. Sustituye al sheet cuando el registro tiene su propia operación.", "Pendiente en la demo"],
           ]}
         />
@@ -119,10 +118,10 @@ export default function AnatomiaPage() {
       <DocSection id="responsive" title="Comportamiento por ancho">
         <Rules
           items={[
-            <><strong>≥ 1280 px (xl):</strong> layout completo con panel de información a la derecha. La toolbar mide lo que el bloque; si no le caben los filtros, el buscador se estrecha y después salta de línea, con las vistas y la acción principal a la derecha.</>,
+            <><strong>≥ 1280 px (xl):</strong> layout completo con panel de información a la derecha. La toolbar mide lo que el bloque y va en una línea: los filtros rápidos que no caben se recogen en «+N», y «Filtros», las vistas y la acción principal siempre se ven.</>,
             <><strong>1024–1279 px:</strong> el panel de información pasa debajo del bloque de operación, a todo el ancho. Las columnas de tabla marcadas <code>hideBelow</code> se ocultan.</>,
-            <><strong>768–1023 px:</strong> la sidebar sigue visible y se pliega a iconos con el botón de la cabecera o con ⌘B; la toolbar envuelve en dos filas (buscador y filtros arriba; vistas y acción principal abajo, a la derecha).</>,
-            <><strong>&lt; 768 px:</strong> sidebar en cajón, buscador a todo el ancho, cifras en dos columnas, la tabla se sustituye por la lista o las tarjetas (<code>usePageView</code>), sheet a pantalla completa.</>,
+            <><strong>768–1023 px:</strong> la sidebar sigue visible y se pliega a iconos con el botón de la cabecera o con ⌘B; la toolbar sigue en una línea con menos rápidos a la vista (el resto en «+N»).</>,
+            <><strong>&lt; 768 px:</strong> sidebar en cajón, buscador a todo el ancho en su propia línea (si «+N» y «Filtros» no caben junto a las acciones, estas bajan a la siguiente), cifras en dos columnas, la tabla se sustituye por la lista o las tarjetas (<code>usePageView</code>), sheet a pantalla completa.</>,
           ]}
         />
         <Prose>

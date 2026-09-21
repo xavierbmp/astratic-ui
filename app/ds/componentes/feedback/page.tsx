@@ -52,7 +52,7 @@ const alert = `<PageBody>
       <AlertTitle>Falta configurar el remitente de los avisos. Hasta entonces no se envía ningún email.</AlertTitle>
       <AlertAction>
         <Button variant="outline" size="xs" asChild>
-          <Link href="/ajustes/notificaciones">Configurar</Link>
+          <Link href="/avisos?configurar=remitente">Configurar</Link>
         </Button>
       </AlertAction>
     </Alert>
@@ -104,7 +104,7 @@ export default function FeedbackPage() {
             <AlertTitle>Falta configurar el remitente de los avisos. Hasta entonces no se envía ningún email.</AlertTitle>
             <AlertAction>
               <Button variant="outline" size="xs" asChild>
-                <Link href="/demo/ajustes">Configurar</Link>
+                <Link href="/ds/patrones/convenciones#in-situ">Configurar</Link>
               </Button>
             </AlertAction>
           </Alert>

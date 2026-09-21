@@ -1,5 +1,6 @@
 import { DownloadIcon } from "lucide-react"
 import { DocPage, DocSection, DoDont, Example, NextLinks, Rules, SpecTable } from "@/components/docs/doc"
+import { FilterBarDemo } from "@/components/docs/examples/filter-bar-demo"
 import { CodeBlock } from "@/components/docs/code-block"
 import { FiltersDemo } from "@/components/docs/examples/filters-demo"
 import { PageHeader } from "@/components/app/page-header"
@@ -210,6 +211,12 @@ const chips = [
         title="Filtros avanzados, rápidos y campos visibles"
         lead="Los menús de arriba resuelven el día a día de un clic. Para lo fino —«empresas con más de tres contactos y sin responsable»— la toolbar monta un constructor de condiciones al estilo de Airtable, y un panel decide qué columnas se ven. Las tres piezas van juntas en FilterBar."
       >
+        <Example
+          title="FilterBar con rápidos que se recogen en «+N»"
+          description="Estrecha el recuadro: los rápidos que no caben pasan a «+N» (menú con sus opciones) y «Filtros» sigue pegado detrás del último visible. En «Filtros» se montan condiciones y se eligen, ordenan o guardan los rápidos."
+        >
+          <FilterBarDemo />
+        </Example>
         <SpecTable
           columns={["Pieza", "Componente", "Qué hace"]}
           rows={[
@@ -225,7 +232,7 @@ const chips = [
               <>
                 <code>QuickFilters</code> + <code>useQuickFilters</code>
               </>,
-              "Los atajos junto al buscador. O el desplegable de un campo de lista, o una condición guardada con nombre. El usuario elige cuáles ve, los ordena y guarda los suyos desde el engranaje.",
+              "Los atajos junto al buscador. O el desplegable de un campo de lista, o una condición guardada con nombre. El usuario elige cuáles ve, los ordena y guarda los suyos desde «Filtros rápidos», dentro del desplegable de «Filtros». Los que no caben en la fila se recogen en un botón «+N» con flecha.",
             ],
             [
               "Campos visibles",
@@ -271,12 +278,17 @@ const cols = useTableConfig("crm-marcas", columns)
       filas={filas}
       objeto="las empresas"
       buscador={{ value: q, onChange: setQ, placeholder: "Buscar empresa…" }}
-      columnas={cols}
       vistas={{ views, value: view, onChange: setView }}
       actions={<Button><PlusIcon /> Nueva empresa</Button>}
     />
   }
-/>`}
+>
+  <Section>
+    {/* Campos visibles: en la cabecera del bloque, nunca en la toolbar. */}
+    <SectionHeader title="Empresas" count={filas.length} action={<ColumnSettings config={cols} />} />
+    …
+  </Section>
+</WorkGrid>`}
         />
         <Rules
           items={[
@@ -288,6 +300,12 @@ const cols = useTableConfig("crm-marcas", columns)
             <>
               <strong>Rápidos y constructor escriben en el mismo sitio.</strong> Un desplegable rápido no es un filtro aparte: añade una
               condición al mismo grupo. Por eso todo lo activo se ve junto en los chips y se puede afinar desde «Filtros».
+            </>,
+            <>
+              <strong>Los rápidos nunca tapan «Filtros».</strong> La fila enseña los que caben en el sitio que deja la toolbar y recoge el
+              resto en un botón «+N» con flecha, que abre un menú con esos mismos filtros y sus opciones; si alguno de ellos está activo, el
+              botón lo marca. «Filtros» va siempre pegado detrás del último visible. Al estrechar la ventana se recogen más; al
+              ensanchar, vuelven a la fila.
             </>,
             <>
               <strong>Filtrar en memoria sobre las filas ya cargadas</strong> (tope de 1.000) en vez de traducir cada condición a SQL. Así se

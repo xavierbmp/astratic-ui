@@ -25,7 +25,7 @@ export default function PageHeaderPage() {
         <Prose>
           <p>
             En todas las páginas, siempre como primer hijo de <code>PageBody</code>. El título dice qué gestiona la
-            página (un sustantivo: «Registros», «Campañas», «Ajustes»); la descripción, en una línea, qué hay dentro o
+            página (un sustantivo: «Registros», «Campañas», «Equipo»); la descripción, en una línea, qué hay dentro o
             cuándo se actualizó. A la derecha van, por este orden, las pestañas de subpágina si el módulo las tiene y
             las acciones que afectan a toda la página, no a un registro.
           </p>

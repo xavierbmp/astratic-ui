@@ -18,12 +18,12 @@ export default function PanelesPage() {
       >
         <Prose>
           <p>
-            El panel es una <code>Section</code> con cabecera («Información» y un icono de ajustes) y un cuerpo con <strong>bloques</strong> apilados
+            El panel es una <code>Section</code> con cabecera («Información» y un icono de personalizar) y un cuerpo con <strong>bloques</strong> apilados
             y separados por una línea. Cada bloque es un <code>InsightBlock</code>: un id estable, un título de 13 px, un icono opcional y una función{" "}
             <code>render</code> que pinta su contenido. No hay más estructura: ni tarjetas dentro de tarjetas ni pestañas.
           </p>
           <p>
-            Desde el icono de ajustes el usuario ve la lista de bloques, activa o desactiva cada uno con un checkbox y los reordena con las flechas.
+            Desde el icono de personalizar el usuario ve la lista de bloques, activa o desactiva cada uno con un checkbox y los reordena con las flechas.
             «Restablecer» vuelve al orden y la visibilidad que definió la página. Si desactiva todos, el panel lo dice en una línea y sigue en su
             sitio: nunca desaparece.
           </p>
@@ -57,7 +57,7 @@ export default function PanelesPage() {
       <DocSection
         id="ejemplo"
         title="Ejemplo"
-        lead="Tres bloques reales en un contenedor de 320 por 420 px. Abre el icono de ajustes, desactiva o reordena y recarga la página: se mantiene."
+        lead="Tres bloques reales en un contenedor de 320 por 420 px. Abre el icono de personalizar, desactiva o reordena y recarga la página: se mantiene."
       >
         <Example>
           <PanelDemo />
@@ -175,7 +175,6 @@ export default function PanelesPage() {
               "Resumen del registro · Próximos hitos · Actividad",
               "El storageKey lleva el tipo de registro («campana»), no su id: la preferencia vale para todas las campañas.",
             ],
-            ["Ajustes / formulario", "No hay panel", "Una columna de navegación y un bloque con campos. Nada que resumir."],
             ["Detalle en sheet", "No hay panel", "El sheet ocupa ese papel con sus pestañas Resumen, Actividad y Archivos."],
           ]}
         />
@@ -190,7 +189,7 @@ export default function PanelesPage() {
           columns={["Preferencia", "Dónde se elige", "Clave"]}
           rows={[
             ["Vista activa", "Conmutador de vistas de la toolbar", <code key="view">view:&lt;página&gt;</code>],
-            ["Bloques del panel", "Icono de ajustes del panel", <code key="insights">insights:&lt;página&gt;</code>],
+            ["Bloques del panel", "Icono de personalizar del panel", <code key="insights">insights:&lt;página&gt;</code>],
             [
               "Columnas visibles",
               <>

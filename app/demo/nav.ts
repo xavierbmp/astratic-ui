@@ -1,4 +1,4 @@
-import { KanbanSquareIcon, LayoutDashboardIcon, ListTodoIcon, ReceiptTextIcon, SettingsIcon, UsersIcon } from "lucide-react"
+import { KanbanSquareIcon, LayoutDashboardIcon, ListTodoIcon, ReceiptTextIcon, UsersIcon } from "lucide-react"
 import type { Brand, CurrentUser, NavGroup, PageTab } from "@/lib/nav"
 import { demoInvoices } from "@/lib/demo-data"
 
@@ -27,7 +27,6 @@ export const demoNav: NavGroup[] = [
     items: [
       { id: "facturacion", label: "Facturación", href: "/demo/facturacion", icon: ReceiptTextIcon, badge: overdueInvoices, tabs: facturacionTabs },
       { id: "equipo", label: "Equipo", href: "/demo/equipo", icon: UsersIcon },
-      { id: "ajustes", label: "Ajustes", href: "/demo/ajustes", icon: SettingsIcon },
     ],
   },
 ]

@@ -42,9 +42,11 @@ app/
   demo/                mini-portal de ejemplo
 components/
   ui/                  shadcn/ui (preset Nova sobre Radix)
-  app/                 kit de aplicación: app-shell, page-header, kpi, section, work-grid,
-                       toolbar, data-table, record-list, kanban, insights-panel,
-                       detail-sheet, bulk-bar, status-badge, states, confirm-dialog,
+  app/                 kit de aplicación: app-shell, page-header, page-tabs, kpi, section,
+                       work-grid, toolbar, filter-bar, quick-filters, filter-builder,
+                       column-settings, data-table, record-list, kanban, insights-panel,
+                       detail-sheet, inline-field, multi-select, step-timeline, html-frame,
+                       bulk-bar, status-badge, states, confirm-dialog, config-button,
                        avatar-initials, social-icons, theme-toggle
   docs/                componentes de la documentación y ejemplos en vivo
 lib/                   format, status, nav, demo-data
@@ -56,4 +58,4 @@ registry.json          definición del registry
 
 ## Reglas en una frase
 
-Una página de operación es: cabecera, de 3 a 5 cifras, toolbar encima del bloque (buscador · filtros · vistas · acción principal), **un** bloque de operación y un panel de información a la derecha; el detalle se abre en un sheet lateral. Si un módulo tiene subpáginas, van como pestañas en la cabecera. Todo lo demás está en `/ds/patrones/convenciones` y `/ds/patrones/navegacion`.
+Una página de operación es: cabecera, de 3 a 5 cifras, toolbar encima del bloque (buscador · filtros · vistas · acción principal), **un** bloque de operación y un panel de información a la derecha; el detalle se abre en una ficha lateral por bloques, editable en el sitio. No hay página de Ajustes: cada cosa se configura donde se usa. Si un módulo tiene subpáginas, van como pestañas en la cabecera. Todo lo demás está en `/ds/patrones/convenciones` y `/ds/patrones/navegacion`.

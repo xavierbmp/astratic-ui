@@ -148,14 +148,14 @@ export default function FormsPage() {
     <DocPage
       eyebrow="Componentes"
       title="Formularios"
-      lead="Field de shadcn para la estructura, sus controles para la entrada y react-hook-form con zod para el estado y la validación. El mismo patrón sirve para el diálogo de alta y para la página de ajustes."
+      lead="Field de shadcn para la estructura, sus controles para la entrada y react-hook-form con zod para el estado y la validación. El mismo patrón sirve para el diálogo de alta y para los gestores de configuración."
     >
       <DocSection id="uso" title="Cuándo se usa">
         <Prose>
           <p>
-            Crear y editar registros sencillos se hace en un <code>Dialog</code> de 480 px con los campos en una
-            columna. Los registros complejos tienen página propia con secciones. La configuración del portal va en la
-            página de ajustes: navegación vertical a la izquierda y un <code>Section</code> con campos y pie de guardado.
+            Crear un registro se hace en un <code>Dialog</code> de 480 px con los campos en una columna; editarlo, en su
+            ficha, campo a campo. La configuración no tiene página propia: cada cosa se configura donde se usa, en un{" "}
+            <code>Dialog</code> gestor que se abre desde su engranaje (ver Convenciones → Configuración in situ).
           </p>
           <p>
             En los tres casos la estructura de cada campo es la misma: <code>Field</code> con{" "}
@@ -206,7 +206,7 @@ export default function FormsPage() {
           </FieldGroup>
         </Example>
 
-        <Example title="Selects, radios, switches y checkboxes" description="Controlados con watch y setValue. El select suelto de ajustes mide w-56; en un diálogo, 100 %." code={controls}>
+        <Example title="Selects, radios, switches y checkboxes" description="Controlados con watch y setValue. Un select suelto fuera de un diálogo mide w-56; dentro, 100 %." code={controls}>
           <div className="grid gap-6 md:grid-cols-2">
             <FieldGroup>
               <Field>
@@ -289,7 +289,7 @@ export default function FormsPage() {
             ["Email", <code key="c">Input type=&quot;email&quot;</code>, "z.email(\"Escribe un email válido\")."],
             ["Fecha", <code key="c">Input type=&quot;date&quot;</code>, "Para rangos, Calendar dentro de un Popover."],
             ["Una opción entre pocas (2 a 4)", <code key="c">RadioGroup</code>, "Dentro de FieldSet con FieldLegend; cada opción en Field horizontal."],
-            ["Una opción entre muchas", <code key="c">Select</code>, "w-56 suelto en ajustes; w-full en diálogos. Con placeholder en SelectValue si no hay valor."],
+            ["Una opción entre muchas", <code key="c">Select</code>, "w-56 suelto; w-full en diálogos. Con placeholder en SelectValue si no hay valor."],
             ["Varias opciones", <code key="c">Checkbox</code>, "Una por opción, dentro de FieldSet con FieldLegend."],
             ["Sí / no como preferencia", <code key="c">Switch</code>, "Field horizontal con FieldContent para etiqueta y ayuda."],
             ["Aceptar algo (aviso, condiciones)", <code key="c">Checkbox</code>, "Field horizontal. Nunca un Switch para un consentimiento."],
@@ -329,9 +329,8 @@ export default function FormsPage() {
               datos.
             </>,
             <>
-              Anchos: inputs al 100 % dentro de diálogos y de los bloques de ajustes (con <code>max-w-xl</code> en el
-              grupo); <code>w-56</code> para selects sueltos en ajustes. Nunca dos campos por fila en un diálogo de 480
-              px.
+              Anchos: inputs al 100 % dentro de diálogos y gestores; <code>w-56</code> para un select suelto fuera de
+              un diálogo. Nunca dos campos por fila en un diálogo de 480 px.
             </>,
             <>
               <code>Input</code> y <code>Textarea</code> van con <code>register</code>. Selects, switches, radios y

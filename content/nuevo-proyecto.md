@@ -47,7 +47,7 @@ Cerrado cuando: `npm run db:migrate` aplica en `dev` y el seed crea el admin.
 - [ ] Modelo `User.role` interno (área) separado del rol de Better Auth (`admin` / `user`).
 - [ ] `proxy.ts` (middleware) que protege todo salvo `/(publico)`. Sesión en servidor con `lib/auth-session.ts`; nunca `auth.api` desde componentes cliente.
 - [ ] Pantallas públicas: login, espera de aprobación (si el alta es por solicitud), legal. Usan el mismo `globals.css` y la tipografía del sistema.
-- [ ] Alta de usuarios: por invitación desde Ajustes → Equipo. Cada persona ve solo su bloque; el administrador ve todo.
+- [ ] Alta de usuarios: por invitación desde Equipo (la única página de configuración: el resto se configura donde se usa). Cada persona ve solo su bloque; el administrador ve todo.
 
 Cerrado cuando: un usuario del dominio del cliente entra con Google, uno de fuera no, y el admin ve la página de Equipo.
 

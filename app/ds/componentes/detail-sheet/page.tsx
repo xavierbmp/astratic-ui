@@ -2,73 +2,73 @@ import Link from "next/link"
 import { DocPage, DocSection, DoDont, Example, NextLinks, Prose, Rules, SpecTable } from "@/components/docs/doc"
 import { CodeBlock } from "@/components/docs/code-block"
 import { DetailSheetDemo } from "@/components/docs/examples/detail-sheet-demo"
+import { FichaRecorridoDemo } from "@/components/docs/examples/ficha-recorrido-demo"
 
 export const metadata = { title: "Sheet de detalle" }
 
 const example = `const [openId, setOpenId] = React.useState<string | null>(null)
-const record = records.find((r) => r.id === openId)
+const i = rows.findIndex((r) => r.id === openId)          // lista filtrada: para las flechas
+const record = i >= 0 ? rows[i] : null
 
-<DetailSheet open={record !== undefined} onOpenChange={(o) => !o && setOpenId(null)}>
+<DetailSheet open={record !== null} onOpenChange={(o) => !o && setOpenId(null)}>
   {record && (
     <>
       <DetailHeader
         leading={<AvatarInitials name={record.name} size="lg" variant="entity" />}
-        title={record.name}
+        title={<InlineTitle parts={[{ key: "name", value: record.name, placeholder: "Nombre", required: true }]} onSave={saveMany} />}
         subtitle={\`\${record.code} · \${record.category}\`}
         status={<StatusBadge tone={phase.tone}>{phase.label}</StatusBadge>}
-        actions={
-          <>
-            <Button variant="outline" size="sm" onClick={edit}><PenLineIcon /> Editar</Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={\`/registros/\${record.id}\`}><ExternalLinkIcon /> Abrir página</Link>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label="Más acciones" className="ml-auto"><EllipsisIcon /></Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={duplicate}><CopyIcon /> Duplicar</DropdownMenuItem>
-                <DropdownMenuItem onClick={archive}><ArchiveIcon /> Archivar</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => setConfirm(true)}><Trash2Icon /> Eliminar</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
-        }
+        nav={<RecordPager index={i} total={rows.length} label="registro" onPrev={() => setOpenId(rows[i - 1].id)} onNext={() => setOpenId(rows[i + 1].id)} />}
+        actions={<>{/* outline sm + menú «…» con eliminar al final */}</>}
       />
-
-      <Tabs defaultValue="resumen" className="flex min-h-0 flex-1 flex-col gap-0">
-        <TabsList variant="line" className="w-full justify-start rounded-none border-b px-4">
-          <TabsTrigger value="resumen" className="flex-none">Resumen</TabsTrigger>
-          <TabsTrigger value="actividad" className="flex-none">Actividad</TabsTrigger>
-        </TabsList>
+      <Tabs key={record.id} defaultValue="resumen" className="flex min-h-0 flex-1 flex-col gap-0">
+        <TabsList variant="line" className="w-full justify-start rounded-none border-b px-4">…</TabsList>
         <DetailBody>
           <TabsContent value="resumen">
-            <DetailSection title="Datos">
+            <DetailSection title="Gestión" icon={UserCogIcon} collapsible storageKey="registro.gestion" summary={resumen}>
               <DetailFields>
-                <DetailField label="Responsable">{record.owner}</DetailField>
                 <DetailField label="Fase">
-                  <Select value={record.stage} onValueChange={setStage}>
-                    <SelectTrigger size="sm" className="h-7 w-44"><SelectValue /></SelectTrigger>
-                    <SelectContent>{stages.map((s) => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <InlineField value={record.stage} tipo="select" required opciones={stages} onSave={save("stage")} render={badge} />
                 </DetailField>
-                <DetailField label="Valor"><span className="font-semibold tabular-nums">{fmt.eur(record.value)}</span></DetailField>
-                <DetailField label="Vencimiento">{fmt.dateLong(record.dueAt)}</DetailField>
+                <DetailField label="Responsable" empty={!record.owner}>
+                  <InlineField value={record.owner} tipo="select" opciones={team} placeholder="Añadir responsable" onSave={save("owner")} />
+                </DetailField>
               </DetailFields>
             </DetailSection>
+            <DetailSection title="Tareas" icon={ListChecksIcon} count={tasks.length} collapsible
+              defaultOpen={tasks.length > 0} storageKey="registro.tareas"
+              action={<DetailSectionAction onClick={newTask}>Añadir</DetailSectionAction>}>
+              …
+            </DetailSection>
+            <DetailMeta>Creado el 2 de septiembre de 2026 · actualizado hace 2 horas</DetailMeta>
           </TabsContent>
-          <TabsContent value="actividad">…</TabsContent>
         </DetailBody>
       </Tabs>
-
       <DetailFooter>
         <Button variant="ghost" onClick={() => setOpenId(null)}>Cerrar</Button>
-        <Button onClick={advance} disabled={record.stage === "ganado"}><ArrowRightIcon /> Avanzar fase</Button>
+        <Button onClick={advance}><ArrowRightIcon /> Avanzar fase</Button>
       </DetailFooter>
     </>
   )}
 </DetailSheet>`
+
+const exampleSplit = `<DetailSheet open={open} onOpenChange={(o) => !o && tryTo(close)} width={1040}>
+  <DetailHeader … nav={<RecordPager … />} />
+  <DetailSplit
+    asideWidth={320}
+    aside={
+      <DetailSection title="Recorrido" icon={RouteIcon}>
+        <StepTimeline items={steps} value={stepId} onSelect={(id) => tryTo(() => setStepId(id))} />
+      </DetailSection>
+    }
+  >
+    <div className="p-4 md:p-6">{/* el paso elegido, en grande */}</div>
+  </DetailSplit>
+  <DetailFooter>…</DetailFooter>
+</DetailSheet>
+
+<ConfirmDialog open={pending !== null} title="¿Descartar los cambios?" confirmLabel="Descartar cambios"
+  cancelLabel="Seguir editando" destructive onConfirm={runPending} … />`
 
 function PropsTitle({ children }: { children: React.ReactNode }) {
   return <h3 className="font-mono text-[13px] font-semibold">{children}</h3>
@@ -79,33 +79,34 @@ export default function DetailSheetPage() {
     <DocPage
       eyebrow="Componentes"
       title="Sheet de detalle"
-      lead="El panel lateral derecho donde se lee y se opera un registro sin salir de la página. Tres zonas fijas: cabecera, cuerpo y pie."
+      lead="La ficha de un registro: un panel lateral que se lee de un vistazo, ordenado por bloques, y en el que cada dato se edita donde se lee. Tres zonas fijas: cabecera, cuerpo y pie."
     >
       <DocSection id="uso" title="Cuándo se usa">
         <Prose>
           <p>
             Se abre al pulsar una fila o una tarjeta y se coloca por encima de la página, que sigue debajo con su
-            búsqueda, sus filtros y su selección intactos. Es la única forma de ver un registro: nunca un modal, y solo
-            una página propia cuando la ficha es larga (campañas, eventos). En ese caso el sheet sigue existiendo como
-            vista rápida y ofrece «Abrir página» en la cabecera.
+            búsqueda, sus filtros y su selección intactos. Es la única forma de ver un registro: nunca un modal. Desde
+            la propia ficha se pasa al registro anterior o al siguiente de la lista, sin cerrarla.
           </p>
           <p>
-            Las reglas de comportamiento (qué va en cada zona, edición inline, cierre) están en{" "}
-            <Link href="/ds/patrones/convenciones#sheet">Convenciones</Link>. Aquí, el componente.
+            No hay botón «Editar»: el nombre y cada campo se editan pulsándolos. El <code>Dialog</code> de formulario
+            queda solo para crear (ver <Link href="/ds/componentes/forms">Formularios</Link>).
           </p>
         </Prose>
         <Rules
           items={[
             <>
-              <code>width</code> 440 por defecto. 400 para fichas simples: un solo bloque de campos y sin pestañas.
-            </>,
-            <>
-              El sheet muestra un registro que ya existe. Crear y editar es un <code>Dialog</code> de 480 px (ver
-              Formularios); solo los campos de estado (fase, responsable) se editan inline dentro del sheet.
+              <code>width</code> 480 por defecto. Las fichas de dos columnas (<code>DetailSplit</code>), 960 a 1040.
+              En móvil ocupa todo el ancho.
             </>,
             <>
               Se abre desde <code>onRowClick</code> de la tabla o <code>onCardClick</code> del kanban con el id del
-              registro. El estado <code>openId</code> vive en la página, no en el componente.
+              registro, y el id va en la URL (<code>?registro=</code>) para poder compartirlo. El estado vive en la
+              página.
+            </>,
+            <>
+              Escape cierra la ficha, salvo con el foco en un campo: entonces cancela ese campo y la ficha sigue
+              abierta.
             </>,
           ]}
         />
@@ -113,66 +114,143 @@ export default function DetailSheetPage() {
 
       <DocSection
         id="ejemplo"
-        title="Ejemplo"
-        lead="Un registro con cabecera completa, dos pestañas, cinco campos y pie con la acción principal. Se cierra con Escape, con la X o pulsando fuera."
+        title="La ficha"
+        lead="Tres registros para recorrer con las flechas. Pulsa el nombre, la fase o cualquier valor para editarlo; los campos vacíos están al pie de cada bloque como «+ Campo». Pliega un bloque y abre otro registro: sigue plegado."
       >
-        <Example title="Registro con pestañas y acciones" description="La fase se edita inline con un Select pequeño; eliminar pasa por el diálogo de confirmación." code={example}>
+        <Example title="Ficha por bloques, editable en el sitio" description="Cada guardado tarda un poco a propósito: el campo se atenúa mientras guarda. Un valor negativo en «Valor» devuelve un error y el campo vuelve atrás." code={example}>
           <DetailSheetDemo />
         </Example>
       </DocSection>
 
-      <DocSection id="reglas" title="Reglas">
+      <DocSection id="anatomia" title="Anatomía">
         <Rules
           items={[
             <>
-              <strong>Tres zonas fijas.</strong> <code>DetailHeader</code>: avatar o monograma, título, subtítulo
-              «código · categoría», badge de estado y acciones. <code>DetailBody</code>: scroll propio y pestañas de
-              tipo línea si hay más de un bloque. <code>DetailFooter</code>: «Cerrar» ghost a la izquierda de la
-              acción principal.
+              <strong>Cabecera</strong> (<code>DetailHeader</code>): avatar, nombre editable con{" "}
+              <code>InlineTitle</code> (nombre y apellidos se editan juntos, uno al lado del otro), subtítulo corto
+              («cargo · empresa», «código · categoría»), <code>StatusBadge</code> junto al título y{" "}
+              <code>RecordPager</code> arriba a la derecha. Debajo, acciones secundarias outline <code>sm</code> y el
+              menú «…» con eliminar al final, en rojo.
             </>,
             <>
-              <strong>Una sola acción principal en el pie:</strong> la siguiente cosa útil que se puede hacer con el
-              registro («Avanzar fase», «Enviar», «Cobrar»). Cuando no aplica se deshabilita, no desaparece.
+              <strong>Cuerpo por bloques</strong> (<code>DetailSection</code>): primero los campos agrupados por tema,
+              luego los campos propios, luego las listas relacionadas con su contador y «Añadir», y al final las notas
+              internas y <code>DetailMeta</code> (creado, origen, actualizado). Con más de un tipo de contenido
+              (notas, tareas, actividad), pestañas de tipo línea.
             </>,
             <>
-              Acciones secundarias en la cabecera como outline <code>sm</code> («Editar», «Copiar enlace», «Abrir
-              página»). Duplicar, archivar y eliminar van en el menú «…», con eliminar en{" "}
-              <code>variant=&quot;destructive&quot;</code> y separado del resto.
+              <strong>Bloques plegables</strong> desde su título, con icono. Con <code>storageKey</code> cada persona
+              los encuentra como los dejó; plegado, el bloque enseña una línea de resumen. Las listas vacías empiezan
+              plegadas.
             </>,
             <>
-              Edición inline solo de campos de estado (fase, responsable) con <code>Select</code> y{" "}
-              <code>SelectTrigger size=&quot;sm&quot;</code>. Todo lo demás se edita con «Editar», que abre el
-              formulario.
+              <strong>Campos</strong> en <code>DetailFields</code>: etiqueta a la izquierda con el mismo ancho en toda
+              la ficha, valor a la derecha. En reposo ningún valor lleva caja ni flecha: se lee como texto, insignias
+              o enlaces. Al pulsar aparece su control del mismo alto (nada salta).
             </>,
             <>
-              Los campos van en <code>DetailFields</code> (lista de definición «etiqueta · valor») dentro de un{" "}
-              <code>DetailSection</code> con título de 13 px. Cifras con <code>tabular-nums</code>, fechas con{" "}
-              <code>fmt.dateLong</code>.
+              <strong>Campos vacíos</strong>: no ocupan fila. Se recogen al pie del bloque como «+ Campo»; al pulsar
+              uno, el campo aparece ya editándose. Así la ficha enseña lo que se sabe y sigue invitando a completar lo
+              que falta.
             </>,
             <>
-              «Abrir página» en la cabecera cuando el registro tiene página propia. El sheet es entonces la vista
-              rápida y no repite toda la ficha.
-            </>,
-            <>
-              Cierra con Escape y con clic fuera sin guardar nada. Si hay edición pendiente, ocurre en el diálogo, no
-              en el sheet.
-            </>,
-            <>
-              En móvil ocupa el ancho completo; <code>width</code> solo aplica a partir de <code>sm</code>.
+              <strong>Pie</strong> (<code>DetailFooter</code>): «Cerrar» ghost y la acción principal del registro
+              («Avanzar fase», «Añadir a campaña»). Cuando no aplica se deshabilita, no desaparece.
             </>,
           ]}
         />
+      </DocSection>
+
+      <DocSection
+        id="dos-columnas"
+        title="Ficha de dos columnas"
+        lead="Para un registro que recorre una secuencia: un contacto dentro de una campaña, un pedido por sus fases. A la izquierda el recorrido; a la derecha, en grande, el paso elegido."
+      >
+        <Example title="Recorrido y paso en grande" description="Pulsa el mensaje 2 para editarlo solo para esta persona. Con cambios sin guardar, cambiar de paso, de contacto o cerrar pide confirmación." code={exampleSplit}>
+          <FichaRecorridoDemo />
+        </Example>
+        <Rules
+          items={[
+            <>
+              <code>DetailSplit</code> reparte la ficha en dos columnas con scroll propio; en móvil se apilan (el
+              recorrido arriba).
+            </>,
+            <>
+              <code>StepTimeline</code>: cada paso con su punto (hecho, lo que toca ahora, lo que vendrá, lo que no
+              pasará), su insignia de estado y una línea con el día y la fecha. La ficha se abre en lo que toca ahora
+              o, si la secuencia acabó, en lo último que pasó.
+            </>,
+            <>
+              Lo que ya pasó se ve tal cual fue y no se edita. Lo que está por pasar se ve exactamente como será y,
+              si tiene sentido, se edita en el sitio.
+            </>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="por-registro" title="Contenido editable para un solo registro">
+        <Prose>
+          <p>
+            Cuando un contenido sale de una plantilla (el email de un paso de campaña), cada registro lo ve{" "}
+            <strong>exactamente como le llega</strong> y se puede reescribir solo para él, sin tocar la plantilla ni a
+            los demás.
+          </p>
+        </Prose>
+        <Rules
+          items={[
+            <>Se lee tal cual; al pasar por encima se marca y avisa «Pulsa para editar»; al pulsar pasa a editor.</>,
+            <>
+              «Guardar para Ana» (y ⌘+Enter) lo deja solo para esa persona. Queda la insignia «Editado a mano» y «Volver
+              a la plantilla», que se deshace desde el toast.
+            </>,
+            <>
+              En la vista previa de la plantilla, unas flechas recorren los registros empezando por los que lo tienen
+              pendiente, con un buscador en el nombre. Si el registro tiene su versión editada, se dice que los
+              cambios de la plantilla no le llegan.
+            </>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="cambios" title="Cambios sin guardar">
+        <Rules
+          items={[
+            <>
+              Si hay un editor con cambios y se va a cambiar de registro, de paso o cerrar, <code>ConfirmDialog</code>{" "}
+              «¿Descartar los cambios?» con <code>cancelLabel=&quot;Seguir editando&quot;</code> y «Descartar
+              cambios» destructivo.
+            </>,
+            <>Escape solo sale del editor si no hay cambios; con cambios no hace nada (no se pierde trabajo con una tecla).</>,
+            <>Los campos sueltos no necesitan aviso: guardan al salir.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="html" title="HTML que no escribe el portal">
+        <Prose>
+          <p>
+            El cuerpo de un email, una firma pegada o un documento importado se pintan en <code>HtmlFrame</code>: un
+            marco aislado, sin scripts y con sus propios estilos, que crece con su contenido y toma el color del tema.
+            Así ese HTML no puede cambiar los estilos de la página ni ejecutar nada. Nunca{" "}
+            <code>dangerouslySetInnerHTML</code> con HTML de fuera.
+          </p>
+        </Prose>
+      </DocSection>
+
+      <DocSection id="reglas" title="Reglas">
         <DoDont
           dos={[
-            "Fila clicable que abre el sheet; el detalle no navega.",
-            "Badge de estado junto al título, no perdido en el cuerpo.",
+            "Fila clicable que abre la ficha; las flechas pasan al siguiente sin cerrarla.",
+            "Campos agrupados por tema en bloques plegables, listas relacionadas después.",
+            "Valores en reposo sin cajas; el control aparece al pulsar.",
+            "Campos vacíos al pie del bloque como «+ Campo».",
             "«Cerrar» ghost y una acción principal en el pie.",
-            "Menú «…» para duplicar, archivar y eliminar.",
           ]}
           donts={[
             "Modal centrado para ver un registro.",
-            "Dos botones principales en el pie.",
-            "Formulario completo dentro del sheet.",
+            "Un botón «Editar» que abre un formulario para cambiar un dato.",
+            "Una lista larga de campos sin agrupar, con los vacíos ocupando filas.",
+            "Selects y cajas siempre visibles en reposo.",
             "Botón destructivo suelto en la cabecera.",
           ]}
         />
@@ -185,9 +263,8 @@ export default function DetailSheetPage() {
             columns={["Prop", "Tipo", "Descripción"]}
             rows={[
               ["open", <code key="t">boolean</code>, "Si está abierto. Controlado desde la página."],
-              ["onOpenChange", <code key="t">(open: boolean) =&gt; void</code>, "Se llama al cerrar con Escape, la X o clic fuera."],
-              ["width", <code key="t">number · 440</code>, "Ancho en px a partir de sm. En móvil ocupa todo el ancho."],
-              ["className", <code key="t">string</code>, "Clases extra para el contenedor del sheet."],
+              ["onOpenChange", <code key="t">(open: boolean) =&gt; void</code>, "Se llama al cerrar con Escape (fuera de un campo), la X o clic fuera."],
+              ["width", <code key="t">number · 480</code>, "Ancho en px a partir de sm. 960-1040 para DetailSplit."],
               ["children", <code key="t">ReactNode</code>, "Cabecera, cuerpo y pie, en ese orden."],
             ]}
           />
@@ -198,11 +275,11 @@ export default function DetailSheetPage() {
             columns={["Prop", "Tipo", "Descripción"]}
             rows={[
               ["leading", <code key="t">ReactNode</code>, "AvatarInitials lg: variant=\"entity\" para registros, la variante por defecto para personas."],
-              ["title", <code key="t">ReactNode</code>, "Nombre del registro."],
-              ["subtitle", <code key="t">ReactNode</code>, "Una línea: «código · categoría». Se trunca."],
+              ["title", <code key="t">ReactNode</code>, "El nombre: un texto o un InlineTitle para editarlo en el sitio."],
+              ["subtitle", <code key="t">ReactNode</code>, "Una línea corta. Se trunca."],
               ["status", <code key="t">ReactNode</code>, "StatusBadge a la derecha del título."],
-              ["actions", <code key="t">ReactNode</code>, "Botones outline sm y menú «…». Van en una segunda fila."],
-              ["className", <code key="t">string</code>, "Clases extra."],
+              ["nav", <code key="t">ReactNode</code>, "RecordPager, arriba a la derecha."],
+              ["actions", <code key="t">ReactNode</code>, "Botones outline sm y menú «…», en una segunda fila."],
             ]}
           />
         </div>
@@ -212,9 +289,13 @@ export default function DetailSheetPage() {
             columns={["Prop", "Tipo", "Descripción"]}
             rows={[
               ["title", <code key="t">ReactNode</code>, "Título de 13 px."],
-              ["action", <code key="t">ReactNode</code>, "Enlace o botón de texto a la derecha del título («Añadir»)."],
-              ["className", <code key="t">string</code>, "Clases extra."],
-              ["children", <code key="t">ReactNode</code>, "DetailFields, una lista, un progreso."],
+              ["icon", <code key="t">LucideIcon</code>, "Icono del bloque, en gris."],
+              ["count", <code key="t">number</code>, "Nº de elementos de una lista relacionada."],
+              ["action", <code key="t">ReactNode</code>, "DetailSectionAction («Añadir», «Nuevo campo») o un ConfigButton."],
+              ["collapsible", <code key="t">boolean</code>, "Se pliega desde el título."],
+              ["defaultOpen", <code key="t">boolean · true</code>, "Cómo empieza. false para listas vacías."],
+              ["storageKey", <code key="t">string</code>, "Recuerda si está plegado, por tipo de ficha y bloque: «contacto.gestion»."],
+              ["summary", <code key="t">ReactNode</code>, "Lo que se lee con el bloque plegado."],
             ]}
           />
         </div>
@@ -223,17 +304,65 @@ export default function DetailSheetPage() {
           <SpecTable
             columns={["Prop", "Tipo", "Descripción"]}
             rows={[
-              ["label", <code key="t">ReactNode</code>, "Etiqueta en gris, columna izquierda."],
-              ["children", <code key="t">ReactNode</code>, "Valor: texto, badge, avatar con nombre o Select pequeño."],
+              ["label", <code key="t">ReactNode</code>, "Etiqueta en gris, columna izquierda de ancho fijo."],
+              ["empty", <code key="t">boolean</code>, "El campo no tiene valor: DetailFields lo recoge como «+ Campo»."],
+              ["onConfig", <code key="t">() =&gt; void</code>, "Pulsar la etiqueta abre la configuración del campo (sus opciones, su tipo)."],
+              ["children", <code key="t">ReactNode</code>, "El valor: normalmente un InlineField."],
+            ]}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <PropsTitle>InlineField</PropsTitle>
+          <SpecTable
+            columns={["Prop", "Tipo", "Descripción"]}
+            rows={[
+              ["value", <code key="t">string · number · boolean · string[] · null</code>, "El valor actual."],
+              ["tipo", <code key="t">texto · textarea · numero · fecha · url · email · telefono · select · multiselect · booleano</code>, "Decide el control al editar."],
+              ["onSave", <code key="t">(v) =&gt; Promise&lt;string | void&gt;</code>, "Guarda. Devuelve el mensaje de error, o nada."],
+              ["render", <code key="t">(v) =&gt; ReactNode</code>, "Cómo se lee en reposo: insignias, enlaces, cifras."],
+              ["opciones", <code key="t">{"{ value, label }[]"}</code>, "Para select y multiselect."],
+              ["required", <code key="t">boolean</code>, "select sin «Sin valor»."],
+              ["placeholder", <code key="t">string</code>, "«Añadir …», lo que se lee si está vacío."],
+              ["readOnly", <code key="t">boolean</code>, "Se ve pero no se edita."],
+            ]}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <PropsTitle>InlineTitle</PropsTitle>
+          <SpecTable
+            columns={["Prop", "Tipo", "Descripción"]}
+            rows={[
+              ["parts", <code key="t">{"{ key, value, placeholder, required? }[]"}</code>, "Las partes del nombre; se editan juntas."],
+              ["onSave", <code key="t">(values) =&gt; Promise&lt;string | void&gt;</code>, "Guarda todas a la vez."],
+            ]}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <PropsTitle>RecordPager</PropsTitle>
+          <SpecTable
+            columns={["Prop", "Tipo", "Descripción"]}
+            rows={[
+              ["index · total", <code key="t">number</code>, "Posición (desde 0) y tamaño de la lista filtrada. Con uno solo, no se pinta."],
+              ["onPrev · onNext", <code key="t">() =&gt; void</code>, "Abren el anterior o el siguiente."],
+              ["label", <code key="t">string · registro</code>, "Lo que se recorre, para los textos de ayuda."],
+            ]}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <PropsTitle>DetailSplit · StepTimeline · HtmlFrame</PropsTitle>
+          <SpecTable
+            columns={["Pieza", "Props", "Descripción"]}
+            rows={[
+              ["DetailSplit", <code key="t">aside, asideWidth · 300</code>, "Dos columnas con scroll propio; se apilan en móvil."],
+              ["StepTimeline", <code key="t">{"items: { id, title, meta, status, icon, state }[], value, onSelect"}</code>, "state: done · current · upcoming · off."],
+              ["HtmlFrame", <code key="t">html, onClick, interceptarEnlaces</code>, "HTML de fuera en un marco aislado que crece con su contenido."],
             ]}
           />
         </div>
         <Prose>
           <p>
-            <code>DetailBody</code>, <code>DetailFields</code> y <code>DetailFooter</code> no tienen props propias:
-            aceptan las de un <code>div</code> (<code>className</code>, <code>children</code>).{" "}
-            <code>DetailFields</code> renderiza una <code>dl</code> a dos columnas y cada <code>DetailField</code> su
-            par <code>dt</code> y <code>dd</code>.
+            <code>DetailBody</code>, <code>DetailFields</code>, <code>DetailMeta</code> y <code>DetailFooter</code>{" "}
+            aceptan las props de su elemento (<code>className</code>, <code>children</code>).
           </p>
         </Prose>
       </DocSection>
@@ -242,8 +371,8 @@ export default function DetailSheetPage() {
         <CodeBlock lang="bash" code="npx shadcn@latest add https://ui.astraticnetwork.com/r/detail-sheet.json" />
         <Prose>
           <p>
-            Añade <code>sheet</code> de shadcn si no está. El ejemplo usa además <code>avatar-initials</code>,{" "}
-            <code>status-badge</code> y <code>confirm-dialog</code>, que se instalan igual.
+            Trae <code>inline-field</code> y <code>multi-select</code>. Para la ficha de dos columnas, además{" "}
+            <code>step-timeline</code> y <code>html-frame</code>.
           </p>
         </Prose>
       </DocSection>
@@ -251,10 +380,10 @@ export default function DetailSheetPage() {
       <DocSection id="siguiente" title="Relacionado">
         <NextLinks
           links={[
-            { href: "/ds/patrones/convenciones", label: "Convenciones", text: "Las tres zonas del sheet y las interacciones fijas." },
-            { href: "/ds/componentes/data-table", label: "Tabla de datos", text: "La fila clicable que abre el sheet." },
-            { href: "/ds/componentes/forms", label: "Formularios", text: "El Dialog de 480 px para crear y editar." },
-            { href: "/ds/componentes/feedback", label: "Feedback", text: "Confirmación para eliminar, «Deshacer» para archivar." },
+            { href: "/ds/patrones/convenciones", label: "Convenciones", text: "Edición en el sitio, configuración in situ y cambios sin guardar." },
+            { href: "/ds/componentes/data-table", label: "Tabla de datos", text: "La fila clicable que abre la ficha." },
+            { href: "/ds/componentes/forms", label: "Formularios", text: "El Dialog de 480 px para crear." },
+            { href: "/ds/componentes/feedback", label: "Feedback", text: "Confirmación para eliminar, «Deshacer» para lo reversible." },
           ]}
         />
       </DocSection>

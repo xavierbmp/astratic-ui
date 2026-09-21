@@ -110,10 +110,16 @@ export default function ToolbarPage() {
               tarjetas), porque una tabla no cabe en 390 px. Si solo queda una vista, el conmutador no se pinta.
             </>,
             <>
-              <code>ToolbarSearch</code> es un <code>InputGroup</code> con la lupa: hasta 256 px, se estrecha hasta 160 px
-              antes de que la fila salte y ocupa todo el ancho en móvil. El placeholder corto («Buscar registro…») y con
-              puntos suspensivos si no cabe. Filtra en cliente sobre lo cargado o lanza la búsqueda al servidor con un
-              retardo; en ambos casos, controlado con <code>value</code>.
+              <code>ToolbarSearch</code> es un <code>InputGroup</code> con la lupa. Dentro de <code>FilterBar</code> mide
+              208 px fijos (el sitio sobrante es para los filtros rápidos) y en móvil ocupa su propia línea. El placeholder
+              corto («Buscar registro…») y con puntos suspensivos si no cabe. Filtra en cliente sobre lo cargado o lanza la
+              búsqueda al servidor con un retardo; en ambos casos, controlado con <code>value</code>.
+            </>,
+            <>
+              En <code>FilterBar</code>, los filtros rápidos que no caben se recogen en un botón «+N» con flecha (menú con
+              esos filtros y sus opciones, marcado si alguno está activo) y «Filtros» va pegado detrás del último visible:
+              nunca se tapan ni se esconden. <code>FilterMenuButton</code> es el botón de un filtro sin su menú, el mismo
+              que se mide para decidir cuántos caben.
             </>,
           ]}
         />
@@ -132,6 +138,7 @@ export default function ToolbarPage() {
             "Buscador · Fase · Estado · Responsable · [espacio] · vistas · Nuevo registro, con el ancho del bloque.",
             "FilterMenu con contadores y chips debajo de la toolbar.",
             "Un solo botón negro al final.",
+            "Los rápidos que no caben, recogidos en «+N»; «Filtros» siempre a la vista.",
           ]}
           donts={[
             "Texto de aviso o recuento dentro de la toolbar: eso va en la cabecera del bloque.",

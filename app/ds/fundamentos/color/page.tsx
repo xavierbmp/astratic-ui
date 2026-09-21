@@ -23,17 +23,40 @@ export default function ColorPage() {
           <Swatch name="Texto secundario" token="--muted-foreground" note="Etiquetas, ayudas, migas" />
           <Swatch name="Muted" token="--muted" note="Cabecera de tabla, hover, fondos suaves" />
           <Swatch name="Borde" token="--border" note="Tarjetas, tablas, separadores" />
+          <Swatch name="Borde de campo" token="--input" note="Inputs, selects, botones outline" />
+          <Swatch name="Borde de control" token="--control" note="Casillas y radios: lo que se marca" />
+          <Swatch name="Accent" token="--accent" note="Opción resaltada en menús y listas" />
           <Swatch name="Sidebar" token="--sidebar" note="Fondo de la navegación" />
           <Swatch name="Primario" token="--primary" note="Botón principal (negro)" />
           <Swatch name="Secundario" token="--secondary" note="Pills de contador, badge neutro" />
           <Swatch name="Anillo de foco" token="--ring" note="focus-visible" />
         </div>
+        <Rules
+          items={[
+            <>
+              <strong>Tres grosores de borde en claro.</strong> <code>border</code> separa bloques y filas;{" "}
+              <code>input</code>, un poco más oscuro, bordea lo que se escribe (campos, selects, botones outline);{" "}
+              <code>control</code>, bastante más, bordea lo que se marca (casillas, radios, las casillas de los
+              menús). Una casilla vacía tiene que verse sin buscarla.
+            </>,
+            <>
+              <strong>Lo seleccionado se ve siempre:</strong> filas, tarjetas y elementos de lista seleccionados van en{" "}
+              <code>bg-brand-soft</code> con un filo <code>brand</code> a la izquierda. El hover es <code>bg-muted</code> y la
+              opción resaltada de un menú, <code>bg-accent</code>. La pestaña activa, blanca con sombra sobre{" "}
+              <code>muted</code>.
+            </>,
+            <>
+              El texto secundario (<code>muted-foreground</code>) cumple 6:1 sobre blanco: se lee bien en 12 px. La
+              selección de texto es el acento al 24 %.
+            </>,
+          ]}
+        />
       </DocSection>
 
       <DocSection id="acento" title="El acento" lead="Índigo. Un solo color de marca y se usa poco: es lo que hace que se note.">
         <div className="grid gap-2 sm:grid-cols-3">
           <Swatch name="Brand" token="--brand" note="Enlaces, ítem activo, foco, gráfico principal" />
-          <Swatch name="Brand soft" token="--brand-soft" note="Fila seleccionada, selección de texto, columna kanban al soltar" />
+          <Swatch name="Brand soft" token="--brand-soft" note="Fila seleccionada, columna kanban al soltar" />
           <Swatch name="Brand foreground" token="--brand-foreground" note="Texto sobre brand" />
         </div>
         <Rules

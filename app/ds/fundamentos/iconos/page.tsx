@@ -28,7 +28,7 @@ import {
   ReceiptTextIcon,
   SearchIcon,
   SendIcon,
-  SettingsIcon,
+  Settings2Icon,
   SquareKanbanIcon,
   Table2Icon,
   Trash2Icon,
@@ -64,7 +64,7 @@ const groups: { title: string; items: Vocab[] }[] = [
       { concept: "Campañas", name: "megaphone", Icon: MegaphoneIcon },
       { concept: "Eventos", name: "calendar-days", Icon: CalendarDaysIcon },
       { concept: "PR y prensa", name: "newspaper", Icon: NewspaperIcon },
-      { concept: "Ajustes", name: "settings", Icon: SettingsIcon, note: "Último ítem de la sidebar." },
+      { concept: "Configurar", name: "settings-2", Icon: Settings2Icon, note: "El engranaje de ConfigButton y de campos visibles, en la cabecera del bloque que se configura." },
     ],
   },
   {
@@ -144,7 +144,7 @@ export default function IconosPage() {
       <DocSection id="set" title="Un solo set: lucide" lead="Trazo uniforme, caja de 24 px y un componente por icono. Los componentes del kit ya esperan un icono de lucide en sus props.">
         <Example>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
-            {[LayoutDashboardIcon, SquareKanbanIcon, RadarIcon, SendIcon, UsersIcon, ReceiptTextIcon, MegaphoneIcon, CalendarDaysIcon, SettingsIcon].map((Icon, i) => (
+            {[LayoutDashboardIcon, SquareKanbanIcon, RadarIcon, SendIcon, UsersIcon, ReceiptTextIcon, MegaphoneIcon, CalendarDaysIcon, Settings2Icon].map((Icon, i) => (
               <Icon key={i} className="size-4 text-foreground" aria-hidden />
             ))}
             <span className="inline-flex items-center gap-2 text-muted-foreground">
