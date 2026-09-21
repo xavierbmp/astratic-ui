@@ -69,9 +69,48 @@ export function ToolbarSearch({
 
 export type FilterOption = { value: string; label: string; count?: number }
 
-export function FilterMenu({
+/** Lo que enseña el botón de un filtro activo: la opción elegida o cuántas hay. */
+export function filterSummary(options: Pick<FilterOption, "value" | "label">[], value: string[]): string | undefined {
+  if (value.length === 1) return options.find((o) => o.value === value[0])?.label
+  if (value.length > 1) return `${value.length}`
+  return undefined
+}
+
+/**
+ * El botón de un filtro de la toolbar, sin su menú. Lo usan `FilterMenu` y los filtros rápidos,
+ * que lo miden para saber cuántos caben en la fila.
+ */
+export function FilterMenuButton({
   label,
   icon: Icon,
+  summary,
+  active,
+  className,
+  ...props
+}: React.ComponentProps<typeof Button> & { label: React.ReactNode; icon?: LucideIcon; summary?: string; active?: boolean }) {
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      data-active={active || undefined}
+      className={cn("h-8 flex-none gap-1.5 text-sm", active && "border-foreground/30 bg-muted/60", className)}
+      {...props}
+    >
+      {Icon && <Icon />}
+      <span>{label}</span>
+      {summary && (
+        <span className="max-w-32 truncate rounded-sm bg-foreground px-1.5 text-xs font-medium text-background">
+          {summary}
+        </span>
+      )}
+      <ChevronDownIcon className="text-muted-foreground" />
+    </Button>
+  )
+}
+
+export function FilterMenu({
+  label,
+  icon,
   options,
   value,
   onChange,
@@ -85,30 +124,10 @@ export function FilterMenu({
   multiple?: boolean
 }) {
   const active = value.length > 0
-  const summary =
-    value.length === 1
-      ? options.find((o) => o.value === value[0])?.label
-      : value.length > 1
-        ? `${value.length}`
-        : undefined
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          data-active={active || undefined}
-          className={cn("h-8 flex-none gap-1.5 text-sm", active && "border-foreground/30 bg-muted/60")}
-        >
-          {Icon && <Icon />}
-          <span>{label}</span>
-          {summary && (
-            <span className="max-w-32 truncate rounded-sm bg-foreground px-1.5 text-xs font-medium text-background">
-              {summary}
-            </span>
-          )}
-          <ChevronDownIcon className="text-muted-foreground" />
-        </Button>
+        <FilterMenuButton label={label} icon={icon} summary={filterSummary(options, value)} active={active} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-52">
         <DropdownMenuLabel>{label}</DropdownMenuLabel>

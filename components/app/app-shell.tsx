@@ -43,6 +43,7 @@ import {
   CommandList,
   CommandShortcut,
 } from "@/components/ui/command"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AvatarInitials } from "@/components/app/avatar-initials"
 import { ThemeToggle } from "@/components/app/theme-toggle"
 
@@ -69,12 +70,18 @@ export function AppShell({
   nav,
   children,
   headerEnd,
+  userMenu,
+  notifications,
 }: {
   brand: Brand
   user: CurrentUser
   nav: NavGroup[]
   children: React.ReactNode
   headerEnd?: React.ReactNode
+  /** Contenido del menú desplegable del usuario (pie de la sidebar): «Ir a…», tema, cerrar sesión. */
+  userMenu?: React.ReactNode
+  /** Botón de notificaciones ya montado; si no se pasa, se muestra el icono sin punto. */
+  notifications?: React.ReactNode
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -168,14 +175,32 @@ export function AppShell({
           <SidebarFooter className="border-t p-2">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:p-0!">
-                  <AvatarInitials name={user.name} size="md" />
-                  <span className="grid flex-1 leading-tight">
-                    <span className="truncate text-sm font-semibold">{user.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{user.role}</span>
-                  </span>
-                  <ChevronsUpDownIcon className="text-muted-foreground" />
-                </SidebarMenuButton>
+                {userMenu ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:p-0! data-[state=open]:bg-sidebar-accent">
+                        <AvatarInitials name={user.name} size="md" />
+                        <span className="grid flex-1 leading-tight">
+                          <span className="truncate text-sm font-semibold">{user.name}</span>
+                          <span className="truncate text-xs text-muted-foreground">{user.role}</span>
+                        </span>
+                        <ChevronsUpDownIcon className="text-muted-foreground" />
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="top" align="start" sideOffset={8} className="w-64">
+                      {userMenu}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:p-0!">
+                    <AvatarInitials name={user.name} size="md" />
+                    <span className="grid flex-1 leading-tight">
+                      <span className="truncate text-sm font-semibold">{user.name}</span>
+                      <span className="truncate text-xs text-muted-foreground">{user.role}</span>
+                    </span>
+                    <ChevronsUpDownIcon className="text-muted-foreground" />
+                  </SidebarMenuButton>
+                )}
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
@@ -227,10 +252,11 @@ export function AppShell({
               >
                 <SearchIcon />
               </Button>
-              <Button variant="ghost" size="icon" aria-label="Notificaciones" className="relative">
-                <BellIcon />
-                <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-danger ring-2 ring-background" />
-              </Button>
+              {notifications ?? (
+                <Button variant="ghost" size="icon" aria-label="Notificaciones">
+                  <BellIcon />
+                </Button>
+              )}
               <ThemeToggle />
               {headerEnd}
             </div>

@@ -4,7 +4,7 @@ import * as React from "react"
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core"
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { ChevronDownIcon, Columns3Icon, GripVerticalIcon, PlusIcon, Settings2Icon } from "lucide-react"
+import { ChevronDownIcon, Columns3Icon, GripVerticalIcon, PenLineIcon, PlusIcon, Settings2Icon, Trash2Icon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,7 +15,8 @@ import type { TablaConfigurada } from "@/hooks/use-table-config"
 
 /**
  * Qué campos se ven en la tabla y en qué orden, al estilo de «Ocultar campos» de Airtable:
- * un interruptor por campo, arrastrar para ordenar y, si la página lo permite, crear uno nuevo.
+ * un interruptor por campo, arrastrar para ordenar y, si la página lo permite, crear, editar y
+ * borrar los campos propios sin salir de la lista.
  *
  * Vive al final de la fila de cabeceras de la tabla (prop `headerAction` de `DataTable`), que es
  * donde se buscan las columnas. La configuración se recuerda por página (`useTableConfig`).
@@ -23,12 +24,15 @@ import type { TablaConfigurada } from "@/hooks/use-table-config"
 export function ColumnSettings<T>({
   config,
   onCrearCampo,
+  camposPropios,
   label = "Campos",
   variant = "header",
 }: {
   config: TablaConfigurada<T>
   /** Si se pasa, el panel ofrece crear un campo propio. */
   onCrearCampo?: () => void
+  /** Si se pasa, los campos propios llevan lápiz y papelera para editarlos o borrarlos aquí. */
+  camposPropios?: { es: (columnaId: string) => boolean; onEditar: (columnaId: string) => void; onBorrar: (columnaId: string) => void }
   label?: string
   /** `header`: botoncito de icono en la cabecera de la tabla. `toolbar`: botón con texto. */
   variant?: "header" | "toolbar"
@@ -110,6 +114,18 @@ export function ColumnSettings<T>({
                   fijo={bloqueadas.has(c.id)}
                   ordenable={!busqueda}
                   onToggle={(v) => alternar(c.id, v)}
+                  acciones={
+                    camposPropios?.es(c.id) ? (
+                      <>
+                        <Button variant="ghost" size="icon-xs" aria-label={`Editar ${textoDeCabecera(c)}`} title="Editar el campo" className="size-6 text-muted-foreground hover:text-foreground" onClick={() => { setOpen(false); camposPropios.onEditar(c.id) }}>
+                          <PenLineIcon />
+                        </Button>
+                        <Button variant="ghost" size="icon-xs" aria-label={`Eliminar ${textoDeCabecera(c)}`} title="Eliminar el campo" className="size-6 text-muted-foreground hover:text-danger" onClick={() => { setOpen(false); camposPropios.onBorrar(c.id) }}>
+                          <Trash2Icon />
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
                 />
               ))}
             </SortableContext>
@@ -149,6 +165,7 @@ function FilaCampo({
   fijo,
   ordenable,
   onToggle,
+  acciones,
 }: {
   id: string
   label: string
@@ -156,13 +173,14 @@ function FilaCampo({
   fijo: boolean
   ordenable: boolean
   onToggle: (v: boolean) => void
+  acciones?: React.ReactNode
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: !ordenable })
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={cn("flex items-center gap-1.5 rounded-md px-1 py-1 hover:bg-muted/60", isDragging && "z-10 bg-background shadow-sm")}
+      className={cn("group/campo flex items-center gap-1.5 rounded-md px-1 py-1 hover:bg-muted/60", isDragging && "z-10 bg-background shadow-sm")}
     >
       <button
         type="button"
@@ -174,6 +192,9 @@ function FilaCampo({
         <GripVerticalIcon className="size-3.5" />
       </button>
       <span className="min-w-0 flex-1 truncate text-xs">{label}</span>
+      {acciones && (
+        <span className="flex items-center opacity-0 transition-opacity group-hover/campo:opacity-100 focus-within:opacity-100">{acciones}</span>
+      )}
       {fijo ? (
         <span className="pr-1 text-[10px] text-muted-foreground">fijo</span>
       ) : (

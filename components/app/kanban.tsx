@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { ChevronsLeftIcon, ChevronsRightIcon, EllipsisIcon } from "lucide-react"
+import { ChevronsLeftIcon, ChevronsRightIcon, EllipsisIcon, PlusIcon } from "lucide-react"
 import { cn } from "cn"
 import { statusDotClass, type StatusTone } from "@/lib/status"
 import { useLocalStorage } from "@/hooks/use-local-storage"
@@ -25,6 +25,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -41,6 +42,10 @@ export function Kanban<T extends KanbanItem>({
   emptyColumn = "Sin registros",
   storageKey,
   defaultCollapsed = [],
+  columnMenu,
+  onColumnTitleClick,
+  onAddColumn,
+  addColumnLabel = "Añadir columna",
 }: {
   columns: KanbanColumn[]
   items: T[]
@@ -51,6 +56,13 @@ export function Kanban<T extends KanbanItem>({
   emptyColumn?: React.ReactNode
   storageKey?: string
   defaultCollapsed?: string[]
+  /** Opciones propias de cada columna (editar, mover, borrar…), que se suman al menú «…». */
+  columnMenu?: (column: KanbanColumn, index: number) => React.ReactNode
+  /** Pulsar el título de una columna abre su configuración. */
+  onColumnTitleClick?: (column: KanbanColumn) => void
+  /** Si se pasa, al final hay una columna estrecha para crear otra. */
+  onAddColumn?: () => void
+  addColumnLabel?: string
 }) {
   const dndId = React.useId()
   const [activeId, setActiveId] = React.useState<string | null>(null)
@@ -115,7 +127,7 @@ export function Kanban<T extends KanbanItem>({
       onDragCancel={() => setActiveId(null)}
     >
       <div className={cn("flex h-full min-h-0 gap-2.5 overflow-x-auto p-3", className)}>
-        {columns.map((col) => {
+        {columns.map((col, index) => {
           const colItems = byColumn.get(col.id) ?? []
           if (collapsed.includes(col.id)) {
             return <CollapsedColumn key={col.id} column={col} count={colItems.length} onExpand={() => toggleCollapsed(col.id)} />
@@ -127,6 +139,8 @@ export function Kanban<T extends KanbanItem>({
               count={colItems.length}
               empty={colItems.length === 0 ? emptyColumn : null}
               onCollapse={() => toggleCollapsed(col.id)}
+              menu={columnMenu?.(col, index)}
+              onTitleClick={onColumnTitleClick ? () => onColumnTitleClick(col) : undefined}
             >
               <SortableContext items={colItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                 {colItems.map((item) => (
@@ -138,6 +152,17 @@ export function Kanban<T extends KanbanItem>({
             </KanbanColumnView>
           )
         })}
+        {onAddColumn && (
+          <button
+            type="button"
+            onClick={onAddColumn}
+            title={addColumnLabel}
+            className="flex w-10 flex-none flex-col items-center gap-2.5 rounded-xl border border-dashed pt-2.5 text-muted-foreground transition-colors outline-none hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+          >
+            <PlusIcon className="size-4" />
+            <span className="text-[13px] font-medium [writing-mode:vertical-rl]">{addColumnLabel}</span>
+          </button>
+        )}
       </div>
       <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.2, 0, 0, 1)" }}>
         {activeItem ? (
@@ -161,12 +186,16 @@ function KanbanColumnView({
   count,
   empty,
   onCollapse,
+  menu,
+  onTitleClick,
   children,
 }: {
   column: KanbanColumn
   count: number
   empty: React.ReactNode
   onCollapse: () => void
+  menu?: React.ReactNode
+  onTitleClick?: () => void
   children: React.ReactNode
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
@@ -182,7 +211,13 @@ function KanbanColumnView({
       <div className="px-1.5 pt-1 pb-2">
         <div className="flex items-center gap-1.5">
           <span className={cn("size-2 flex-none rounded-full", statusDotClass[column.tone ?? "neutral"])} />
-          <span className="truncate text-[13px] font-semibold">{column.title}</span>
+          {onTitleClick ? (
+            <button type="button" onClick={onTitleClick} title={`Configurar ${column.title}`} className="truncate rounded-sm text-left text-[13px] font-semibold outline-none hover:underline hover:underline-offset-2 focus-visible:ring-2 focus-visible:ring-ring/50">
+              {column.title}
+            </button>
+          ) : (
+            <span className="truncate text-[13px] font-semibold">{column.title}</span>
+          )}
           <CountPill>{count}</CountPill>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -194,6 +229,12 @@ function KanbanColumnView({
               <DropdownMenuItem onSelect={onCollapse}>
                 <ChevronsLeftIcon /> Plegar columna
               </DropdownMenuItem>
+              {menu && (
+                <>
+                  <DropdownMenuSeparator />
+                  {menu}
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -20,7 +20,7 @@ export function SectionHeader({
   className,
   children,
   ...props
-}: React.ComponentProps<"header"> & {
+}: Omit<React.ComponentProps<"header">, "title"> & {
   icon?: LucideIcon
   title: React.ReactNode
   count?: number

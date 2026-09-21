@@ -184,7 +184,7 @@ export function DataTable<T>({
                 className={cn(
                   "group/row",
                   onRowClick && "cursor-pointer",
-                  isSelected && "bg-brand-soft/60 hover:bg-brand-soft/60",
+                  isSelected && "bg-brand-soft hover:bg-brand-soft [&>td:first-child]:shadow-[inset_2px_0_0_var(--brand)]",
                   rowClassName?.(row)
                 )}
               >

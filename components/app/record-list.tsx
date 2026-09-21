@@ -40,11 +40,11 @@ export function RecordListItem({
       )}
     </>
   )
-  const base = cn("flex w-full items-center gap-3 px-4 py-2.5 text-left", selected && "bg-brand-soft/60", className)
+  const base = cn("flex w-full items-center gap-3 px-4 py-2.5 text-left", selected && "bg-brand-soft shadow-[inset_2px_0_0_var(--brand)]", className)
   return (
     <li data-slot="record-list-item" data-state={selected ? "selected" : undefined}>
       {onClick ? (
-        <button type="button" onClick={onClick} className={cn(base, "transition-colors hover:bg-muted/50")}>
+        <button type="button" onClick={onClick} className={cn(base, "transition-colors", selected ? "hover:bg-brand-soft" : "hover:bg-muted/70")}>
           {content}
         </button>
       ) : (

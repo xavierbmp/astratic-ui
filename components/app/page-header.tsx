@@ -7,7 +7,7 @@ export function PageHeader({
   actions,
   className,
   ...props
-}: React.ComponentProps<"div"> & {
+}: Omit<React.ComponentProps<"div">, "title"> & {
   title: React.ReactNode
   description?: React.ReactNode
   /** Pestañas de subpágina (`PageTabs`) o un segmentado de toda la página. Van antes de las acciones. */

@@ -20,6 +20,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel = "Confirmar",
+  cancelLabel = "Cancelar",
   destructive = false,
   onConfirm,
 }: {
@@ -28,6 +29,8 @@ export function ConfirmDialog({
   title: React.ReactNode
   description?: React.ReactNode
   confirmLabel?: string
+  /** «Seguir editando» cuando lo que se confirma es perder cambios sin guardar. */
+  cancelLabel?: string
   destructive?: boolean
   onConfirm: () => void | Promise<void>
 }) {
@@ -40,7 +43,7 @@ export function ConfirmDialog({
           {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             disabled={pending}
             className={cn(destructive && buttonVariants({ variant: "destructive" }))}

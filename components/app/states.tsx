@@ -3,6 +3,9 @@ import { InboxIcon, RefreshCwIcon, TriangleAlertIcon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PageBody } from "@/components/app/page-header"
+import { Section } from "@/components/app/section"
+import { WorkGrid } from "@/components/app/work-grid"
 
 export function EmptyState({
   icon: Icon = InboxIcon,
@@ -100,6 +103,44 @@ export function KanbanSkeleton({ cols = 4 }: { cols?: number }) {
         </div>
       ))}
     </div>
+  )
+}
+
+/** Página de operación mientras carga (`loading.tsx`): cabecera, cifras, toolbar, bloque y panel. */
+export function PageSkeleton({ block = "table", kpis = 4 }: { block?: "table" | "kanban"; kpis?: number }) {
+  return (
+    <PageBody aria-busy="true">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <div className="min-w-0">
+          <Skeleton className="h-8 w-44 rounded" />
+          <Skeleton className="mt-2 h-3.5 w-72 max-w-full rounded" />
+        </div>
+      </div>
+      <KpiSkeleton count={kpis} />
+      <WorkGrid
+        toolbar={
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-full max-w-64 rounded-md" />
+            <Skeleton className="h-9 w-24 rounded-md" />
+            <Skeleton className="ml-auto h-9 w-32 rounded-md" />
+          </div>
+        }
+        aside={
+          <Section className="h-full">
+            <div className="border-b px-4 py-3">
+              <Skeleton className="h-3.5 w-24 rounded" />
+            </div>
+            <div className="flex flex-col gap-3 p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 rounded-md" />
+              ))}
+            </div>
+          </Section>
+        }
+      >
+        <Section>{block === "kanban" ? <KanbanSkeleton /> : <TableSkeleton rows={8} />}</Section>
+      </WorkGrid>
+    </PageBody>
   )
 }
 

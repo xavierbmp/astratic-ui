@@ -33,6 +33,8 @@ export const fmt = {
       : v >= 1000
         ? `${Math.round(v / 1000)} k`
         : num.format(v),
+  bytes: (b: number) =>
+    b >= 1024 ** 3 ? `${num1.format(b / 1024 ** 3)} GB` : b >= 1024 ** 2 ? `${num1.format(b / 1024 ** 2)} MB` : b >= 1024 ? `${Math.round(b / 1024)} KB` : `${num.format(b)} B`,
   date: (d: Date | string) => {
     const x = new Date(d)
     return `${x.getDate()} ${months[x.getMonth()]}`

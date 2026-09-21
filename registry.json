@@ -7,7 +7,7 @@
       "name": "theme",
       "type": "registry:theme",
       "title": "Tema Astratic",
-      "description": "Tokens de color (claro y oscuro), acento brand, cinco colores de estado, utilidades de formato y estado.",
+      "description": "Tokens de color (claro y oscuro) con el contraste de los bordes y los controles, acento brand, cinco colores de estado, utilidades de formato y estado.",
       "files": [
         { "path": "lib/status.ts", "type": "registry:lib" },
         { "path": "lib/format.ts", "type": "registry:lib" }
@@ -26,7 +26,8 @@
           "color-danger": "var(--danger)",
           "color-danger-soft": "var(--danger-soft)",
           "shadow-xs": "0 1px 2px 0 oklch(0 0 0 / 0.04)",
-          "shadow-pop": "0 10px 30px oklch(0 0 0 / 0.12), 0 2px 6px oklch(0 0 0 / 0.06)"
+          "shadow-pop": "0 10px 30px oklch(0 0 0 / 0.12), 0 2px 6px oklch(0 0 0 / 0.06)",
+          "color-control": "var(--control)"
         },
         "light": {
           "brand": "oklch(0.53 0.19 265)",
@@ -45,7 +46,17 @@
           "chart-3": "oklch(0.87 0 0)",
           "chart-4": "oklch(0.205 0 0)",
           "chart-5": "oklch(0.556 0 0)",
-          "sidebar-accent": "oklch(0.945 0 0)"
+          "sidebar-accent": "oklch(0.93 0 0)",
+          "border": "oklch(0.9 0 0)",
+          "input": "oklch(0.87 0 0)",
+          "control": "oklch(0.72 0 0)",
+          "ring": "oklch(0.62 0 0)",
+          "muted": "oklch(0.96 0 0)",
+          "muted-foreground": "oklch(0.5 0 0)",
+          "secondary": "oklch(0.96 0 0)",
+          "accent": "oklch(0.95 0 0)",
+          "sidebar-border": "oklch(0.9 0 0)",
+          "sidebar-ring": "oklch(0.62 0 0)"
         },
         "dark": {
           "brand": "oklch(0.68 0.16 265)",
@@ -66,7 +77,8 @@
           "chart-4": "oklch(0.922 0 0)",
           "chart-5": "oklch(0.708 0 0)",
           "sidebar": "oklch(0.165 0 0)",
-          "sidebar-accent": "oklch(0.245 0 0)"
+          "sidebar-accent": "oklch(0.245 0 0)",
+          "control": "oklch(1 0 0 / 32%)"
         }
       }
     },
@@ -90,7 +102,9 @@
       "type": "registry:component",
       "title": "Cabecera de página",
       "description": "Título, descripción, pestañas de subpágina y acciones de página, más el contenedor PageBody con el padding del sistema.",
-      "files": [{ "path": "components/app/page-header.tsx", "type": "registry:component" }]
+      "files": [
+        { "path": "components/app/page-header.tsx", "type": "registry:component" }
+      ]
     },
     {
       "name": "page-tabs",
@@ -108,7 +122,9 @@
       "title": "Cifras (KPI)",
       "description": "Fila de tarjetas de cifra con icono, valor, delta y alerta.",
       "dependencies": ["lucide-react"],
-      "files": [{ "path": "components/app/kpi.tsx", "type": "registry:component" }]
+      "files": [
+        { "path": "components/app/kpi.tsx", "type": "registry:component" }
+      ]
     },
     {
       "name": "document-proposal",
@@ -142,20 +158,24 @@
       "type": "registry:component",
       "title": "Sección",
       "description": "El bloque con cabecera (icono, título, contador, acción), cuerpo con scroll y pie.",
-      "files": [{ "path": "components/app/section.tsx", "type": "registry:component" }]
+      "files": [
+        { "path": "components/app/section.tsx", "type": "registry:component" }
+      ]
     },
     {
       "name": "work-grid",
       "type": "registry:component",
       "title": "Rejilla de trabajo",
       "description": "Toolbar encima del bloque de operación y con su mismo ancho; bloque a la izquierda y panel de información de 320 px a la derecha, que empieza a la altura del bloque y mide lo mismo.",
-      "files": [{ "path": "components/app/work-grid.tsx", "type": "registry:component" }]
+      "files": [
+        { "path": "components/app/work-grid.tsx", "type": "registry:component" }
+      ]
     },
     {
       "name": "toolbar",
       "type": "registry:component",
       "title": "Toolbar",
-      "description": "Buscador, menús de filtro con opciones y contadores, chips de filtros activos, grupo final (ToolbarActions) y conmutador de vistas con su estado por página (usePageView).",
+      "description": "Buscador, menús de filtro con opciones y contadores (FilterMenu y su botón, FilterMenuButton), chips de filtros activos, grupo final (ToolbarActions) y conmutador de vistas con su estado por página (usePageView).",
       "dependencies": ["lucide-react", "radix-ui"],
       "registryDependencies": ["button", "input-group", "dropdown-menu", "tooltip"],
       "files": [
@@ -192,7 +212,7 @@
       "name": "kanban",
       "type": "registry:component",
       "title": "Kanban",
-      "description": "Tablero por fases con arrastre entre columnas, reordenación y columnas plegables, sobre dnd-kit.",
+      "description": "Tablero por fases con arrastre entre columnas, reordenación, columnas plegables y configurables desde su título y su menú «…», y columna final «Añadir», sobre dnd-kit.",
       "dependencies": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "lucide-react"],
       "registryDependencies": ["button", "dropdown-menu"],
       "files": [
@@ -208,7 +228,9 @@
       "description": "Barra flotante inferior con contador y acciones en bloque.",
       "dependencies": ["lucide-react"],
       "registryDependencies": ["button"],
-      "files": [{ "path": "components/app/bulk-bar.tsx", "type": "registry:component" }]
+      "files": [
+        { "path": "components/app/bulk-bar.tsx", "type": "registry:component" }
+      ]
     },
     {
       "name": "insights-panel",
@@ -227,9 +249,17 @@
       "name": "detail-sheet",
       "type": "registry:component",
       "title": "Sheet de detalle",
-      "description": "Panel lateral derecho con cabecera (avatar, título, estado, acciones), cuerpo por secciones y pie.",
-      "registryDependencies": ["sheet"],
-      "files": [{ "path": "components/app/detail-sheet.tsx", "type": "registry:component" }]
+      "description": "La ficha de un registro: cabecera con nombre editable (InlineTitle) y flechas anterior/siguiente (RecordPager), cuerpo por bloques plegables con campos editables en el sitio y los vacíos como «+ Campo», línea de sistema y pie. Incluye DetailSplit para fichas de dos columnas.",
+      "registryDependencies": ["sheet", "button", "tooltip", "input", "textarea", "switch", "select", "popover", "command", "badge"],
+      "files": [
+        { "path": "components/app/detail-sheet.tsx", "type": "registry:component" },
+        { "path": "components/app/inline-field.tsx", "type": "registry:component" },
+        { "path": "components/app/multi-select.tsx", "type": "registry:component" },
+        { "path": "components/app/status-badge.tsx", "type": "registry:component" },
+        { "path": "hooks/use-local-storage.ts", "type": "registry:hook" },
+        { "path": "lib/status.ts", "type": "registry:lib" }
+      ],
+      "dependencies": ["lucide-react", "radix-ui", "sonner"]
     },
     {
       "name": "states",
@@ -238,15 +268,19 @@
       "description": "Estado vacío, estado de error con reintento y esqueletos de tabla, kanban y cifras.",
       "dependencies": ["lucide-react"],
       "registryDependencies": ["button", "skeleton"],
-      "files": [{ "path": "components/app/states.tsx", "type": "registry:component" }]
+      "files": [
+        { "path": "components/app/states.tsx", "type": "registry:component" }
+      ]
     },
     {
       "name": "confirm-dialog",
       "type": "registry:component",
       "title": "Diálogo de confirmación",
-      "description": "AlertDialog con estado de envío y variante destructiva.",
+      "description": "Diálogo de confirmación para lo destructivo, con textos de confirmar y cancelar propios («Descartar cambios» / «Seguir editando»).",
       "registryDependencies": ["alert-dialog", "button"],
-      "files": [{ "path": "components/app/confirm-dialog.tsx", "type": "registry:component" }]
+      "files": [
+        { "path": "components/app/confirm-dialog.tsx", "type": "registry:component" }
+      ]
     },
     {
       "name": "avatar-initials",
@@ -263,7 +297,78 @@
       "type": "registry:component",
       "title": "Iconos de redes",
       "description": "Instagram, TikTok, YouTube y LinkedIn como SVG propios (lucide ya no incluye marcas), con etiqueta accesible.",
-      "files": [{ "path": "components/app/social-icons.tsx", "type": "registry:component" }]
+      "files": [
+        { "path": "components/app/social-icons.tsx", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "filter-bar",
+      "type": "registry:component",
+      "title": "Barra de filtros",
+      "description": "La toolbar completa de una lista: buscador, filtros rápidos (los que no caben se recogen en «+N»), constructor de filtros al estilo Airtable con condiciones en la URL, vistas y acción principal.",
+      "dependencies": ["lucide-react", "radix-ui", "@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
+      "registryDependencies": ["button", "input", "label", "switch", "dialog", "popover", "command", "dropdown-menu", "select", "input-group", "tooltip", "badge"],
+      "files": [
+        { "path": "components/app/filter-bar.tsx", "type": "registry:component" },
+        { "path": "components/app/filter-builder.tsx", "type": "registry:component" },
+        { "path": "components/app/quick-filters.tsx", "type": "registry:component" },
+        { "path": "components/app/toolbar.tsx", "type": "registry:component" },
+        { "path": "components/app/multi-select.tsx", "type": "registry:component" },
+        { "path": "components/app/status-badge.tsx", "type": "registry:component" },
+        { "path": "lib/filtros/core.ts", "type": "registry:lib" },
+        { "path": "lib/status.ts", "type": "registry:lib" },
+        { "path": "hooks/use-filtros-avanzados.ts", "type": "registry:hook" },
+        { "path": "hooks/use-url-filters.ts", "type": "registry:hook" },
+        { "path": "hooks/use-local-storage.ts", "type": "registry:hook" },
+        { "path": "hooks/use-page-view.ts", "type": "registry:hook" },
+        { "path": "hooks/use-mobile.ts", "type": "registry:hook" }
+      ]
+    },
+    {
+      "name": "column-settings",
+      "type": "registry:component",
+      "title": "Campos visibles",
+      "description": "Panel de campos visibles de una tabla, estilo «Ocultar campos» de Airtable: interruptor por columna, arrastre para ordenar y, con permiso, crear, editar y borrar campos propios.",
+      "dependencies": ["lucide-react", "@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
+      "registryDependencies": ["button", "popover", "switch"],
+      "files": [
+        { "path": "components/app/column-settings.tsx", "type": "registry:component" },
+        { "path": "hooks/use-table-config.ts", "type": "registry:hook" },
+        { "path": "hooks/use-local-storage.ts", "type": "registry:hook" }
+      ]
+    },
+    {
+      "name": "step-timeline",
+      "type": "registry:component",
+      "title": "Recorrido por pasos",
+      "description": "Lista vertical de pasos de una secuencia (hecho, lo que toca, lo que vendrá, lo que no pasará), pulsables para ver cada uno al lado. Va en la columna izquierda de una ficha de dos columnas.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [],
+      "files": [
+        { "path": "components/app/step-timeline.tsx", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "html-frame",
+      "type": "registry:component",
+      "title": "Marco de HTML",
+      "description": "HTML que no escribe el portal (emails, firmas, documentos importados) en un marco aislado, sin scripts, que crece con su contenido y toma el color del tema.",
+      "dependencies": ["next-themes"],
+      "registryDependencies": [],
+      "files": [
+        { "path": "components/app/html-frame.tsx", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "config-button",
+      "type": "registry:component",
+      "title": "Botón de configurar",
+      "description": "El engranaje de la configuración in situ: en la cabecera del bloque o del panel que enseña lo configurable.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "tooltip"],
+      "files": [
+        { "path": "components/app/config-button.tsx", "type": "registry:component" }
+      ]
     },
     {
       "name": "operations-page",
@@ -271,10 +376,7 @@
       "title": "Página de operación",
       "description": "Todo el kit de una página de operación: cabecera con pestañas de subpágina, cifras, toolbar, tabla, kanban, panel de información, sheet, barra de selección y estados.",
       "dependencies": ["lucide-react", "radix-ui", "next-themes", "@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "sonner"],
-      "registryDependencies": [
-        "sidebar", "breadcrumb", "button", "kbd", "command", "separator", "dropdown-menu", "tooltip",
-        "input-group", "badge", "table", "checkbox", "popover", "sheet", "skeleton", "alert-dialog", "progress", "tabs", "select", "sonner"
-      ],
+      "registryDependencies": ["sidebar", "breadcrumb", "button", "kbd", "command", "separator", "dropdown-menu", "tooltip", "input-group", "badge", "table", "checkbox", "popover", "sheet", "skeleton", "alert-dialog", "progress", "tabs", "select", "sonner", "input", "label", "switch", "dialog", "textarea"],
       "files": [
         { "path": "components/app/app-shell.tsx", "type": "registry:component" },
         { "path": "components/app/theme-toggle.tsx", "type": "registry:component" },
@@ -300,7 +402,20 @@
         { "path": "hooks/use-mobile.ts", "type": "registry:hook" },
         { "path": "lib/nav.ts", "type": "registry:lib" },
         { "path": "lib/status.ts", "type": "registry:lib" },
-        { "path": "lib/format.ts", "type": "registry:lib" }
+        { "path": "lib/format.ts", "type": "registry:lib" },
+        { "path": "components/app/filter-bar.tsx", "type": "registry:component" },
+        { "path": "components/app/filter-builder.tsx", "type": "registry:component" },
+        { "path": "components/app/quick-filters.tsx", "type": "registry:component" },
+        { "path": "components/app/column-settings.tsx", "type": "registry:component" },
+        { "path": "components/app/inline-field.tsx", "type": "registry:component" },
+        { "path": "components/app/multi-select.tsx", "type": "registry:component" },
+        { "path": "components/app/config-button.tsx", "type": "registry:component" },
+        { "path": "components/app/step-timeline.tsx", "type": "registry:component" },
+        { "path": "components/app/html-frame.tsx", "type": "registry:component" },
+        { "path": "hooks/use-filtros-avanzados.ts", "type": "registry:hook" },
+        { "path": "hooks/use-url-filters.ts", "type": "registry:hook" },
+        { "path": "hooks/use-table-config.ts", "type": "registry:hook" },
+        { "path": "lib/filtros/core.ts", "type": "registry:lib" }
       ]
     }
   ]

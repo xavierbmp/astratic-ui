@@ -12,8 +12,10 @@ import type { CampoFiltrable, GrupoCondiciones } from "@/lib/filtros/core"
  * filtros, conmutador de vistas y la acción principal. Va en la prop `toolbar` de `WorkGrid` y es
  * la misma en todas las listas, para que filtrar se haga igual en todas.
  *
- * Todo cabe en una línea: los rápidos son la parte elástica y, si no caben, se desplazan en
- * horizontal; «Filtros» y las acciones se quedan siempre a la vista. Los campos visibles no están
+ * Todo cabe en una línea: los rápidos son la parte elástica y los que no caben se recogen en un
+ * botón «+N» con flecha; «Filtros» va pegado detrás del último visible y las acciones se quedan
+ * siempre a la vista. En móvil el buscador ocupa su propia línea y, si «+N» y «Filtros» no
+ * caben junto a las acciones, estas bajan a la siguiente. Los campos visibles no están
  * aquí, sino al final de la cabecera de la tabla, que es donde se buscan.
  */
 export function FilterBar<T, V extends ViewKind = ViewKind>({
@@ -49,30 +51,36 @@ export function FilterBar<T, V extends ViewKind = ViewKind>({
 
   return (
     <>
-      <Toolbar className="flex-nowrap">
+      <Toolbar>
         <ToolbarSearch
           placeholder={buscador.placeholder ?? "Buscar…"}
           value={buscador.value}
           onChange={(e) => buscador.onChange(e.target.value)}
-          className="w-40 flex-none sm:w-56"
+          className="w-full flex-none sm:w-52 sm:flex-none"
         />
         {/*
           «Filtros» va pegado al último rápido, no anclado a la derecha: se mueve según cuántos
-          rápidos haya, porque es uno más de la fila. El grupo es lo que cede sitio y se desplaza
-          en horizontal en vez de saltar de línea.
+          rápidos haya, porque es uno más de la fila. Los rápidos son lo que cede sitio: los que
+          no caben se recogen en «+N».
         */}
-        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <QuickFilters api={filtros.rapidos} campos={campos} filas={filas} value={filtros.grupo} onChange={filtros.setGrupo} />
-          <FilterBuilder
-            campos={campos}
-            value={filtros.grupo}
-            onChange={filtros.setGrupo}
-            objeto={objeto}
-            onCrearCampo={onCrearCampo}
-            onGuardarRapido={setGuardando}
-            onEditarRapidos={() => setEditor(true)}
-          />
-        </div>
+        <QuickFilters
+          api={filtros.rapidos}
+          campos={campos}
+          filas={filas}
+          value={filtros.grupo}
+          onChange={filtros.setGrupo}
+          trailing={
+            <FilterBuilder
+              campos={campos}
+              value={filtros.grupo}
+              onChange={filtros.setGrupo}
+              objeto={objeto}
+              onCrearCampo={onCrearCampo}
+              onGuardarRapido={setGuardando}
+              onEditarRapidos={() => setEditor(true)}
+            />
+          }
+        />
         <ToolbarActions className="flex-none">
           {vistas && <ViewSwitcher views={vistas.views} value={vistas.value} onChange={vistas.onChange} />}
           {actions}
