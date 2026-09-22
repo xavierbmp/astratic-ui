@@ -48,8 +48,9 @@ export function HtmlFrame({
   const doc = React.useMemo(
     () =>
       `<!doctype html><html><head><meta charset="utf-8"><base target="_blank"><style>` +
-      // El marco mide lo que su contenido: nunca lleva barra de scroll propia.
-      `html,body{margin:0;padding:0;background:transparent;overflow:hidden}` +
+      // El marco mide lo que su contenido: nunca lleva barra de scroll propia. Con el mismo color-scheme que
+      // la página el fondo queda transparente; si no, en oscuro el navegador pinta el marco de blanco.
+      `html{color-scheme:light dark}html,body{margin:0;padding:0;background:transparent;overflow:hidden}` +
       `body{color:${color ?? "inherit"};font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow-wrap:anywhere;padding:12px}` +
       `p{margin:0 0 8px}a{color:inherit;text-decoration:underline}ul,ol{margin:0 0 8px;padding-left:20px}ul{list-style:disc}ol{list-style:decimal}img{max-width:100%;height:auto}` +
       `</style></head><body>${html}</body></html>`,
