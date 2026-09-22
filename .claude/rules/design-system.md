@@ -82,6 +82,13 @@ Nada se configura en una página de ajustes aparte: cada cosa se configura **don
 - Feedback siempre con `toast` (sonner). Prohibido `alert`, `confirm`, avisos de texto en la toolbar.
 - Formularios: label encima, ayuda debajo, error debajo. `Dialog` de 480 px para crear/editar registros sencillos. Botones del pie: «Cancelar» ghost + acción principal.
 
+## Reportar un problema
+- Todo portal monta `ReportButton` una vez en el shell (prop `report` de `AppShell`): el bicho va en la cabecera, **entre el buscador y la campana**. Nunca un botón flotante ni un enlace de «feedback» por página.
+- `Dialog` de 480 px con dos pestañas: «Nuevo» (qué pasa + «Señalar en la página», opcional) y «Enviados» (cada reporte con su `StatusBadge`, Pendiente · En curso · Resuelto · Descartado, y la respuesta de quien lo cerró).
+- Señalar esconde el diálogo, resalta en `brand` lo que hay bajo el ratón con su nombre del kit y un clic lo elige; Esc cancela y la página no reacciona mientras tanto. ⇧⌘X lo abre desde cualquier sitio, también con una ficha o un diálogo abiertos.
+- El contexto va solo (ruta con la query, pantalla, tema, navegador, últimos errores y los contenedores del kit del elemento): no se pide nada que la página ya sabe.
+- Se guarda en la BD del proyecto con quien lo envía. Un reporte no se borra: se resuelve o se descarta, siempre con una respuesta de una frase. «Resuelto» es arreglado **y publicado**; antes es «En curso».
+
 ## Componentes y copy
 - Botones: icono lucide + verbo + objeto («Nuevo registro»). `default` en toolbars y pies; `sm` en tablas y barras.
 - Estados solo con `StatusBadge` (`success` hecho/activo · `info` en curso · `warning` pendiente · `danger` vencido/error · `neutral` borrador).

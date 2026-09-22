@@ -86,7 +86,7 @@
       "name": "app-shell",
       "type": "registry:component",
       "title": "Shell de aplicación",
-      "description": "Sidebar con grupos y contadores, cabecera de 48 px con migas, buscador ⌘K, notificaciones y tema.",
+      "description": "Sidebar con grupos y contadores, cabecera de 48 px con migas, buscador ⌘K, reportar un problema, notificaciones y tema.",
       "dependencies": ["next-themes", "lucide-react"],
       "registryDependencies": ["sidebar", "breadcrumb", "button", "kbd", "command", "separator", "dropdown-menu", "tooltip"],
       "files": [
@@ -94,6 +94,21 @@
         { "path": "components/app/theme-toggle.tsx", "type": "registry:component" },
         { "path": "components/app/avatar-initials.tsx", "type": "registry:component" },
         { "path": "lib/nav.ts", "type": "registry:lib" },
+        { "path": "lib/format.ts", "type": "registry:lib" }
+      ]
+    },
+    {
+      "name": "report-button",
+      "type": "registry:component",
+      "title": "Reportar un problema",
+      "description": "Botón del bicho para la cabecera del shell: diálogo para contar qué falla, selector para señalar el elemento en la página (también dentro de fichas y diálogos), contexto automático (ruta, pantalla, tema, errores recientes) y pestaña con los reportes enviados y su estado. Se abre con ⇧⌘X.",
+      "dependencies": ["lucide-react", "sonner"],
+      "registryDependencies": ["button", "dialog", "kbd", "label", "skeleton", "tabs", "textarea", "tooltip", "badge"],
+      "files": [
+        { "path": "components/app/report-button.tsx", "type": "registry:component" },
+        { "path": "components/app/states.tsx", "type": "registry:component" },
+        { "path": "components/app/status-badge.tsx", "type": "registry:component" },
+        { "path": "lib/status.ts", "type": "registry:lib" },
         { "path": "lib/format.ts", "type": "registry:lib" }
       ]
     },

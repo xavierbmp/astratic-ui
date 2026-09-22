@@ -30,7 +30,7 @@ export default async function ShellPage() {
           <p>
             Siempre y solo una vez: <code>AppShell</code> envuelve todas las páginas del portal desde el layout del grupo
             de rutas autenticado. Recibe la marca, el usuario y la navegación en grupos, y se encarga del resto: ítem
-            activo, migas, contadores, buscador ⌘K, campana y tema.
+            activo, migas, contadores, buscador ⌘K, reportar un problema, campana y tema.
           </p>
         </Prose>
         <Rules
@@ -50,11 +50,20 @@ export default async function ShellPage() {
             </>,
             <>
               <strong>Cabecera de 48 px</strong> con <code>SidebarTrigger</code>, migas automáticas «Grupo › Página», y a la
-              derecha el buscador, la campana, el <code>ThemeToggle</code> y lo que pases en <code>headerEnd</code>.
+              derecha el buscador, el bicho de reportar un problema (prop <code>report</code>), la campana, el{" "}
+              <code>ThemeToggle</code> y lo que pases en <code>headerEnd</code>.
             </>,
             <>
               <strong>Migas extra</strong> desde cualquier página con <code>useBreadcrumb([{"{ label, href }"}])</code>: el
               shell las añade detrás de la página y las quita al desmontar.
+            </>,
+            <>
+              <strong>Reportar un problema</strong>: <code>ReportButton</code> en la prop <code>report</code>, entre el
+              buscador y la campana. Se abre también con ⇧⌘X, con una ficha abierta. Ver{" "}
+              <Link href="/ds/componentes/report-button" className="underline underline-offset-4">
+                Reportar un problema
+              </Link>
+              .
             </>,
             <>
               <strong>Buscador ⌘K</strong>: un <code>CommandDialog</code> con las páginas de la navegación agrupadas. Las
@@ -114,7 +123,7 @@ export function RegistroPage({ record }: { record: { id: string; name: string } 
           columns={["Zona", "Medidas", "Qué contiene"]}
           rows={[
             ["Sidebar", "256 px, colapsa a 48 px. Fondo sidebar, borde derecho.", "Marca con monograma, grupos con etiqueta, ítems con icono, contador ámbar y usuario abajo."],
-            ["Cabecera", "48 px, borde inferior, padding horizontal 16 px.", "Botón de colapso, separador, migas; a la derecha buscador ⌘K (256 px), campana, tema y headerEnd."],
+            ["Cabecera", "48 px, borde inferior, padding horizontal 16 px.", "Botón de colapso, separador, migas; a la derecha buscador ⌘K (256 px), reportar un problema, campana, tema y headerEnd."],
             ["Contenido", "El resto. Columna flex con min-h-0.", "Las páginas, que empiezan por PageBody."],
             ["Buscador", "CommandDialog centrado.", "Un grupo por grupo de navegación; al elegir, navega con router.push."],
           ]}
@@ -143,6 +152,7 @@ export function RegistroPage({ record }: { record: { id: string; name: string } 
             [<code key="user">user</code>, <code key="user-t">CurrentUser</code>, "Nombre y rol del usuario conectado. Se muestra abajo con AvatarInitials. Obligatoria."],
             [<code key="nav">nav</code>, <code key="nav-t">NavGroup[]</code>, "Grupos de navegación. El primer ítem del primer grupo es el destino del logotipo. Obligatoria."],
             [<code key="children">children</code>, <code key="children-t">ReactNode</code>, "Las páginas. Se renderizan en una columna flex con min-h-0 para que PageBody y WorkGrid puedan ocupar la altura."],
+            [<code key="report">report</code>, <code key="report-t">ReactNode</code>, "El ReportButton ya montado con sus acciones. Va entre el buscador y la campana. Opcional, pero todo portal lo lleva."],
             [<code key="headerEnd">headerEnd</code>, <code key="headerEnd-t">ReactNode</code>, "Contenido extra al final de la cabecera, después del tema. Opcional."],
           ]}
         />

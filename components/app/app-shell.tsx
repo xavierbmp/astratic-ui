@@ -71,6 +71,7 @@ export function AppShell({
   children,
   headerEnd,
   userMenu,
+  report,
   notifications,
 }: {
   brand: Brand
@@ -80,6 +81,8 @@ export function AppShell({
   headerEnd?: React.ReactNode
   /** Contenido del menú desplegable del usuario (pie de la sidebar): «Ir a…», tema, cerrar sesión. */
   userMenu?: React.ReactNode
+  /** Botón «Reportar un problema» (`ReportButton`) ya montado; va entre el buscador y la campana. */
+  report?: React.ReactNode
   /** Botón de notificaciones ya montado; si no se pasa, se muestra el icono sin punto. */
   notifications?: React.ReactNode
 }) {
@@ -210,15 +213,15 @@ export function AppShell({
           <header className="flex h-12 flex-none items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mx-1 h-4!" />
-            <Breadcrumb>
-              <BreadcrumbList className="text-sm">
+            <Breadcrumb className="min-w-0">
+              <BreadcrumbList className="flex-nowrap text-sm whitespace-nowrap">
                 {crumbs.map((c, i) => {
                   const last = i === crumbs.length - 1
                   return (
                     <React.Fragment key={`${c.label}-${i}`}>
-                      <BreadcrumbItem className={cn(i === 0 && crumbs.length > 1 && "hidden md:inline-flex")}>
+                      <BreadcrumbItem className={cn(i === 0 && crumbs.length > 1 && "hidden md:inline-flex", last && "min-w-0")}>
                         {last ? (
-                          <BreadcrumbPage className="font-medium">{c.label}</BreadcrumbPage>
+                          <BreadcrumbPage className="truncate font-medium">{c.label}</BreadcrumbPage>
                         ) : c.href ? (
                           <BreadcrumbLink asChild>
                             <Link href={c.href}>{c.label}</Link>
@@ -252,6 +255,7 @@ export function AppShell({
               >
                 <SearchIcon />
               </Button>
+              {report}
               {notifications ?? (
                 <Button variant="ghost" size="icon" aria-label="Notificaciones">
                   <BellIcon />

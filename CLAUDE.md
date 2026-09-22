@@ -24,6 +24,7 @@ Design system y kit de arranque de Astratic Network Devs para portales operativo
 - Subpáginas: pestañas `PageTabs` en la cabecera (prop `tabs`), una ruta por pestaña, definidas en `nav.ts`. Ejemplo en `/demo/facturacion`; reglas en `/ds/patrones/navegacion`.
 - Fila clicable abre el sheet; checkbox selecciona; selección → `BulkBar` flotante abajo. Destructivo → `ConfirmDialog`. Feedback → `toast` de sonner.
 - Badges de estado solo con `StatusBadge` y sus cinco tonos. Botones con icono + verbo + objeto.
+- Reportar un problema: `ReportButton` en la prop `report` del shell (bicho entre el buscador y la campana, ⇧⌘X con una ficha abierta). Cada proyecto guarda los reportes en su BD; se cierran con respuesta, nunca se borran.
 - Toda página sale con filtros, orden, vistas que apliquen, selección, detalle y estados vacío/cargando/error. Sin UI muerta.
 
 ## Al clonar para un cliente
