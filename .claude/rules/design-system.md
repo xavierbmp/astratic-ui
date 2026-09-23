@@ -20,6 +20,10 @@
 
 Dashboards: cifras + grid de secciones de resumen + panel «Hoy». No hay página de Ajustes: ver «Configuración in situ».
 
+Página propia de un registro (un evento, una cuenta, una campaña que se trabaja durante semanas): la misma anatomía. `PageHeader` con el nombre del registro como título y `PageTabs` con sus partes (Producción · Invitados · Proveedores…), cifras de ese registro, un bloque de trabajo e `InsightsPanel` con sus datos. **Nunca la lista de registros junto al detalle**: ya estás dentro; se cambia de registro con las migas o ⌘K.
+
+Una página de operación trabaja, no resume: **un solo bloque de trabajo** y un panel de 2 o 3 bloques cortos. Gráficos, rankings y clipping van al dashboard; el resto de partes, a subpáginas. Si al mirarla no se sabe dónde poner los ojos, sobra información.
+
 ## Subpáginas
 - Un módulo con partes distintas que comparten título (Facturas y Cobros en Facturación) usa subpáginas: una ruta por parte (`/facturacion`, `/facturacion/cobros`) y `PageTabs` en la prop `tabs` de `PageHeader`.
 - Las pestañas se definen una vez en `nav.ts` (campo `tabs` del ítem): la sidebar marca el módulo y las migas y ⌘K incluyen la subpágina.
