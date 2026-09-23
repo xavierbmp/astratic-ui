@@ -38,6 +38,7 @@ export function Kanban<T extends KanbanItem>({
   onChange,
   renderCard,
   onCardClick,
+  openId,
   className,
   emptyColumn = "Sin registros",
   storageKey,
@@ -52,6 +53,8 @@ export function Kanban<T extends KanbanItem>({
   onChange: (next: T[]) => void
   renderCard: (item: T, state: { dragging: boolean }) => React.ReactNode
   onCardClick?: (item: T) => void
+  /** Tarjeta del registro abierto en la ficha: se marca como lo seleccionado. */
+  openId?: string | null
   className?: string
   emptyColumn?: React.ReactNode
   storageKey?: string
@@ -144,7 +147,7 @@ export function Kanban<T extends KanbanItem>({
             >
               <SortableContext items={colItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                 {colItems.map((item) => (
-                  <SortableCard key={item.id} id={item.id} onClick={onCardClick ? () => onCardClick(item) : undefined}>
+                  <SortableCard key={item.id} id={item.id} open={item.id === openId} onClick={onCardClick ? () => onCardClick(item) : undefined}>
                     {renderCard(item, { dragging: item.id === activeId })}
                   </SortableCard>
                 ))}
@@ -274,7 +277,7 @@ function CollapsedColumn({ column, count, onExpand }: { column: KanbanColumn; co
   )
 }
 
-function SortableCard({ id, onClick, children }: { id: string; onClick?: () => void; children: React.ReactNode }) {
+function SortableCard({ id, open, onClick, children }: { id: string; open?: boolean; onClick?: () => void; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   return (
     <div
@@ -286,6 +289,7 @@ function SortableCard({ id, onClick, children }: { id: string; onClick?: () => v
       className={cn(
         "rounded-lg border bg-card p-3 shadow-xs outline-none hover:border-foreground/20 focus-visible:ring-2 focus-visible:ring-ring/50",
         onClick ? "cursor-pointer" : "cursor-grab",
+        open && "border-brand bg-brand-soft hover:border-brand",
         isDragging && "opacity-40"
       )}
     >

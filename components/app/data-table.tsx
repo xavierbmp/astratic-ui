@@ -36,6 +36,7 @@ export function DataTable<T>({
   selected,
   onSelectedChange,
   onRowClick,
+  activeId,
   sort,
   onSortChange,
   emptyState,
@@ -51,6 +52,8 @@ export function DataTable<T>({
   selected?: Set<string>
   onSelectedChange?: (next: Set<string>) => void
   onRowClick?: (row: T) => void
+  /** Fila del registro abierto en la ficha: se marca como lo seleccionado. */
+  activeId?: string | null
   sort?: Sort | null
   onSortChange?: (next: Sort | null) => void
   emptyState?: React.ReactNode
@@ -176,15 +179,17 @@ export function DataTable<T>({
           {sorted.map((row) => {
             const id = getRowId(row)
             const isSelected = selected?.has(id) ?? false
+            const isActive = activeId === id
             return (
               <TableRow
                 key={id}
                 data-state={isSelected ? "selected" : undefined}
+                aria-current={isActive || undefined}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={cn(
                   "group/row",
                   onRowClick && "cursor-pointer",
-                  isSelected && "bg-brand-soft hover:bg-brand-soft [&>td:first-child]:shadow-[inset_2px_0_0_var(--brand)]",
+                  (isSelected || isActive) && "bg-brand-soft hover:bg-brand-soft [&>td:first-child]:shadow-[inset_2px_0_0_var(--brand)]",
                   rowClassName?.(row)
                 )}
               >

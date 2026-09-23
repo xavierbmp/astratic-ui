@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Section, SectionBody, SectionHeader } from "@/components/app/section"
+import { PanelFichaSwitch, type PanelFicha } from "@/components/app/detail-panel"
 
 export type InsightBlock = {
   id: string
@@ -25,11 +26,14 @@ export function InsightsPanel({
   storageKey,
   blocks,
   title = "Información",
+  ficha,
   className,
 }: {
   storageKey: string
   blocks: InsightBlock[]
   title?: string
+  /** Si se pasa, los ajustes del panel ofrecen enseñar aquí la ficha del registro abierto. */
+  ficha?: PanelFicha
   className?: string
 }) {
   const defaults: Prefs = {
@@ -63,7 +67,12 @@ export function InsightsPanel({
                 <SlidersHorizontalIcon />
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-64 p-2">
+            <PopoverContent align="end" className={cn("p-2", ficha ? "w-72" : "w-64")}>
+              {ficha && (
+                <div className="mb-1 border-b pb-1">
+                  <PanelFichaSwitch ficha={ficha} />
+                </div>
+              )}
               <p className="px-2 pt-1 pb-2 text-xs font-medium text-muted-foreground">Bloques del panel</p>
               <ul className="flex flex-col">
                 {order.map((id, i) => {

@@ -212,6 +212,26 @@ export default function DetailSheetPage() {
         />
       </DocSection>
 
+      <DocSection id="botones" title="Botones de acción propios">
+        <Prose>
+          <p>
+            Tras las acciones secundarias de la cabecera, <code>RecordActions</code> pinta los botones que cada persona
+            se ha creado para ese tipo de registro y un engranaje para gestionarlos. Cada botón hace una o varias cosas
+            seguidas de un clic: poner un campo a un valor, añadir una etiqueta, meter el registro en una campaña. La
+            página declara qué se puede hacer (<code>operaciones</code>, con sus valores o una función que los carga al
+            abrir el editor) y lo ejecuta (<code>onEjecutar</code>); el kit guarda los botones y ofrece el editor.
+          </p>
+        </Prose>
+        <Rules
+          items={[
+            <>Se guardan en el navegador de cada persona con la clave <code>botones:&lt;clave&gt;</code>, una por tipo de registro.</>,
+            <>Crear y editar se hace en el mismo diálogo que la lista; borrar pide confirmación con el nombre del botón.</>,
+            <>Mientras un botón trabaja, todos se desactivan y el suyo gira. El resultado se cuenta en un toast, con aviso si algo no se pudo hacer.</>,
+            <>Si una acción necesita decidir algo (a qué contactos meter en la campaña), se pregunta en un diálogo al ejecutarla, con lo más probable ya marcado.</>,
+          ]}
+        />
+      </DocSection>
+
       <DocSection id="cambios" title="Cambios sin guardar">
         <Rules
           items={[

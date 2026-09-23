@@ -181,9 +181,12 @@
       "name": "work-grid",
       "type": "registry:component",
       "title": "Rejilla de trabajo",
-      "description": "Toolbar encima del bloque de operación y con su mismo ancho; bloque a la izquierda y panel de información de 320 px a la derecha, que empieza a la altura del bloque y mide lo mismo.",
+      "description": "Toolbar encima del bloque de operación y con su mismo ancho; bloque a la izquierda y panel de información de 320 px a la derecha, que empieza a la altura del bloque y mide lo mismo. Con la ficha en el panel, la columna derecha es el registro abierto y se ensancha arrastrando su borde.",
+      "registryDependencies": ["button", "switch", "popover"],
       "files": [
-        { "path": "components/app/work-grid.tsx", "type": "registry:component" }
+        { "path": "components/app/work-grid.tsx", "type": "registry:component" },
+        { "path": "components/app/detail-panel.tsx", "type": "registry:component" },
+        { "path": "hooks/use-local-storage.ts", "type": "registry:hook" }
       ]
     },
     {
@@ -253,11 +256,12 @@
       "title": "Panel de información",
       "description": "Columna derecha con bloques que el usuario activa, desactiva y reordena; se recuerda por página.",
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["button", "checkbox", "popover"],
+      "registryDependencies": ["button", "checkbox", "popover", "switch"],
       "files": [
         { "path": "components/app/insights-panel.tsx", "type": "registry:component" },
         { "path": "components/app/section.tsx", "type": "registry:component" },
-        { "path": "hooks/use-local-storage.ts", "type": "registry:hook" }
+        { "path": "hooks/use-local-storage.ts", "type": "registry:hook" },
+        { "path": "components/app/detail-panel.tsx", "type": "registry:component" }
       ]
     },
     {
@@ -272,9 +276,24 @@
         { "path": "components/app/multi-select.tsx", "type": "registry:component" },
         { "path": "components/app/status-badge.tsx", "type": "registry:component" },
         { "path": "hooks/use-local-storage.ts", "type": "registry:hook" },
-        { "path": "lib/status.ts", "type": "registry:lib" }
+        { "path": "lib/status.ts", "type": "registry:lib" },
+        { "path": "components/app/detail-panel.tsx", "type": "registry:component" }
       ],
       "dependencies": ["lucide-react", "radix-ui", "sonner"]
+    },
+    {
+      "name": "record-actions",
+      "type": "registry:component",
+      "title": "Botones de acción",
+      "description": "Botones propios en la cabecera de una ficha: cada persona crea los suyos y cada uno hace varias cosas seguidas de un clic (poner un campo, añadir una etiqueta, meter en una campaña). La página declara las operaciones y las ejecuta.",
+      "dependencies": ["lucide-react", "sonner"],
+      "registryDependencies": ["button", "input", "label", "dialog", "select", "alert-dialog"],
+      "files": [
+        { "path": "components/app/record-actions.tsx", "type": "registry:component" },
+        { "path": "components/app/config-button.tsx", "type": "registry:component" },
+        { "path": "components/app/confirm-dialog.tsx", "type": "registry:component" },
+        { "path": "hooks/use-local-storage.ts", "type": "registry:hook" }
+      ]
     },
     {
       "name": "states",
@@ -433,7 +452,9 @@
         { "path": "hooks/use-filtros-avanzados.ts", "type": "registry:hook" },
         { "path": "hooks/use-url-filters.ts", "type": "registry:hook" },
         { "path": "hooks/use-table-config.ts", "type": "registry:hook" },
-        { "path": "lib/filtros/core.ts", "type": "registry:lib" }
+        { "path": "lib/filtros/core.ts", "type": "registry:lib" },
+        { "path": "components/app/detail-panel.tsx", "type": "registry:component" },
+        { "path": "components/app/record-actions.tsx", "type": "registry:component" }
       ]
     }
   ]

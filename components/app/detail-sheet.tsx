@@ -1,14 +1,20 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import type { LucideIcon } from "lucide-react"
-import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, Settings2Icon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, Settings2Icon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { InlineAutoEdit } from "@/components/app/inline-field"
+import type { PanelFicha } from "@/components/app/detail-panel"
 import { useLocalStorage } from "@/hooks/use-local-storage"
+
+// Dónde se está pintando la ficha: encima de la lista (Sheet) o en la columna derecha (panel). La
+// cabecera no puede usar los títulos del Sheet fuera de él.
+const ModoFicha = React.createContext<"sheet" | "panel">("sheet")
 
 /** Escape dentro de un campo cancela la edición de ese campo, no cierra la ficha. */
 function escapeDentroDeCampo(e: KeyboardEvent) {
@@ -16,10 +22,16 @@ function escapeDentroDeCampo(e: KeyboardEvent) {
   if (t?.closest("input, textarea, select, [contenteditable='true']")) e.preventDefault()
 }
 
+/**
+ * La ficha de un registro. Se abre encima de la lista, por la derecha; con `ficha` activa (la
+ * persona ha elegido «Ficha en el panel»), se pinta en la columna derecha de `WorkGrid` y la lista
+ * sigue entera a la vista y se puede usar.
+ */
 export function DetailSheet({
   open,
   onOpenChange,
   width = 480,
+  ficha,
   children,
   className,
 }: {
@@ -27,9 +39,25 @@ export function DetailSheet({
   onOpenChange: (open: boolean) => void
   /** 480 para una ficha; 960-1040 para las de dos columnas (`DetailSplit`). */
   width?: number
+  /** Panel de ficha de la página (`usePanelFicha`). */
+  ficha?: PanelFicha
   children: React.ReactNode
   className?: string
 }) {
+  if (ficha?.activa && ficha.nodo) {
+    if (!open) return null
+    return createPortal(
+      <ModoFicha.Provider value="panel">
+        <div data-slot="detail-panel-content" className="flex min-h-0 flex-1 flex-col">
+          {children}
+          <Button variant="ghost" size="icon-sm" aria-label="Cerrar ficha" title="Cerrar ficha" className="absolute top-3 right-3" onClick={() => onOpenChange(false)}>
+            <XIcon />
+          </Button>
+        </div>
+      </ModoFicha.Provider>,
+      ficha.nodo,
+    )
+  }
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -65,25 +93,31 @@ export function DetailHeader({
   nav?: React.ReactNode
   className?: string
 }) {
+  // En el panel no hay Sheet: mismas piezas en HTML normal, y sitio a la derecha para «Cerrar» y
+  // los ajustes del panel (en el Sheet, solo para «Cerrar»).
+  const enPanel = React.useContext(ModoFicha) === "panel"
+  const Cabecera = enPanel ? "div" : SheetHeader
+  const Titulo = enPanel ? "h2" : SheetTitle
+  const Descripcion = enPanel ? "p" : SheetDescription
   return (
-    <SheetHeader className={cn("flex-none gap-3 border-b p-4 pr-12", className)}>
+    <Cabecera className={cn("flex flex-none flex-col gap-3 border-b p-4", enPanel ? "pr-20" : "pr-12", className)}>
       <div className="flex items-start gap-3">
         {leading}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <SheetTitle className="min-w-0 text-[15px] leading-tight font-semibold">{title}</SheetTitle>
+            <Titulo className="min-w-0 font-heading text-[15px] leading-tight font-semibold text-foreground">{title}</Titulo>
             {status}
           </div>
           {subtitle ? (
-            <SheetDescription className="mt-0.5 truncate text-xs">{subtitle}</SheetDescription>
+            <Descripcion className="mt-0.5 truncate text-xs text-muted-foreground">{subtitle}</Descripcion>
           ) : (
-            <SheetDescription className="sr-only">Detalle</SheetDescription>
+            <Descripcion className="sr-only">Detalle</Descripcion>
           )}
         </div>
         {nav && <div className="flex-none">{nav}</div>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
-    </SheetHeader>
+    </Cabecera>
   )
 }
 

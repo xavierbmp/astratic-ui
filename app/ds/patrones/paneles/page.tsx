@@ -55,6 +55,35 @@ export default function PanelesPage() {
       </DocSection>
 
       <DocSection
+        id="ficha-en-el-panel"
+        title="Ficha en el panel"
+        lead="La columna derecha también puede enseñar el registro abierto en lugar de la información. Es una preferencia de cada persona y página."
+      >
+        <Prose>
+          <p>
+            En los ajustes del panel, «Ficha en el panel» cambia la columna derecha por la ficha del registro abierto. Al pulsar una fila, la
+            ficha se pone ahí, sin abrirse encima de la lista, que sigue entera a la vista y se puede usar. Sin ninguna abierta, el panel
+            explica cómo elegirla y conserva sus ajustes arriba a la derecha para volver a «Información».
+          </p>
+          <p>
+            Se ensancha o estrecha arrastrando su borde izquierdo (o con las flechas desde el teclado), entre 380 y 960 px y dejando siempre
+            sitio a la lista; doble clic vuelve a los 480 de siempre. La lista se ajusta sola: las cifras se recolocan y los filtros rápidos
+            que no caben se recogen en «+N».
+          </p>
+        </Prose>
+        <Rules
+          items={[
+            <>
+              <code>usePanelFicha(clave)</code> guarda la preferencia y el ancho en <code>panel-ficha:&lt;clave&gt;</code>; se pasa a{" "}
+              <code>WorkGrid ficha</code>, <code>InsightsPanel ficha</code> y <code>DetailSheet ficha</code>. La página no cambia nada más.
+            </>,
+            <>Solo con dos columnas (1280 px o más). Por debajo, el panel va debajo del bloque, así que la ficha se abre encima como siempre.</>,
+            <>El registro abierto se marca en la lista como lo seleccionado (<code>DataTable activeId</code>, <code>Kanban openId</code>).</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection
         id="ejemplo"
         title="Ejemplo"
         lead="Tres bloques reales en un contenedor de 320 por 420 px. Abre el icono de personalizar, desactiva o reordena y recarga la página: se mantiene."

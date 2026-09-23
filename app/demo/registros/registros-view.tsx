@@ -52,6 +52,8 @@ import { AvatarInitials, AvatarStack } from "@/components/app/avatar-initials"
 import { EmptyState } from "@/components/app/states"
 import { InsightList, InsightStat, InsightsPanel } from "@/components/app/insights-panel"
 import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, DetailMeta, DetailSection, DetailSectionAction, DetailSheet, RecordPager } from "@/components/app/detail-sheet"
+import { usePanelFicha } from "@/components/app/detail-panel"
+import { RecordActions, type BotonAccion, type OperacionBoton } from "@/components/app/record-actions"
 import { InlineField, InlineTitle, type ValorInline } from "@/components/app/inline-field"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
 
@@ -86,6 +88,15 @@ export function RegistrosView({
   const [confirmDelete, setConfirmDelete] = React.useState(false)
 
   const owners = React.useMemo(() => Array.from(new Set(records.map((r) => r.owner))).sort(), [records])
+  // Ficha en el panel (ajustes del panel) y botones de acción propios de la ficha.
+  const panel = usePanelFicha("demo-registros")
+  const operaciones = React.useMemo<OperacionBoton[]>(
+    () => [
+      { id: "stage", grupo: "Cambiar un campo", label: "Fase", opciones: stages.map((s) => ({ value: s.id, label: s.label })) },
+      { id: "owner", grupo: "Cambiar un campo", label: "Responsable", opciones: owners.map((o) => ({ value: o, label: o })) },
+    ],
+    [owners],
+  )
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -107,6 +118,24 @@ export function RegistrosView({
   const actualizar = (campo: keyof DemoRecord) => async (v: ValorInline) => {
     await new Promise((r) => setTimeout(r, 250))
     setRecords((rs) => rs.map((r) => (r.id === openId ? { ...r, [campo]: v ?? (campo === "tags" ? [] : r[campo]), ...(campo === "stage" ? { columnId: v as Stage } : {}) } : r)))
+  }
+
+  /** Aplica un botón de acción al registro abierto (en la demo, en memoria). */
+  const ejecutarBoton = async (b: BotonAccion) => {
+    await new Promise((r) => setTimeout(r, 250))
+    setRecords((rs) =>
+      rs.map((r) => {
+        if (r.id !== openId) return r
+        let n = r
+        // Los valores salen de `operaciones`: fases de `stages` y responsables de la lista.
+        for (const a of b.acciones) {
+          if (a.operacion === "stage" && a.valor) n = { ...n, stage: a.valor as Stage, columnId: a.valor as Stage }
+          if (a.operacion === "owner" && a.valor) n = { ...n, owner: a.valor }
+        }
+        return n
+      }),
+    )
+    toast.success(`«${b.nombre}» aplicado`)
   }
 
   const totalValue = filtered.reduce((a, r) => a + r.value, 0)
@@ -236,6 +265,7 @@ export function RegistrosView({
       </KpiRow>
 
       <WorkGrid
+        ficha={panel}
         toolbar={
           <>
             <Toolbar>
@@ -256,6 +286,7 @@ export function RegistrosView({
         aside={
           <InsightsPanel
             storageKey="demo-registros"
+            ficha={panel}
             blocks={[
               {
                 id: "resumen",
@@ -340,6 +371,7 @@ export function RegistrosView({
                 selected={selected}
                 onSelectedChange={setSelected}
                 onRowClick={(r) => setOpenId(r.id)}
+                activeId={openId}
                 emptyState={emptyState}
               />
             )}
@@ -356,7 +388,7 @@ export function RegistrosView({
                         subtitle={`${r.code} · ${r.category} · ${r.owner}`}
                         status={<StatusBadge tone={s.tone}>{s.label}</StatusBadge>}
                         value={fmt.eur(r.value)}
-                        selected={selected.has(r.id)}
+                        selected={selected.has(r.id) || r.id === openId}
                         onClick={() => setOpenId(r.id)}
                       />
                     )
@@ -378,6 +410,7 @@ export function RegistrosView({
                   setRecords((rs) => rs.map((r) => (map.has(r.id) ? { ...r, stage: map.get(r.id)!, columnId: map.get(r.id)! } : r)))
                 }}
                 onCardClick={(r) => setOpenId(r.id)}
+                openId={openId}
                 storageKey="demo-registros"
                 defaultCollapsed={["nuevo", "ganado"]}
                 renderCard={(r) => (
@@ -419,7 +452,7 @@ export function RegistrosView({
         </Section>
       </WorkGrid>
 
-      <DetailSheet open={open !== null} onOpenChange={(o) => !o && setOpenId(null)}>
+      <DetailSheet open={open !== null} onOpenChange={(o) => !o && setOpenId(null)} ficha={panel}>
         {open && (
           <>
             <DetailHeader
@@ -440,6 +473,7 @@ export function RegistrosView({
                   >
                     <CopyIcon /> Copiar enlace
                   </Button>
+                  <RecordActions clave="demo-registro" operaciones={operaciones} onEjecutar={ejecutarBoton} />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon-sm" aria-label="Más acciones" className="ml-auto"><EllipsisIcon /></Button>
