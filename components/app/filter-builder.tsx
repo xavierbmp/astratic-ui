@@ -57,9 +57,8 @@ export function FilterBuilder<T>({
     set(condiciones.map((c, j) => (j === i ? { ...c, ...cambio } : c)))
   const quitar = (i: number) => set(condiciones.filter((_, j) => j !== i))
   const anadir = () => {
-    const campo = campos[0]
-    if (!campo) return
-    set([...condiciones, { campo: campo.id, op: operadorPorDefecto(campo.tipo) }])
+    const nueva = condicionNueva(campos)
+    if (nueva) set([...condiciones, nueva])
   }
 
   return (
@@ -146,7 +145,14 @@ export function FilterBuilder<T>({
   )
 }
 
-function FilaCondicion<T>({
+/** La condición que se añade al pulsar «Añadir condición»: el primer campo con su operador por defecto. */
+export function condicionNueva<T>(campos: CampoFiltrable<T>[]): Condicion | null {
+  const campo = campos[0]
+  return campo ? { campo: campo.id, op: operadorPorDefecto(campo.tipo) } : null
+}
+
+/** Una condición editable: campo, operador y valor. La usan el constructor y la edición de un filtro rápido. */
+export function FilaCondicion<T>({
   union,
   indice,
   condicion,

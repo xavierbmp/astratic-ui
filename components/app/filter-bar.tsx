@@ -3,7 +3,8 @@
 import * as React from "react"
 import { ActiveFilters, Toolbar, ToolbarActions, ToolbarSearch, ViewSwitcher, type ViewKind } from "@/components/app/toolbar"
 import { FilterBuilder } from "@/components/app/filter-builder"
-import { EditorRapidos, GuardarRapidoDialog, QuickFilters } from "@/components/app/quick-filters"
+import { QuickFilters } from "@/components/app/quick-filters"
+import { EditorRapidos, GuardarRapidoDialog } from "@/components/app/quick-filters-editor"
 import type { FiltrosAvanzados } from "@/hooks/use-filtros-avanzados"
 import type { CampoFiltrable, GrupoCondiciones } from "@/lib/filtros/core"
 
@@ -98,7 +99,7 @@ export function FilterBar<T, V extends ViewKind = ViewKind>({
         onOpenChange={(o) => !o && setGuardando(null)}
         onGuardar={(r) => filtros.rapidos.anadir(r)}
       />
-      <EditorRapidos open={editor} onOpenChange={setEditor} api={filtros.rapidos} campos={campos} />
+      <EditorRapidos open={editor} onOpenChange={setEditor} api={filtros.rapidos} campos={campos} value={filtros.grupo} onChange={filtros.setGrupo} />
     </>
   )
 }

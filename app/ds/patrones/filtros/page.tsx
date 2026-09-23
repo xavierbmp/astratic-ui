@@ -232,7 +232,7 @@ const chips = [
               <>
                 <code>QuickFilters</code> + <code>useQuickFilters</code>
               </>,
-              "Los atajos junto al buscador. O el desplegable de un campo de lista, o una condición guardada con nombre. El usuario elige cuáles ve, los ordena y guarda los suyos desde «Filtros rápidos», dentro del desplegable de «Filtros». Los que no caben en la fila se recogen en un botón «+N» con flecha.",
+              "Los atajos junto al buscador. O el desplegable de un campo de lista, o una condición guardada con nombre. El usuario elige cuáles ve, los ordena, los cambia (nombre y condiciones) y guarda los suyos desde «Filtros rápidos», dentro del desplegable de «Filtros». Los que no caben en la fila se recogen en un botón «+N» con flecha.",
             ],
             [
               "Campos visibles",
@@ -300,6 +300,12 @@ const cols = useTableConfig("crm-marcas", columns)
             <>
               <strong>Rápidos y constructor escriben en el mismo sitio.</strong> Un desplegable rápido no es un filtro aparte: añade una
               condición al mismo grupo. Por eso todo lo activo se ve junto en los chips y se puede afinar desde «Filtros».
+            </>,
+            <>
+              <strong>Cada rápido se edita y se borra uno a uno.</strong> Su lápiz abre la edición en el mismo diálogo: el nombre del botón y,
+              si es un filtro guardado, sus condiciones con las mismas filas del constructor. Si está puesto, la lista se filtra ya con lo
+              nuevo. Borrar pide confirmación y no hay «Restablecer»: un botón que borra de golpe lo que el usuario ha ido guardando es una
+              trampa.
             </>,
             <>
               <strong>Los rápidos nunca tapan «Filtros».</strong> La fila enseña los que caben en el sitio que deja la toolbar y recoge el
