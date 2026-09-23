@@ -30,6 +30,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
+          // Un diálogo o ficha abiertos quitan los clics a todo lo de fuera (pointer-events en body):
+          // el aviso los recupera para que su «Deshacer» funcione.
+          pointerEvents: "auto",
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
@@ -46,4 +49,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
   )
 }
 
-export { Toaster }
+/** ¿El clic o el foco vienen de un aviso? Los diálogos y fichas no se cierran por pulsar uno. */
+function esDeUnAviso(target: EventTarget | null) {
+  return target instanceof Element && target.closest("[data-sonner-toaster]") !== null
+}
+
+export { Toaster, esDeUnAviso }

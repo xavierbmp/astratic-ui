@@ -43,8 +43,7 @@ export function EditorRapidos<T>({
   onChange?: (next: GrupoCondiciones) => void
 }) {
   const [editando, setEditando] = React.useState<FiltroRapido | null>(null)
-  // Un guardado borrado no se recupera (vive en este navegador): se confirma. No hay aviso con
-  // «Deshacer» porque, con el diálogo abierto, el aviso no se puede pulsar.
+  // Un guardado borrado no se recupera (vive en este navegador): se confirma antes.
   const [borrando, setBorrando] = React.useState<FiltroRapido | null>(null)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),

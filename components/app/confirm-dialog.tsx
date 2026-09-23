@@ -11,8 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "cn"
 
 export function ConfirmDialog({
   open,
@@ -46,7 +44,7 @@ export function ConfirmDialog({
           <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             disabled={pending}
-            className={cn(destructive && buttonVariants({ variant: "destructive" }))}
+            variant={destructive ? "destructive" : "default"}
             onClick={async (e) => {
               e.preventDefault()
               setPending(true)
