@@ -15,23 +15,15 @@ export function PageHeader({
   actions?: React.ReactNode
 }) {
   return (
-    <div
-      data-slot="page-header"
-      className={cn("flex flex-wrap items-end justify-between gap-x-6 gap-y-3", className)}
-      {...props}
-    >
-      <div className="min-w-0">
-        <h1 className="text-[27px] leading-tight font-semibold tracking-tight">{title}</h1>
-        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
-      </div>
-      {(tabs || actions) && (
-        <div className="flex max-w-full min-w-0 flex-wrap items-center gap-2.5">
-          {tabs}
-          {actions && (
-            <div className="flex flex-none items-center gap-2.5 whitespace-nowrap">{actions}</div>
-          )}
+    <div data-slot="page-header" className={cn("flex flex-col gap-3", className)} {...props}>
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <div className="min-w-0">
+          <h1 className="text-[27px] leading-tight font-semibold tracking-tight">{title}</h1>
+          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
         </div>
-      )}
+        {actions && <div className="flex flex-none flex-wrap items-center gap-2.5 whitespace-nowrap">{actions}</div>}
+      </div>
+      {tabs}
     </div>
   )
 }
