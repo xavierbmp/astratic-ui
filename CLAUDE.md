@@ -1,5 +1,8 @@
 # CLAUDE.md — astratic-ui
 
+> **Conocimiento:** todo vive en la bóveda `../../00_Brain/` (reglas de uso en `../../CLAUDE.md`). Sección de
+> este proyecto: `04-Devs/Design-System/Devs-Design-System-Contexto.md`. Este archivo solo añade lo propio del código.
+
 Design system y kit de arranque de Astratic Network Devs para portales operativos. Este repo es a la vez la documentación (`/ds`), la demo (`/demo`), la plantilla que se clona para un cliente nuevo y el registry de shadcn (`registry.json` → `public/r`).
 
 ## Lo no obvio
