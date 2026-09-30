@@ -128,6 +128,8 @@ export default function KpiPage() {
             [<code key="hint">hint</code>, <code key="hint-t">ReactNode</code>, "Contexto corto a la derecha de la cifra, en text-xs gris. Opcional."],
             [<code key="delta">delta</code>, <code key="delta-t">Delta</code>, "Variación respecto al periodo anterior. Opcional; excluyente con alert."],
             [<code key="alert">alert</code>, <code key="alert-t">ReactNode</code>, "Texto de alerta en rojo semibold. Opcional; excluyente con delta."],
+            [<code key="onClick">onClick</code>, <code key="onClick-t">{"() => void"}</code>, "Convierte la cifra en un atajo que filtra la lista de debajo (los tramos de un recorrido: «Sin normalizar», «Listas para campaña»). Se puede pulsar con ratón y con teclado. Opcional."],
+            [<code key="active">active</code>, <code key="active-t">boolean</code>, "Con onClick: la cifra cuyo filtro está puesto, marcada en bg-brand-soft con borde brand. Pulsarla otra vez lo quita."],
             [<code key="className">className</code>, <code key="className-t">string</code>, "Clases extra. La tarjeta es rounded-xl border bg-card px-4 py-3 shadow-xs."],
           ]}
         />

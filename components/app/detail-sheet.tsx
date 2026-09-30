@@ -3,10 +3,11 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import type { LucideIcon } from "lucide-react"
-import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, Settings2Icon, XIcon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, PlusIcon, Settings2Icon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { InlineAutoEdit } from "@/components/app/inline-field"
 import type { PanelFicha } from "@/components/app/detail-panel"
@@ -215,9 +216,10 @@ type PropsCampo = React.ComponentProps<typeof DetailField>
  * Los campos de un bloque, en filas «etiqueta · valor» con la columna de etiquetas del mismo ancho
  * en toda la ficha. Los campos vacíos (`empty`) no ocupan fila: se recogen al pie del bloque como
  * «+ Campo» y, al pulsarlo, el campo aparece ya editándose. Así la ficha enseña lo que se sabe y
- * sigue invitando a completar lo que falta.
+ * sigue invitando a completar lo que falta. Con `columns={2}` van en dos columnas (datos cortos:
+ * fase, valor, fechas) y vuelven a una sola cuando la ficha se estrecha.
  */
-export function DetailFields({ children, className }: { children: React.ReactNode; className?: string }) {
+export function DetailFields({ children, columns = 1, className }: { children: React.ReactNode; columns?: 1 | 2; className?: string }) {
   const [abiertos, setAbiertos] = React.useState<Set<string>>(() => new Set())
   const filas: React.ReactNode[] = []
   const vacios: { key: string; label: React.ReactNode }[] = []
@@ -230,8 +232,17 @@ export function DetailFields({ children, className }: { children: React.ReactNod
   })
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      {filas.length > 0 && <dl className="grid grid-cols-[7.5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-0.5 text-sm">{filas}</dl>}
+    <div className={cn("flex flex-col gap-2", columns === 2 && "@container", className)}>
+      {filas.length > 0 && (
+        <dl
+          className={cn(
+            "grid items-start gap-x-3 gap-y-0.5 text-sm",
+            columns === 2 ? "grid-cols-[5.25rem_minmax(0,1fr)] @sm:grid-cols-[5.25rem_minmax(0,1fr)_5.25rem_minmax(0,1fr)]" : "grid-cols-[7.5rem_minmax(0,1fr)]"
+          )}
+        >
+          {filas}
+        </dl>
+      )}
       {vacios.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {vacios.map((v) => (
@@ -293,6 +304,87 @@ export function DetailField({
         <div className="min-w-0 flex-1">{autoEdit ? <InlineAutoEdit.Provider value>{children}</InlineAutoEdit.Provider> : children}</div>
       </dd>
     </>
+  )
+}
+
+/**
+ * Lo esencial del registro, arriba y sin plegar: estado, enlaces y los cuatro datos que se miran
+ * siempre. Va justo debajo de la cabecera, antes de las pestañas o de los bloques. Todo lo demás
+ * (el perfil completo, los campos propios) queda en su pestaña o en sus bloques.
+ */
+export function DetailSummary({ className, ...props }: React.ComponentProps<"div">) {
+  return <div data-slot="detail-summary" className={cn("flex flex-none flex-col gap-2.5 border-b px-4 py-3", className)} {...props} />
+}
+
+export type DetailLink = {
+  key: string
+  /** Nombre del enlace («LinkedIn», «Web»): es su `aria-label` y el texto de «Añadir …». */
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  /** Sin `href` el enlace está vacío: se pinta atenuado y, si hay `editor`, al pulsarlo se abre para rellenarlo. */
+  href?: string | null
+  /** Lo que enseña al pasar el ratón (el dominio, el usuario). Por defecto, `label`. */
+  title?: string
+}
+
+/**
+ * Los enlaces de un registro (web, LinkedIn, Instagram, teléfono) como iconos en una fila, para
+ * que no ocupen una línea cada uno. Un clic abre el enlace; el lápiz abre `editor` (los mismos
+ * campos con `InlineField`) para cambiarlos o rellenar los que faltan.
+ */
+export function DetailLinks({
+  links,
+  editor,
+  editLabel = "Editar enlaces",
+  children,
+  className,
+}: {
+  links: DetailLink[]
+  editor?: React.ReactNode
+  editLabel?: string
+  /** Algo más en la misma fila, a la derecha (una cifra, una insignia). */
+  children?: React.ReactNode
+  className?: string
+}) {
+  const [editando, setEditando] = React.useState(false)
+  const caja = "inline-flex size-7 flex-none items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 [&_svg]:size-3.5"
+  return (
+    <div data-slot="detail-links" className={cn("flex flex-wrap items-center gap-1", className)}>
+      {links.map((l) =>
+        l.href ? (
+          <Tooltip key={l.key}>
+            <TooltipTrigger asChild>
+              <a href={l.href} target={/^(tel|mailto):/.test(l.href) ? undefined : "_blank"} rel="noreferrer" aria-label={l.label} className={cn(caja, "border border-input bg-background text-foreground hover:bg-muted")}>
+                <l.icon />
+              </a>
+            </TooltipTrigger>
+            <TooltipContent>{l.title ?? l.label}</TooltipContent>
+          </Tooltip>
+        ) : editor ? (
+          <Tooltip key={l.key}>
+            <TooltipTrigger asChild>
+              <button type="button" aria-label={`Añadir ${l.label}`} onClick={() => setEditando(true)} className={cn(caja, "border border-dashed border-control/60 text-muted-foreground/60 hover:border-solid hover:bg-muted hover:text-foreground")}>
+                <l.icon />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Añadir {l.label}</TooltipContent>
+          </Tooltip>
+        ) : null
+      )}
+      {editor && (
+        <Popover open={editando} onOpenChange={setEditando}>
+          <PopoverTrigger asChild>
+            <button type="button" aria-label={editLabel} title={editLabel} className={cn(caja, "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+              <PencilIcon />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-80 p-3">
+            {editor}
+          </PopoverContent>
+        </Popover>
+      )}
+      {children && <div className="ml-auto flex min-w-0 items-center gap-2 text-xs text-muted-foreground">{children}</div>}
+    </div>
   )
 }
 

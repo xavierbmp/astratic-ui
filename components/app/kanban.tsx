@@ -47,6 +47,7 @@ export function Kanban<T extends KanbanItem>({
   onColumnTitleClick,
   onAddColumn,
   addColumnLabel = "Añadir columna",
+  density = "default",
 }: {
   columns: KanbanColumn[]
   items: T[]
@@ -66,7 +67,13 @@ export function Kanban<T extends KanbanItem>({
   /** Si se pasa, al final hay una columna estrecha para crear otra. */
   onAddColumn?: () => void
   addColumnLabel?: string
+  /**
+   * `compact` para tableros con muchas tarjetas: columnas más estrechas y tarjetas de dos o tres
+   * líneas, sin monograma. Caben el doble de registros a la vista.
+   */
+  density?: "default" | "compact"
 }) {
+  const compacto = density === "compact"
   const dndId = React.useId()
   const [activeId, setActiveId] = React.useState<string | null>(null)
   const [storedCollapsed, setStoredCollapsed] = useLocalStorage<string[]>(`kanban:${storageKey ?? "_"}`, defaultCollapsed)
@@ -143,11 +150,12 @@ export function Kanban<T extends KanbanItem>({
               empty={colItems.length === 0 ? emptyColumn : null}
               onCollapse={() => toggleCollapsed(col.id)}
               menu={columnMenu?.(col, index)}
+              compact={compacto}
               onTitleClick={onColumnTitleClick ? () => onColumnTitleClick(col) : undefined}
             >
               <SortableContext items={colItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                 {colItems.map((item) => (
-                  <SortableCard key={item.id} id={item.id} open={item.id === openId} onClick={onCardClick ? () => onCardClick(item) : undefined}>
+                  <SortableCard key={item.id} id={item.id} open={item.id === openId} compact={compacto} onClick={onCardClick ? () => onCardClick(item) : undefined}>
                     {renderCard(item, { dragging: item.id === activeId })}
                   </SortableCard>
                 ))}
@@ -169,7 +177,7 @@ export function Kanban<T extends KanbanItem>({
       </div>
       <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.2, 0, 0, 1)" }}>
         {activeItem ? (
-          <div className="rotate-1 cursor-grabbing rounded-lg border bg-card p-3 shadow-pop">
+          <div className={cn("rotate-1 cursor-grabbing rounded-lg border bg-card shadow-pop", compacto ? "px-2.5 py-2" : "p-3")}>
             {renderCard(activeItem, { dragging: true })}
           </div>
         ) : null}
@@ -191,6 +199,7 @@ function KanbanColumnView({
   onCollapse,
   menu,
   onTitleClick,
+  compact,
   children,
 }: {
   column: KanbanColumn
@@ -198,6 +207,7 @@ function KanbanColumnView({
   empty: React.ReactNode
   onCollapse: () => void
   menu?: React.ReactNode
+  compact?: boolean
   onTitleClick?: () => void
   children: React.ReactNode
 }) {
@@ -207,7 +217,8 @@ function KanbanColumnView({
       ref={setNodeRef}
       data-slot="kanban-column"
       className={cn(
-        "flex min-w-52 flex-1 basis-52 flex-col rounded-xl bg-muted/60 p-1.5 transition-colors",
+        "flex flex-1 flex-col rounded-xl bg-muted/60 p-1.5 transition-colors",
+        compact ? "min-w-44 basis-44" : "min-w-52 basis-52",
         isOver && "bg-brand-soft ring-1 ring-brand/40"
       )}
     >
@@ -245,7 +256,7 @@ function KanbanColumnView({
           <div className="mt-0.5 pl-3.5 text-xs font-medium tabular-nums text-muted-foreground">{column.meta}</div>
         )}
       </div>
-      <div className="flex min-h-16 flex-1 flex-col gap-1.5">
+      <div className={cn("flex min-h-16 flex-1 flex-col", compact ? "gap-1" : "gap-1.5")}>
         {children}
         {empty && (
           <div className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">{empty}</div>
@@ -277,7 +288,7 @@ function CollapsedColumn({ column, count, onExpand }: { column: KanbanColumn; co
   )
 }
 
-function SortableCard({ id, open, onClick, children }: { id: string; open?: boolean; onClick?: () => void; children: React.ReactNode }) {
+function SortableCard({ id, open, compact, onClick, children }: { id: string; open?: boolean; compact?: boolean; onClick?: () => void; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   return (
     <div
@@ -287,7 +298,8 @@ function SortableCard({ id, open, onClick, children }: { id: string; open?: bool
       {...listeners}
       onClick={onClick}
       className={cn(
-        "rounded-lg border bg-card p-3 shadow-xs outline-none hover:border-foreground/20 focus-visible:ring-2 focus-visible:ring-ring/50",
+        "rounded-lg border bg-card shadow-xs outline-none hover:border-foreground/20 focus-visible:ring-2 focus-visible:ring-ring/50",
+        compact ? "px-2.5 py-2" : "p-3",
         onClick ? "cursor-pointer" : "cursor-grab",
         open && "border-brand bg-brand-soft hover:border-brand",
         isDragging && "opacity-40"

@@ -102,6 +102,41 @@ export default function KanbanPage() {
         </Example>
       </DocSection>
 
+      <DocSection id="compacto" title="Tablero compacto">
+        <Prose>
+          <p>
+            Cuando por una fase pasan muchos registros (un pipeline de prospección con decenas de marcas por columna),{" "}
+            <code>density=&quot;compact&quot;</code> estrecha las columnas a 176 px y deja la tarjeta en dos o tres líneas
+            de texto, sin monograma: caben el doble a la vista. La tarjeta compacta enseña, por este orden, el nombre
+            del registro con una fecha a la derecha (la de la última interacción), la persona de contacto con el valor
+            a la derecha si lo tiene y, debajo, el principio de lo último que se apuntó. El tablero se ordena por esa
+            fecha, lo más reciente arriba.
+          </p>
+        </Prose>
+        <CodeBlock
+          lang="tsx"
+          code={`<Kanban
+  density="compact"
+  columns={columns}
+  items={items}
+  onChange={mover}
+  renderCard={(o) => (
+    <div className="flex flex-col gap-0.5">
+      <div className="flex items-baseline gap-2">
+        <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">{o.empresa}</span>
+        <span className="flex-none text-[11px] text-muted-foreground tabular-nums">{fmt.date(o.ultimaInteraccionAt)}</span>
+      </div>
+      <div className="flex items-baseline gap-2 text-xs text-muted-foreground">
+        <span className="min-w-0 flex-1 truncate">{o.contacto ?? "Sin contacto"}</span>
+        {o.valor > 0 && <span className="flex-none font-medium text-foreground tabular-nums">{fmt.eur(o.valor)}</span>}
+      </div>
+      {o.ultimoStatus && <span className="truncate text-xs">{o.ultimoStatus}</span>}
+    </div>
+  )}
+/>`}
+        />
+      </DocSection>
+
       <DocSection id="reglas" title="Reglas">
         <Rules
           items={[
@@ -182,6 +217,7 @@ export default function KanbanPage() {
             [<code key="emptyColumn">emptyColumn</code>, <code key="emptyColumn-t">ReactNode</code>, "Texto de la caja discontinua en columnas vacías. Por defecto «Sin registros»."],
             [<code key="storageKey">storageKey</code>, <code key="storageKey-t">string</code>, "Si se pasa, las columnas plegadas se guardan en localStorage con la clave kanban:<storageKey>. Sin ella, se recuerdan solo mientras la página está abierta."],
             [<code key="defaultCollapsed">defaultCollapsed</code>, <code key="defaultCollapsed-t">string[]</code>, "Ids de las columnas que empiezan plegadas. Por defecto ninguna."],
+            [<code key="density">density</code>, <code key="density-t">{'"default" | "compact"'}</code>, "compact estrecha las columnas a 176 px y la tarjeta a dos o tres líneas sin monograma, para tableros con muchas tarjetas. Por defecto default."],
             [<code key="className">className</code>, <code key="className-t">string</code>, "Clases del contenedor de columnas (flex h-full min-h-0 gap-2.5 overflow-x-auto p-3)."],
           ]}
         />

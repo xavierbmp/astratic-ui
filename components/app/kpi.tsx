@@ -21,6 +21,8 @@ export function KpiCard({
   hint,
   delta,
   alert,
+  active,
+  onClick,
   className,
   ...props
 }: React.ComponentProps<"div"> & {
@@ -30,12 +32,33 @@ export function KpiCard({
   hint?: React.ReactNode
   delta?: Delta
   alert?: React.ReactNode
+  /** Con `onClick` la cifra es un atajo (filtra la lista de debajo): `active` la marca como puesta. */
+  active?: boolean
 }) {
+  const pulsable = Boolean(onClick)
   const positive = delta ? (delta.invert ? delta.value < 0 : delta.value > 0) : undefined
   return (
     <div
       data-slot="kpi-card"
-      className={cn("rounded-xl border bg-card px-4 py-3 shadow-xs", className)}
+      role={pulsable ? "button" : undefined}
+      tabIndex={pulsable ? 0 : undefined}
+      aria-pressed={pulsable ? Boolean(active) : undefined}
+      onClick={onClick}
+      onKeyDown={
+        pulsable
+          ? (e) => {
+              if (e.key !== "Enter" && e.key !== " ") return
+              e.preventDefault()
+              e.currentTarget.click()
+            }
+          : undefined
+      }
+      className={cn(
+        "rounded-xl border bg-card px-4 py-3 shadow-xs",
+        pulsable && "cursor-pointer outline-none transition-colors hover:border-foreground/20 hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50",
+        active && "border-brand bg-brand-soft hover:border-brand hover:bg-brand-soft",
+        className
+      )}
       {...props}
     >
       <div className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground">

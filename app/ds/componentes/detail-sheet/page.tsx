@@ -3,6 +3,7 @@ import { DocPage, DocSection, DoDont, Example, NextLinks, Prose, Rules, SpecTabl
 import { CodeBlock } from "@/components/docs/code-block"
 import { DetailSheetDemo } from "@/components/docs/examples/detail-sheet-demo"
 import { FichaRecorridoDemo } from "@/components/docs/examples/ficha-recorrido-demo"
+import { FichaCompactaDemo } from "@/components/docs/examples/ficha-compacta-demo"
 
 export const metadata = { title: "Sheet de detalle" }
 
@@ -51,6 +52,38 @@ const record = i >= 0 ? rows[i] : null
     </>
   )}
 </DetailSheet>`
+
+const exampleCompacta = `<DetailHeader … actions={<><Button variant="outline" size="sm"><SendIcon /> Añadir a campaña</Button>…</>} />
+<DetailSummary>
+  <DetailLinks
+    links={[
+      { key: "web", label: "Web", icon: GlobeIcon, href: web, title: dominio },
+      { key: "linkedin", label: "LinkedIn", icon: Linkedin, href: linkedin },
+      { key: "telefono", label: "Teléfono", icon: PhoneIcon, href: telefono ? \`tel:\${telefono}\` : null },
+    ]}
+    editor={<DetailFields>…los mismos campos con InlineField…</DetailFields>}
+  >
+    2.642 seguidores
+  </DetailLinks>
+  <DetailFields columns={2}>
+    <DetailField label="Fase">…</DetailField>
+    <DetailField label="Valor">…</DetailField>
+    <DetailField label="Contacto">…</DetailField>
+    <DetailField label="Cierre" empty={!cierre}>…</DetailField>
+  </DetailFields>
+</DetailSummary>
+<Tabs defaultValue="seguimiento">…
+  <InteractionLog
+    entries={seguimiento}
+    autoEditId={recienApuntado}
+    actions={<>
+      <Button variant="outline" size="sm" onClick={() => apuntar("followup")}><SendIcon /> Follow-up</Button>
+      <Button variant="outline" size="sm" onClick={() => apuntar("status")}><MessageSquareTextIcon /> Status</Button>
+    </>}
+    onSaveNote={(e, nota) => guardarNota(e.id, nota)}
+    onDelete={(e) => setBorrar(e)}
+  />
+</Tabs>`
 
 const exampleSplit = `<DetailSheet open={open} onOpenChange={(o) => !o && tryTo(close)} width={1040}>
   <DetailHeader … nav={<RecordPager … />} />
@@ -156,6 +189,49 @@ export default function DetailSheetPage() {
             <>
               <strong>Pie</strong> (<code>DetailFooter</code>): «Cerrar» ghost y la acción principal del registro
               («Avanzar fase», «Añadir a campaña»). Cuando no aplica se deshabilita, no desaparece.
+            </>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="resumen" title="Resumen arriba y seguimiento">
+        <Prose>
+          <p>
+            Cuando la ficha se abre decenas de veces al día (prospectar, hacer seguimiento), lo que se mira siempre no
+            puede estar repartido en bloques que hay que recorrer. Va arriba, en un <code>DetailSummary</code> fijo
+            justo debajo de la cabecera: los enlaces del registro como iconos en una fila (<code>DetailLinks</code>: un
+            clic abre el enlace, el lápiz los edita y los que faltan se ven atenuados) y sus cuatro o seis datos clave
+            en dos columnas (<code>DetailFields columns={"{2}"}</code>). El perfil completo, las etiquetas y los campos
+            propios pasan a una pestaña «Datos».
+          </p>
+          <p>
+            Debajo, el trabajo. Para un registro al que se le hace seguimiento, <code>InteractionLog</code>: cada botón
+            («Follow-up», «Status») <strong>crea la entrada al pulsarlo</strong>, con la fecha de hoy; la nota es
+            opcional y se escribe después en la propia tarjeta. Queda el historial, lo último arriba. La tarjeta del
+            kanban enseña el principio de la última entrada.
+          </p>
+        </Prose>
+        <Example title="Resumen compacto y registro de seguimiento" description="Pulsa el icono atenuado o el lápiz para rellenar un enlace. «Status» crea la entrada con la nota ya editándose; «Follow-up» la crea sin más." code={exampleCompacta}>
+          <FichaCompactaDemo />
+        </Example>
+        <Rules
+          items={[
+            <>
+              <strong>Las acciones del trabajo, arriba.</strong> En la cabecera van las dos o tres que mueven el
+              registro por su flujo («Normalizada», «Añadir a campaña», «Nuevo contacto»); el resto, en «…». Una acción
+              que ya no aplica no se enseña.
+            </>,
+            <>
+              <strong>Un bloque solo sale si tiene algo.</strong> Las listas relacionadas vacías («Campañas»,
+              «Oportunidades») no ocupan sitio en una ficha compacta: se crean desde la cabecera o el pie.
+            </>,
+            <>
+              <strong>Sin formulario previo.</strong> Apuntar un seguimiento cuesta un clic. Nada de diálogos para
+              elegir fecha o tipo: la fecha es hoy y el tipo es el botón.
+            </>,
+            <>
+              <strong>Cada entrada es de quien la apuntó.</strong> Con <code>locked</code> se lee, sin editor ni
+              papelera. Borrar pide confirmación.
             </>,
           ]}
         />
@@ -385,6 +461,23 @@ export default function DetailSheetPage() {
             aceptan las props de su elemento (<code>className</code>, <code>children</code>).
           </p>
         </Prose>
+        <div className="flex flex-col gap-2">
+          <PropsTitle>DetailSummary, DetailLinks e InteractionLog</PropsTitle>
+          <SpecTable
+            columns={["Prop", "Tipo", "Descripción"]}
+            rows={[
+              ["DetailFields columns", <code key="t">1 | 2 · 1</code>, "Con 2, los campos van en dos columnas (datos cortos) y vuelven a una cuando la ficha se estrecha."],
+              ["DetailLinks links", <code key="t">DetailLink[]</code>, "key, label, icon y href. Sin href el enlace está vacío: se pinta atenuado y al pulsarlo se abre el editor."],
+              ["DetailLinks editor", <code key="t">ReactNode</code>, "Los mismos campos con InlineField. Se abre con el lápiz, en un popover."],
+              ["DetailLinks children", <code key="t">ReactNode</code>, "Algo más en la misma fila, a la derecha (una cifra)."],
+              ["InteractionLog entries", <code key="t">LogEntry[]</code>, "id, title, date, note, author, icon, tone y locked. Lo último, primero."],
+              ["InteractionLog actions", <code key="t">ReactNode</code>, "Botones outline sm que crean una entrada."],
+              ["InteractionLog onSaveNote", <code key="t">(entry, note) =&gt; Promise&lt;string | void&gt;</code>, "Si se pasa, la nota se edita en el sitio. Devuelve el error o nada."],
+              ["InteractionLog onDelete", <code key="t">(entry) =&gt; void</code>, "Papelera al pasar el ratón. La página confirma."],
+              ["InteractionLog autoEditId", <code key="t">string | null</code>, "Entrada recién creada cuya nota arranca editándose."],
+            ]}
+          />
+        </div>
       </DocSection>
 
       <DocSection id="instalar" title="Instalar">
@@ -392,7 +485,9 @@ export default function DetailSheetPage() {
         <Prose>
           <p>
             Trae <code>inline-field</code> y <code>multi-select</code>. Para la ficha de dos columnas, además{" "}
-            <code>step-timeline</code> y <code>html-frame</code>.
+            <code>step-timeline</code> y <code>html-frame</code>. Para el registro de seguimiento,{" "}
+            <code>interaction-log</code>; los iconos de LinkedIn e Instagram de <code>DetailLinks</code> salen de{" "}
+            <code>social-icons</code>.
           </p>
         </Prose>
       </DocSection>

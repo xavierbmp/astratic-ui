@@ -230,7 +230,7 @@
       "name": "kanban",
       "type": "registry:component",
       "title": "Kanban",
-      "description": "Tablero por fases con arrastre entre columnas, reordenación, columnas plegables y configurables desde su título y su menú «…», y columna final «Añadir», sobre dnd-kit.",
+      "description": "Tablero por fases con arrastre entre columnas, reordenación, columnas plegables y configurables desde su título y su menú «…», columna final «Añadir» y densidad compacta para tableros con muchas tarjetas, sobre dnd-kit.",
       "dependencies": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "lucide-react"],
       "registryDependencies": ["button", "dropdown-menu"],
       "files": [
@@ -268,7 +268,7 @@
       "name": "detail-sheet",
       "type": "registry:component",
       "title": "Sheet de detalle",
-      "description": "La ficha de un registro: cabecera con nombre editable (InlineTitle) y flechas anterior/siguiente (RecordPager), cuerpo por bloques plegables con campos editables en el sitio y los vacíos como «+ Campo», línea de sistema y pie. Incluye DetailSplit para fichas de dos columnas.",
+      "description": "La ficha de un registro: cabecera con nombre editable (InlineTitle) y flechas anterior/siguiente (RecordPager), resumen fijo arriba (DetailSummary) con los enlaces como iconos (DetailLinks) y campos en dos columnas, cuerpo por bloques plegables con campos editables en el sitio y los vacíos como «+ Campo», línea de sistema y pie. Incluye DetailSplit para fichas de dos columnas.",
       "registryDependencies": ["sheet", "button", "tooltip", "input", "textarea", "switch", "select", "popover", "command", "badge"],
       "files": [
         { "path": "components/app/detail-sheet.tsx", "type": "registry:component" },
@@ -382,6 +382,21 @@
       "registryDependencies": [],
       "files": [
         { "path": "components/app/step-timeline.tsx", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "interaction-log",
+      "type": "registry:component",
+      "title": "Registro de seguimiento",
+      "description": "Lo que se ha ido haciendo con un registro (follow-ups, status), lo último arriba. Cada entrada se crea al pulsar su botón, con la fecha de hoy, y su nota opcional se escribe en la propia tarjeta.",
+      "dependencies": ["lucide-react", "sonner"],
+      "registryDependencies": ["button"],
+      "files": [
+        { "path": "components/app/interaction-log.tsx", "type": "registry:component" },
+        { "path": "components/app/inline-field.tsx", "type": "registry:component" },
+        { "path": "components/app/multi-select.tsx", "type": "registry:component" },
+        { "path": "lib/status.ts", "type": "registry:lib" },
+        { "path": "lib/format.ts", "type": "registry:lib" }
       ]
     },
     {

@@ -11,7 +11,7 @@
 ## Anatomía de una página de operación (orden fijo)
 1. `PageBody` → `PageHeader` (título 27 px, descripción; a la derecha, `tabs` con las pestañas de subpágina si las hay y `actions` con botones outline).
 2. `WorkGrid`, que reparte el resto de la página en dos columnas:
-   - `stats={<KpiRow>}` con 3 a 5 `KpiCard`. Van **dentro** de la columna izquierda, no a ancho completo: `KpiRow` es `auto-fit minmax(180px,1fr)` y se reordena solo al estrecharse.
+   - `stats={<KpiRow>}` con 3 a 5 `KpiCard`. Van **dentro** de la columna izquierda, no a ancho completo: `KpiRow` es `auto-fit minmax(180px,1fr)` y se reordena solo al estrecharse. Cuando las cifras son los tramos de un mismo recorrido (el estado de una base: sin normalizar, listas, en campaña…), van en el orden del trabajo y **cada una filtra la lista** al pulsarla (`KpiCard onClick` + `active`): es una condición más, que se ve en los chips. Cuentan toda la base, no solo las filas cargadas.
    - `toolbar`: **siempre `FilterBar`**, que monta buscador · filtros rápidos · botón «Filtros» · `ToolbarActions` (`ViewSwitcher` + botón principal negro y único) y los chips debajo. «Filtros» es uno más de la fila de rápidos y va **pegado al último visible**; solo las acciones se anclan a la derecha. **Todo en una línea**: los rápidos son la parte elástica y **los que no caben se recogen en un botón «+N» con flecha**, que abre un menú con esos mismos filtros y sus opciones (marcado si alguno está activo). Nunca se tapan ni esconden «Filtros». En móvil el buscador va en su propia línea y, si «+N» y «Filtros» no caben junto a las acciones, estas bajan a la siguiente. La toolbar mide lo que el bloque: nunca queda encima del panel de información.
    - **un** `Section` (bloque de operación) como hijo.
    - `aside={<InsightsPanel storageKey=… blocks=… />}`: ocupa la columna derecha **entera**, desde las cifras hasta el pie del bloque. El panel habla de toda la página, igual que las cifras, así que empiezan a la misma altura; empezar a la altura del bloque lo hacía parecer un apéndice de la tabla.
@@ -52,6 +52,15 @@ Se leen de un vistazo y se editan donde se leen. Orden fijo:
 - `onSave` devuelve el mensaje de error o nada; mientras guarda el campo se atenúa y, si falla, un `toast` lo dice y el valor vuelve atrás. Lo calculado (contadores, fechas de alta) va en `DetailMeta` o con `readOnly`.
 - **Pie** (`DetailFooter`): «Cerrar» ghost y la acción principal del registro.
 
+### Fichas de trabajo diario (prospección, seguimiento)
+Una ficha que se abre decenas de veces al día no puede repartir lo que se mira siempre en bloques que hay que recorrer:
+
+- **Acciones del flujo arriba**, en la cabecera: las dos o tres que mueven el registro («Normalizada», «Añadir a campaña», «Nuevo contacto»). La que ya no aplica no se enseña; el resto, en «…».
+- **Resumen fijo** (`DetailSummary`, justo bajo la cabecera y antes de las pestañas): los enlaces como iconos en una fila (`DetailLinks`: un clic abre, el lápiz edita, los vacíos van atenuados; LinkedIn e Instagram con `SocialIcon`) y los cuatro o seis datos clave en dos columnas (`DetailFields columns={2}`).
+- **Debajo, el trabajo**: los contactos con cargo, email (se copia con un clic) y su LinkedIn; o el seguimiento. Una lista relacionada vacía no ocupa bloque.
+- **El perfil completo, etiquetas y campos propios, en la pestaña «Datos»**. Pestañas: «Resumen» o «Seguimiento» primero, luego «Datos», y después notas, tareas e historial.
+- **Seguimiento** (`InteractionLog`): cada botón («Follow-up», «Status») **crea la entrada al pulsarlo**, con la fecha de hoy; la nota es opcional y se escribe después en la tarjeta (en un status arranca ya editándose). Sin formulario previo. Los follow-ups se numeran solos. Cada entrada la cambia o la borra quien la apuntó o un administrador, y borrar pide confirmación.
+
 ### Fichas de dos columnas
 Para un registro que recorre una secuencia (un contacto dentro de una campaña, un pedido por sus fases): `DetailSheet` ancho (960-1040) con `DetailSplit`. A la izquierda el recorrido (`StepTimeline`: hecho, lo que toca ahora, lo que vendrá, lo que no pasará, cada uno con su fecha) y los datos de ese registro en la secuencia; a la derecha, en grande, el paso elegido. Se abre en lo que toca ahora. En móvil las columnas se apilan.
 
@@ -82,7 +91,7 @@ Nada se configura en una página de ajustes aparte: cada cosa se configura **don
 ## Interacción
 - Fila o tarjeta entera clicable → abre el `DetailSheet`. Checkbox → selecciona. Selección → `BulkBar` flotante, fija al pie de la ventana y centrada (nunca acciones en bloque arriba). Lo seleccionado se ve siempre: fondo `bg-brand-soft` y filo `brand`.
 - Vistas: `table` · `list` · `kanban` · `calendar` · `grid` con sus iconos fijos, en un `ViewSwitcher` segmentado; la vista se recuerda por página y en móvil la tabla cede el sitio a la lista (`RecordList`) o las tarjetas; búsqueda, filtros y selección se comparten entre vistas.
-- Kanban: columnas grises con la cabecera dentro, fases de los extremos plegadas con `defaultCollapsed` cuando no caben; tarjeta con monograma, valor, etiqueta y pie de estado.
+- Kanban: columnas grises con la cabecera dentro, fases de los extremos plegadas con `defaultCollapsed` cuando no caben; tarjeta con monograma, valor, etiqueta y pie de estado. Con muchas tarjetas por fase, `density="compact"`: tarjeta de dos o tres líneas sin monograma (nombre y fecha de la última interacción; contacto y valor; principio de lo último apuntado), ordenadas por esa fecha.
 - Filtros: ver «Filtrar, ordenar y elegir campos». Todo filtro activo se marca en su botón y aparece como chip bajo la toolbar.
 - Destructivo → `ConfirmDialog` con nombre de lo que se borra. Reversible → se ejecuta y el `toast` ofrece «Deshacer».
 - Feedback siempre con `toast` (sonner). Prohibido `alert`, `confirm`, avisos de texto en la toolbar.
