@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { InlineAutoEdit } from "@/components/app/inline-field"
+import { ReportTrigger } from "@/components/app/report-button"
 import type { PanelFicha } from "@/components/app/detail-panel"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 
@@ -115,7 +116,11 @@ export function DetailHeader({
             <Descripcion className="sr-only">Detalle</Descripcion>
           )}
         </div>
-        {nav && <div className="flex-none">{nav}</div>}
+        {/* El bicho de la cabecera del shell queda tapado por la ficha: aquí, a mano para reportar algo de ella. */}
+        <div className="flex flex-none items-center gap-0.5">
+          {nav}
+          <ReportTrigger />
+        </div>
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </Cabecera>

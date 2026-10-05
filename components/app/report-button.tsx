@@ -4,7 +4,8 @@
 // Quien usa el portal cuenta qué falla y, si quiere, señala el elemento en la página. El reporte
 // sale con su contexto (ruta, pantalla, tema, errores recientes y, si lo hay, el elemento con sus
 // contenedores del kit) para que quien lo arregle lo encuentre sin tener que preguntar.
-// Se abre también con ⇧⌘X, que funciona con una ficha o un diálogo abiertos (tapan la cabecera).
+// Se abre también con ⇧⌘X, que funciona con una ficha o un diálogo abiertos (tapan la cabecera), y
+// con `ReportTrigger`, el mismo bicho en pequeño en la cabecera de cada ficha.
 
 import * as React from "react"
 import { createPortal } from "react-dom"
@@ -362,6 +363,40 @@ function SentReports({ load }: { load: () => Promise<ReportItem[]> }) {
   )
 }
 
+// ---------- Abrirlo desde una ficha ----------
+
+// El `ReportButton` principal (el que lleva el atajo) se apunta aquí al montarse, para que
+// `ReportTrigger` abra su diálogo desde una ficha que tapa la cabecera.
+const openers = new Set<() => void>()
+const listeners = new Set<() => void>()
+const notify = () => listeners.forEach((l) => l())
+const subscribe = (l: () => void) => {
+  listeners.add(l)
+  return () => void listeners.delete(l)
+}
+const hasOpener = () => openers.size > 0
+
+/**
+ * El bicho en pequeño para la cabecera de una ficha (`DetailHeader` ya lo lleva): abre el diálogo
+ * del `ReportButton` del shell, que la ficha tapa. Sin un `ReportButton` montado no se pinta.
+ */
+export function ReportTrigger({ className }: { className?: string }) {
+  const available = React.useSyncExternalStore(subscribe, hasOpener, () => false)
+  if (!available) return null
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon-sm" aria-label="Reportar un problema" className={cn("text-muted-foreground", className)} onClick={() => openers.values().next().value?.()}>
+          <BugIcon />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        Reportar un problema <Kbd>⇧⌘X</Kbd>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 // ---------- Botón y diálogo ----------
 
 export function ReportButton({
@@ -409,6 +444,21 @@ export function ReportButton({
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
   }, [shortcut])
+
+  React.useEffect(() => {
+    if (!shortcut) return
+    const open = () => {
+      setPicking(false)
+      setTab("new")
+      show()
+    }
+    openers.add(open)
+    notify()
+    return () => {
+      openers.delete(open)
+      notify()
+    }
+  }, [shortcut, show])
 
   // El diálogo se esconde mientras se señala y vuelve con el borrador intacto.
   const startPicking = () => {

@@ -68,7 +68,9 @@ export default function ReportButtonPage() {
             </>,
             <>
               <strong>⇧⌘X lo abre desde cualquier sitio</strong>, también con una ficha o un diálogo abiertos, que tapan
-              la cabecera. Así se puede señalar algo dentro de un <code>DetailSheet</code>.
+              la cabecera. Así se puede señalar algo dentro de un <code>DetailSheet</code>. Por eso cada ficha lleva
+              además el bicho en pequeño junto a sus flechas (<code>ReportTrigger</code>, ya incluido en{" "}
+              <code>DetailHeader</code>), que abre el mismo diálogo.
             </>,
             <>
               <strong>El contexto va solo</strong>: la ruta con su query (el registro abierto), el tamaño de pantalla, el

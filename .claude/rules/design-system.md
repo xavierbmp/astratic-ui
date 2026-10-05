@@ -99,6 +99,7 @@ Nada se configura en una página de ajustes aparte: cada cosa se configura **don
 
 ## Reportar un problema
 - Todo portal monta `ReportButton` una vez en el shell (prop `report` de `AppShell`): el bicho va en la cabecera, **entre el buscador y la campana**. Nunca un botón flotante ni un enlace de «feedback» por página.
+- La ficha tapa la cabecera, así que `DetailHeader` lleva el bicho en pequeño junto a las flechas (`ReportTrigger`): abre el mismo diálogo del shell. No se añade a mano.
 - `Dialog` de 480 px con dos pestañas: «Nuevo» (qué pasa + «Señalar en la página», opcional) y «Enviados» (cada reporte con su `StatusBadge`, Pendiente · En curso · Resuelto · Descartado, y la respuesta de quien lo cerró).
 - Señalar esconde el diálogo, resalta en `brand` lo que hay bajo el ratón con su nombre del kit y un clic lo elige; Esc cancela y la página no reacciona mientras tanto. ⇧⌘X lo abre desde cualquier sitio, también con una ficha o un diálogo abiertos.
 - El contexto va solo (ruta con la query, pantalla, tema, navegador, últimos errores y los contenedores del kit del elemento): no se pide nada que la página ya sabe.
