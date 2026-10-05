@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
+import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
 import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, PlusIcon, Settings2Icon, XIcon } from "lucide-react"
 import { cn } from "cn"
@@ -326,15 +327,18 @@ export type DetailLink = {
   /** Nombre del enlace («LinkedIn», «Web»): es su `aria-label` y el texto de «Añadir …». */
   label: string
   icon: React.ComponentType<{ className?: string }>
-  /** Sin `href` el enlace está vacío: se pinta atenuado y, si hay `editor`, al pulsarlo se abre para rellenarlo. */
+  /**
+   * Sin `href` el enlace está vacío: se pinta atenuado y, si hay `editor`, al pulsarlo se abre para rellenarlo.
+   * Una ruta del propio portal (`/crm/marcas?registro=…`) se abre en la misma pestaña; el resto, en otra.
+   */
   href?: string | null
   /** Lo que enseña al pasar el ratón (el dominio, el usuario). Por defecto, `label`. */
   title?: string
 }
 
 /**
- * Los enlaces de un registro (web, LinkedIn, Instagram, teléfono) como iconos en una fila, para
- * que no ocupen una línea cada uno. Un clic abre el enlace; el lápiz abre `editor` (los mismos
+ * Los enlaces de un registro (su ficha en el portal, web, LinkedIn, Instagram, teléfono) como iconos
+ * en una fila, para que no ocupen una línea cada uno. Un clic abre el enlace; el lápiz abre `editor` (los mismos
  * campos con `InlineField`) para cambiarlos o rellenar los que faltan.
  */
 export function DetailLinks({
@@ -359,9 +363,15 @@ export function DetailLinks({
         l.href ? (
           <Tooltip key={l.key}>
             <TooltipTrigger asChild>
-              <a href={l.href} target={/^(tel|mailto):/.test(l.href) ? undefined : "_blank"} rel="noreferrer" aria-label={l.label} className={cn(caja, "border border-input bg-background text-foreground hover:bg-muted")}>
-                <l.icon />
-              </a>
+              {l.href.startsWith("/") ? (
+                <Link href={l.href} aria-label={l.label} className={cn(caja, "border border-input bg-background text-foreground hover:bg-muted")}>
+                  <l.icon />
+                </Link>
+              ) : (
+                <a href={l.href} target={/^(tel|mailto):/.test(l.href) ? undefined : "_blank"} rel="noreferrer" aria-label={l.label} className={cn(caja, "border border-input bg-background text-foreground hover:bg-muted")}>
+                  <l.icon />
+                </a>
+              )}
             </TooltipTrigger>
             <TooltipContent>{l.title ?? l.label}</TooltipContent>
           </Tooltip>
