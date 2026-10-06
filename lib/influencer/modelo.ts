@@ -754,6 +754,15 @@ export type PlantillaTarea = {
 
 export type TipoAviso = "oportunidad" | "cambios" | "aprobado" | "cobro" | "astratic"
 
+/** Cómo se llama cada tipo de aviso y su tinte (por tipo de cosa, no por estado). */
+export const TIPOS_AVISO: Record<TipoAviso, { label: string; tint: Tint }> = {
+  oportunidad: { label: "Oportunidades", tint: "lavender" },
+  cambios: { label: "Cambios pedidos", tint: "peach" },
+  aprobado: { label: "Aprobados", tint: "mint" },
+  cobro: { label: "Cobros", tint: "sky" },
+  astratic: { label: "De Astratic", tint: "rose" },
+}
+
 export type Aviso = {
   id: string
   tipo: TipoAviso

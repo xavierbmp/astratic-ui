@@ -570,7 +570,8 @@
         { "path": "lib/influencer/campos-biblioteca.ts", "type": "registry:lib" },
         { "path": "lib/influencer/ajustes.ts", "type": "registry:lib" },
         { "path": "lib/influencer/ics.ts", "type": "registry:lib" },
-        { "path": "lib/influencer/biblia.ts", "type": "registry:lib" }
+        { "path": "lib/influencer/biblia.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/avisos.ts", "type": "registry:lib" }
       ]
     }
   ]

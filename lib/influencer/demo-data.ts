@@ -383,8 +383,16 @@ export const demoAvisoDestacado: Aviso = {
 export const demoAvisos: Aviso[] = [
   { id: "n1", tipo: "cambios", titulo: "Maison Vero ha pedido cambios en el reel", descripcion: "2 notas en la V1", el: "2026-10-06T10:15:00", leido: false, href: "/workspace/collabs/vero/contenidos/vero-reel" },
   { id: "n2", tipo: "aprobado", titulo: "Lumea Skin ha aprobado el guion", el: "2026-10-05T18:20:00", leido: false, href: "/workspace/collabs/lumea/contenidos/lumea-reel" },
-  { id: "n3", tipo: "cobro", titulo: "Cobro vencido: Botánica Lab", descripcion: "Factura 2026-014 · 760 € para ti", el: "2026-10-03T09:00:00", leido: true, href: "/workspace/collabs/botanica-verano" },
-  { id: "n4", tipo: "astratic", titulo: "Tu auditoría de octubre está lista", el: "2026-10-01T12:00:00", leido: true, href: "/workspace/perfil" },
+  { id: "n11", tipo: "astratic", titulo: "Capítulo actualizado en la Biblia: Facturar y cobrar", descripcion: "Con las fechas de Verifactu", el: "2026-10-05T12:00:00", leido: false, href: "/workspace/biblia/facturar" },
+  { id: "n5", tipo: "cobro", titulo: "Bloom Beauty te ha pagado", descripcion: "Factura 2026-015 · 1.800 €", el: "2026-10-05T10:30:00", leido: true, href: "/workspace/cobros?registro=bloom-delineador-p1" },
+  { id: "n6", tipo: "aprobado", titulo: "Glow Studio ha aprobado la V2 del reel", el: "2026-10-04T12:10:00", leido: true, href: "/workspace/collabs/glow/contenidos/glow-reel" },
+  { id: "n3", tipo: "cobro", titulo: "Cobro vencido: Botánica Lab", descripcion: "Factura 2026-014 · 760 € para ti", el: "2026-10-03T09:00:00", leido: true, href: "/workspace/cobros?registro=botanica-verano-p1" },
+  { id: "n7", tipo: "oportunidad", titulo: "Oferta de la red: Soleil Paris", descripcion: "900 € por dos reels", el: "2026-10-03T13:00:00", leido: true, href: "/workspace/crm?registro=p-soleil" },
+  { id: "n8", tipo: "astratic", titulo: "Tu propuesta de tarifa para TikTok está en revisión", el: "2026-10-02T16:00:00", leido: true, href: "/workspace/perfil/tarifas?registro=tiktok" },
+  { id: "n9", tipo: "cambios", titulo: "Glow Studio ha pedido cambios en el reel", descripcion: "1 nota en la V1", el: "2026-10-02T09:30:00", leido: true, href: "/workspace/collabs/glow/contenidos/glow-reel" },
+  { id: "n10", tipo: "aprobado", titulo: "Maison Vero ha aprobado el TikTok", el: "2026-09-30T09:45:00", leido: true, href: "/workspace/collabs/vero/contenidos/vero-tiktok" },
+  { id: "n12", tipo: "cobro", titulo: "Brisa Nails te ha pagado", descripcion: "Factura 2026-013 · 1.700 €", el: "2026-09-26T11:00:00", leido: true, href: "/workspace/cobros?registro=brisa-verano-p1" },
+  { id: "n4", tipo: "astratic", titulo: "Tu auditoría de septiembre está lista", descripcion: "Tramo 50K–100K · 7 mejoras", el: "2026-09-15T12:00:00", leido: true, href: "/workspace/perfil/auditoria" },
 ]
 
 export const demoEnlaces: Enlace[] = [
