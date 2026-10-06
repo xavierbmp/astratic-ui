@@ -28,6 +28,7 @@ import {
   ShapesIcon,
   SignpostIcon,
   SlidersHorizontalIcon,
+  KanbanSquareIcon,
   SmartphoneIcon,
   SparklesIcon,
   SwatchBookIcon,
@@ -123,6 +124,7 @@ export const influencerNav: NavGroup[] = [
       { id: "iw-fundamentos", label: "Fundamentos", href: "/ds/influencer/fundamentos", icon: SwatchBookIcon },
       { id: "iw-componentes", label: "Componentes", href: "/ds/influencer/componentes", icon: BoxesIcon },
       { id: "iw-patrones", label: "Página de inicio", href: "/ds/influencer/patrones", icon: SmartphoneIcon },
+      { id: "iw-operar", label: "Páginas de operar", href: "/ds/influencer/operar", icon: KanbanSquareIcon },
     ],
   },
 ]

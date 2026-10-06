@@ -76,16 +76,16 @@ export default function InfluencerPatronesPage() {
       <DocSection id="siguientes" title="Lo que viene">
         <Prose>
           <p>
-            Con el Inicio validado se diseñan, en este orden, Perfil y tarifas, Propuestas, Collabs (con la ficha de
-            collab), Contenidos (con la revisión de guion y vídeo), Cobros, Biblia y Ajustes. Cada una tendrá aquí su
-            página de patrón antes de construirse.
+            Construidas después del Inicio: Propuestas y Collabs con su ficha completa (brief, contenidos con la revisión
+            de guion y vídeo, materiales y tareas), en <a href="/ds/influencer/operar" className="text-brand underline-offset-2 hover:underline">Páginas de operar</a>.
+            Quedan Tareas (la página general), Contenidos (la biblioteca), Cobros, Perfil y tarifas, Biblia y Ajustes.
           </p>
         </Prose>
       </DocSection>
 
       <NextLinks
         links={[
-          { href: "/workspace", label: "Abrir la demo", text: "El Inicio con datos de ejemplo." },
+          { href: "/workspace", label: "Abrir el workspace", text: "El Inicio con datos de ejemplo." },
           { href: "/ds/influencer/componentes", label: "Componentes", text: "Las piezas de la página." },
         ]}
       />
