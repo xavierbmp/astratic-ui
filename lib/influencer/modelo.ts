@@ -856,6 +856,30 @@ export type PreferenciasAvisos = {
 /** Un dispositivo con la sesión abierta. */
 export type Sesion = { id: string; dispositivo: string; lugar: string; ultimaVez: string; actual?: boolean }
 
+// ───────────────────────── Biblia ─────────────────────────
+
+/** Un trozo de un capítulo: texto, una lista, un consejo destacado o un enlace a una página del workspace. */
+export type BloqueBiblia =
+  | { tipo: "parrafo"; texto: string }
+  | { tipo: "lista"; items: string[] }
+  | { tipo: "consejo"; texto: string }
+  | { tipo: "enlace"; texto: string; href: string }
+
+/** Un capítulo de la guía de la red. Lo escribe Astratic; ella lo lee y lo marca como leído. */
+export type CapituloBiblia = {
+  id: string
+  titulo: string
+  resumen: string
+  minutos: number
+  /** Los que conviene leer antes de la primera collab. */
+  esencial?: boolean
+  secciones: { titulo: string; bloques: BloqueBiblia[] }[]
+  actualizadoEl: string
+}
+
+/** Cuándo leyó cada capítulo, por su id. */
+export type LecturasBiblia = Record<string, string>
+
 // ───────────────────────── Auditoría y tarifas ─────────────────────────
 
 export type AreaMejora = "perfil" | "contenido" | "frecuencia" | "audiencia" | "marcas"

@@ -73,6 +73,11 @@
 - **Tarifas** es de operar: tabla por formato con salida, mínimo y CPM (`lib/influencer/perfil.ts`: solo los formatos medidos por visualizaciones de vídeo, `FORMATOS_CON_CPM`, y la comparación con la referencia solo en vídeo corto, `FORMATOS_CON_REFERENCIA`). Seis formatos fijos: sin buscador ni filtros. Cambiar una tarifa es proponerla (`CambioTarifa`, pendiente hasta que Astratic la acepta; una nueva sustituye a la pendiente). Panel: simulador de presupuesto para contestar por DM, extras y propuestas.
 - **Auditoría** (`Auditoria`): resumen, tramo, CPM, cifras frente a la anterior (`compararCifras`), lo que funciona y las mejoras por área, que ella marca al hacerlas (`CasillaTarea`). Historial a la derecha (`?id=`).
 
+## Biblia (`/workspace/biblia`, 2026-10-06)
+- La guía de la red, que escribe Astratic (en el portal, desde su lado; aquí, `demo-biblia.ts`). Capítulos con secciones de bloques tipados (`BloqueBiblia`: párrafo, lista, consejo, enlace a una página del workspace), sin Markdown ni HTML que pintar a ciegas. Los esenciales se marcan; lo leído se guarda por capítulo (`LecturasBiblia`) y, si Astratic cambia uno ya leído, sale «Actualizado».
+- Índice con el progreso y el capítulo que toca (`capituloRecomendado`), la lista de antes de publicar y dónde están las plantillas. Cada capítulo en su página (`/workspace/biblia/[id]`) con su índice, «Marcar como leído» y anterior y siguiente.
+- El texto sigue la guía de redacción de Xavier (sin guiones largos, dos puntos ni punto y coma en el texto corrido; un test lo vigila) y solo dice lo que es cierto hoy.
+
 ## Ajustes (`/workspace/ajustes`, 2026-10-06)
 - Es «Mi cuenta», no configuración del producto (eso sigue in situ): sus datos personales y de acceso, los fiscales, su acuerdo con Astratic, los avisos y las conexiones. Pestañas en `ajustesTabs` (`nav.ts`), estado común en `AjustesProvider` y marco común `AjustesMarco` (lo que se edita a la izquierda; quién lo ve y para qué, a la derecha).
 - Todo se edita en el sitio y se guarda al momento, como en las fichas. El NIF, NIE o CIF y el IBAN se comprueban con su control antes de guardarse (`lib/influencer/ajustes.ts`), y con sociedad se pide CIF. `FormaFiscal` incluye «sin alta» con su aviso; `faltaParaFacturar` dice qué falta.

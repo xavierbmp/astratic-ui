@@ -21,6 +21,7 @@ import {
   demoTareas,
 } from "@/lib/influencer/demo-data"
 import { demoCollabs, demoMateriales } from "@/lib/influencer/demo-collabs"
+import { demoAntesDePublicar, demoCapitulosBiblia, demoLecturasBiblia } from "@/lib/influencer/demo-biblia"
 import {
   demoAcuerdo,
   demoAstratic,
@@ -128,6 +129,11 @@ export const obtenerDatosPersonales = () => demoDatosPersonales
 export const obtenerAcuerdo = () => demoAcuerdo
 export const obtenerPreferencias = () => demoPreferencias
 export const listarSesiones = () => demoSesiones
+
+export const listarCapitulosBiblia = () => demoCapitulosBiblia
+export const obtenerCapituloBiblia = (id: string) => demoCapitulosBiblia.find((c) => c.id === id) ?? null
+export const obtenerLecturasBiblia = () => demoLecturasBiblia
+export const listarAntesDePublicar = () => demoAntesDePublicar
 /** A quién se factura en las collabs de la red. */
 export const datosAstratic = () => demoAstratic
 
