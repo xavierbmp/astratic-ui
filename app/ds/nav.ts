@@ -28,7 +28,9 @@ import {
   ShapesIcon,
   SignpostIcon,
   SlidersHorizontalIcon,
+  SmartphoneIcon,
   SparklesIcon,
+  SwatchBookIcon,
   SquareIcon,
   SquareKanbanIcon,
   Table2Icon,
@@ -106,6 +108,21 @@ export const dsNav: NavGroup[] = [
       { id: "documentos", label: "Documentos y PDF", href: "/ds/documentos", icon: FileTextIcon },
       { id: "doc-elaborada", label: "Propuesta elaborada", href: "/ds/documentos/elaborada", icon: BookOpenTextIcon },
       { id: "doc-simple", label: "Propuesta simple", href: "/ds/documentos/simple", icon: ScrollTextIcon },
+    ],
+  },
+]
+
+/* Design system hijo «Influencer Workspace»: misma documentación, con su propia navegación. El shell
+   de /ds cambia de uno a otro con el selector de la cabecera según la ruta. */
+export const influencerBrand: Brand = { name: "Influencer Workspace", tagline: "Design system hijo", monogram: "IW" }
+
+export const influencerNav: NavGroup[] = [
+  {
+    items: [
+      { id: "iw-intro", label: "Introducción", href: "/ds/influencer", icon: BookOpenIcon },
+      { id: "iw-fundamentos", label: "Fundamentos", href: "/ds/influencer/fundamentos", icon: SwatchBookIcon },
+      { id: "iw-componentes", label: "Componentes", href: "/ds/influencer/componentes", icon: BoxesIcon },
+      { id: "iw-patrones", label: "Página de inicio", href: "/ds/influencer/patrones", icon: SmartphoneIcon },
     ],
   },
 ]

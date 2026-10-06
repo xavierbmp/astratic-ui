@@ -471,6 +471,25 @@
         { "path": "components/app/detail-panel.tsx", "type": "registry:component" },
         { "path": "components/app/record-actions.tsx", "type": "registry:component" }
       ]
+    },
+    {
+      "name": "influencer-workspace",
+      "type": "registry:block",
+      "title": "Influencer Workspace (design system hijo)",
+      "description": "Capa de estilo y componentes del workspace de influencers: bloque, cifra, tarjeta de collab, tarea, mini perfil, avisos, directorio de enlaces y barra inferior del móvil. Requiere el tema `.theme-influencer` de globals.css.",
+      "dependencies": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "react-hook-form", "@hookform/resolvers", "zod", "sonner", "lucide-react"],
+      "registryDependencies": ["button", "dialog", "field", "input", "tabs"],
+      "files": [
+        { "path": "components/influencer/block.tsx", "type": "registry:component" },
+        { "path": "components/influencer/stat-tile.tsx", "type": "registry:component" },
+        { "path": "components/influencer/collab-card.tsx", "type": "registry:component" },
+        { "path": "components/influencer/task-card.tsx", "type": "registry:component" },
+        { "path": "components/influencer/profile-panel.tsx", "type": "registry:component" },
+        { "path": "components/influencer/notice-card.tsx", "type": "registry:component" },
+        { "path": "components/influencer/link-grid.tsx", "type": "registry:component" },
+        { "path": "components/influencer/mobile-tab-bar.tsx", "type": "registry:component" },
+        { "path": "lib/influencer/tints.ts", "type": "registry:lib" }
+      ]
     }
   ]
 }
