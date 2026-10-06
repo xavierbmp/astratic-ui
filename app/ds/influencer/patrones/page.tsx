@@ -85,7 +85,6 @@ export default function InfluencerPatronesPage() {
 
       <NextLinks
         links={[
-          { href: "/workspace", label: "Abrir el workspace", text: "El Inicio con datos de ejemplo." },
           { href: "/ds/influencer/componentes", label: "Componentes", text: "Las piezas de la página." },
         ]}
       />

@@ -112,9 +112,6 @@ export default function InfluencerOperarPage() {
 
       <NextLinks
         links={[
-          { href: "/workspace/crm", label: "CRM", text: "El pipeline con datos de ejemplo." },
-          { href: "/workspace/collabs/vero", label: "Ficha de collab", text: "Maison Vero · Colección otoño." },
-          { href: "/revisar/rv-vero-reel-m1", label: "Revisión de la marca", text: "Lo que ve la marca con el enlace." },
           { href: "/ds/influencer/componentes", label: "Componentes", text: "Las piezas de operar." },
         ]}
       />

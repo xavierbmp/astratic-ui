@@ -86,7 +86,6 @@ export function WorkspaceShell({ children }) {
           { href: "/ds/influencer/fundamentos", label: "Fundamentos", text: "Superficies, forma, tintes y espacio." },
           { href: "/ds/influencer/componentes", label: "Componentes", text: "Bloque, cifra, tarjeta de collab, tarea, perfil, avisos, enlaces y barra del móvil." },
           { href: "/ds/influencer/patrones", label: "Página de inicio", text: "La anatomía de la primera página y sus reglas." },
-          { href: "/workspace", label: "Abrir la demo", text: "El Inicio con datos de ejemplo." },
         ]}
       />
     </DocPage>

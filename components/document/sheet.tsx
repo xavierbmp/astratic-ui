@@ -3,7 +3,7 @@ import { ArrowDownIcon, ArrowRightIcon } from "lucide-react"
 import { cn } from "cn"
 
 /* El logotipo usa la tipografía de la web de Astratic; el resto del documento, Geist. */
-const logoFont = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["700", "800"] })
+const logoFont = Plus_Jakarta_Sans({ subsets: ["latin"] })
 
 /**
  * Lienzo de un documento A4 (propuestas, presupuestos, informes). En pantalla muestra las hojas sobre

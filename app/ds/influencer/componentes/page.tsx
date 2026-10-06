@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { BanknoteIcon, CircleCheckIcon, MessageSquareWarningIcon, SparklesIcon, WalletIcon } from "lucide-react"
 import { fmt } from "@/lib/format"
 import { HOY, demoMarcas, demoPerfil } from "@/lib/influencer/demo-data"
@@ -190,7 +189,7 @@ const [editing, setEditing] = useState(false)
         <Prose>
           <p>
             <code>MobileTabBar</code> recibe las mismas entradas que la sidebar (<code>workspaceTabs</code> en{" "}
-            <code>app/workspace/nav.ts</code>) y marca la activa por la ruta. Se ve en la demo con el navegador por
+            <code>app/workspace/nav.ts</code> de la app del workspace) y marca la activa por la ruta. Se ve con el navegador por
             debajo de 768 px. Las páginas llevan <code>pb-28 md:pb-10</code> para que no tape el final.
           </p>
         </Prose>
@@ -261,10 +260,10 @@ const [editing, setEditing] = useState(false)
 <PiezaCard pieza={pieza} tint={collab.tint} hoy={hoy} href="…" compacta activa parteActiva="media" />`}>
           <div className="grid w-full gap-4 lg:grid-cols-[minmax(0,1fr)_264px]">
             <div className="flex flex-col gap-2">
-              <PiezaCard pieza={demoCollabs[2].piezas[0]} tint="peach" hoy={HOY.slice(0, 10)} href="/workspace/collabs/vero/contenidos/vero-reel" />
-              <PiezaCard pieza={demoCollabs[0].piezas[2]} tint="rose" hoy={HOY.slice(0, 10)} href="/workspace/collabs/lumea/contenidos/lumea-foto" />
+              <PiezaCard pieza={demoCollabs[2].piezas[0]} tint="peach" hoy={HOY.slice(0, 10)} href="#" />
+              <PiezaCard pieza={demoCollabs[0].piezas[2]} tint="rose" hoy={HOY.slice(0, 10)} href="#" />
             </div>
-            <PiezaCard pieza={demoCollabs[2].piezas[0]} tint="peach" hoy={HOY.slice(0, 10)} href="/workspace/collabs/vero/contenidos/vero-reel" compacta activa parteActiva="media" />
+            <PiezaCard pieza={demoCollabs[2].piezas[0]} tint="peach" hoy={HOY.slice(0, 10)} href="#" compacta activa parteActiva="media" />
           </div>
         </Example>
       </DocSection>
@@ -315,7 +314,7 @@ const [editing, setEditing] = useState(false)
         </Example>
         <Prose>
           <p>
-            En la pieza (<Link href="/workspace/collabs/vero/contenidos/vero-reel" className="text-brand underline-offset-2 hover:underline">el reel de Maison Vero</Link>) y en lo que ve la marca (<Link href="/revisar/rv-vero-reel-m1" className="text-brand underline-offset-2 hover:underline">su revisión</Link>). <code>lado="marca"</code> deja escribir notas ancladas; <code>lado="influencer"</code>, resolverlas, contestar y escribir a la marca.
+            En la pieza, junto al guion o al vídeo, y en lo que ve la marca con el enlace de revisión. <code>lado="marca"</code> deja escribir notas ancladas; <code>lado="influencer"</code>, resolverlas, contestar y escribir a la marca.
           </p>
         </Prose>
       </DocSection>
@@ -345,7 +344,6 @@ const [editing, setEditing] = useState(false)
         links={[
           { href: "/ds/influencer/patrones", label: "Página de inicio", text: "Cómo se juntan estas piezas en la primera página." },
           { href: "/ds/influencer/operar", label: "Páginas de operar", text: "Propuestas, Collabs, la ficha de collab, la pieza y la revisión." },
-          { href: "/workspace", label: "Abrir el workspace", text: "Todo junto con datos de ejemplo." },
         ]}
       />
     </DocPage>

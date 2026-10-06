@@ -12,7 +12,7 @@ import { dsBrand, dsNav, dsUser, influencerBrand, influencerNav } from "./nav"
 /** Los design systems documentados en /ds: el original y sus hijos. La ruta decide cuál está abierto. */
 const DESIGN_SYSTEMS = [
   { id: "astratic-ui", label: "Astratic UI", href: "/ds", demo: "/demo", brand: dsBrand, nav: dsNav },
-  { id: "influencer", label: "Influencer Workspace", href: "/ds/influencer", demo: "/workspace", brand: influencerBrand, nav: influencerNav },
+  { id: "influencer", label: "Influencer Workspace", href: "/ds/influencer", demo: null, brand: influencerBrand, nav: influencerNav },
 ] as const
 
 export function DsShell({ children }: { children: React.ReactNode }) {
@@ -42,11 +42,13 @@ export function DsShell({ children }: { children: React.ReactNode }) {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" asChild className="hidden lg:inline-flex">
-            <Link href={current.demo}>
-              <LayoutDashboardIcon /> Abrir la demo
-            </Link>
-          </Button>
+          {current.demo && (
+            <Button variant="outline" size="sm" asChild className="hidden lg:inline-flex">
+              <Link href={current.demo}>
+                <LayoutDashboardIcon /> Abrir la demo
+              </Link>
+            </Button>
+          )}
         </>
       }
     >
