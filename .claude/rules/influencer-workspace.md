@@ -78,6 +78,11 @@
 - Índice con el progreso y el capítulo que toca (`capituloRecomendado`), la lista de antes de publicar y dónde están las plantillas. Cada capítulo en su página (`/workspace/biblia/[id]`) con su índice, «Marcar como leído» y anterior y siguiente.
 - El texto sigue la guía de redacción de Xavier (sin guiones largos, dos puntos ni punto y coma en el texto corrido; un test lo vigila) y solo dice lo que es cierto hoy.
 
+## Avisos y primeros pasos (2026-10-06)
+- `/workspace/avisos`: todos los avisos agrupados por día (`agruparAvisos`), con filtros por tipo (`TIPOS_AVISO`, con su tinte) y sin leer; abrir uno lo marca y lleva a su sitio. El Inicio enseña los cuatro últimos.
+- Primeros pasos, arriba del Inicio: la lista de alta (`primerosPasos`), cada paso hecho o no según los datos (perfil, mención en la bio, datos fiscales, esenciales de la Biblia, curso de Autocontrol). Desaparece al completarla o al ocultarla (se recuerda en el navegador).
+- Una dirección del workspace que no existe cae en `[...seccion]`, que lo dice sin salir del shell.
+
 ## Ajustes (`/workspace/ajustes`, 2026-10-06)
 - Es «Mi cuenta», no configuración del producto (eso sigue in situ): sus datos personales y de acceso, los fiscales, su acuerdo con Astratic, los avisos y las conexiones. Pestañas en `ajustesTabs` (`nav.ts`), estado común en `AjustesProvider` y marco común `AjustesMarco` (lo que se edita a la izquierda; quién lo ve y para qué, a la derecha).
 - Todo se edita en el sitio y se guarda al momento, como en las fichas. El NIF, NIE o CIF y el IBAN se comprueban con su control antes de guardarse (`lib/influencer/ajustes.ts`), y con sociedad se pide CIF. `FormaFiscal` incluye «sin alta» con su aviso; `faltaParaFacturar` dice qué falta.
