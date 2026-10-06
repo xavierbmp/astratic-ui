@@ -440,6 +440,15 @@ export type Material = {
 
 // ───────────────────────── Facturación ─────────────────────────
 
+/** Cómo factura: como autónoma, con una sociedad o aún sin darse de alta. */
+export type FormaFiscal = "autonoma" | "sociedad" | "sin-alta"
+
+export const FORMAS_FISCALES: Record<FormaFiscal, { label: string; descripcion: string }> = {
+  autonoma: { label: "Autónoma", descripcion: "Facturas con tu NIF, con IVA y retención de IRPF" },
+  sociedad: { label: "Sociedad", descripcion: "Facturas con el CIF de tu sociedad, sin retención" },
+  "sin-alta": { label: "Aún sin dar de alta", descripcion: "Para cobrar collabs hay que facturar: Astratic te cuenta las opciones" },
+}
+
 /** Sus datos para facturar: salen en cada factura y en el contrato. */
 export type DatosFiscales = {
   /** Nombre y apellidos o razón social. */
@@ -447,7 +456,7 @@ export type DatosFiscales = {
   nif: string
   direccion: string
   iban: string
-  forma: "autonoma" | "sociedad"
+  forma: FormaFiscal
   /** IVA que repercute (21 % en general). */
   ivaPct: number
   /** Retención de IRPF: 15 %, 7 % los primeros años de autónoma, 0 en sociedad. */
@@ -796,6 +805,56 @@ export type Perfil = {
   /** El curso de Autocontrol para influencers: si lo aprobó, sale en su perfil y en el media kit. */
   autocontrol?: { aprobadoEl: string }
 }
+
+// ───────────────────────── Ajustes de su cuenta ─────────────────────────
+
+/** Sus datos personales. La dirección de envío solo la ve la marca de una collab aceptada, para mandarle producto. */
+export type DatosPersonales = {
+  nombreLegal: string
+  /** Con el que entra en el workspace. */
+  emailAcceso: string
+  telefono?: string
+  envio: { direccion: string; cp: string; ciudad: string; provincia: string; notas?: string }
+}
+
+export type PlanAstratic = "red" | "representacion"
+
+export const PLANES_ASTRATIC: Record<PlanAstratic, { label: string; descripcion: string }> = {
+  red: { label: "Red Astratic", descripcion: "Llevas tus collabs con el workspace y Astratic te trae oportunidades de la red." },
+  representacion: { label: "Representación", descripcion: "Además, un gestor de Astratic lleva el trato con la marca en tus collabs." },
+}
+
+/** Su acuerdo con Astratic: el plan, la mención en la bio y la versión de las condiciones que aceptó. */
+export type Acuerdo = {
+  plan: PlanAstratic
+  desde: string
+  /** Cuándo comprobó Astratic que lleva la mención de la red en la bio. */
+  mencionComprobadaEl?: string
+  condiciones: { version: string; aceptadasEl: string }
+  gestor?: { nombre: string; email: string }
+}
+
+export type EventoAviso = "cambios" | "aprobado" | "oportunidad" | "cobro" | "tareas" | "propuesta"
+
+export const EVENTOS_AVISO: { id: EventoAviso; label: string; descripcion: string }[] = [
+  { id: "cambios", label: "La marca pide cambios", descripcion: "En un guion, un vídeo o unas fotos" },
+  { id: "aprobado", label: "La marca aprueba", descripcion: "Un guion o un contenido, listo para el siguiente paso" },
+  { id: "oportunidad", label: "Oportunidad de la red", descripcion: "Astratic te propone una collab" },
+  { id: "cobro", label: "Cobros", descripcion: "Una factura vence o te la pagan" },
+  { id: "tareas", label: "Tareas del día", descripcion: "Lo que vence hoy y lo que se te ha pasado" },
+  { id: "propuesta", label: "Propuestas sin respuesta", descripcion: "Una marca lleva días sin contestar" },
+]
+
+export type CanalAviso = "email" | "movil"
+
+export type PreferenciasAvisos = {
+  eventos: Record<EventoAviso, Record<CanalAviso, boolean>>
+  /** Un email por la mañana con lo del día, en vez de uno por cosa. */
+  resumenDiario: { activo: boolean; hora: string }
+}
+
+/** Un dispositivo con la sesión abierta. */
+export type Sesion = { id: string; dispositivo: string; lugar: string; ultimaVez: string; actual?: boolean }
 
 // ───────────────────────── Auditoría y tarifas ─────────────────────────
 

@@ -567,7 +567,9 @@
         { "path": "lib/influencer/campos-cobros.ts", "type": "registry:lib" },
         { "path": "lib/influencer/perfil.ts", "type": "registry:lib" },
         { "path": "lib/influencer/biblioteca.ts", "type": "registry:lib" },
-        { "path": "lib/influencer/campos-biblioteca.ts", "type": "registry:lib" }
+        { "path": "lib/influencer/campos-biblioteca.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/ajustes.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/ics.ts", "type": "registry:lib" }
       ]
     }
   ]

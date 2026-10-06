@@ -1,7 +1,7 @@
 // Datos de ejemplo de lo que acompaña a las collabs: contratos y sus plantillas, facturas, informes de
 // resultados, formularios para la marca y plantillas de guion. Todo inventado: el repo es público
 // (NIF, IBAN y razones sociales son de relleno).
-import type { Clausula, Contrato, DatosFacturacion, DatosFiscales, Factura, FormularioMarca, Informe, PlantillaContrato, PlantillaGuion } from "@/lib/influencer/modelo"
+import type { Acuerdo, Clausula, Contrato, DatosFacturacion, DatosFiscales, DatosPersonales, Factura, FormularioMarca, Informe, PlantillaContrato, PlantillaGuion, PreferenciasAvisos, Sesion } from "@/lib/influencer/modelo"
 import { historialFacturas } from "@/lib/influencer/demo-historial"
 
 /** Sus datos fiscales: en el portal, los de Ajustes. */
@@ -14,6 +14,39 @@ export const demoDatosFiscales: DatosFiscales = {
   ivaPct: 21,
   irpfPct: 15,
 }
+
+/** Sus datos personales: en el portal, los de Ajustes. Inventados. */
+export const demoDatosPersonales: DatosPersonales = {
+  nombreLegal: "Marta Albiol Ferrer",
+  emailAcceso: "marta@example.com",
+  telefono: "+34 600 000 200",
+  envio: { direccion: "Calle Ejemplo 3, 2.º B", cp: "46002", ciudad: "Valencia", provincia: "Valencia", notas: "Si no estoy, dejar en la portería." },
+}
+
+export const demoAcuerdo: Acuerdo = {
+  plan: "red",
+  desde: "2026-06-10",
+  mencionComprobadaEl: "2026-06-12",
+  condiciones: { version: "1.0", aceptadasEl: "2026-06-10" },
+  gestor: { nombre: "Equipo de Astratic", email: "red@example.com" },
+}
+
+export const demoPreferencias: PreferenciasAvisos = {
+  eventos: {
+    cambios: { email: true, movil: true },
+    aprobado: { email: false, movil: true },
+    oportunidad: { email: true, movil: true },
+    cobro: { email: true, movil: false },
+    tareas: { email: false, movil: true },
+    propuesta: { email: true, movil: false },
+  },
+  resumenDiario: { activo: true, hora: "08:30" },
+}
+
+export const demoSesiones: Sesion[] = [
+  { id: "s1", dispositivo: "iPhone · app del workspace", lugar: "Valencia", ultimaVez: "2026-10-06T11:20:00", actual: true },
+  { id: "s2", dispositivo: "Mac · Safari", lugar: "Valencia", ultimaVez: "2026-10-05T22:10:00" },
+]
 
 /** A quién factura en las collabs de la red. */
 export const demoAstratic: DatosFacturacion = {

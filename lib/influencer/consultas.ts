@@ -22,15 +22,19 @@ import {
 } from "@/lib/influencer/demo-data"
 import { demoCollabs, demoMateriales } from "@/lib/influencer/demo-collabs"
 import {
+  demoAcuerdo,
   demoAstratic,
   demoClausulas,
   demoContratos,
   demoDatosFiscales,
+  demoDatosPersonales,
   demoFacturas,
   demoFormularios,
   demoInformes,
   demoPlantillasContrato,
   demoPlantillasGuion,
+  demoPreferencias,
+  demoSesiones,
 } from "@/lib/influencer/demo-documentos"
 import { COLLABS_ACTIVAS, ESTADOS_ABIERTOS, type Collab, type Informe, type TipoVersion } from "@/lib/influencer/modelo"
 import { marcaDe } from "@/lib/influencer/collabs"
@@ -120,6 +124,10 @@ export function revisionesPendientes(collabId: string) {
 }
 
 export const obtenerDatosFiscales = () => demoDatosFiscales
+export const obtenerDatosPersonales = () => demoDatosPersonales
+export const obtenerAcuerdo = () => demoAcuerdo
+export const obtenerPreferencias = () => demoPreferencias
+export const listarSesiones = () => demoSesiones
 /** A quién se factura en las collabs de la red. */
 export const datosAstratic = () => demoAstratic
 
