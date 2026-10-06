@@ -4,7 +4,7 @@ import * as React from "react"
 import { useUrlFilters } from "@/hooks/use-url-filters"
 import { useQuickFilters, type FiltroRapido } from "@/components/app/quick-filters"
 import { chipsDeGrupo } from "@/components/app/filter-builder"
-import { parseGrupo, serializarGrupo, type CampoFiltrable, type GrupoCondiciones } from "@/lib/filtros/core"
+import { grupoVacio, parseGrupo, serializarGrupo, type CampoFiltrable, type GrupoCondiciones } from "@/lib/filtros/core"
 
 /**
  * Todo el estado de filtrado de una lista: búsqueda, condiciones y filtros rápidos.
@@ -29,7 +29,7 @@ export function useFiltrosAvanzados<T>(
   const chips = React.useMemo(() => chipsDeGrupo(grupo, campos, setGrupo), [grupo, campos, setGrupo])
   const limpiar = React.useCallback(() => filtros.clear(["q", "f"]), [filtros])
 
-  return { filtros, grupo, setGrupo, rapidos, chips, limpiar, hayCondiciones: grupo.condiciones.length > 0 }
+  return { filtros, grupo, setGrupo, rapidos, chips, limpiar, hayCondiciones: !grupoVacio(grupo) }
 }
 
 export type FiltrosAvanzados<T> = ReturnType<typeof useFiltrosAvanzados<T>>

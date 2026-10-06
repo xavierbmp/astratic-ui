@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronDownIcon, ListFilterIcon, PlusIcon, SettingsIcon, SlidersHorizontalIcon, StarIcon, Trash2Icon, XIcon } from "lucide-react"
+import { BracesIcon, CheckIcon, ChevronDownIcon, ListFilterIcon, PlusIcon, SettingsIcon, SlidersHorizontalIcon, StarIcon, Trash2Icon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,8 +10,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect } from "@/components/app/multi-select"
 import {
+  NIVELES_GRUPO,
+  contarCondiciones,
   defOperador,
   describirCondicion,
+  describirGrupo,
+  grupoVacio,
   operadorPorDefecto,
   operadoresDe,
   type CampoFiltrable,
@@ -22,6 +26,8 @@ import {
 /**
  * Constructor de filtros al estilo Airtable: campo + operador + valor, unidos con Y o con O.
  * Los operadores que se ofrecen salen del tipo del campo (texto, número, fecha, lista, sí/no).
+ * Como en Notion, se pueden meter grupos dentro (hasta tres niveles) para mezclar Y con O:
+ * «(Lumea o Nuura) y sin hacer».
  *
  * Es controlado: el grupo de condiciones vive donde lo use la página (normalmente en la URL) y
  * aquí solo se edita. Los filtros rápidos escriben en este mismo grupo, así que todo lo activo
@@ -35,6 +41,8 @@ export function FilterBuilder<T>({
   onCrearCampo,
   onGuardarRapido,
   onEditarRapidos,
+  etiqueta = "Filtros",
+  variant = "outline",
 }: {
   campos: CampoFiltrable<T>[]
   value: GrupoCondiciones
@@ -47,36 +55,40 @@ export function FilterBuilder<T>({
   onGuardarRapido?: (grupo: GrupoCondiciones) => void
   /** Si se pasa, desde aquí se eligen los filtros rápidos que se ven en la toolbar. */
   onEditarRapidos?: () => void
+  /** El texto del botón: «Filtros» en la toolbar, «Filtro de la vista» en la cabecera de una vista. */
+  etiqueta?: string
+  /** `ghost` para ir junto a «Ordenar» y «Agrupar» en la cabecera de una vista. */
+  variant?: "outline" | "ghost"
 }) {
   const [open, setOpen] = React.useState(false)
-  const condiciones = value.condiciones
-  const n = condiciones.length
+  const n = contarCondiciones(value)
+  const conGrupos = (value.grupos ?? []).length > 0
 
-  const set = (condiciones: Condicion[]) => onChange({ ...value, condiciones })
-  const editar = (i: number, cambio: Partial<Condicion>) =>
-    set(condiciones.map((c, j) => (j === i ? { ...c, ...cambio } : c)))
-  const quitar = (i: number) => set(condiciones.filter((_, j) => j !== i))
   const anadir = () => {
     const nueva = condicionNueva(campos)
-    if (nueva) set([...condiciones, nueva])
+    if (nueva) onChange({ ...value, condiciones: [...value.condiciones, nueva] })
+  }
+  const anadirGrupo = () => {
+    const nueva = condicionNueva(campos)
+    if (nueva) onChange({ ...value, grupos: [...(value.grupos ?? []), { union: value.union === "y" ? "o" : "y", condiciones: [nueva] }] })
   }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant={variant}
           size="sm"
           data-active={n > 0 || undefined}
-          className={cn("h-8 flex-none gap-1.5 text-sm", n > 0 && "border-foreground/30 bg-muted/60")}
+          className={cn("h-8 flex-none gap-1.5 text-sm", n > 0 && variant === "outline" && "border-foreground/30 bg-muted/60", n > 0 && "text-foreground")}
         >
           <SlidersHorizontalIcon />
-          <span>Filtros</span>
+          <span>{etiqueta}</span>
           {n > 0 && <span className="rounded-sm bg-foreground px-1.5 text-xs font-medium text-background tabular-nums">{n}</span>}
           <ChevronDownIcon className="text-muted-foreground" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[min(92vw,44rem)] p-0">
+      <PopoverContent align="start" className="w-[min(92vw,46rem)] p-0">
         <div className="flex items-center gap-2 border-b px-3 py-2 text-xs text-muted-foreground">
           <ListFilterIcon className="size-3.5" />
           {n === 0 ? (
@@ -84,31 +96,14 @@ export function FilterBuilder<T>({
           ) : (
             <span className="flex items-center gap-1.5">
               Mostrar {objeto} que cumplen
-              <Select value={value.union} onValueChange={(u) => onChange({ ...value, union: u as "y" | "o" })}>
-                <SelectTrigger size="sm" className="h-6 w-auto gap-1 px-1.5 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="y">todas las condiciones</SelectItem>
-                  <SelectItem value="o">alguna condición</SelectItem>
-                </SelectContent>
-              </Select>
+              <SelectorUnion value={value.union} onChange={(union) => onChange({ ...value, union })} />
             </span>
           )}
         </div>
 
         {n > 0 && (
-          <div className="flex max-h-[50vh] flex-col gap-1.5 overflow-y-auto p-3">
-            {condiciones.map((c, i) => (
-              <FilaCondicion
-                key={`${i}-${c.campo}-${c.op}`}
-                union={value.union}
-                indice={i}
-                condicion={c}
-                campos={campos}
-                onChange={(cambio) => editar(i, cambio)}
-                onRemove={() => quitar(i)}
-                onCrearCampo={onCrearCampo}
-              />
-            ))}
+          <div className="flex max-h-[55vh] flex-col gap-1.5 overflow-y-auto p-3">
+            <ItemsGrupo grupo={value} nivel={1} campos={campos} onChange={onChange} onCrearCampo={onCrearCampo} />
           </div>
         )}
 
@@ -116,13 +111,17 @@ export function FilterBuilder<T>({
           <Button variant="ghost" size="sm" onClick={anadir} disabled={campos.length === 0}>
             <PlusIcon /> Añadir condición
           </Button>
-          {onGuardarRapido && n > 0 && (
+          <Button variant="ghost" size="sm" onClick={anadirGrupo} disabled={campos.length === 0}>
+            <BracesIcon /> Añadir grupo
+          </Button>
+          {/* Un rápido guarda una lista plana de condiciones: con grupos dentro no se puede. */}
+          {onGuardarRapido && n > 0 && !conGrupos && (
             <Button variant="ghost" size="sm" onClick={() => onGuardarRapido(value)}>
               <StarIcon /> Guardar como rápido
             </Button>
           )}
           {n > 0 && (
-            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => set([])}>
+            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => onChange({ union: value.union, condiciones: [] })}>
               <Trash2Icon /> Quitar todos
             </Button>
           )}
@@ -142,6 +141,99 @@ export function FilterBuilder<T>({
         </div>
       </PopoverContent>
     </Popover>
+  )
+}
+
+function SelectorUnion({ value, onChange }: { value: "y" | "o"; onChange: (u: "y" | "o") => void }) {
+  return (
+    <Select value={value} onValueChange={(u) => onChange(u === "o" ? "o" : "y")}>
+      <SelectTrigger size="sm" className="h-6 w-auto gap-1 px-1.5 text-xs"><SelectValue /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="y">todas las condiciones</SelectItem>
+        <SelectItem value="o">alguna condición</SelectItem>
+      </SelectContent>
+    </Select>
+  )
+}
+
+/**
+ * Las condiciones y los grupos de un grupo, en filas: «Donde», y luego «Y» u «O». Cada grupo de
+ * dentro va en su caja, con su propia Y u O y sus botones para añadir.
+ */
+function ItemsGrupo<T>({
+  grupo,
+  nivel,
+  campos,
+  onChange,
+  onCrearCampo,
+}: {
+  grupo: GrupoCondiciones
+  nivel: number
+  campos: CampoFiltrable<T>[]
+  onChange: (next: GrupoCondiciones) => void
+  onCrearCampo?: () => void
+}) {
+  const grupos = grupo.grupos ?? []
+  const setCondiciones = (condiciones: Condicion[]) => onChange({ ...grupo, condiciones })
+  // Un grupo que se queda sin condiciones desaparece: una caja vacía no filtra nada.
+  const setGrupos = (gs: GrupoCondiciones[]) => onChange({ ...grupo, grupos: gs.filter((g) => !grupoVacio(g)) })
+  const prefijo = (i: number) => (i === 0 ? "Donde" : grupo.union === "y" ? "Y" : "O")
+  return (
+    <>
+      {grupo.condiciones.map((c, i) => (
+        <FilaCondicion
+          key={`c-${i}-${c.campo}-${c.op}`}
+          union={grupo.union}
+          indice={i}
+          condicion={c}
+          campos={campos}
+          onChange={(cambio) => setCondiciones(grupo.condiciones.map((x, j) => (j === i ? { ...x, ...cambio } : x)))}
+          onRemove={() => setCondiciones(grupo.condiciones.filter((_, j) => j !== i))}
+          onCrearCampo={onCrearCampo}
+        />
+      ))}
+      {grupos.map((g, i) => (
+        <div key={`g-${i}`} className="flex items-start gap-1.5">
+          <span className="w-12 flex-none pt-2 text-xs text-muted-foreground">{prefijo(grupo.condiciones.length + i)}</span>
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5 rounded-lg border bg-muted/30 p-2">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              Cumplen
+              <SelectorUnion value={g.union} onChange={(union) => setGrupos(grupos.map((x, j) => (j === i ? { ...x, union } : x)))} />
+              <Button variant="ghost" size="icon-sm" aria-label="Quitar grupo" className="ml-auto text-muted-foreground" onClick={() => setGrupos(grupos.filter((_, j) => j !== i))}>
+                <XIcon />
+              </Button>
+            </div>
+            <ItemsGrupo grupo={g} nivel={nivel + 1} campos={campos} onChange={(next) => setGrupos(grupos.map((x, j) => (j === i ? next : x)))} onCrearCampo={onCrearCampo} />
+            <div className="flex flex-wrap gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => {
+                  const nueva = condicionNueva(campos)
+                  if (nueva) setGrupos(grupos.map((x, j) => (j === i ? { ...x, condiciones: [...x.condiciones, nueva] } : x)))
+                }}
+              >
+                <PlusIcon /> Condición
+              </Button>
+              {nivel + 1 < NIVELES_GRUPO && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => {
+                    const nueva = condicionNueva(campos)
+                    if (nueva) setGrupos(grupos.map((x, j) => (j === i ? { ...x, grupos: [...(x.grupos ?? []), { union: x.union === "y" ? "o" : "y", condiciones: [nueva] }] } : x)))
+                  }}
+                >
+                  <BracesIcon /> Grupo
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </>
   )
 }
 
@@ -203,7 +295,7 @@ export function FilaCondicion<T>({
         {def?.sinValor ? (
           <span className="block px-1 text-xs text-muted-foreground">Sin valor</span>
         ) : (
-          <ValorCondicion campo={campo} multiple={def?.multiple} valor={condicion.valor} onChange={(valor) => onChange({ valor })} />
+          <ValorCondicion campo={campo} multiple={def?.multiple} numerico={def?.numerico} sufijo={def?.sufijo} valor={condicion.valor} onChange={(valor) => onChange({ valor })} />
         )}
       </div>
       <Button variant="ghost" size="icon-sm" aria-label="Quitar condición" className="flex-none text-muted-foreground" onClick={onRemove}>
@@ -287,11 +379,16 @@ function SelectorCampo<T>({
 function ValorCondicion<T>({
   campo,
   multiple,
+  numerico,
+  sufijo,
   valor,
   onChange,
 }: {
   campo: CampoFiltrable<T> | undefined
   multiple?: boolean
+  /** El operador pide un número de días, no un valor del campo. */
+  numerico?: boolean
+  sufijo?: string
   valor: string | string[] | undefined
   onChange: (v: string | string[] | undefined) => void
 }) {
@@ -309,6 +406,14 @@ function ValorCondicion<T>({
 
   if (!campo) return null
 
+  if (numerico) {
+    return (
+      <span className="flex items-center gap-1.5">
+        <Input type="number" inputMode="numeric" min={0} placeholder="7" className="h-8 w-20 text-xs" value={texto} onChange={(e) => setTexto(e.target.value)} />
+        {sufijo && <span className="text-xs text-muted-foreground">{sufijo}</span>}
+      </span>
+    )
+  }
   if (multiple) {
     return (
       <MultiSelect
@@ -341,14 +446,24 @@ export function agruparCampos<T>(campos: CampoFiltrable<T>[]): Array<[string, Ca
   return [...mapa.entries()]
 }
 
-/** Chips de las condiciones activas, para `ActiveFilters`. */
+/** Chips de las condiciones activas, para `ActiveFilters`. Cada grupo de dentro va en un chip entero. */
 export function chipsDeGrupo<T>(
   grupo: GrupoCondiciones,
   campos: CampoFiltrable<T>[],
   onChange: (next: GrupoCondiciones) => void,
 ): { label: string; onRemove: () => void }[] {
-  return grupo.condiciones.map((c, i) => ({
-    label: describirCondicion(c, campos),
-    onRemove: () => onChange({ ...grupo, condiciones: grupo.condiciones.filter((_, j) => j !== i) }),
-  }))
+  const grupos = grupo.grupos ?? []
+  return [
+    ...grupo.condiciones.map((c, i) => ({
+      label: describirCondicion(c, campos),
+      onRemove: () => onChange({ ...grupo, condiciones: grupo.condiciones.filter((_, j) => j !== i) }),
+    })),
+    ...grupos
+      .map((g, i) => ({ g, i }))
+      .filter(({ g }) => !grupoVacio(g))
+      .map(({ g, i }) => ({
+        label: describirGrupo(g, campos),
+        onRemove: () => onChange({ ...grupo, grupos: grupos.filter((_, j) => j !== i) }),
+      })),
+  ]
 }

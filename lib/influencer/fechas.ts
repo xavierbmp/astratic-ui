@@ -1,28 +1,9 @@
 // Fechas del workspace: todo se compara por día (AAAA-MM-DD), sin horas ni zonas.
 
-/** «2026-10-06T11:30:00» → «2026-10-06». */
-export function soloFecha(iso: string) {
-  return iso.slice(0, 10)
-}
+import { lunesDe, soloFecha, sumarDias } from "@/lib/filtros/fechas"
 
-export function sumarDias(fecha: string, dias: number) {
-  const d = new Date(`${soloFecha(fecha)}T12:00:00`)
-  d.setDate(d.getDate() + dias)
-  return d.toISOString().slice(0, 10)
-}
-
-/** Días de `a` a `b` (positivo si `b` es después). */
-export function diasEntre(a: string, b: string) {
-  const ms = new Date(`${soloFecha(b)}T12:00:00`).getTime() - new Date(`${soloFecha(a)}T12:00:00`).getTime()
-  return Math.round(ms / 86_400_000)
-}
-
-/** Lunes de la semana de una fecha. */
-export function lunesDe(fecha: string) {
-  const d = new Date(`${soloFecha(fecha)}T12:00:00`)
-  const desplazamiento = (d.getDay() + 6) % 7
-  return sumarDias(fecha, -desplazamiento)
-}
+// Las de comparar por día son las mismas que usan filtros y vistas: viven en `lib/filtros/fechas`.
+export { diasEntre, lunesDe, soloFecha, sumarDias } from "@/lib/filtros/fechas"
 
 /** Las 42 casillas (6 semanas, de lunes a domingo) del mes al que pertenece la fecha. */
 export function casillasDelMes(fecha: string) {

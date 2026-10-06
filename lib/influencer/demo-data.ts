@@ -6,11 +6,13 @@ import type {
   Aviso,
   Contacto,
   Enlace,
+  EtiquetaTarea,
   Interaccion,
   Marca,
   MediaKit,
   Perfil,
   Plantilla,
+  PlantillaTarea,
   Propuesta,
   Tarea,
 } from "@/lib/influencer/modelo"
@@ -229,28 +231,84 @@ export const demoPropuestas: Propuesta[] = [
   },
 ]
 
-export const demoTareas: Tarea[] = [
-  { id: "t1", titulo: "Subir la V2 del reel", hecha: false, fechaLimite: "2026-10-05", relacion: { tipo: "collab", id: "vero" }, origen: "auto", notas: "Ronda 1 de 2: dos notas de Inés en la V1." },
-  { id: "t2", titulo: "Enviar el guion del reel 1 a la marca", hecha: false, fechaLimite: "2026-10-06", relacion: { tipo: "collab", id: "botanica" }, origen: "auto" },
-  { id: "t3", titulo: "Grabar el reel de la rutina de noche", hecha: false, fechaLimite: "2026-10-06", relacion: { tipo: "collab", id: "lumea" }, origen: "manual" },
-  { id: "t4", titulo: "Recoger el paquete en Correos", hecha: true, hechaEl: "2026-10-06T10:00:00", fechaLimite: "2026-10-06", relacion: { tipo: "collab", id: "lumea" }, origen: "manual" },
-  { id: "t5", titulo: "Reclamar la factura 2026-014 a Astratic", hecha: false, fechaLimite: "2026-10-08", relacion: { tipo: "collab", id: "botanica-verano" }, origen: "manual" },
-  { id: "t6", titulo: "Decir a Astratic si entro en la campaña de Nuura", hecha: false, fechaLimite: "2026-10-09", relacion: { tipo: "propuesta", id: "p-nuura" }, origen: "auto" },
-  { id: "t7", titulo: "Grabar las 3 stories", hecha: false, fechaLimite: "2026-10-10", relacion: { tipo: "collab", id: "lumea" }, origen: "manual" },
-  { id: "t8", titulo: "Entregar la V1 del reel", hecha: false, fechaLimite: "2026-10-09", relacion: { tipo: "collab", id: "lumea" }, origen: "auto" },
-  { id: "t9", titulo: "Mandar tarifas y media kit a Kalma", hecha: false, fechaLimite: "2026-10-07", relacion: { tipo: "propuesta", id: "p-kalma" }, origen: "manual" },
-  { id: "t10", titulo: "Contraoferta a Soleil: 1.150 €", hecha: false, fechaLimite: "2026-10-07", relacion: { tipo: "propuesta", id: "p-soleil" }, origen: "manual" },
-  { id: "t11", titulo: "Publicar el reel del SPF", hecha: false, fechaLimite: "2026-10-12", relacion: { tipo: "collab", id: "glow" }, origen: "auto", notas: "Entre las 18 y las 20 h, con el enlace de la bio actualizado." },
-  { id: "t12", titulo: "Publicar el reel del look de otoño", hecha: false, fechaLimite: "2026-10-15", relacion: { tipo: "collab", id: "vero" }, origen: "auto" },
-  { id: "t13", titulo: "Enviar los resultados del TikTok a Maison Vero", hecha: false, fechaLimite: "2026-10-09", relacion: { tipo: "collab", id: "vero" }, origen: "auto" },
-  { id: "t14", titulo: "Seguimiento de la propuesta de Aura Hair", hecha: false, fechaLimite: "2026-10-08", relacion: { tipo: "propuesta", id: "p-aura" }, origen: "manual" },
-  { id: "t15", titulo: "Publicar las 3 stories", hecha: false, fechaLimite: "2026-10-18", relacion: { tipo: "collab", id: "lumea" }, origen: "auto" },
-  { id: "t16", titulo: "Enviar el guion del reel 2", hecha: false, fechaLimite: "2026-10-26", relacion: { tipo: "collab", id: "botanica" }, origen: "auto" },
-  { id: "t17", titulo: "Actualizar el media kit con las cifras de octubre", hecha: false, fechaLimite: "2026-10-10", origen: "manual" },
-  { id: "t18", titulo: "Renovar el dominio de la web", hecha: false, fechaLimite: "2026-10-20", origen: "manual" },
-  { id: "t19", titulo: "Pedir el certificado de Autocontrol", hecha: true, hechaEl: "2026-10-02T12:00:00", fechaLimite: "2026-10-02", origen: "manual" },
-  { id: "t20", titulo: "Escribir a Aceites Brote si no contestan al DM", hecha: false, fechaLimite: "2026-10-09", relacion: { tipo: "marca", id: "brote" }, origen: "manual" },
-  { id: "t21", titulo: "Buscar el email de quien lleva colaboraciones en Nimbo", hecha: false, relacion: { tipo: "marca", id: "nimbo" }, origen: "manual" },
+/** Sus etiquetas, para trabajar por tandas: un día graba, otro edita, otro hace papeles. */
+export const demoEtiquetasTarea: EtiquetaTarea[] = [
+  { id: "e-grabar", nombre: "Grabar", tint: "rose" },
+  { id: "e-editar", nombre: "Editar", tint: "lavender" },
+  { id: "e-escribir", nombre: "Escribir", tint: "sky" },
+  { id: "e-responder", nombre: "Responder", tint: "mint" },
+  { id: "e-gestiones", nombre: "Gestiones", tint: "peach" },
+]
+
+type DatosTarea = Omit<Tarea, "orden" | "actividad" | "etiquetas" | "prioridad" | "estado" | "origen" | "creadaEl"> &
+  Partial<Pick<Tarea, "etiquetas" | "prioridad" | "estado" | "origen" | "creadaEl" | "actividad">>
+
+/** Las de ejemplo con lo repetido por defecto: por hacer, prioridad normal, a mano. */
+const tarea = (t: DatosTarea, orden: number): Tarea => ({
+  estado: "por-hacer",
+  prioridad: "normal",
+  origen: "manual",
+  etiquetas: [],
+  actividad: [],
+  creadaEl: "2026-09-28T10:00:00",
+  ...t,
+  orden,
+})
+
+const datosTareas: DatosTarea[] = [
+  // Campañas
+  { id: "t1", titulo: "Subir la V2 del reel", estado: "en-curso", prioridad: "urgente", donde: { pagina: "campanas", tipo: "contenidos", collabId: "vero", piezaId: "vero-reel" }, fecha: "2026-10-05", fechaLimite: "2026-10-07", etiquetas: ["e-editar"], origen: "auto", notas: "<p>Ronda 1 de 2: dos notas de Inés en la V1.</p>" },
+  { id: "t2", titulo: "Enviar el guion del reel 1 a la marca", prioridad: "alta", donde: { pagina: "campanas", tipo: "contenidos", collabId: "botanica", piezaId: "botanica-reel-1" }, fecha: "2026-10-06", fechaLimite: "2026-10-12", etiquetas: ["e-escribir"], origen: "auto" },
+  { id: "t3", titulo: "Grabar el reel de la rutina de noche", prioridad: "urgente", donde: { pagina: "campanas", tipo: "contenidos", collabId: "lumea", piezaId: "lumea-reel" }, fecha: "2026-10-06T10:00", fechaLimite: "2026-10-08", etiquetas: ["e-grabar"], notas: "<p>Luz de la ventana, de 10 a 12. El sérum siempre con la etiqueta a cámara.</p>" },
+  { id: "t3a", titulo: "Preparar el baño y la luz", estado: "hecha", hechaEl: "2026-10-06T09:40:00", padreId: "t3", donde: { pagina: "campanas", tipo: "contenidos", collabId: "lumea", piezaId: "lumea-reel" } },
+  { id: "t3b", titulo: "Tener el sérum y la crema a mano", padreId: "t3", donde: { pagina: "campanas", tipo: "contenidos", collabId: "lumea", piezaId: "lumea-reel" } },
+  { id: "t3c", titulo: "Grabar tres tomas del gancho", padreId: "t3", donde: { pagina: "campanas", tipo: "contenidos", collabId: "lumea", piezaId: "lumea-reel" } },
+  { id: "t4", titulo: "Recoger el paquete en Correos", estado: "hecha", hechaEl: "2026-10-06T10:00:00", donde: { pagina: "campanas", tipo: "materiales", collabId: "lumea" }, fecha: "2026-10-06", etiquetas: ["e-gestiones"] },
+  { id: "t5", titulo: "Reclamar la factura 2026-014 a Astratic", estado: "esperando", esperandoDesde: "2026-10-03", prioridad: "alta", donde: { pagina: "campanas", tipo: "cobros", collabId: "botanica-verano" }, fechaLimite: "2026-10-08", etiquetas: ["e-gestiones"], notas: "<p>Les escribí el viernes. Botánica Lab paga tarde.</p>" },
+  { id: "t6", titulo: "Entregar la V1 del reel", prioridad: "alta", donde: { pagina: "campanas", tipo: "contenidos", collabId: "lumea", piezaId: "lumea-reel" }, fecha: "2026-10-08", fechaLimite: "2026-10-10", etiquetas: ["e-editar"], origen: "auto" },
+  { id: "t7", titulo: "Grabar las 3 stories", donde: { pagina: "campanas", tipo: "contenidos", collabId: "lumea", piezaId: "lumea-stories" }, fecha: "2026-10-09", fechaLimite: "2026-10-11", etiquetas: ["e-grabar"] },
+  { id: "t8", titulo: "Publicar el reel del SPF", prioridad: "alta", donde: { pagina: "campanas", tipo: "contenidos", collabId: "glow", piezaId: "glow-reel" }, fecha: "2026-10-12T19:00", fechaLimite: "2026-10-12", origen: "auto", notas: "<p>Entre las 18 y las 20 h, con el enlace de la bio actualizado.</p>" },
+  { id: "t9", titulo: "Publicar el reel del look de otoño", donde: { pagina: "campanas", tipo: "contenidos", collabId: "vero", piezaId: "vero-reel" }, fecha: "2026-10-15", fechaLimite: "2026-10-15", origen: "auto" },
+  { id: "t10", titulo: "Enviar los resultados del TikTok a Maison Vero", donde: { pagina: "campanas", tipo: "resultados", collabId: "vero" }, fechaLimite: "2026-10-09", etiquetas: ["e-escribir"], origen: "auto" },
+  { id: "t11", titulo: "Publicar las 3 stories", donde: { pagina: "campanas", tipo: "contenidos", collabId: "lumea", piezaId: "lumea-stories" }, fecha: "2026-10-18", origen: "auto" },
+  { id: "t12", titulo: "Enviar el guion del reel 2", donde: { pagina: "campanas", tipo: "contenidos", collabId: "botanica", piezaId: "botanica-reel-2" }, fecha: "2026-10-26", origen: "auto" },
+  { id: "t13", titulo: "Firmar el contrato de Atelier Mirra", estado: "esperando", esperandoDesde: "2026-10-02", prioridad: "alta", donde: { pagina: "campanas", tipo: "contrato", collabId: "mirra" }, fechaLimite: "2026-10-09", etiquetas: ["e-gestiones"], notas: "<p>Les mandé mis cambios a la cláusula de exclusividad el viernes.</p>" },
+  { id: "t14", titulo: "Facturar el primer plazo de Lumea", prioridad: "alta", donde: { pagina: "campanas", tipo: "cobros", collabId: "lumea" }, fecha: "2026-10-07", etiquetas: ["e-gestiones"], origen: "plantilla" },
+  { id: "t14a", titulo: "Hacer la factura con los datos de Facturación", padreId: "t14", donde: { pagina: "campanas", tipo: "cobros", collabId: "lumea" } },
+  { id: "t14b", titulo: "Subir el PDF", padreId: "t14", donde: { pagina: "campanas", tipo: "cobros", collabId: "lumea" } },
+  { id: "t14c", titulo: "Enviarla a Clara", padreId: "t14", donde: { pagina: "campanas", tipo: "cobros", collabId: "lumea" } },
+  { id: "t15", titulo: "Revisar el brief de Atelier Mirra", estado: "en-curso", donde: { pagina: "campanas", tipo: "general", collabId: "mirra" }, fecha: "2026-10-06", etiquetas: ["e-escribir"] },
+  { id: "t16", titulo: "Pedir a Glow el código de descuento", estado: "esperando", esperandoDesde: "2026-10-05", donde: { pagina: "campanas", tipo: "materiales", collabId: "glow" }, fechaLimite: "2026-10-10", etiquetas: ["e-responder"] },
+  { id: "t17", titulo: "Subir las capturas de estadísticas del TikTok", estado: "hecha", hechaEl: "2026-10-04T18:00:00", donde: { pagina: "campanas", tipo: "resultados", collabId: "vero" }, fecha: "2026-10-04" },
+  { id: "t18", titulo: "Sesión de fotos del perfume", prioridad: "alta", donde: { pagina: "campanas", tipo: "contenidos", collabId: "mirra" }, fecha: "2026-10-13", fechaFin: "2026-10-14", etiquetas: ["e-grabar"] },
+  { id: "t19", titulo: "Ir a la presentación de Glow en Madrid", estado: "cancelada", donde: { pagina: "campanas", tipo: "general", collabId: "glow" }, fecha: "2026-10-09T19:30" },
+  // CRM
+  { id: "t20", titulo: "Decir a Astratic si entro en la campaña de Nuura", prioridad: "urgente", donde: { pagina: "crm", tipo: "propuesta", registroId: "p-nuura" }, fechaLimite: "2026-10-09", etiquetas: ["e-responder"] },
+  { id: "t21", titulo: "Mandar tarifas y media kit a Kalma", prioridad: "alta", donde: { pagina: "crm", tipo: "propuesta", registroId: "p-kalma" }, fecha: "2026-10-06", fechaLimite: "2026-10-07", etiquetas: ["e-responder"] },
+  { id: "t22", titulo: "Contraoferta a Soleil: 1.150 €", estado: "esperando", esperandoDesde: "2026-10-01", donde: { pagina: "crm", tipo: "propuesta", registroId: "p-soleil" }, fechaLimite: "2026-10-07", etiquetas: ["e-responder"] },
+  { id: "t23", titulo: "Seguimiento de la propuesta de Aura Hair", donde: { pagina: "crm", tipo: "propuesta", registroId: "p-aura" }, fecha: "2026-10-08", etiquetas: ["e-responder"] },
+  { id: "t24", titulo: "Escribir a Aceites Brote si no contestan al DM", prioridad: "baja", donde: { pagina: "crm", tipo: "marca", registroId: "brote" }, fecha: "2026-10-05", etiquetas: ["e-responder"] },
+  { id: "t25", titulo: "Buscar el email de quien lleva colaboraciones en Nimbo", prioridad: "baja", donde: { pagina: "crm", tipo: "marca", registroId: "nimbo" }, etiquetas: ["e-gestiones"] },
+  { id: "t26", titulo: "Actualizar el media kit con las cifras del mes", donde: { pagina: "crm", tipo: "media-kit" }, fecha: "2026-10-10", repetir: { frecuencia: "mensual" }, etiquetas: ["e-escribir"] },
+  { id: "t27", titulo: "Llamar a Laia para cerrar fechas", donde: { pagina: "crm", tipo: "contacto", registroId: "c-laia" }, fecha: "2026-10-07T12:30", etiquetas: ["e-responder"] },
+  { id: "t28", titulo: "Plantilla para responder a los regalos sin fee", prioridad: "baja", donde: { pagina: "crm", tipo: "plantillas" }, etiquetas: ["e-escribir"] },
+  // Personal
+  { id: "t29", titulo: "Renovar el dominio de la web", donde: { pagina: "personal", tipo: "administracion" }, fechaLimite: "2026-10-20", etiquetas: ["e-gestiones"] },
+  { id: "t30", titulo: "Pedir el certificado de Autocontrol", estado: "hecha", hechaEl: "2026-10-02T12:00:00", donde: { pagina: "personal", tipo: "astratic" }, fecha: "2026-10-02" },
+  { id: "t31", titulo: "Pasar las facturas del trimestre a la gestoría", prioridad: "alta", donde: { pagina: "personal", tipo: "administracion" }, fechaLimite: "2026-10-15", repetir: { frecuencia: "trimestral" }, etiquetas: ["e-gestiones"], notas: "<p>IVA e IRPF del tercer trimestre: el plazo acaba el 20 de octubre.</p>" },
+  { id: "t32", titulo: "Responder comentarios y mensajes", donde: { pagina: "personal", tipo: "personal" }, fecha: "2026-10-06T21:00", repetir: { frecuencia: "laborables" }, etiquetas: ["e-responder"] },
+  { id: "t33", titulo: "Leer el capítulo de negociación de la Biblia", prioridad: "baja", donde: { pagina: "personal", tipo: "astratic" }, fecha: "2026-10-08" },
+  { id: "t34", titulo: "Dentista", donde: { pagina: "personal", tipo: "personal" }, fecha: "2026-10-07T17:00" },
+]
+
+export const demoTareas: Tarea[] = datosTareas.map((t, i) => tarea(t, i + 1))
+
+/** Tareas a medida para no escribir siempre lo mismo. */
+export const demoPlantillasTarea: PlantillaTarea[] = [
+  { id: "pt-factura", nombre: "Factura de campaña", titulo: "Hacer y enviar la factura", pagina: "campanas", tipo: "cobros", prioridad: "alta", etiquetas: ["e-gestiones"], subtareas: ["Hacer la factura con los datos de Facturación", "Subir el PDF", "Enviarla a la marca"] },
+  { id: "pt-publicar", nombre: "Publicar una pieza", titulo: "Publicar", pagina: "campanas", tipo: "contenidos", prioridad: "alta", etiquetas: [], subtareas: ["Copiar el copy aprobado", "Comprobar #publi, mención y enlace", "Pegar el enlace de la publicación en la pieza"] },
+  { id: "pt-propuesta", nombre: "Preparar propuesta", titulo: "Preparar la propuesta", pagina: "crm", tipo: "propuesta", prioridad: "normal", etiquetas: ["e-escribir"], subtareas: ["Leer bien lo que piden", "Calcular el presupuesto con mis tarifas", "Mandarla con el media kit"] },
+  { id: "pt-gestoria", nombre: "Trimestre para la gestoría", titulo: "Pasar las facturas del trimestre a la gestoría", pagina: "personal", tipo: "administracion", prioridad: "alta", etiquetas: ["e-gestiones"], notas: "<p>IVA e IRPF: el plazo acaba el 20 de abril, julio y octubre y el 30 de enero.</p>", subtareas: ["Descargar las facturas emitidas", "Juntar los gastos con su ticket", "Enviarlo todo a la gestoría"] },
 ]
 
 export const demoAvisoDestacado: Aviso = {

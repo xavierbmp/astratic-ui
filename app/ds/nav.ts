@@ -54,6 +54,7 @@ export const componentPages: { slug: string; label: string; summary: string; ico
   { slug: "toolbar", label: "Toolbar", summary: "Buscador, filtros, conmutador de vistas y acción principal, encima del bloque.", icon: SearchIcon },
   { slug: "data-table", label: "Tabla de datos", summary: "Columnas tipadas, orden, selección y paginación.", icon: Table2Icon },
   { slug: "kanban", label: "Kanban", summary: "Columnas por fase con arrastre y fases plegables.", icon: SquareKanbanIcon },
+  { slug: "base-de-datos", label: "Base de datos con vistas", summary: "Vistas guardadas, agrupar, ordenar, filtros anidados y cálculos, al estilo de Notion.", icon: DatabaseIcon },
   { slug: "insights-panel", label: "Panel de información", summary: "Columna derecha con bloques personalizables.", icon: PanelRightIcon },
   { slug: "detail-sheet", label: "Sheet de detalle", summary: "La ficha de un registro: bloques, edición en el sitio, flechas y dos columnas.", icon: PanelRightOpenIcon },
   { slug: "bulk-bar", label: "Barra de selección", summary: "Acciones en bloque sobre las filas marcadas.", icon: ListChecksIcon },

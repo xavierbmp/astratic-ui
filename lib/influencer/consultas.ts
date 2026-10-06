@@ -9,11 +9,13 @@ import {
   demoAvisos,
   demoContactos,
   demoEnlaces,
+  demoEtiquetasTarea,
   demoInteracciones,
   demoMarcas,
   demoMediaKit,
   demoPerfil,
   demoPlantillas,
+  demoPlantillasTarea,
   demoPropuestas,
   demoTareas,
 } from "@/lib/influencer/demo-data"
@@ -74,6 +76,10 @@ export function obtenerPieza(collabId: string, piezaId: string) {
 
 export const listarMateriales = (collabId: string) => demoMateriales.filter((m) => m.collabId === collabId)
 export const listarTareas = () => demoTareas
+export const listarEtiquetasTarea = () => demoEtiquetasTarea
+export const listarPlantillasTarea = () => demoPlantillasTarea
+/** Lo que hace falta para decir dónde vive cada tarea: campañas, propuestas, marcas y contactos. */
+export const contextoTareas = () => ({ collabs: demoCollabs, propuestas: demoPropuestas, marcas: demoMarcas, contactos: demoContactos })
 export const listarAvisos = () => ({ destacado: demoAvisoDestacado, avisos: demoAvisos })
 export const listarEnlaces = () => demoEnlaces
 

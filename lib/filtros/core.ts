@@ -5,6 +5,12 @@
 // Cada objeto del CRM declara sus campos filtrables en `lib/filtros/crm.ts` con una función
 // `valor(fila)`: filtramos en memoria sobre las filas ya cargadas, así funcionan también los
 // campos calculados (nº de contactos, valor abierto, campañas) que no son columnas de la BD.
+//
+// Las condiciones se agrupan como en Notion: un grupo une sus condiciones con Y o con O y puede
+// llevar grupos dentro (hasta tres niveles), para filtros como «(Lumea o Nuura) y sin hacer».
+// Las fechas se comparan también contra hoy («es esta semana», «en los próximos 7 días»).
+
+import { domingoDe, hoyLocal, lunesDe, sumarDias } from "@/lib/filtros/fechas"
 
 export type TipoFiltro = "texto" | "numero" | "fecha" | "select" | "multiselect" | "booleano"
 
@@ -46,6 +52,15 @@ export type Operador =
   | "no_vacio"
   | "verdadero"
   | "falso"
+  | "es_hoy"
+  | "es_manana"
+  | "es_ayer"
+  | "esta_semana"
+  | "semana_que_viene"
+  | "este_mes"
+  | "pasada"
+  | "proximos_dias"
+  | "ultimos_dias"
 
 export type Condicion = {
   campo: string
@@ -56,9 +71,20 @@ export type Condicion = {
   de?: string
 }
 
-export type GrupoCondiciones = { union: "y" | "o"; condiciones: Condicion[] }
+export type GrupoCondiciones = {
+  union: "y" | "o"
+  condiciones: Condicion[]
+  /** Grupos dentro de este, unidos con la misma Y u O que sus condiciones. */
+  grupos?: GrupoCondiciones[]
+}
 
 export const GRUPO_VACIO: GrupoCondiciones = { union: "y", condiciones: [] }
+
+/** Niveles de grupos, contando el de fuera: como en Notion, hasta tres. */
+export const NIVELES_GRUPO = 3
+
+/** Lo que hace falta para comparar fechas con hoy. Sin `hoy`, se toma el día del reloj. */
+export type RefFiltro = { hoy?: string }
 
 export type DefOperador = {
   value: Operador
@@ -67,6 +93,10 @@ export type DefOperador = {
   sinValor?: boolean
   /** Pide varias opciones en vez de una. */
   multiple?: boolean
+  /** Pide un número (de días) en vez de un valor del campo. */
+  numerico?: boolean
+  /** Lo que va detrás del número: «en los próximos 7 días». */
+  sufijo?: string
 }
 
 const OPS_VACIO: DefOperador[] = [
@@ -99,6 +129,15 @@ const OPERADORES: Record<TipoFiltro, DefOperador[]> = {
     { value: "despues", label: "es posterior a" },
     { value: "en_o_antes", label: "es ese día o antes" },
     { value: "en_o_despues", label: "es ese día o después" },
+    { value: "es_hoy", label: "es hoy", sinValor: true },
+    { value: "es_manana", label: "es mañana", sinValor: true },
+    { value: "es_ayer", label: "fue ayer", sinValor: true },
+    { value: "esta_semana", label: "es esta semana", sinValor: true },
+    { value: "semana_que_viene", label: "es la semana que viene", sinValor: true },
+    { value: "este_mes", label: "es este mes", sinValor: true },
+    { value: "pasada", label: "ya pasó", sinValor: true },
+    { value: "proximos_dias", label: "está en los próximos", numerico: true, sufijo: "días" },
+    { value: "ultimos_dias", label: "está en los últimos", numerico: true, sufijo: "días" },
     ...OPS_VACIO,
   ],
   select: [
@@ -175,8 +214,35 @@ function comoLista(valor: string | string[] | undefined): string[] {
   return Array.isArray(valor) ? valor : [valor]
 }
 
+/** Fechas contra hoy: «es esta semana», «en los próximos 7 días». Un número a medio escribir no filtra. */
+function cumpleFechaRelativa(v: ValorFila, c: Condicion, ref: RefFiltro | undefined): boolean {
+  const pideNumero = c.op === "proximos_dias" || c.op === "ultimos_dias"
+  if (pideNumero && num(comoLista(c.valor)[0]) === null) return true
+  const a = dia(v)
+  if (a === null) return false
+  const hoy = ref?.hoy?.slice(0, 10) ?? hoyLocal()
+  const lunes = lunesDe(hoy)
+  switch (c.op) {
+    case "es_hoy": return a === hoy
+    case "es_manana": return a === sumarDias(hoy, 1)
+    case "es_ayer": return a === sumarDias(hoy, -1)
+    case "esta_semana": return a >= lunes && a <= domingoDe(hoy)
+    case "semana_que_viene": return a >= sumarDias(lunes, 7) && a <= sumarDias(lunes, 13)
+    case "este_mes": return a.slice(0, 7) === hoy.slice(0, 7)
+    case "pasada": return a < hoy
+    case "proximos_dias":
+    case "ultimos_dias": {
+      const n = num(comoLista(c.valor)[0]) ?? 0
+      return c.op === "proximos_dias" ? a >= hoy && a <= sumarDias(hoy, n) : a >= sumarDias(hoy, -n) && a <= hoy
+    }
+    default: return true
+  }
+}
+
+const OPS_FECHA_RELATIVA = new Set<Operador>(["es_hoy", "es_manana", "es_ayer", "esta_semana", "semana_que_viene", "este_mes", "pasada", "proximos_dias", "ultimos_dias"])
+
 /** ¿Cumple la fila esta condición? Una condición mal formada no filtra (deja pasar). */
-export function cumpleCondicion<T>(row: T, c: Condicion, campos: CampoFiltrable<T>[]): boolean {
+export function cumpleCondicion<T>(row: T, c: Condicion, campos: CampoFiltrable<T>[], ref?: RefFiltro): boolean {
   const campo = campos.find((f) => f.id === c.campo)
   if (!campo) return true
   const def = defOperador(campo.tipo, c.op)
@@ -187,6 +253,7 @@ export function cumpleCondicion<T>(row: T, c: Condicion, campos: CampoFiltrable<
   if (c.op === "no_vacio") return !esVacio(v)
   if (c.op === "verdadero") return v === true
   if (c.op === "falso") return v !== true
+  if (OPS_FECHA_RELATIVA.has(c.op)) return cumpleFechaRelativa(v, c, ref)
 
   const objetivos = comoLista(c.valor).filter((x) => x !== "")
   if (objetivos.length === 0) return true // condición a medio escribir: no filtra
@@ -249,17 +316,29 @@ export function cumpleCondicion<T>(row: T, c: Condicion, campos: CampoFiltrable<
   }
 }
 
-export function cumpleGrupo<T>(row: T, grupo: GrupoCondiciones, campos: CampoFiltrable<T>[]): boolean {
-  const cs = grupo.condiciones
-  if (cs.length === 0) return true
-  return grupo.union === "o"
-    ? cs.some((c) => cumpleCondicion(row, c, campos))
-    : cs.every((c) => cumpleCondicion(row, c, campos))
+/** Un grupo sin condiciones en ningún nivel: no filtra nada. */
+export function grupoVacio(grupo: GrupoCondiciones): boolean {
+  return grupo.condiciones.length === 0 && (grupo.grupos ?? []).every(grupoVacio)
 }
 
-export function filtrarFilas<T>(rows: T[], grupo: GrupoCondiciones | null | undefined, campos: CampoFiltrable<T>[]): T[] {
-  if (!grupo || grupo.condiciones.length === 0) return rows
-  return rows.filter((r) => cumpleGrupo(r, grupo, campos))
+/** Condiciones de un grupo y de los de dentro: el número del botón «Filtros». */
+export function contarCondiciones(grupo: GrupoCondiciones): number {
+  return grupo.condiciones.length + (grupo.grupos ?? []).reduce((n, g) => n + contarCondiciones(g), 0)
+}
+
+export function cumpleGrupo<T>(row: T, grupo: GrupoCondiciones, campos: CampoFiltrable<T>[], ref?: RefFiltro): boolean {
+  // Los grupos vacíos no cuentan: si contaran, en un «O» dejarían pasar todas las filas.
+  const comprobaciones = [
+    ...grupo.condiciones.map((c) => () => cumpleCondicion(row, c, campos, ref)),
+    ...(grupo.grupos ?? []).filter((g) => !grupoVacio(g)).map((g) => () => cumpleGrupo(row, g, campos, ref)),
+  ]
+  if (comprobaciones.length === 0) return true
+  return grupo.union === "o" ? comprobaciones.some((f) => f()) : comprobaciones.every((f) => f())
+}
+
+export function filtrarFilas<T>(rows: T[], grupo: GrupoCondiciones | null | undefined, campos: CampoFiltrable<T>[], ref?: RefFiltro): T[] {
+  if (!grupo || grupoVacio(grupo)) return rows
+  return rows.filter((r) => cumpleGrupo(r, grupo, campos, ref))
 }
 
 // ---------- Texto de una condición (chips, resúmenes) ----------
@@ -271,7 +350,14 @@ export function describirCondicion<T>(c: Condicion, campos: CampoFiltrable<T>[])
   const op = def?.label ?? c.op
   if (def?.sinValor) return `${etiqueta} ${op}`
   const valores = comoLista(c.valor).map((v) => campo?.opciones?.find((o) => o.value === v)?.label ?? v)
-  return `${etiqueta} ${op} ${valores.join(", ")}`.trim()
+  return `${etiqueta} ${op} ${valores.join(", ")} ${def?.sufijo ?? ""}`.trim()
+}
+
+/** «(Campaña es alguno de Lumea o Prioridad es alguno de Urgente)»: un grupo de dentro, en un chip. */
+export function describirGrupo<T>(grupo: GrupoCondiciones, campos: CampoFiltrable<T>[]): string {
+  const union = grupo.union === "o" ? " o " : " y "
+  const partes = [...grupo.condiciones.map((c) => describirCondicion(c, campos)), ...(grupo.grupos ?? []).filter((g) => !grupoVacio(g)).map((g) => describirGrupo(g, campos))]
+  return `(${partes.join(union)})`
 }
 
 // ---------- Serialización a la URL ----------
@@ -291,25 +377,31 @@ function saneaCondicion(raw: unknown): Condicion | null {
   return { campo: o.campo, op: o.op as Operador, valor, de: typeof o.de === "string" ? o.de : undefined }
 }
 
-/** Lee `?f=` de la URL. Cualquier cosa rara devuelve «sin filtros» en vez de romper la página. */
+/** Un grupo con sus grupos de dentro, sin pasar de `NIVELES_GRUPO`. */
+function saneaGrupo(raw: unknown, nivel: number): GrupoCondiciones | null {
+  if (!raw || typeof raw !== "object") return null
+  const o = raw as Record<string, unknown>
+  const union = UNIONES.includes(o.u as (typeof UNIONES)[number]) ? (o.u as "y" | "o") : "y"
+  const condiciones = Array.isArray(o.c) ? o.c.map(saneaCondicion).filter((c): c is Condicion => c !== null) : []
+  const grupos = nivel < NIVELES_GRUPO && Array.isArray(o.g) ? o.g.map((g) => saneaGrupo(g, nivel + 1)).filter((g): g is GrupoCondiciones => g !== null) : []
+  return grupos.length ? { union, condiciones, grupos } : { union, condiciones }
+}
+
+/** Lee `?f=` de la URL (o un filtro guardado). Cualquier cosa rara devuelve «sin filtros» en vez de romper la página. */
 export function parseGrupo(raw: string | null | undefined): GrupoCondiciones {
   if (!raw) return GRUPO_VACIO
   try {
-    const data = JSON.parse(raw) as unknown
-    if (!data || typeof data !== "object") return GRUPO_VACIO
-    const o = data as Record<string, unknown>
-    const union = UNIONES.includes(o.u as (typeof UNIONES)[number]) ? (o.u as "y" | "o") : "y"
-    const condiciones = Array.isArray(o.c) ? o.c.map(saneaCondicion).filter((c): c is Condicion => c !== null) : []
-    return { union, condiciones }
+    return saneaGrupo(JSON.parse(raw) as unknown, 1) ?? GRUPO_VACIO
   } catch {
     return GRUPO_VACIO
   }
 }
 
-/** Serializa para la URL. Sin condiciones devuelve "" para que el parámetro desaparezca. */
-export function serializarGrupo(grupo: GrupoCondiciones): string {
-  if (grupo.condiciones.length === 0) return ""
-  return JSON.stringify({
+type GrupoSerializado = { u: "y" | "o"; c: Record<string, unknown>[]; g?: GrupoSerializado[] }
+
+function compactar(grupo: GrupoCondiciones): GrupoSerializado {
+  const grupos = (grupo.grupos ?? []).filter((g) => !grupoVacio(g)).map(compactar)
+  return {
     u: grupo.union,
     c: grupo.condiciones.map((c) => ({
       campo: c.campo,
@@ -317,5 +409,12 @@ export function serializarGrupo(grupo: GrupoCondiciones): string {
       ...(c.valor === undefined ? {} : { valor: c.valor }),
       ...(c.de === undefined ? {} : { de: c.de }),
     })),
-  })
+    ...(grupos.length ? { g: grupos } : {}),
+  }
+}
+
+/** Serializa para la URL. Sin condiciones devuelve "" para que el parámetro desaparezca. */
+export function serializarGrupo(grupo: GrupoCondiciones): string {
+  if (grupoVacio(grupo)) return ""
+  return JSON.stringify(compactar(grupo))
 }

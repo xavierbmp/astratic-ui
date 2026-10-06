@@ -7,25 +7,27 @@ import { Block, BlockHeader } from "@/components/influencer/block"
 import { TaskCard } from "@/components/influencer/task-card"
 import { LinkGrid, type QuickLink } from "@/components/influencer/link-grid"
 import { TaskTable } from "@/components/influencer/task-table"
-import { HOY, demoEnlaces, demoMarcas, demoPropuestas, demoTareas } from "@/lib/influencer/demo-data"
+import { HOY, demoContactos, demoEnlaces, demoEtiquetasTarea, demoMarcas, demoPropuestas, demoTareas } from "@/lib/influencer/demo-data"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
-import { contextoDeTarea, grupoDeTarea, hrefDeTarea, type GrupoTarea } from "@/lib/influencer/tareas"
+import { cuandoDe, textoDonde, type CuandoTarea } from "@/lib/influencer/tareas"
+import { alternarHecha, borrarTareas, crearTareas, conSubtareas, guardarTarea } from "@/lib/influencer/tareas-cambios"
 import { soloFecha } from "@/lib/influencer/fechas"
-import type { Tarea } from "@/lib/influencer/modelo"
+import type { DondeTarea, Tarea } from "@/lib/influencer/modelo"
 
 const hoy = soloFecha(HOY)
-const contexto = { collabs: demoCollabs, propuestas: demoPropuestas, marcas: demoMarcas }
+const ctx = { collabs: demoCollabs, propuestas: demoPropuestas, marcas: demoMarcas, contactos: demoContactos }
+const reloj = { hoy, ahora: HOY, id: (p: string) => `${p}-${Math.random().toString(36).slice(2, 8)}` }
 
-type Pestana = Extract<GrupoTarea, "hoy" | "semana" | "vencidas">
+type Pestana = Extract<CuandoTarea, "hoy" | "semana" | "vencidas">
 
 /** Bloque de tareas con pestañas y marcado, como en el Inicio (registro de mostrar). */
 export function TaskBlockExample() {
-  const [tareas, setTareas] = React.useState(demoTareas)
+  const [tareas, setTareas] = React.useState(demoTareas.filter((t) => !t.padreId))
   const [pestana, setPestana] = React.useState<Pestana>("hoy")
-  const pendientes = (g: GrupoTarea) => tareas.filter((t) => grupoDeTarea(t, hoy) === g).length
+  const pendientes = (g: CuandoTarea) => tareas.filter((t) => cuandoDe(t, hoy) === g).length
   return (
     <Block className="max-w-xl">
-      <BlockHeader title="Tareas" count={tareas.filter((t) => !t.hecha).length} href="#" hrefLabel="Ver todo">
+      <BlockHeader title="Tareas" count={tareas.filter((t) => t.estado !== "hecha").length} href="#" hrefLabel="Ver todo">
         <Tabs value={pestana} onValueChange={(v) => setPestana(v as Pestana)} className="sm:ml-2">
           <TabsList variant="line" className="flex-wrap">
             <TabsTrigger value="hoy">Hoy <span className="ml-1 text-[11px] text-muted-foreground">{pendientes("hoy")}</span></TabsTrigger>
@@ -36,16 +38,16 @@ export function TaskBlockExample() {
       </BlockHeader>
       <ul className="flex flex-col gap-2">
         {tareas
-          .filter((t) => grupoDeTarea(t, hoy) === pestana)
+          .filter((t) => cuandoDe(t, hoy) === pestana)
           .map((t) => (
             <li key={t.id}>
               <TaskCard
                 title={t.titulo}
-                context={contextoDeTarea(t, contexto)}
-                dueAt={t.fechaLimite ?? hoy}
+                context={textoDonde(t.donde, ctx)}
+                dueAt={t.fecha ?? t.fechaLimite ?? hoy}
                 tone={pestana === "vencidas" ? "vencida" : pestana === "hoy" ? "hoy" : "normal"}
-                done={t.hecha}
-                onToggle={() => setTareas((ts) => ts.map((x) => (x.id === t.id ? { ...x, hecha: !x.hecha } : x)))}
+                done={t.estado === "hecha"}
+                onToggle={() => setTareas((ts) => alternarHecha(ts, t.id, ctx, reloj).tareas)}
               />
             </li>
           ))}
@@ -54,21 +56,29 @@ export function TaskBlockExample() {
   )
 }
 
-/** La lista de tareas de operar: agrupada, editable en el sitio y con alta rápida. */
+const DONDE_LUMEA: DondeTarea = { pagina: "campanas", tipo: "contenidos", collabId: "lumea" }
+
+/** La lista de tareas de un sitio (aquí, los contenidos de una campaña): agrupada por cuándo tocan y con alta rápida. */
 export function TaskTableExample() {
-  const [tareas, setTareas] = React.useState<Tarea[]>(demoTareas.filter((t) => t.relacion?.id === "lumea"))
+  const [tareas, setTareas] = React.useState<Tarea[]>(demoTareas)
+  const deLumea = tareas.filter((t) => t.donde.pagina === "campanas" && t.donde.collabId === "lumea" && t.donde.tipo === "contenidos")
   return (
     <Block className="max-w-2xl">
-      <BlockHeader title="Tareas de la collab" count={tareas.filter((t) => !t.hecha).length} />
+      <BlockHeader title="Tareas de los contenidos" count={deLumea.filter((t) => t.estado !== "hecha" && !t.padreId).length} />
       <TaskTable
-        tareas={tareas}
+        tareas={deLumea}
+        todas={tareas}
         hoy={hoy}
-        relacionFija={{ tipo: "collab", id: "lumea", label: "Lumea Skin · Rutina de noche" }}
-        hrefDe={hrefDeTarea}
-        onToggle={(id) => setTareas((ts) => ts.map((t) => (t.id === id ? { ...t, hecha: !t.hecha } : t)))}
-        onUpdate={(t) => setTareas((ts) => ts.map((x) => (x.id === t.id ? t : x)))}
-        onCreate={(t) => setTareas((ts) => [...ts, t])}
-        onDelete={(ids) => setTareas((ts) => ts.filter((t) => !ids.includes(t.id)))}
+        ctx={ctx}
+        etiquetas={demoEtiquetasTarea}
+        donde={DONDE_LUMEA}
+        acciones={{
+          onAbrir: () => {},
+          onToggle: (t) => setTareas((ts) => alternarHecha(ts, t.id, ctx, reloj).tareas),
+          onCrear: (t, subtareas) => setTareas((ts) => crearTareas(ts, conSubtareas(t, subtareas, reloj))),
+          onGuardarVarias: (cambiadas) => setTareas((ts) => cambiadas.reduce((acc, t) => guardarTarea(acc, t, ctx, reloj).tareas, ts)),
+          onBorrarVarias: (ids) => setTareas((ts) => borrarTareas(ts, ids).tareas),
+        }}
       />
     </Block>
   )

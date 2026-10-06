@@ -582,20 +582,161 @@ export type PlantillaGuion = { id: string; nombre: string; descripcion: string; 
 
 // ───────────────────────── Tareas ─────────────────────────
 
-/** A qué pertenece una tarea: una collab, una propuesta o una marca a la que quiere escribir. */
-export type RelacionTarea = { tipo: "collab" | "propuesta" | "marca"; id: string }
+/**
+ * La página del workspace a la que pertenece una tarea: además de en Tareas, sale en ella. Dentro
+ * de cada página, el tipo dice de qué parte es (en una campaña, sus pestañas). No hay catálogo de
+ * tipos de acción: lo que se hace lo dice el título.
+ */
+export type PaginaTarea = "campanas" | "crm" | "personal"
+
+export type TipoTareaCampana = "general" | "contenidos" | "materiales" | "contrato" | "cobros" | "resultados"
+export type TipoTareaCrm = "propuesta" | "marca" | "contacto" | "media-kit" | "plantillas"
+export type TipoTareaPersonal = "personal" | "administracion" | "astratic"
+export type TipoTarea = TipoTareaCampana | TipoTareaCrm | TipoTareaPersonal
+
+/**
+ * Dónde vive una tarea. En Campañas, siempre de una collab y, en Contenidos, quizá de una pieza; en
+ * el CRM, del registro si es de uno (una propuesta, una marca o un contacto, según el tipo).
+ */
+export type DondeTarea =
+  | { pagina: "campanas"; tipo: TipoTareaCampana; collabId: string; piezaId?: string }
+  | { pagina: "crm"; tipo: TipoTareaCrm; registroId?: string }
+  | { pagina: "personal"; tipo: TipoTareaPersonal }
+
+export const PAGINAS_TAREA: Record<PaginaTarea, string> = { campanas: "Campañas", crm: "CRM", personal: "Personal" }
+export const LISTA_PAGINAS_TAREA = Object.keys(PAGINAS_TAREA) as PaginaTarea[]
+
+export const TIPOS_TAREA_CAMPANA: Record<TipoTareaCampana, string> = {
+  general: "General",
+  contenidos: "Contenidos",
+  materiales: "Materiales",
+  contrato: "Contrato",
+  cobros: "Cobros",
+  resultados: "Resultados",
+}
+
+export const TIPOS_TAREA_CRM: Record<TipoTareaCrm, string> = {
+  propuesta: "Propuesta",
+  marca: "Marca",
+  contacto: "Contacto",
+  "media-kit": "Media kit",
+  plantillas: "Plantillas",
+}
+
+export const TIPOS_TAREA_PERSONAL: Record<TipoTareaPersonal, string> = {
+  personal: "Personal",
+  administracion: "Administración",
+  astratic: "Astratic",
+}
+
+/** Los tipos de cada página, en el orden en que se ofrecen. */
+export const TIPOS_TAREA: { [P in PaginaTarea]: Record<Extract<DondeTarea, { pagina: P }>["tipo"], string> } = {
+  campanas: TIPOS_TAREA_CAMPANA,
+  crm: TIPOS_TAREA_CRM,
+  personal: TIPOS_TAREA_PERSONAL,
+}
+
+export type EstadoTarea = "por-hacer" | "en-curso" | "esperando" | "hecha" | "cancelada"
+
+/** Los estados se agrupan como el estado de Notion: lo que no ha empezado, lo que está en marcha y lo cerrado. */
+export type GrupoEstadoTarea = "pendiente" | "en-marcha" | "cerrada"
+
+export const ESTADOS_TAREA: (Estado<EstadoTarea> & { grupo: GrupoEstadoTarea })[] = [
+  { id: "por-hacer", label: "Por hacer", tone: "neutral", grupo: "pendiente" },
+  { id: "en-curso", label: "En curso", tone: "info", grupo: "en-marcha" },
+  { id: "esperando", label: "Esperando", tone: "warning", grupo: "en-marcha" },
+  { id: "hecha", label: "Hecha", tone: "success", grupo: "cerrada" },
+  { id: "cancelada", label: "Cancelada", tone: "neutral", grupo: "cerrada" },
+]
+
+export const GRUPOS_ESTADO_TAREA: Record<GrupoEstadoTarea, string> = { pendiente: "Pendiente", "en-marcha": "En marcha", cerrada: "Cerrada" }
+
+export type PrioridadTarea = "urgente" | "alta" | "normal" | "baja"
+
+export const PRIORIDADES_TAREA: { id: PrioridadTarea; label: string }[] = [
+  { id: "urgente", label: "Urgente" },
+  { id: "alta", label: "Alta" },
+  { id: "normal", label: "Normal" },
+  { id: "baja", label: "Baja" },
+]
+
+export type FrecuenciaTarea = "diaria" | "laborables" | "semanal" | "mensual" | "trimestral" | "anual"
+
+export const FRECUENCIAS_TAREA: Record<FrecuenciaTarea, string> = {
+  diaria: "Cada día",
+  laborables: "Días laborables",
+  semanal: "Cada semana",
+  mensual: "Cada mes",
+  trimestral: "Cada 3 meses",
+  anual: "Cada año",
+}
+
+/** Cómo se repite una tarea: al hacerla, aparece la siguiente con su fecha. */
+export type Repeticion = {
+  frecuencia: FrecuenciaTarea
+  /** Cada cuántas: cada 2 semanas, cada 6 meses. Por defecto, 1. */
+  cada?: number
+  /** En las semanales, qué días (0 domingo … 6 sábado). Sin días, el de la fecha de la tarea. */
+  dias?: number[]
+}
+
+export type EtiquetaTarea = { id: string; nombre: string; tint: Tint }
+
+/** Lo que pasa en una tarea: un comentario suyo o un cambio (estado, fecha, dónde vive…). */
+export type EntradaTarea = { id: string; tipo: "comentario" | "cambio"; texto: string; el: string }
+
+/** A mano, de las fechas del brief, de una plantilla o la siguiente de una que se repite. */
+export type OrigenTarea = "manual" | "auto" | "plantilla" | "repetida"
+
+export const ORIGENES_TAREA: Record<OrigenTarea, string> = {
+  manual: "A mano",
+  auto: "De las fechas del brief",
+  plantilla: "De una plantilla",
+  repetida: "Se repite",
+}
 
 export type Tarea = {
   id: string
   titulo: string
-  hecha: boolean
+  estado: EstadoTarea
+  prioridad: PrioridadTarea
+  donde: DondeTarea
+  /** El día en que la va a hacer, con hora opcional («2026-10-06T10:00»): decide cuándo sale en Hoy. */
+  fecha?: string
+  /** Si lleva varios días, el último: la barra del cronograma va de `fecha` a `fechaFin`. */
+  fechaFin?: string
+  /** La entrega que pide la marca o su propio plazo. */
   fechaLimite?: string
-  /** La collab o propuesta a la que pertenece; sin relación es una tarea general. */
-  relacion?: RelacionTarea
-  /** Las automáticas salen de las fechas del brief; las manuales las añade ella. */
-  origen: "auto" | "manual"
+  repetir?: Repeticion
+  /** Ids de sus etiquetas. */
+  etiquetas: string[]
+  /** Si es subtarea, la tarea de la que cuelga. */
+  padreId?: string
+  /** Posición a mano en las listas que no se ordenan por nada. */
+  orden: number
+  origen: OrigenTarea
+  /** La descripción (HTML del editor). */
   notas?: string
+  actividad: EntradaTarea[]
+  /** Desde cuándo está «Esperando»: para decir cuántos días lleva. */
+  esperandoDesde?: string
+  creadaEl: string
+  editadaEl?: string
   hechaEl?: string
+}
+
+/** Una tarea a medida para repetir: «Factura de campaña» con sus subtareas. */
+export type PlantillaTarea = {
+  id: string
+  nombre: string
+  titulo: string
+  /** Página y tipo con los que nace; la campaña o el registro, si no los pone la pestaña, se eligen al crearla. */
+  pagina: PaginaTarea
+  tipo: TipoTarea
+  prioridad: PrioridadTarea
+  etiquetas: string[]
+  notas?: string
+  subtareas: string[]
 }
 
 // ───────────────────────── Avisos, enlaces, actividad y perfil ─────────────────────────

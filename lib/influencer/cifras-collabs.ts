@@ -1,8 +1,7 @@
 // La portada de Collabs: lo que está en marcha, lo que hay que entregar esta semana, lo que espera a
-// la marca, lo que falta por cobrar y las tareas de hoy y de los próximos días. Sin React.
-import { COLLABS_ACTIVAS, type Collab, type Marca, type Tarea, type TipoVersion } from "@/lib/influencer/modelo"
+// la marca y lo que falta por cobrar. Las listas de tareas están en `tareas.ts`. Sin React.
+import { COLLABS_ACTIVAS, type Collab, type Marca, type TipoVersion } from "@/lib/influencer/modelo"
 import { diasEsperando, hitosDePieza, marcaDe, nombreDeParte } from "@/lib/influencer/collabs"
-import { ordenarTareas } from "@/lib/influencer/tareas"
 import { diasEntre, soloFecha } from "@/lib/influencer/fechas"
 
 /** Días hacia delante que cuentan como «esta semana» y como «próximas». */
@@ -46,24 +45,6 @@ export function enRevision(collabs: Collab[], marcas: Marca[], hoy: string): EnR
       ),
     )
     .sort((a, b) => b.dias - a.dias)
-}
-
-/** Las de hoy: lo que vence hoy y lo que ya venció, sin hacer. */
-export function tareasDeHoy(tareas: Tarea[], hoy: string) {
-  const dia = soloFecha(hoy)
-  return ordenarTareas(tareas.filter((t) => !t.hecha && t.fechaLimite && diasEntre(dia, t.fechaLimite) <= 0))
-}
-
-/** Las próximas: lo que vence en los próximos días, por fecha. */
-export function proximasTareas(tareas: Tarea[], hoy: string, dias = DIAS_PROXIMOS) {
-  const dia = soloFecha(hoy)
-  return ordenarTareas(
-    tareas.filter((t) => {
-      if (t.hecha || !t.fechaLimite) return false
-      const faltan = diasEntre(dia, t.fechaLimite)
-      return faltan > 0 && faltan <= dias
-    }),
-  )
 }
 
 /** «Hoy», «Mañana», «jue 8» o «3 oct»: cómo se dice una fecha cercana en una lista de tareas. */

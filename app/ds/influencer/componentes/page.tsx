@@ -219,19 +219,34 @@ const [editing, setEditing] = useState(false)
         </Example>
       </DocSection>
 
-      <DocSection id="task-table" title="Lista de tareas" lead="La lista de operar, al estilo de Notion: agrupada por fecha, se marca con el círculo, título y fecha se editan en el sitio, abajo se añade escribiendo y Enter, y la selección saca la barra de acciones.">
+      <DocSection id="task-table" title="Lista de tareas de un sitio" lead="Las tareas de una campaña, una de sus pestañas, una pieza, una propuesta o una marca, en la lista de operar: agrupadas por cuándo tocan, con alta rápida que ya nace en su sitio y la barra de acciones al seleccionar. Es una vista de la misma base que la página de Tareas.">
         <Example className={EXAMPLE} code={`<TaskTable
-  tareas={tareas} hoy="2026-10-06"
-  relacionFija={{ tipo: "collab", id: "lumea", label: "Lumea Skin · Rutina de noche" }}
-  onToggle={…} onUpdate={…} onCreate={…} onDelete={…}
+  tareas={tareasDe(todas, { collabId: "lumea", tipo: "contenidos" })}
+  todas={todas} hoy="2026-10-06" ctx={ctx} etiquetas={etiquetas}
+  donde={{ pagina: "campanas", tipo: "contenidos", collabId: "lumea" }}
+  acciones={acciones}   // onAbrir, onToggle, onCrear, onGuardarVarias, onBorrarVarias…
 />`}>
           <TaskTableExample />
         </Example>
         <Rules
           items={[
-            <>La misma lista sirve para una collab, una propuesta o todas: con <code>relacionFija</code> las nuevas nacen atadas; con <code>contexto</code> se enseña a qué pertenece cada una.</>,
-            <><code>TaskDialog</code> es el diálogo de tarea de toda la app («Nuevo → Tarea» del Inicio, «Nueva tarea» de una collab): desde una página se abre ya atado a ese registro y la tarea aparece también en la lista general.</>,
-            <>Las automáticas (<code>origen: "auto"</code>) salen de las fechas del brief y llevan la etiqueta «Auto»; se pueden mover como las demás.</>,
+            <>Cada tarea vive en <strong>una página y un tipo</strong> (<code>DondeTarea</code>): Campañas (con su collab y, en Contenidos, quizá la pieza), CRM (con su propuesta, marca o contacto) o Personal. No hay catálogo de tipos de acción: lo que se hace lo dice el título.</>,
+            <>Una sola base de tareas: cada página enseña su trozo con <code>tareasDe(tareas, filtro)</code> y lo que se crea ahí nace con su <code>donde</code>, así que sale en su página y en Tareas.</>,
+            <><code>TaskDialog</code> es el alta de toda la app: con <code>dondeFijo</code> no pregunta dónde; con <code>limitar</code> solo ofrece una página o una campaña; con <code>plantilla</code> llega rellena y con sus subtareas.</>,
+            <>Los cambios pasan por <code>lib/influencer/tareas-cambios.ts</code> (guardar apuntando la actividad, la siguiente de una que se repite, borrar con sus subtareas, deshacer, colocar a mano).</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="tareas" title="Página de Tareas" lead="Las piezas de la página de Tareas, que replica una base de datos de Notion: lo de hoy primero y debajo todas las tareas con sus vistas.">
+        <Rules
+          items={[
+            <><code>TareasHoy</code> (registro de mostrar): las vencidas arriba con «Pasar todo a hoy»; lo de hoy por importancia (<code>ordenarHoy</code>: prioridad, hora y lo que vence antes), reordenable arrastrando; las hechas de hoy, plegadas; y el pie con mañana, esperando y esta semana.</>,
+            <><code>TareasLista</code>: grupos plegables con su «+», subtareas anidadas, selección y arrastre por el asa para colocar a mano o mover de grupo (lo que cambia su valor, con <code>asignarCampo</code>).</>,
+            <><code>TableroTareas</code>: columnas por un campo (el estado, por defecto) y filas por otro (una por campaña); el mismo arrastre que la lista. <code>CalendarioTareas</code>: mes o semana, por fecha o por fecha límite, arrastrar a otro día, «+» en un día y «Sin fecha».</>,
+            <><code>columnasTareas</code> da las columnas de la tabla (<code>TablaAgrupada</code> del madre), todas editables en su celda. <code>NombreGrupoTarea</code> pinta la cabecera de un grupo según el campo (estado, prioridad, campaña con su logo, etiqueta…).</>,
+            <><code>TaskSheet</code> / <code>TareaDetalle</code>: la ficha, con sus propiedades editables, «Para hacerla» (<code>TareaContexto</code>, según la página y el tipo), descripción, subtareas, comentarios y actividad. <code>DondeSelector</code> elige la página y el tipo con buscador por palabras.</>,
+            <>Celdas comunes en <code>task-cells.tsx</code>: <code>CasillaTarea</code>, <code>PrioridadBandera</code>, <code>EstadoTareaBadge</code>, <code>DondeChip</code>, <code>FechaTarea</code>, <code>EtiquetasTarea</code>, <code>ProgresoSubtareas</code>, <code>EsperandoDias</code>.</>,
           ]}
         />
       </DocSection>
