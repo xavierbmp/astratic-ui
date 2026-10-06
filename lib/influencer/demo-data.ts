@@ -4,14 +4,15 @@
 import type {
   Actividad,
   Aviso,
-  Collab,
+  Contacto,
   Enlace,
+  Interaccion,
   Marca,
-  Material,
+  MediaKit,
   Perfil,
+  Plantilla,
   Propuesta,
   Tarea,
-  Version,
 } from "@/lib/influencer/modelo"
 
 const UNSPLASH = "https://images.unsplash.com"
@@ -43,20 +44,42 @@ export const demoPerfil: Perfil = {
     { formato: "youtube", precio: 950, minimo: 760 },
     { formato: "ugc", precio: 260, minimo: 200 },
   ],
+  email: "hola@example.com",
 }
 
 export const demoMarcas: Marca[] = [
-  { id: "lumea", nombre: "Lumea Skin", sector: "Skincare", web: "https://example.com", tint: "rose", atribucion: "propia", atribucionHasta: "2027-03-12", contactos: [{ id: "c-clara", nombre: "Clara Benet", cargo: "Marketing manager", email: "clara@example.com" }], notas: "Contestan rápido. Piden el guion siempre antes de grabar." },
-  { id: "botanica", nombre: "Botánica Lab", sector: "Skincare natural", tint: "mint", atribucion: "red", contactos: [{ id: "c-pau", nombre: "Pau Ribes", cargo: "Brand manager", email: "pau@example.com" }], notas: "Pagan tarde: la factura de verano lleva una semana vencida." },
-  { id: "vero", nombre: "Maison Vero", sector: "Maquillaje", tint: "peach", atribucion: "propia", atribucionHasta: "2027-01-20", contactos: [{ id: "c-ines", nombre: "Inés Roldán", cargo: "Influencer marketing", email: "ines@example.com" }], notas: "Muy detallistas con el producto en plano: dos rondas casi siempre." },
-  { id: "glow", nombre: "Glow Studio", sector: "Protección solar", tint: "lavender", atribucion: "red", contactos: [{ id: "c-marc", nombre: "Marc Soler", cargo: "Marketing", email: "marc@example.com" }] },
-  { id: "nuura", nombre: "Nuura", sector: "Cuidado del cabello", tint: "sky", atribucion: "red", contactos: [] },
-  { id: "kalma", nombre: "Kalma Cosmetics", sector: "Maquillaje limpio", tint: "lime", atribucion: "propia", atribucionHasta: "2027-09-30", contactos: [{ id: "c-laia", nombre: "Laia Font", cargo: "Fundadora", email: "laia@example.com" }] },
-  { id: "aura", nombre: "Aura Hair", sector: "Cuidado del cabello", tint: "sky", atribucion: "propia", atribucionHasta: "2027-09-25", contactos: [{ id: "c-diego", nombre: "Diego Mas", cargo: "Marketing digital", email: "diego@example.com" }] },
-  { id: "petalo", nombre: "Pétalo", sector: "Perfumería", tint: "rose", atribucion: "propia", atribucionHasta: "2027-10-05", contactos: [{ id: "c-sara", nombre: "Sara Vidal", cargo: "Comunicación" }] },
-  { id: "soleil", nombre: "Soleil Paris", sector: "Protección solar", tint: "peach", atribucion: "red", contactos: [] },
-  { id: "dermanova", nombre: "Derma Nova", sector: "Dermocosmética", tint: "lavender", atribucion: "propia", atribucionHasta: "2027-08-14", contactos: [] },
-  { id: "bloom", nombre: "Bloom Beauty", sector: "Maquillaje", tint: "mint", atribucion: "propia", atribucionHasta: "2027-07-02", contactos: [] },
+  { id: "lumea", nombre: "Lumea Skin", sector: "Skincare", web: "https://example.com", instagram: "lumea.skin", tint: "rose", atribucion: "propia", atribucionHasta: "2027-03-12", notas: "Contestan rápido. Piden el guion siempre antes de grabar.", creadaEl: "2026-03-12T10:00:00" },
+  { id: "botanica", nombre: "Botánica Lab", sector: "Skincare natural", web: "https://example.com", tint: "mint", atribucion: "red", notas: "Pagan tarde: la factura de verano lleva una semana vencida.", creadaEl: "2026-05-20T10:00:00" },
+  { id: "vero", nombre: "Maison Vero", sector: "Maquillaje", web: "https://example.com", instagram: "maisonvero", tint: "peach", atribucion: "propia", atribucionHasta: "2027-01-20", notas: "Muy detallistas con el producto en plano: dos rondas casi siempre.", creadaEl: "2026-01-20T10:00:00" },
+  { id: "glow", nombre: "Glow Studio", sector: "Protección solar", tint: "lavender", atribucion: "red", creadaEl: "2026-08-30T10:00:00" },
+  { id: "nuura", nombre: "Nuura", sector: "Cuidado del cabello", tint: "sky", atribucion: "red", notas: "La lleva Astratic: hablo con ellos a través de la red.", creadaEl: "2026-10-06T09:40:00" },
+  { id: "kalma", nombre: "Kalma Cosmetics", sector: "Maquillaje limpio", web: "https://example.com", instagram: "kalma.cosmetics", tint: "lime", atribucion: "propia", atribucionHasta: "2027-09-30", creadaEl: "2026-09-30T12:00:00" },
+  { id: "aura", nombre: "Aura Hair", sector: "Cuidado del cabello", web: "https://example.com", tint: "sky", atribucion: "propia", atribucionHasta: "2027-09-25", creadaEl: "2026-09-25T10:00:00" },
+  { id: "petalo", nombre: "Pétalo", sector: "Perfumería", instagram: "petalo.perfumes", tint: "rose", atribucion: "propia", atribucionHasta: "2027-10-05", creadaEl: "2026-10-05T20:30:00" },
+  { id: "soleil", nombre: "Soleil Paris", sector: "Protección solar", tint: "peach", atribucion: "red", creadaEl: "2026-09-22T09:00:00" },
+  { id: "dermanova", nombre: "Derma Nova", sector: "Dermocosmética", web: "https://example.com", tint: "lavender", atribucion: "propia", atribucionHasta: "2027-08-14", notas: "Quieren derechos ilimitados por poco dinero.", creadaEl: "2026-08-14T09:00:00" },
+  { id: "bloom", nombre: "Bloom Beauty", sector: "Maquillaje", instagram: "bloom.beauty", tint: "mint", atribucion: "propia", atribucionHasta: "2027-07-02", creadaEl: "2026-07-02T09:00:00" },
+  { id: "brote", nombre: "Aceites Brote", sector: "Aceites faciales", web: "https://example.com", instagram: "aceites.brote", tint: "lime", atribucion: "propia", atribucionHasta: "2027-10-02", notas: "Les escribí yo: uso su aceite de rosa mosqueta desde hace un año.", creadaEl: "2026-10-02T18:00:00" },
+  { id: "nimbo", nombre: "Nimbo Color", sector: "Maquillaje", instagram: "nimbo.color", tint: "lavender", atribucion: "propia", atribucionHasta: "2027-09-15", notas: "Marca que me gustaría trabajar. Sin contacto todavía.", creadaEl: "2026-09-15T09:00:00" },
+  { id: "mirra", nombre: "Atelier Mirra", sector: "Perfumería nicho", web: "https://example.com", tint: "peach", atribucion: "propia", atribucionHasta: "2027-09-10", creadaEl: "2026-09-10T09:00:00" },
+  { id: "brisa", nombre: "Brisa Nails", sector: "Uñas", instagram: "brisa.nails", tint: "sky", atribucion: "propia", atribucionHasta: "2027-08-25", creadaEl: "2026-08-25T09:00:00" },
+]
+
+export const demoContactos: Contacto[] = [
+  { id: "c-clara", marcaId: "lumea", nombre: "Clara Benet", cargo: "Marketing manager", email: "clara@example.com", telefono: "+34 600 000 101", principal: true, creadoEl: "2026-03-12T10:00:00" },
+  { id: "c-jordi", marcaId: "lumea", nombre: "Jordi Pons", cargo: "Relaciones públicas", email: "jordi@example.com", creadoEl: "2026-04-02T10:00:00" },
+  { id: "c-pau", marcaId: "botanica", nombre: "Pau Ribes", cargo: "Brand manager", email: "pau@example.com", principal: true, notas: "Hablar con él para lo de la factura vencida.", creadoEl: "2026-05-20T10:00:00" },
+  { id: "c-ines", marcaId: "vero", nombre: "Inés Roldán", cargo: "Influencer marketing", email: "ines@example.com", instagram: "ines.roldan", principal: true, creadoEl: "2026-01-20T10:00:00" },
+  { id: "c-nora", marcaId: "vero", nombre: "Nora Gil", cargo: "Producto", email: "nora@example.com", creadoEl: "2026-02-11T10:00:00" },
+  { id: "c-marc", marcaId: "glow", nombre: "Marc Soler", cargo: "Marketing", email: "marc@example.com", principal: true, creadoEl: "2026-08-30T10:00:00" },
+  { id: "c-laia", marcaId: "kalma", nombre: "Laia Font", cargo: "Fundadora", email: "laia@example.com", telefono: "+34 600 000 102", principal: true, notas: "Prefiere WhatsApp para lo rápido.", creadoEl: "2026-09-30T12:00:00" },
+  { id: "c-diego", marcaId: "aura", nombre: "Diego Mas", cargo: "Marketing digital", email: "diego@example.com", principal: true, creadoEl: "2026-09-25T10:00:00" },
+  { id: "c-sara", marcaId: "petalo", nombre: "Sara Vidal", cargo: "Comunicación", instagram: "sara.petalo", principal: true, creadoEl: "2026-10-05T20:30:00" },
+  { id: "c-rocio", marcaId: "dermanova", nombre: "Rocío Peña", cargo: "Trade marketing", email: "rocio@example.com", principal: true, creadoEl: "2026-08-14T09:00:00" },
+  { id: "c-alex", marcaId: "bloom", nombre: "Álex Ferrer", cargo: "Social media", email: "alex@example.com", principal: true, creadoEl: "2026-07-02T09:00:00" },
+  { id: "c-lucia", marcaId: "brote", nombre: "Lucía Marín", cargo: "Fundadora", instagram: "lucia.brote", principal: true, creadoEl: "2026-10-02T18:00:00" },
+  { id: "c-teo", marcaId: "mirra", nombre: "Teo Valls", cargo: "Brand manager", email: "teo@example.com", principal: true, creadoEl: "2026-09-10T09:00:00" },
+  { id: "c-vera", marcaId: "brisa", nombre: "Vera Costa", cargo: "Influencer manager", email: "vera@example.com", principal: true, creadoEl: "2026-08-25T09:00:00" },
 ]
 
 export const demoPropuestas: Propuesta[] = [
@@ -79,6 +102,7 @@ export const demoPropuestas: Propuesta[] = [
   {
     id: "p-kalma",
     marcaId: "kalma",
+    contactoId: "c-laia",
     campana: "Base de maquillaje Pure",
     estado: "hablando",
     origen: "marca",
@@ -94,6 +118,7 @@ export const demoPropuestas: Propuesta[] = [
   {
     id: "p-petalo",
     marcaId: "petalo",
+    contactoId: "c-sara",
     campana: "Colonia de otoño",
     estado: "nueva",
     origen: "mediakit",
@@ -107,6 +132,7 @@ export const demoPropuestas: Propuesta[] = [
   {
     id: "p-aura",
     marcaId: "aura",
+    contactoId: "c-diego",
     campana: "Rutina anticaída",
     estado: "enviada",
     origen: "marca",
@@ -115,6 +141,9 @@ export const demoPropuestas: Propuesta[] = [
       lineas: [{ formato: "reel", cantidad: 1, precio: 690 }, { formato: "tiktok", cantidad: 1, precio: 590 }],
       extras: ["derechos"],
       conPrecios: true,
+      rondas: 2,
+      validez: 15,
+      pago: "30 días tras publicar",
       generadoEl: "2026-10-01T11:00:00",
     },
     desde: "2026-10-26",
@@ -136,6 +165,9 @@ export const demoPropuestas: Propuesta[] = [
       lineas: [{ formato: "reel", cantidad: 2, precio: 690 }],
       extras: [],
       conPrecios: false,
+      rondas: 2,
+      validez: 15,
+      pago: "Factura Astratic",
       generadoEl: "2026-09-29T16:00:00",
     },
     desde: "2026-11-02",
@@ -149,6 +181,7 @@ export const demoPropuestas: Propuesta[] = [
   {
     id: "p-lumea",
     marcaId: "lumea",
+    contactoId: "c-clara",
     campana: "Rutina de noche",
     estado: "ganada",
     origen: "marca",
@@ -157,6 +190,9 @@ export const demoPropuestas: Propuesta[] = [
       lineas: [{ formato: "reel", cantidad: 1, precio: 690 }, { formato: "story", cantidad: 3, precio: 130 }],
       extras: ["derechos"],
       conPrecios: true,
+      rondas: 2,
+      validez: 15,
+      pago: "30 días tras publicar",
       generadoEl: "2026-09-12T10:00:00",
     },
     desde: "2026-10-01",
@@ -168,6 +204,7 @@ export const demoPropuestas: Propuesta[] = [
   {
     id: "p-dermanova",
     marcaId: "dermanova",
+    contactoId: "c-rocio",
     campana: "Sérum reparador",
     estado: "perdida",
     origen: "marca",
@@ -181,6 +218,7 @@ export const demoPropuestas: Propuesta[] = [
   {
     id: "p-bloom",
     marcaId: "bloom",
+    contactoId: "c-alex",
     campana: "Labiales de otoño",
     estado: "perdida",
     origen: "marca",
@@ -189,436 +227,6 @@ export const demoPropuestas: Propuesta[] = [
     motivoPerdida: "sin-respuesta",
     creadaEl: "2026-08-20T09:00:00",
   },
-]
-
-const GUION_LUMEA = `GANCHO (0–3 s)
-«Esto es lo único que hago por la noche y mi piel nunca ha estado mejor.»
-
-DESARROLLO (3–20 s)
-Me desmaquillo con el bálsamo, lo masajeo 30 segundos y lo retiro con agua tibia. Enseño la textura en la mano. Luego el sérum de noche: dos gotas, de dentro hacia fuera.
-
-MENSAJES DE LA MARCA
-Fórmula con retinal al 0,1 %, apta para pieles sensibles. Resultados visibles en 4 semanas (estudio clínico de la marca).
-
-LLAMADA A LA ACCIÓN
-«Tenéis un 15 % con el código MARTA15 en el enlace de mi bio.»
-
-TEXTO EN PANTALLA
-«Rutina de noche en 3 pasos» · «Código MARTA15»
-
-COPY DEL POST
-Mi rutina de noche de verdad, sin diez pasos. #publi @lumea.skin #rutinadenoche #skincare
-
-NOTAS DE RODAJE
-Luz cálida del baño, plano cenital para las texturas. Enseñar el envase entero al menos 2 segundos.`
-
-const GUION_BOTANICA = `GANCHO (0–3 s)
-«Llevo 15 días con este sérum de vitamina C y esto es lo que ha pasado.»
-
-DESARROLLO (3–25 s)
-Primera impresión al abrirlo: color, textura y olor. Cómo lo aplico por la mañana antes del SPF. Qué he notado en la primera semana (luminosidad) y qué no (las manchas van a tardar más).
-
-MENSAJES DE LA MARCA
-Vitamina C estabilizada al 15 %, sin perfume, envase de vidrio reciclable.
-
-LLAMADA A LA ACCIÓN
-«El enlace está en mi bio; el reel de los resultados llega en dos semanas.»
-
-COPY DEL POST
-Primera impresión del sérum de vitamina C de @botanicalab. En 15 días os cuento los resultados. #publi #vitaminac`
-
-const GUION_VERO = `GANCHO (0–3 s)
-«Un look de otoño en 3 productos, y uno de ellos lo vais a querer.»
-
-DESARROLLO (3–22 s)
-Base ligera, la paleta Terracota en los párpados (enseño los 4 tonos de cerca) y el labial Castaña. Antes y después.
-
-MENSAJES DE LA MARCA
-Paleta Terracota: 4 tonos mate y satinados, edición limitada de otoño.
-
-LLAMADA A LA ACCIÓN
-«Todo en el enlace de mi bio.»
-
-COPY DEL POST
-Mi look de otoño con la colección nueva de @maisonvero. #publi #lookdeotoño`
-
-const GUION_GLOW = `GANCHO (0–3 s)
-«El SPF que por fin no me deja la cara blanca.»
-
-DESARROLLO (3–18 s)
-Aplicación con los dos dedos de producto, cómo queda bajo el maquillaje, y el truco para reaplicar a mediodía.
-
-MENSAJES DE LA MARCA
-SPF 50+ de amplio espectro, acabado invisible, sin fragancia.
-
-LLAMADA A LA ACCIÓN
-«Lanzamiento el 12 de octubre: enlace en la bio.»
-
-COPY DEL POST
-Mi SPF de cada día, desde hoy a la venta. @glowstudio #publi #spf50`
-
-const version = (v: Omit<Version, "notas"> & { notas?: Version["notas"] }): Version => ({ notas: [], ...v })
-
-export const demoCollabs: Collab[] = [
-  {
-    id: "lumea",
-    marcaId: "lumea",
-    campana: "Rutina de noche",
-    tipo: "directa",
-    estado: "en-curso",
-    importe: 1296,
-    tint: "rose",
-    coverUrl: foto("1570172619644-dfd03ed5d881"),
-    desde: "2026-10-01",
-    hasta: "2026-10-20",
-    brief: {
-      objetivo: "Dar a conocer la rutina de noche de Lumea (bálsamo + sérum con retinal) entre mujeres de 25 a 40 con piel sensible.",
-      mensajesClave: ["Retinal al 0,1 % apto para pieles sensibles", "Resultados visibles en 4 semanas", "Rutina de 3 pasos, sin complicaciones"],
-      menciones: ["@lumea.skin"],
-      hashtags: ["#publi", "#rutinadenoche", "#lumeaskin"],
-      enlace: "https://example.com/rutina-de-noche",
-      codigo: "MARTA15",
-      exclusividad: "Skincare de noche · 2 meses",
-      derechosUso: "Orgánico · 6 meses",
-      rondasIncluidas: 2,
-      claimsPermitidos: ["Apto para pieles sensibles", "Resultados visibles en 4 semanas (estudio clínico)"],
-      claimsProhibidos: ["Elimina las arrugas", "Efecto bótox", "Cura el acné"],
-      hacer: ["Enseñar el envase entero al menos 2 segundos", "Mostrar la textura en la mano", "Marcar como publicidad en la propia plataforma"],
-      evitar: ["Comparar con otras marcas", "Aplicarlo cerca de los ojos en cámara"],
-      producto: { estado: "recibido", detalle: "Bálsamo + sérum, recibidos el 3 de octubre" },
-      contacto: { nombre: "Clara Benet", email: "clara@example.com" },
-      condicionesPago: "30 días tras la publicación del reel",
-    },
-    piezas: [
-      {
-        id: "lumea-reel",
-        collabId: "lumea",
-        formato: "reel",
-        unidades: 1,
-        titulo: "Reel · Mi rutina de noche",
-        publicacion: "2026-10-15",
-        estado: "borrador",
-        rondaActual: 1,
-        portadaUrl: foto("1570172619644-dfd03ed5d881", 600),
-        guion: [
-          version({
-            id: "lumea-reel-g1",
-            tipo: "guion",
-            numero: 1,
-            estado: "aprobada",
-            creadaEl: "2026-10-03T19:00:00",
-            texto: GUION_LUMEA,
-            enlace: { token: "rv-lumea-reel-g1", caduca: "2026-11-03" },
-            notas: [
-              { id: "n-lumea-1", autor: "Clara Benet", el: "2026-10-05T18:10:00", texto: "Perfecto. Solo una cosa: di «retinal», no «retinol», que es otro ingrediente.", ancla: { tipo: "texto", cita: "Fórmula con retinal al 0,1 %" }, resuelta: true, respuesta: "Cambiado, lo digo bien en el vídeo." },
-            ],
-            aprobada: { por: "Clara Benet", el: "2026-10-05T18:20:00" },
-          }),
-        ],
-        video: [],
-      },
-      {
-        id: "lumea-stories",
-        collabId: "lumea",
-        formato: "story",
-        unidades: 3,
-        titulo: "3 stories · Antes y después",
-        publicacion: "2026-10-18",
-        estado: "borrador",
-        rondaActual: 1,
-        guion: [
-          version({
-            id: "lumea-stories-g1",
-            tipo: "guion",
-            numero: 1,
-            estado: "borrador",
-            creadaEl: "2026-10-05T22:00:00",
-            texto: "STORY 1\nEl paquete abierto, qué lleva y por qué lo he elegido.\n\nSTORY 2\nTextura del sérum en la mano y cómo lo aplico (sticker de enlace).\n\nSTORY 3\nPiel por la mañana + código MARTA15 en grande.",
-          }),
-        ],
-        video: [],
-      },
-    ],
-    cobro: { estado: "por-facturar" },
-    propuestaId: "p-lumea",
-    creadaEl: "2026-09-18T12:00:00",
-  },
-  {
-    id: "botanica",
-    marcaId: "botanica",
-    campana: "Sérum de vitamina C",
-    tipo: "red",
-    estado: "en-curso",
-    importe: 1900,
-    importeNeto: 1520,
-    tint: "mint",
-    coverUrl: foto("1596462502278-27bfdc403348"),
-    desde: "2026-10-05",
-    hasta: "2026-11-05",
-    brief: {
-      objetivo: "Dos reels que enseñen la experiencia real con el sérum: la primera impresión y los resultados a los 15 días.",
-      mensajesClave: ["Vitamina C estabilizada al 15 %", "Sin perfume", "Envase de vidrio reciclable"],
-      menciones: ["@botanicalab"],
-      hashtags: ["#publi", "#vitaminac", "#botanicalab"],
-      enlace: "https://example.com/vitamina-c",
-      derechosUso: "Orgánico · 3 meses",
-      rondasIncluidas: 2,
-      claimsPermitidos: ["Más luminosidad desde la primera semana", "Fórmula estabilizada"],
-      claimsProhibidos: ["Quita las manchas", "Sustituye al SPF"],
-      hacer: ["Grabar el segundo reel con el mismo encuadre que el primero", "Decir el porcentaje de vitamina C"],
-      evitar: ["Mezclarlo en cámara con otros ácidos"],
-      producto: { estado: "enviado", detalle: "Sale el 6 de octubre; llega en 48 h" },
-      contacto: { nombre: "Pau Ribes", email: "pau@example.com" },
-      condicionesPago: "Factura Astratic; cobro a 30 días tras el segundo reel",
-    },
-    piezas: [
-      {
-        id: "botanica-reel-1",
-        collabId: "botanica",
-        formato: "reel",
-        unidades: 1,
-        titulo: "Reel 1 · Primera impresión",
-        publicacion: "2026-10-22",
-        estado: "borrador",
-        rondaActual: 1,
-        portadaUrl: foto("1596462502278-27bfdc403348", 600),
-        guion: [version({ id: "botanica-reel-1-g1", tipo: "guion", numero: 1, estado: "borrador", creadaEl: "2026-10-05T23:10:00", texto: GUION_BOTANICA })],
-        video: [],
-      },
-      {
-        id: "botanica-reel-2",
-        collabId: "botanica",
-        formato: "reel",
-        unidades: 1,
-        titulo: "Reel 2 · Resultados a los 15 días",
-        publicacion: "2026-11-05",
-        estado: "borrador",
-        rondaActual: 1,
-        guion: [],
-        video: [],
-      },
-    ],
-    cobro: { estado: "por-facturar" },
-    creadaEl: "2026-09-28T10:00:00",
-  },
-  {
-    id: "vero",
-    marcaId: "vero",
-    campana: "Colección otoño",
-    tipo: "directa",
-    estado: "en-curso",
-    importe: 1650,
-    tint: "peach",
-    coverUrl: foto("1583241800698-e8ab01830a07"),
-    desde: "2026-09-20",
-    hasta: "2026-10-20",
-    brief: {
-      objetivo: "Presentar la colección de otoño (paleta Terracota y labial Castaña) con un look completo y un tutorial corto.",
-      mensajesClave: ["Edición limitada de otoño", "4 tonos mate y satinados", "Larga duración sin retoques"],
-      menciones: ["@maisonvero"],
-      hashtags: ["#publi", "#lookdeotoño", "#maisonvero"],
-      enlace: "https://example.com/otono",
-      exclusividad: "Maquillaje de ojos · 1 mes",
-      derechosUso: "Paid · 3 meses",
-      rondasIncluidas: 2,
-      claimsPermitidos: ["Larga duración", "Pigmentación alta"],
-      claimsProhibidos: ["Hipoalergénico", "No testado en animales (sin certificado)"],
-      hacer: ["Enseñar los 4 tonos de cerca", "Nombrar la paleta en pantalla"],
-      evitar: ["Mezclar con productos de otras marcas en el mismo plano"],
-      producto: { estado: "recibido" },
-      contacto: { nombre: "Inés Roldán", email: "ines@example.com" },
-      condicionesPago: "50 % al aprobar el guion, 50 % a 30 días tras publicar",
-    },
-    piezas: [
-      {
-        id: "vero-reel",
-        collabId: "vero",
-        formato: "reel",
-        unidades: 1,
-        titulo: "Reel · Look de otoño",
-        publicacion: "2026-10-15",
-        estado: "cambios",
-        rondaActual: 1,
-        portadaUrl: foto("1583241800698-e8ab01830a07", 600),
-        guion: [
-          version({ id: "vero-reel-g1", tipo: "guion", numero: 1, estado: "aprobada", creadaEl: "2026-09-26T18:00:00", texto: GUION_VERO, enlace: { token: "rv-vero-reel-g1", caduca: "2026-10-26" }, aprobada: { por: "Inés Roldán", el: "2026-09-28T10:30:00" } }),
-        ],
-        video: [
-          version({
-            id: "vero-reel-v1",
-            tipo: "video",
-            numero: 1,
-            estado: "cambios",
-            creadaEl: "2026-10-02T17:40:00",
-            archivo: { nombre: "vero-look-otono-v1.mp4", tamano: 148_000_000, duracion: 27, posterUrl: foto("1583241800698-e8ab01830a07", 600) },
-            enlace: { token: "rv-vero-reel-v1", caduca: "2026-11-02" },
-            notas: [
-              { id: "n-vero-1", autor: "Inés Roldán", el: "2026-10-06T10:12:00", texto: "El producto se ve poco en el primer plano. ¿Puedes acercar la paleta a cámara un segundo más?", ancla: { tipo: "segundo", segundo: 4 }, resuelta: false },
-              { id: "n-vero-2", autor: "Inés Roldán", el: "2026-10-06T10:15:00", texto: "Añade el nombre «Terracota» en pantalla cuando enseñas los tonos.", ancla: { tipo: "segundo", segundo: 18 }, resuelta: false },
-            ],
-          }),
-        ],
-      },
-      {
-        id: "vero-tiktok",
-        collabId: "vero",
-        formato: "tiktok",
-        unidades: 1,
-        titulo: "TikTok · Tutorial en 30 segundos",
-        publicacion: "2026-10-02",
-        estado: "publicado",
-        rondaActual: 1,
-        portadaUrl: foto("1522335789203-aabd1fc54bc9", 600),
-        guion: [],
-        video: [
-          version({ id: "vero-tiktok-v1", tipo: "video", numero: 1, estado: "aprobada", creadaEl: "2026-09-29T12:00:00", archivo: { nombre: "vero-tutorial-v1.mp4", tamano: 96_000_000, duracion: 31 }, aprobada: { por: "Inés Roldán", el: "2026-09-30T09:45:00" } }),
-        ],
-        publicada: { url: "https://tiktok.com", fecha: "2026-10-02", marcadaPubli: true },
-      },
-    ],
-    cobro: { estado: "facturado", vencimiento: "2026-10-30", factura: "2026-017" },
-    creadaEl: "2026-09-15T10:00:00",
-  },
-  {
-    id: "glow",
-    marcaId: "glow",
-    campana: "Lanzamiento SPF",
-    tipo: "red",
-    estado: "en-curso",
-    importe: 980,
-    importeNeto: 784,
-    tint: "lavender",
-    coverUrl: foto("1487412947147-5cebf100ffc2"),
-    desde: "2026-10-01",
-    hasta: "2026-10-12",
-    brief: {
-      objetivo: "Acompañar el lanzamiento del SPF 50+ invisible el 12 de octubre con un reel de uso diario.",
-      mensajesClave: ["SPF 50+ de amplio espectro", "Acabado invisible", "Sin fragancia"],
-      menciones: ["@glowstudio"],
-      hashtags: ["#publi", "#spf50", "#glowstudio"],
-      enlace: "https://example.com/spf",
-      derechosUso: "Orgánico · 3 meses",
-      rondasIncluidas: 1,
-      claimsPermitidos: ["Protección muy alta", "Acabado invisible en todos los tonos de piel"],
-      claimsProhibidos: ["Protección total", "Bloqueador"],
-      hacer: ["Publicar el 12 de octubre entre las 18 y las 20 h"],
-      evitar: ["Enseñar el producto antes del día del lanzamiento"],
-      producto: { estado: "recibido" },
-      contacto: { nombre: "Marc Soler", email: "marc@example.com" },
-      condicionesPago: "Factura Astratic; cobro a 30 días",
-    },
-    piezas: [
-      {
-        id: "glow-reel",
-        collabId: "glow",
-        formato: "reel",
-        unidades: 1,
-        titulo: "Reel · SPF cada día",
-        publicacion: "2026-10-12",
-        estado: "programado",
-        rondaActual: 2,
-        portadaUrl: foto("1487412947147-5cebf100ffc2", 600),
-        guion: [version({ id: "glow-reel-g1", tipo: "guion", numero: 1, estado: "aprobada", creadaEl: "2026-09-27T10:00:00", texto: GUION_GLOW, aprobada: { por: "Marc Soler", el: "2026-09-29T11:00:00" } })],
-        video: [
-          version({
-            id: "glow-reel-v1",
-            tipo: "video",
-            numero: 1,
-            estado: "cambios",
-            creadaEl: "2026-10-01T16:00:00",
-            archivo: { nombre: "glow-spf-v1.mp4", tamano: 121_000_000, duracion: 22 },
-            notas: [{ id: "n-glow-1", autor: "Marc Soler", el: "2026-10-02T09:30:00", texto: "Quita el plano del envase antiguo: en el lanzamiento va el nuevo.", ancla: { tipo: "segundo", segundo: 9 }, resuelta: true, respuesta: "Hecho en la V2." }],
-          }),
-          version({ id: "glow-reel-v2", tipo: "video", numero: 2, estado: "aprobada", creadaEl: "2026-10-03T18:30:00", archivo: { nombre: "glow-spf-v2.mp4", tamano: 119_000_000, duracion: 22 }, enlace: { token: "rv-glow-reel-v2", caduca: "2026-11-03" }, aprobada: { por: "Marc Soler", el: "2026-10-04T12:10:00" } }),
-        ],
-      },
-    ],
-    cobro: { estado: "por-facturar" },
-    creadaEl: "2026-09-24T10:00:00",
-  },
-  {
-    id: "botanica-verano",
-    marcaId: "botanica",
-    campana: "Sérum de verano",
-    tipo: "red",
-    estado: "por-cobrar",
-    importe: 950,
-    importeNeto: 760,
-    tint: "mint",
-    desde: "2026-07-01",
-    hasta: "2026-07-20",
-    brief: {
-      objetivo: "Un reel de rutina de verano con el sérum hidratante.",
-      mensajesClave: ["Hidratación ligera para el verano"],
-      menciones: ["@botanicalab"],
-      hashtags: ["#publi"],
-      rondasIncluidas: 2,
-      claimsPermitidos: [],
-      claimsProhibidos: [],
-      hacer: [],
-      evitar: [],
-      contacto: { nombre: "Pau Ribes", email: "pau@example.com" },
-      condicionesPago: "30 días",
-    },
-    piezas: [
-      { id: "botanica-verano-reel", collabId: "botanica-verano", formato: "reel", unidades: 1, titulo: "Reel · Rutina de verano", publicacion: "2026-07-18", estado: "resultados", rondaActual: 1, guion: [], video: [], publicada: { url: "https://instagram.com", fecha: "2026-07-18", marcadaPubli: true } },
-    ],
-    cobro: { estado: "vencido", vencimiento: "2026-09-30", factura: "2026-014" },
-    creadaEl: "2026-06-20T10:00:00",
-  },
-  {
-    id: "lumea-verano",
-    marcaId: "lumea",
-    campana: "Protección solar facial",
-    tipo: "directa",
-    estado: "cerrada",
-    importe: 1150,
-    tint: "rose",
-    desde: "2026-06-01",
-    hasta: "2026-06-20",
-    brief: { objetivo: "Reel y stories del SPF facial.", mensajesClave: [], menciones: ["@lumea.skin"], hashtags: ["#publi"], rondasIncluidas: 2, claimsPermitidos: [], claimsProhibidos: [], hacer: [], evitar: [], contacto: { nombre: "Clara Benet", email: "clara@example.com" }, condicionesPago: "30 días" },
-    piezas: [
-      { id: "lumea-verano-reel", collabId: "lumea-verano", formato: "reel", unidades: 1, titulo: "Reel · SPF facial", publicacion: "2026-06-15", estado: "resultados", rondaActual: 1, guion: [], video: [], publicada: { url: "https://instagram.com", fecha: "2026-06-15", marcadaPubli: true } },
-      { id: "lumea-verano-stories", collabId: "lumea-verano", formato: "story", unidades: 2, titulo: "2 stories · Reaplicar", publicacion: "2026-06-18", estado: "resultados", rondaActual: 1, guion: [], video: [], publicada: { url: "https://instagram.com", fecha: "2026-06-18", marcadaPubli: true } },
-    ],
-    cobro: { estado: "cobrado", vencimiento: "2026-07-15", factura: "2026-009" },
-    creadaEl: "2026-05-12T10:00:00",
-  },
-  {
-    id: "vero-primavera",
-    marcaId: "vero",
-    campana: "Colección primavera",
-    tipo: "directa",
-    estado: "cerrada",
-    importe: 1400,
-    tint: "peach",
-    desde: "2026-04-01",
-    hasta: "2026-04-20",
-    brief: { objetivo: "Look de primavera con la colección nueva.", mensajesClave: [], menciones: ["@maisonvero"], hashtags: ["#publi"], rondasIncluidas: 2, claimsPermitidos: [], claimsProhibidos: [], hacer: [], evitar: [], contacto: { nombre: "Inés Roldán", email: "ines@example.com" }, condicionesPago: "30 días" },
-    piezas: [
-      { id: "vero-primavera-reel", collabId: "vero-primavera", formato: "reel", unidades: 1, titulo: "Reel · Look de primavera", publicacion: "2026-04-14", estado: "resultados", rondaActual: 2, guion: [], video: [], publicada: { url: "https://instagram.com", fecha: "2026-04-14", marcadaPubli: true } },
-    ],
-    cobro: { estado: "cobrado", vencimiento: "2026-05-14", factura: "2026-006" },
-    creadaEl: "2026-03-10T10:00:00",
-  },
-]
-
-export const demoMateriales: Material[] = [
-  { id: "m-lumea-brief", collabId: "lumea", nombre: "Brief Rutina de noche.pdf", tipo: "pdf", origen: "marca", tamano: 2_400_000, url: "#", subidoEl: "2026-09-18T12:30:00", descripcion: "El brief completo de la marca" },
-  { id: "m-lumea-logos", collabId: "lumea", nombre: "Logos Lumea.zip", tipo: "zip", origen: "marca", tamano: 8_100_000, url: "#", subidoEl: "2026-09-18T12:30:00" },
-  { id: "m-lumea-producto-1", collabId: "lumea", nombre: "Sérum de noche · packshot.jpg", tipo: "imagen", origen: "marca", tamano: 1_900_000, url: "#", previewUrl: foto("1570172619644-dfd03ed5d881", 400), subidoEl: "2026-09-19T09:00:00" },
-  { id: "m-lumea-producto-2", collabId: "lumea", nombre: "Bálsamo · textura.jpg", tipo: "imagen", origen: "marca", tamano: 2_200_000, url: "#", previewUrl: foto("1556228720-195a672e8a03", 400), subidoEl: "2026-09-19T09:00:00" },
-  { id: "m-lumea-claims", collabId: "lumea", nombre: "Guía de claims y menciones.pdf", tipo: "pdf", origen: "marca", tamano: 640_000, url: "#", subidoEl: "2026-09-19T09:05:00" },
-  { id: "m-lumea-landing", collabId: "lumea", nombre: "Landing de la campaña", tipo: "enlace", origen: "marca", url: "https://example.com/rutina-de-noche", subidoEl: "2026-09-19T09:05:00" },
-  { id: "m-lumea-contrato", collabId: "lumea", nombre: "Contrato firmado.pdf", tipo: "pdf", origen: "mia", tamano: 310_000, url: "#", subidoEl: "2026-09-22T17:00:00" },
-  { id: "m-vero-brief", collabId: "vero", nombre: "Brief Colección otoño.pdf", tipo: "pdf", origen: "marca", tamano: 3_100_000, url: "#", subidoEl: "2026-09-15T11:00:00" },
-  { id: "m-vero-paleta", collabId: "vero", nombre: "Paleta Terracota · packshot.jpg", tipo: "imagen", origen: "marca", tamano: 2_700_000, url: "#", previewUrl: foto("1583241800698-e8ab01830a07", 400), subidoEl: "2026-09-15T11:00:00" },
-  { id: "m-vero-referencias", collabId: "vero", nombre: "Referencias de la marca", tipo: "enlace", origen: "marca", url: "https://example.com/referencias", subidoEl: "2026-09-15T11:05:00", descripcion: "Looks que les gustan, para el tono" },
-  { id: "m-vero-contrato", collabId: "vero", nombre: "Contrato firmado.pdf", tipo: "pdf", origen: "mia", tamano: 290_000, url: "#", subidoEl: "2026-09-17T10:00:00" },
-  { id: "m-botanica-brief", collabId: "botanica", nombre: "Brief Sérum de vitamina C.pdf", tipo: "pdf", origen: "marca", tamano: 1_800_000, url: "#", subidoEl: "2026-09-28T10:30:00" },
-  { id: "m-botanica-producto", collabId: "botanica", nombre: "Sérum · packshot.jpg", tipo: "imagen", origen: "marca", tamano: 2_000_000, url: "#", previewUrl: foto("1596462502278-27bfdc403348", 400), subidoEl: "2026-09-28T10:30:00" },
-  { id: "m-glow-brief", collabId: "glow", nombre: "Brief Lanzamiento SPF.pdf", tipo: "pdf", origen: "marca", tamano: 1_200_000, url: "#", subidoEl: "2026-09-24T10:30:00" },
-  { id: "m-glow-logo", collabId: "glow", nombre: "Logo Glow Studio.zip", tipo: "zip", origen: "marca", tamano: 4_400_000, url: "#", subidoEl: "2026-09-24T10:30:00" },
 ]
 
 export const demoTareas: Tarea[] = [
@@ -641,6 +249,8 @@ export const demoTareas: Tarea[] = [
   { id: "t17", titulo: "Actualizar el media kit con las cifras de octubre", hecha: false, fechaLimite: "2026-10-10", origen: "manual" },
   { id: "t18", titulo: "Renovar el dominio de la web", hecha: false, fechaLimite: "2026-10-20", origen: "manual" },
   { id: "t19", titulo: "Pedir el certificado de Autocontrol", hecha: true, hechaEl: "2026-10-02T12:00:00", fechaLimite: "2026-10-02", origen: "manual" },
+  { id: "t20", titulo: "Escribir a Aceites Brote si no contestan al DM", hecha: false, fechaLimite: "2026-10-09", relacion: { tipo: "marca", id: "brote" }, origen: "manual" },
+  { id: "t21", titulo: "Buscar el email de quien lleva colaboraciones en Nimbo", hecha: false, relacion: { tipo: "marca", id: "nimbo" }, origen: "manual" },
 ]
 
 export const demoAvisoDestacado: Aviso = {
@@ -650,7 +260,7 @@ export const demoAvisoDestacado: Aviso = {
   descripcion: "1 reel + 3 stories · 1.100 € (880 € para ti) · del 20 al 31 de octubre",
   el: "2026-10-06T09:40:00",
   leido: false,
-  href: "/workspace/propuestas?propuesta=p-nuura",
+  href: "/workspace/crm?registro=p-nuura",
 }
 
 export const demoAvisos: Aviso[] = [
@@ -688,3 +298,216 @@ export const demoActividad: Actividad[] = [
 
 /** Cobrado en lo que va de año: en el portal saldrá de los cobros; aquí es una cifra fija. */
 export const COBRADO_ESTE_ANO = 18_650
+
+/** El seguimiento de cada marca: lo que ella apunta y lo que entra por email o por Astratic. */
+export const demoInteracciones: Interaccion[] = [
+  { id: "i1", tipo: "email", sentido: "recibido", el: "2026-10-06T09:40:00", nota: "Astratic me propone la campaña del champú sólido: 1 reel y 3 stories.", marcaId: "nuura", propuestaId: "p-nuura" },
+  { id: "i2", tipo: "dm", sentido: "enviado", el: "2026-09-30T12:00:00", nota: "Primer mensaje por Instagram: les cuento que uso su base.", marcaId: "kalma", contactoId: "c-laia", propuestaId: "p-kalma" },
+  { id: "i3", tipo: "email", sentido: "recibido", el: "2026-10-04T17:10:00", nota: "Piden tarifas para dos reels antes de Navidad.", marcaId: "kalma", contactoId: "c-laia", propuestaId: "p-kalma" },
+  { id: "i4", tipo: "dm", sentido: "recibido", el: "2026-10-05T20:30:00", nota: "Llegan por el formulario del media kit: una story a cambio de producto.", marcaId: "petalo", contactoId: "c-sara", propuestaId: "p-petalo" },
+  { id: "i5", tipo: "email", sentido: "recibido", el: "2026-09-25T10:00:00", nota: "Piden reel y TikTok para la rutina anticaída.", marcaId: "aura", contactoId: "c-diego", propuestaId: "p-aura" },
+  { id: "i6", tipo: "email", sentido: "enviado", el: "2026-10-01T11:20:00", nota: "Envío el presupuesto (1.536 €) con el media kit.", marcaId: "aura", contactoId: "c-diego", propuestaId: "p-aura" },
+  { id: "i7", tipo: "email", sentido: "enviado", el: "2026-09-29T16:00:00", nota: "Mando el presupuesto a Astratic, media kit sin precios.", marcaId: "soleil", propuestaId: "p-soleil" },
+  { id: "i8", tipo: "email", sentido: "recibido", el: "2026-10-03T13:00:00", nota: "Astratic traslada la oferta: 900 € por dos reels.", marcaId: "soleil", propuestaId: "p-soleil" },
+  { id: "i9", tipo: "email", sentido: "recibido", el: "2026-09-12T10:00:00", nota: "Aceptan el presupuesto.", marcaId: "lumea", contactoId: "c-clara", propuestaId: "p-lumea" },
+  { id: "i10", tipo: "llamada", sentido: "enviado", el: "2026-09-18T12:00:00", nota: "Cerramos fechas: publicar entre el 1 y el 20 de octubre.", marcaId: "lumea", contactoId: "c-clara", propuestaId: "p-lumea" },
+  { id: "i11", tipo: "email", sentido: "recibido", el: "2026-09-14T10:00:00", nota: "Ofrecen 400 € por un reel con derechos ilimitados.", marcaId: "dermanova", contactoId: "c-rocio", propuestaId: "p-dermanova" },
+  { id: "i12", tipo: "email", sentido: "enviado", el: "2026-09-14T16:00:00", nota: "Les digo que no con esas condiciones.", marcaId: "dermanova", contactoId: "c-rocio", propuestaId: "p-dermanova" },
+  { id: "i13", tipo: "email", sentido: "enviado", el: "2026-08-21T10:00:00", nota: "Envío tarifas y media kit.", marcaId: "bloom", contactoId: "c-alex", propuestaId: "p-bloom" },
+  { id: "i14", tipo: "email", sentido: "enviado", el: "2026-08-28T15:00:00", nota: "Segundo seguimiento, sin respuesta.", marcaId: "bloom", contactoId: "c-alex", propuestaId: "p-bloom" },
+  { id: "i15", tipo: "dm", sentido: "enviado", el: "2026-10-02T18:00:00", nota: "Primer mensaje: uso su aceite de rosa mosqueta, ¿hablamos?", marcaId: "brote", contactoId: "c-lucia" },
+  { id: "i16", tipo: "email", sentido: "enviado", el: "2026-09-10T09:30:00", nota: "Primer contacto con media kit.", marcaId: "mirra", contactoId: "c-teo" },
+  { id: "i17", tipo: "reunion", sentido: "enviado", el: "2026-09-03T11:00:00", nota: "Videollamada con Inés: presentan la colección de otoño.", marcaId: "vero", contactoId: "c-ines" },
+]
+
+export const demoPlantillas: Plantilla[] = [
+  {
+    id: "pl-primer-email",
+    nombre: "Primer contacto a una marca",
+    uso: "primer-contacto",
+    canal: "email",
+    asunto: "Colaboración con {{yo.nombre}} · {{marca.nombre}}",
+    cuerpo: `Hola {{contacto.nombre}},
+
+Soy {{yo.nombre}} ({{yo.handle}}), creadora de {{yo.nicho}} en {{yo.ciudad}}. Llevo tiempo usando {{marca.nombre}} y creo que encajaría muy bien con mi comunidad: {{yo.seguidores}} seguidores, sobre todo mujeres de 25 a 34 años en España.
+
+Te dejo mi media kit con mis números y las marcas con las que he trabajado: {{mediakit.enlace}}
+
+¿Te apetece que hablemos de alguna campaña?
+
+Un abrazo,
+{{yo.nombrePila}}`,
+    favorita: true,
+    usos: 14,
+    ultimoUso: "2026-09-10T09:30:00",
+    creadaEl: "2026-03-01T10:00:00",
+    actualizadaEl: "2026-09-02T10:00:00",
+  },
+  {
+    id: "pl-primer-dm",
+    nombre: "Primer contacto por Instagram",
+    uso: "primer-contacto",
+    canal: "dm",
+    cuerpo: `¡Hola! Soy {{yo.nombrePila}}, de {{yo.handle}} Uso {{marca.nombre}} desde hace meses y me encantaría hacer algo juntas. ¿Me pasáis el email de quien lleva colaboraciones? Os mando mi media kit.`,
+    favorita: false,
+    usos: 9,
+    ultimoUso: "2026-10-02T18:00:00",
+    creadaEl: "2026-03-01T10:00:00",
+    actualizadaEl: "2026-06-12T10:00:00",
+  },
+  {
+    id: "pl-tarifas",
+    nombre: "Mandar tarifas y media kit",
+    uso: "tarifas",
+    canal: "email",
+    asunto: "Tarifas y media kit · {{yo.nombre}}",
+    cuerpo: `Hola {{contacto.nombre}},
+
+¡Gracias por escribirme! Te paso mi media kit con mis números, la audiencia y las tarifas de salida: {{mediakit.enlace}}
+
+Los packs, los derechos de uso y la exclusividad se presupuestan aparte según la campaña. Si me cuentas qué tenéis en mente para {{marca.nombre}} (formatos y fechas), te preparo una propuesta a medida.
+
+Un abrazo,
+{{yo.nombrePila}}`,
+    favorita: true,
+    usos: 11,
+    ultimoUso: "2026-08-21T10:00:00",
+    creadaEl: "2026-03-01T10:00:00",
+    actualizadaEl: "2026-07-01T10:00:00",
+  },
+  {
+    id: "pl-propuesta",
+    nombre: "Enviar propuesta",
+    uso: "propuesta",
+    canal: "email",
+    asunto: "Propuesta para {{propuesta.campana}} · {{yo.nombre}}",
+    cuerpo: `Hola {{contacto.nombre}},
+
+Como hablamos, te mando la propuesta para {{propuesta.campana}}: {{propuesta.piezas}} por {{propuesta.total}} (IVA aparte).
+
+La tienes aquí, con el media kit y las condiciones: {{propuesta.enlace}}
+
+El presupuesto vale {{propuesta.validez}}. Si os encaja, te mando el calendario de entregas en cuanto cerremos las fechas.
+
+Un abrazo,
+{{yo.nombrePila}}`,
+    favorita: true,
+    usos: 8,
+    ultimoUso: "2026-10-01T11:20:00",
+    creadaEl: "2026-03-01T10:00:00",
+    actualizadaEl: "2026-09-20T10:00:00",
+  },
+  {
+    id: "pl-propuesta-wa",
+    nombre: "Propuesta por WhatsApp",
+    uso: "propuesta",
+    canal: "whatsapp",
+    cuerpo: `¡Hola {{contacto.nombre}}! Te paso la propuesta para {{propuesta.campana}}: {{propuesta.piezas}} por {{propuesta.total}} + IVA. Aquí la tienes con el media kit: {{propuesta.enlace}}`,
+    favorita: false,
+    usos: 3,
+    ultimoUso: "2026-07-15T10:00:00",
+    creadaEl: "2026-05-01T10:00:00",
+    actualizadaEl: "2026-05-01T10:00:00",
+  },
+  {
+    id: "pl-seguimiento",
+    nombre: "Seguimiento a los cinco días",
+    uso: "seguimiento",
+    canal: "email",
+    asunto: "Re: Propuesta para {{propuesta.campana}}",
+    cuerpo: `Hola {{contacto.nombre}},
+
+Te escribo por si se perdió entre los emails: ¿habéis podido mirar la propuesta para {{propuesta.campana}}? Te la dejo otra vez aquí: {{propuesta.enlace}}
+
+Si necesitáis ajustar formatos o fechas, lo vemos sin problema.
+
+Un abrazo,
+{{yo.nombrePila}}`,
+    favorita: false,
+    usos: 6,
+    ultimoUso: "2026-08-28T15:00:00",
+    creadaEl: "2026-03-01T10:00:00",
+    actualizadaEl: "2026-03-01T10:00:00",
+  },
+  {
+    id: "pl-contraoferta",
+    nombre: "Contraoferta",
+    uso: "negociacion",
+    canal: "email",
+    asunto: "Re: {{propuesta.campana}}",
+    cuerpo: `Hola {{contacto.nombre}},
+
+Gracias por la propuesta. Con {{propuesta.piezas}} no puedo bajar de {{propuesta.minimo}}: es lo que me permite dedicarle el tiempo que merece y cuidar el resultado.
+
+Si el presupuesto es cerrado, puedo proponeros una alternativa con menos piezas que encaje en vuestra cifra. ¿Lo vemos?
+
+Un abrazo,
+{{yo.nombrePila}}`,
+    favorita: false,
+    usos: 4,
+    ultimoUso: "2026-09-14T16:00:00",
+    creadaEl: "2026-04-01T10:00:00",
+    actualizadaEl: "2026-04-01T10:00:00",
+  },
+  {
+    id: "pl-cierre",
+    nombre: "Confirmar la collab",
+    uso: "cierre",
+    canal: "email",
+    asunto: "¡Adelante con {{propuesta.campana}}!",
+    cuerpo: `Hola {{contacto.nombre}},
+
+¡Qué bien! Confirmo {{propuesta.piezas}} por {{propuesta.total}} para {{propuesta.campana}}.
+
+Para empezar necesito el brief con los mensajes clave, el producto en casa y vuestra dirección de facturación. Os mando el guion para revisarlo antes de grabar.
+
+Un abrazo,
+{{yo.nombrePila}}`,
+    favorita: false,
+    usos: 5,
+    ultimoUso: "2026-09-18T12:00:00",
+    creadaEl: "2026-03-01T10:00:00",
+    actualizadaEl: "2026-03-01T10:00:00",
+  },
+  {
+    id: "pl-gracias",
+    nombre: "Gracias y resultados",
+    uso: "agradecimiento",
+    canal: "email",
+    asunto: "Resultados de {{propuesta.campana}}",
+    cuerpo: `Hola {{contacto.nombre}},
+
+¡Ya está todo publicado! Te paso los resultados de la primera semana en cuanto los tenga, con capturas de las estadísticas.
+
+Ha sido un gusto trabajar con {{marca.nombre}}: aquí me tenéis para la próxima.
+
+Un abrazo,
+{{yo.nombrePila}}`,
+    favorita: false,
+    usos: 7,
+    ultimoUso: "2026-09-02T10:00:00",
+    creadaEl: "2026-03-01T10:00:00",
+    actualizadaEl: "2026-03-01T10:00:00",
+  },
+]
+
+export const demoMediaKit: MediaKit = {
+  bloques: [
+    { id: "portada", visible: true },
+    { id: "cifras", visible: true },
+    { id: "redes", visible: true },
+    { id: "audiencia", visible: true },
+    { id: "destacados", visible: true },
+    { id: "marcas", visible: true },
+    { id: "tarifas", visible: true },
+    { id: "contacto", visible: true },
+  ],
+  titular: "Skincare honesto y maquillaje de diario para mujeres de 25 a 34 años",
+  bio: "Rutinas de skincare reales y maquillaje para el día a día. Pruebo todo antes de recomendarlo y solo trabajo con marcas que usaría sin cobrar.",
+  destacados: [
+    { id: "d1", titulo: "Mi rutina de noche en 3 pasos", red: "instagram", url: "https://instagram.com", imagenUrl: foto("1570172619644-dfd03ed5d881", 600), visualizaciones: 182_000, marca: "Lumea Skin" },
+    { id: "d2", titulo: "Maquillaje de diario en 5 minutos", red: "tiktok", url: "https://tiktok.com", imagenUrl: foto("1583241800698-e8ab01830a07", 600), visualizaciones: 246_000, marca: "Maison Vero" },
+    { id: "d3", titulo: "El SPF que llevo todo el año", red: "instagram", url: "https://instagram.com", imagenUrl: foto("1487412947147-5cebf100ffc2", 600), visualizaciones: 97_000, marca: "Glow Studio" },
+  ],
+  actualizadoEl: "2026-09-28T10:00:00",
+}

@@ -1,9 +1,14 @@
+import Link from "next/link"
 import { BanknoteIcon, CircleCheckIcon, MessageSquareWarningIcon, SparklesIcon, WalletIcon } from "lucide-react"
 import { fmt } from "@/lib/format"
-import { HOY, demoCollabs, demoMarcas, demoPerfil } from "@/lib/influencer/demo-data"
+import { HOY, demoMarcas, demoPerfil } from "@/lib/influencer/demo-data"
+import { demoCollabs } from "@/lib/influencer/demo-collabs"
 import { eventosDeCollabs } from "@/lib/influencer/agenda"
 import { BrandMark } from "@/components/influencer/brand-mark"
 import { Agenda } from "@/components/influencer/agenda"
+import { MediaKitHojas } from "@/components/influencer/media-kit-doc"
+import { marcasTrabajadas, obtenerMediaKit } from "@/lib/influencer/consultas"
+import { bloquesVisibles } from "@/lib/influencer/media-kit"
 import { PiezaCard } from "@/components/influencer/pieza-card"
 import { describirEntregables, siguienteHito, unidadesHechas, unidadesTotales } from "@/lib/influencer/collabs"
 import { Button } from "@/components/ui/button"
@@ -13,6 +18,7 @@ import { CollabCard, CollabCardRow } from "@/components/influencer/collab-card"
 import { ProfilePanel } from "@/components/influencer/profile-panel"
 import { NoticeHighlight, NoticeItem } from "@/components/influencer/notice-card"
 import { LinkGridExample, TaskBlockExample, TaskTableExample } from "@/components/docs/examples/influencer-examples"
+import { EditorGuionExample, FotosExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
 import { DocPage, DocSection, Example, NextLinks, Prose, Rules } from "@/components/docs/doc"
 
 export const metadata = { title: "Componentes · Influencer Workspace" }
@@ -59,7 +65,7 @@ export default function InfluencerComponentesPage() {
         />
       </DocSection>
 
-      <DocSection id="stat" title="Cifra" lead="Icono en un círculo de tinte, número grande y etiqueta. Con href, la tarjeta entera lleva a su página. Solo en las páginas de inicio.">
+      <DocSection id="stat" title="Cifra" lead="Icono en un círculo de tinte, número grande y etiqueta. Con href, la tarjeta entera lleva a su página. Solo en las portadas: el Inicio y el Pipeline del CRM.">
         <Example className={EXAMPLE} code={`<StatRow>
   <StatTile icon={WalletIcon} label="Pendiente de cobro" value={fmt.eur(3240)} tint="peach" href="/workspace/cobros" />
   <StatTile icon={BanknoteIcon} label="Cobrado este año" value={fmt.eur(18650)} tint="mint" href="/workspace/cobros" />
@@ -190,13 +196,13 @@ const [editing, setEditing] = useState(false)
         </Prose>
       </DocSection>
 
-      <DocSection id="operar" title="Piezas de operar" lead="Las páginas donde se trabaja (Propuestas, la ficha de collab, la pieza) usan el kit madre dentro de bloques del hijo, más estas piezas propias.">
+      <DocSection id="operar" title="Piezas de operar" lead="Las páginas donde se trabaja (el CRM, la ficha de collab, la pieza) usan la anatomía del madre tal cual, como el CRM del Portal Astratic, más estas piezas propias.">
         <Prose>
           <p>
-            Regla de los dos registros: lo que resume va en el estilo visual de arriba; donde se trabaja se usa{" "}
-            <code>Toolbar</code>, <code>FilterMenu</code>, <code>Kanban</code>, <code>DataTable</code>, <code>DetailSheet</code> e{" "}
-            <code>InlineField</code> de Astratic UI tal cual, dentro de un <code>Block</code> con <code>p-0</code>. Lo que
-            no existía en el madre y hacía falta para operar nace aquí.
+            Regla de los dos registros: lo que resume y las cifras de arriba van en el estilo visual del hijo; el bloque
+            donde se trabaja es el del madre sin adornos: <code>WorkGrid</code>, <code>FilterBar</code>, <code>Section</code>,{" "}
+            <code>Kanban</code>, <code>DataTable</code>, <code>InsightsPanel</code> y <code>DetailSheet</code>. Lo que no
+            existía en el madre y hacía falta para operar nace aquí.
           </p>
         </Prose>
       </DocSection>
@@ -238,30 +244,99 @@ const [editing, setEditing] = useState(false)
         </Example>
       </DocSection>
 
-      <DocSection id="pieza" title="Tarjeta de pieza" lead="Una pieza en la biblioteca de la collab: miniatura, estado, qué toca ahora y en qué versión van el guion y el vídeo.">
-        <Example className={EXAMPLE} code={`<PiezaCard pieza={pieza} tint={collab.tint} hoy={hoy} href="/workspace/collabs/vero/contenidos/vero-reel" />`}>
-          <div className="grid max-w-3xl gap-3 md:grid-cols-2">
-            <PiezaCard pieza={demoCollabs[2].piezas[0]} tint="peach" hoy={HOY.slice(0, 10)} href="/workspace/collabs/vero/contenidos/vero-reel" />
-            <PiezaCard pieza={demoCollabs[0].piezas[0]} tint="rose" hoy={HOY.slice(0, 10)} href="/workspace/collabs/lumea/contenidos/lumea-reel" />
+      <DocSection id="media-kit" title="Media kit" lead="El media kit en hojas A4, con los bloques que ella elige y en su orden, repartidos sin partir ninguno. Es el mismo en el editor, en /media-kit y en cada propuesta.">
+        <Example className={EXAMPLE} code={`<DocViewer pages={hojasMediaKit(bloques)}>
+  <MediaKitHojas perfil={perfil} kit={kit} bloques={bloquesVisibles(kit, { conPrecios })} marcasTrabajadas={marcas} pie="Marta Albiol · Media kit" />
+</DocViewer>`}>
+          <div className="theme-light flex w-full justify-center overflow-hidden rounded-xl bg-muted p-4">
+            <div className="flex flex-col gap-4 [zoom:0.45]">
+              <MediaKitHojas perfil={demoPerfil} kit={obtenerMediaKit()} bloques={bloquesVisibles(obtenerMediaKit()).slice(0, 4)} marcasTrabajadas={marcasTrabajadas()} pie={`${demoPerfil.nombre} · Media kit`} />
+            </div>
           </div>
         </Example>
       </DocSection>
 
-      <DocSection id="revision" title="Guion, vídeo y notas" lead="Las piezas de la revisión: el guion como documento con las citas marcadas, el vídeo con una marca por segundo y el panel de notas, para ella (resolver, contestar) y para la marca (escribir, anclar, aprobar).">
+      <DocSection id="pieza" title="Tarjeta de pieza" lead="Una pieza en la lista de contenidos: la fecha de publicación delante, la miniatura, el estado, qué toca y en qué versión va cada parte. Compacta, en la barra lateral con sus partes como enlaces.">
+        <Example className={EXAMPLE} code={`<PiezaCard pieza={pieza} tint={collab.tint} hoy={hoy} href="…/contenidos/vero-reel" />
+<PiezaCard pieza={pieza} tint={collab.tint} hoy={hoy} href="…" compacta activa parteActiva="media" />`}>
+          <div className="grid w-full gap-4 lg:grid-cols-[minmax(0,1fr)_264px]">
+            <div className="flex flex-col gap-2">
+              <PiezaCard pieza={demoCollabs[2].piezas[0]} tint="peach" hoy={HOY.slice(0, 10)} href="/workspace/collabs/vero/contenidos/vero-reel" />
+              <PiezaCard pieza={demoCollabs[0].piezas[2]} tint="rose" hoy={HOY.slice(0, 10)} href="/workspace/collabs/lumea/contenidos/lumea-foto" />
+            </div>
+            <PiezaCard pieza={demoCollabs[2].piezas[0]} tint="peach" hoy={HOY.slice(0, 10)} href="/workspace/collabs/vero/contenidos/vero-reel" compacta activa parteActiva="media" />
+          </div>
+        </Example>
+      </DocSection>
+
+      <DocSection id="gantt" title="Cronograma (Gantt)" lead="Una fila por pieza con sus fases (guion, grabación, edición, revisión, resultados) entre sus hitos, el rombo de la publicación y la línea de hoy. Arrastrar una fila (o las flechas con ella enfocada) mueve la publicación y todas sus fases.">
+        <Example className={EXAMPLE} code={`<Gantt
+  hoy={hoy}
+  filas={piezas.map((p) => ({ id: p.id, titulo: p.titulo, fases: fasesDePieza(p), publicacion: p.publicacion }))}
+  onMover={(id, dias) => …}
+  onAbrir={(id) => router.push(…)}
+/>`}>
+          <GanttExample />
+        </Example>
+        <Rules
+          items={[
+            <>Las fases salen de <code>fasesDePieza</code> (<code>lib/influencer/cronograma.ts</code>), con la misma regla que las tareas automáticas: guion 10 días antes, grabación 7, v1 5, publicación y resultados 7 después.</>,
+            <>Cada fase con su tinte (por tipo de trabajo, nunca por estado); hecha, atenuada con su check; tarde, con el filo en rojo.</>,
+            <>En el móvil se desliza en horizontal con los nombres fijos; escala «Días» o «Semanas».</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="editor" title="Editor de texto" lead="El editor del workspace (Tiptap, de código abierto): guiones, brief, contratos y conclusiones. Títulos, listas, citas, resaltado, enlaces y alineación; notas de la marca marcadas sobre el texto; variables de contrato como fichas; recuento de palabras.">
+        <Example className={EXAMPLE} code={`<EditorTexto
+  value={html} onChange={setHtml}
+  notas={[{ id, numero: 1, cita: "Fórmula con retinal al 0,1 %", resuelta: true }]}
+  variables={{ valores, verDatos, etiqueta }}   // contratos: {{collab.importe}} como ficha
+  pie={({ palabras }) => …}
+/>`}>
+          <EditorGuionExample />
+        </Example>
+        <Rules
+          items={[
+            <>Se carga bajo demanda (<code>editor-texto.tsx</code> con <code>next/dynamic</code>): solo pesa en las páginas que escriben.</>,
+            <>Lo mismo se escribe y se lee: <code>editable={"{false}"}</code> es la vista de la marca, con las mismas clases de <code>PROSA</code>.</>,
+            <>Variables: <code>{"<span data-variable=\"collab.importe\">"}</code> en el HTML, ficha en pantalla, el dato al «Ver con los datos»; escribir <code>{"{{clave}}"}</code> la crea.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="revision" title="Revisión: visor y conversación" lead="Como la revisión de Feedback: el contenido sobre un lienzo con sus versiones, comparar con la anterior y zoom; las notas de la marca en su sitio (segundo del vídeo o punto de la foto), y la conversación con el progreso de las notas.">
+        <Example className={EXAMPLE} code={`<VisorMedia version={v} anterior={comparar ? previa : null} medio="video" notas={v.notas} zoom={100} onMarcar={…} />
+<Conversacion notas={v.notas} mensajes={v.mensajes} lado="influencer" onResolver={…} onResponder={…} onEnviar={…} />`}>
+          <RevisionExample />
+        </Example>
+        <Example className={EXAMPLE} code={`<VisorMedia version={carrusel} medio="imagen" notas={notas} zoom={75} />`}>
+          <FotosExample />
+        </Example>
         <Prose>
           <p>
-            <code>GuionViewer</code> parte el texto en apartados (los títulos en mayúsculas) y marca cada cita de una nota con
-            su número; con <code>onCitar</code>, seleccionar texto propone una nota ahí. <code>VideoViewer</code> pinta el
-            fotograma, un carril de marcas y la barra de tiempo; con <code>onMarcarSegundo</code>, pulsar en la barra
-            propone una nota en ese segundo. <code>NotesPanel</code> enseña las notas numeradas con su progreso y, en{" "}
-            <code>modo="marca"</code>, el formulario para escribirlas. Se ven en{" "}
-            <a href="/workspace/collabs/vero/contenidos/vero-reel" className="text-brand underline-offset-2 hover:underline">la pieza</a> y en{" "}
-            <a href="/revisar/rv-vero-reel-v1" className="text-brand underline-offset-2 hover:underline">la revisión de la marca</a>.
+            En la pieza (<Link href="/workspace/collabs/vero/contenidos/vero-reel" className="text-brand underline-offset-2 hover:underline">el reel de Maison Vero</Link>) y en lo que ve la marca (<Link href="/revisar/rv-vero-reel-m1" className="text-brand underline-offset-2 hover:underline">su revisión</Link>). <code>lado="marca"</code> deja escribir notas ancladas; <code>lado="influencer"</code>, resolverlas, contestar y escribir a la marca.
           </p>
+        </Prose>
+      </DocSection>
+
+      <DocSection id="marca" title="Para la marca, sin cuenta" lead="Las piezas de lo que se manda por enlace: el formulario rápido de piezas, compartir el enlace y la página de la marca.">
+        <Example className={EXAMPLE} code={`<PiezasEditor value={piezas} onChange={setPiezas} ventana={{ desde, hasta }} />`}>
+          <PiezasEditorExample />
+        </Example>
+        <Rules
+          items={[
+            <><code>PiezasEditor</code>: «Añadir pieza» con tipo (vídeo, foto, carrusel, texto), nombre libre, fecha, red e indicaciones. Sin formatos cerrados. Lo usan el formulario de la marca, «Nueva collab» y «Añadir piezas».</>,
+            <><code>CompartirEnlace</code> y <code>CompartirEnlaceDialog</code>: copiar, WhatsApp, email desde su correo y «Ver como la marca». Revisión, formulario, contrato e informe se mandan igual.</>,
+            <><code>PaginaMarca</code>: la página sin cuenta (cabecera con lo que es y para quién, la creadora delante, pie con la privacidad). <code>ZonaSubida</code>: soltar o elegir archivos.</>,
+            <><code>Firmas</code> (contrato) y <code>ResumenResultados</code>, <code>CifrasPieza</code> y <code>Capturas</code> (informe): las mismas en el workspace y en la página de la marca.</>,
+          ]}
+        />
+        <Prose>
           <p>
             <code>ThemeBody</code> pone la clase del tema en <code>&lt;body&gt;</code> mientras la página está montada:
             sin ella, las fichas, diálogos y menús (que se pintan en un portal fuera del shell) saldrían con los tokens
-            del madre y sin tintes. Va una vez en el shell del workspace y en las páginas sin shell (la revisión).
+            del madre y sin tintes. Va una vez en el shell del workspace y en <code>PaginaMarca</code>.
           </p>
         </Prose>
       </DocSection>

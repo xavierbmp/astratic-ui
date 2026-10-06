@@ -20,7 +20,7 @@ const MAX_VISIBLES = 3
  * Agenda mensual: los hitos de cada pieza, los cobros y las tareas con fecha, con el color de su
  * collab. En el ordenador, una cuadrícula; en el móvil, la lista del mes día a día.
  */
-export function Agenda({ eventos, hoy, className }: { eventos: Evento[]; hoy: string; className?: string }) {
+export function Agenda({ eventos, hoy, onSelect, className }: { eventos: Evento[]; hoy: string; onSelect?: (evento: Evento) => void; className?: string }) {
   const hoyFecha = soloFecha(hoy)
   const [mes, setMes] = React.useState(hoyFecha.slice(0, 7) + "-01")
   const casillas = casillasDelMes(mes)
@@ -31,29 +31,41 @@ export function Agenda({ eventos, hoy, className }: { eventos: Evento[]; hoy: st
   }, [eventos])
   const diasConEventos = casillas.filter((d) => mismoMes(d, mes) && (porDia.get(d)?.length ?? 0) > 0)
 
-  const chip = (e: Evento, compacto = true) => (
-    <Tooltip key={e.id}>
-      <TooltipTrigger asChild>
-        <Link
-          href={e.href}
-          className={cn(
-            "flex min-w-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium transition-opacity hover:opacity-80",
-            e.tint ? tintClass[e.tint] : "bg-muted text-muted-foreground",
-            e.hecho && "opacity-50 line-through",
-            !compacto && "px-2 py-1 text-xs",
+  const chip = (e: Evento, compacto = true) => {
+    const clases = cn(
+      "flex min-w-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-left text-[11px] font-medium transition-opacity hover:opacity-80",
+      e.tint ? tintClass[e.tint] : "bg-muted text-muted-foreground",
+      e.hecho && "opacity-50 line-through",
+      !compacto && "px-2 py-1 text-xs",
+    )
+    const contenido = (
+      <>
+        {e.hecho && <CheckIcon className="size-3 flex-none" />}
+        <span className="truncate">{e.titulo}</span>
+      </>
+    )
+    return (
+      <Tooltip key={e.id}>
+        {/* Con `onSelect` el evento abre su ficha en la misma página; si no, lleva a su sitio. */}
+        <TooltipTrigger asChild>
+          {onSelect ? (
+            <button type="button" className={clases} onClick={() => onSelect(e)}>
+              {contenido}
+            </button>
+          ) : (
+            <Link href={e.href} className={clases}>
+              {contenido}
+            </Link>
           )}
-        >
-          {e.hecho && <CheckIcon className="size-3 flex-none" />}
-          <span className="truncate">{e.titulo}</span>
-        </Link>
-      </TooltipTrigger>
-      <TooltipContent>
-        {TIPOS_EVENTO[e.tipo]}
-        {e.contexto ? ` · ${e.contexto}` : ""}
-        {e.hecho ? " · hecho" : ""}
-      </TooltipContent>
-    </Tooltip>
-  )
+        </TooltipTrigger>
+        <TooltipContent>
+          {TIPOS_EVENTO[e.tipo]}
+          {e.contexto ? ` · ${e.contexto}` : ""}
+          {e.hecho ? " · hecho" : ""}
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
 
   return (
     <div className={cn("flex flex-col", className)}>

@@ -8,80 +8,87 @@ export default function InfluencerOperarPage() {
     <DocPage
       eyebrow="Influencer Workspace · Patrones"
       title="Páginas de operar"
-      lead="Donde se trabaja: Propuestas (su CRM), Collabs y la ficha de cada collab con su brief, sus contenidos, sus materiales y sus tareas. Detalladas y funcionales sin miedo, con el kit de Astratic UI dentro de bloques del hijo."
+      lead="Donde se trabaja: el CRM (pipeline, marcas, contactos, plantillas y media kit), Collabs y la ficha de cada collab. Funcionales como el CRM del Portal Astratic: el kit madre tal cual, y el estilo del hijo solo en las cifras de arriba."
     >
       <DocSection id="estructura" title="Cómo se arma una página de operar">
         <Rules
           items={[
-            <><strong>Sin cifras arriba.</strong> <code>PageHeader</code> con el título y una descripción que ya resume («5 abiertas por 4.016 €») y, debajo, <strong>un solo bloque</strong> (<code>Block className="p-0"</code>) con la toolbar y la lista.</>,
-            <><strong>Toolbar del madre</strong>: buscador, <code>FilterMenu</code> por campo, <code>ViewSwitcher</code> y la acción principal negra, una por página. Los filtros activos, en chips debajo.</>,
-            <><strong>Vistas</strong>: tablero, tabla y lista en Propuestas; tarjetas, tabla y agenda en Collabs. En el móvil la tabla cede el sitio a la lista o a las tarjetas (<code>usePageView</code>).</>,
-            <><strong>Registro abierto</strong>: la propuesta se abre en <code>DetailSheet</code> con <code>?propuesta=id</code> en la URL; la collab es una página propia con pestañas (<code>PageTabs</code>), porque se trabaja durante semanas.</>,
+            <><strong>La anatomía del madre, sin adornos</strong>: <code>PageHeader</code> con <code>PageTabs</code>, <code>WorkGrid</code> con <code>FilterBar</code>, un <code>Section</code> con la lista o el tablero e <code>InsightsPanel</code> a la derecha. Nada de <code>Block</code> del hijo alrededor de una tabla.</>,
+            <><strong>Cifras bonitas solo en las portadas</strong> (el Pipeline): <code>StatRow</code> del hijo en <code>WorkGrid stats</code>. Las bases de datos empiezan por su toolbar.</>,
+            <><strong>Filtrar como en el portal</strong>: buscador, filtros rápidos, constructor «Filtros» con los campos de <code>lib/influencer/campos.ts</code> (en la URL, <code>?f=</code>), vistas y campos visibles (<code>ColumnSettings</code>).</>,
+            <><strong>Registro abierto</strong>: propuesta, marca y persona en <code>DetailSheet</code> con <code>?registro=id</code>; la collab y la plantilla, página propia.</>,
             <><strong>Todo se edita donde se lee</strong> (<code>InlineField</code>); crear lleva diálogo (react-hook-form + zod); borrar, <code>ConfirmDialog</code> o toast con «Deshacer» si se puede recuperar.</>,
             <><strong>Nada se pide dos veces</strong>: el diálogo de tarea, la lista de tareas, la marca y las piezas de revisión son los mismos componentes en todas las páginas.</>,
           ]}
         />
         <CodeBlock
           code={`<PageBody className="gap-6 px-4 pb-28 md:px-[34px] md:pb-10">
-  <PageHeader title="Propuestas" description="Tu CRM: 5 abiertas por 4.016 €." />
-  <Block className="min-h-[560px] p-0">
-    <div className="p-4 pb-3"><Toolbar>…búsqueda · filtros · ViewSwitcher · acción…</Toolbar><ActiveFilters … /></div>
-    {view === "kanban" && <Kanban … />}
-    {view === "table" && <DataTable … />}
-    <BulkBar … />
-  </Block>
-  <PropuestaSheet … />   {/* DetailSheet con pestañas Resumen · Tareas · Actividad */}
+  <CrmHeader description="Tus propuestas por fase…" />          {/* PageHeader + PageTabs del CRM */}
+  <WorkGrid
+    stats={<StatRow>…4 StatTile…</StatRow>}
+    toolbar={<FilterBar filtros={av} campos={campos} vistas={…} actions={<Button>Nueva propuesta</Button>} />}
+    aside={<InsightsPanel blocks={[porFase, proximosPasos, cerradas]} />}
+  >
+    <Section>
+      <SectionHeader title="Propuestas" count={8} action={<ColumnSettings … />} />
+      <SectionBody>{kanban · tabla · lista · calendario}</SectionBody>
+      <BulkBar … />
+    </Section>
+  </WorkGrid>
+  <PropuestaSheet … />   {/* DetailSummary + pestañas Seguimiento · Datos · Tareas */}
 </PageBody>`}
         />
       </DocSection>
 
-      <DocSection id="propuestas" title="Propuestas (su CRM)">
+      <DocSection id="crm" title="CRM">
         <SpecTable
-          columns={["Pieza", "Qué hace"]}
+          columns={["Pestaña", "Qué hay"]}
           rows={[
-            ["Tablero", "Nueva → Hablando → Enviada → Negociando → Ganada · Perdida. Tarjeta con la marca, qué piden, el importe (lo pedido o lo que ofrecen, con aviso si baja del mínimo), «Red Astratic» si viene de la red y la fecha del siguiente paso. Se arrastra de columna."],
-            ["Tabla y lista", "Marca y campaña, piden, estado, origen, importe, siguiente paso y último contacto. Selección con casillas y barra de acciones: a «Hablando», perdidas, eliminar."],
-            ["Ficha", "Campaña editable en el título, estado, marca con su atribución («tuya hasta…» o «de la red»), origen, piden, ofrecen, tu presupuesto, tu mínimo, fechas, siguiente paso, motivo si se perdió y notas. Pestañas Tareas (la lista de operar) y Actividad (apuntar contacto o email de un clic)."],
-            ["Nueva propuesta", "Marca (o crearla), campaña, cómo ha llegado, qué piden por formato, lo que ofrecen, ventana de publicación y notas. Pensada para el móvil."],
-            ["Preparar propuesta", "Líneas por formato a sus tarifas, extras que suben el fee (derechos, exclusividad, paid, urgencia), total y aviso si queda bajo el mínimo pactado o si lo que ofrece la marca está por debajo. Media kit con o sin precios. Al guardar se abre el documento."],
-            ["Documento", "/propuesta/[id]: media kit (foto, cifras, redes, audiencia, marcas, tarifas si se quiere, sello de Astratic) y presupuesto (detalle, condiciones) en A4, listo para exportar a PDF o mandar como enlace."],
+            ["Pipeline", "La portada: cuatro cifras (abierto, ganado en 30 días, pasos para hoy, sin respuesta) y las propuestas en tablero compacto (se arrastran de fase), tabla, lista o calendario de siguientes pasos y ventanas de publicación. Panel con el reparto por fase, los próximos pasos y las cerradas. Ficha con lo esencial arriba (estado, importe, persona, siguiente paso) y pestañas Seguimiento, Datos y Tareas; «Escribir» con la plantilla que toca según el estado y «Preparar propuesta»."],
+            ["Marcas", "Base de datos con relación calculada (cliente, en conversación, sin acuerdo, sin propuestas), contacto principal, valor abierto, facturado, atribución y último contacto. Tabla, lista o tarjetas; exportar a CSV. Panel con el reparto por relación, cuándo caduca la atribución de las suyas y a cuáles no tiene cómo escribir. Ficha con su gente, propuestas, collabs, seguimiento y tareas."],
+            ["Contactos", "La gente de cada marca: cargo, email (se copia de un clic), teléfono, Instagram, principal y último contacto. Copiar emails en bloque y exportar. Ficha con sus propuestas y su seguimiento."],
+            ["Plantillas", "Directorio por uso (primer contacto, tarifas, propuesta, seguimiento, negociación, cierre, agradecimiento) y canal. Cada una se abre en su página: editor con variables y vista previa para una marca, persona y propuesta concretas, como la página de pasos del outreach del portal."],
+            ["Media kit", "Editor por bloques (arrastrar, enseñar o esconder, textos de la portada) con la vista previa A4. «Nueva propuesta»: marca, persona, piezas a tarifa, extras, rondas, validez, pago y condiciones; después, PDF o email con plantilla."],
+            ["Documentos", "/propuesta/[id] (media kit + presupuesto con condiciones) y /media-kit, en A4 y listos para PDF o para mandar por enlace."],
           ]}
         />
       </DocSection>
 
       <DocSection id="collabs" title="Collabs y la ficha de collab">
         <SpecTable
-          columns={["Pestaña", "Qué hay"]}
+          columns={["Parte", "Qué hay"]}
           rows={[
-            ["Collabs", "Tarjetas grandes (activas primero), tabla con piezas hechas, siguiente hito, importe y cobro, y la agenda del mes con los hitos de cada pieza, los cobros y las tareas con fecha."],
-            ["Resumen", "Arriba el brief resumido (portada, objetivo, entregables, menciones, enlace y código, exclusividad y derechos, rondas, producto). Debajo, los entregables con su estado y lo que toca, el cronograma con la línea de hoy, las tareas pendientes, el cobro, el contacto y la actividad."],
-            ["Brief", "Todo lo que hay que cumplir y las condiciones, editable donde se lee: objetivo, mensajes clave, menciones, hashtags, enlace, código, claims permitidos y prohibidos, hay que y evitar, producto, tipo, importe, fechas, pago, rondas, exclusividad, derechos y contacto. Los archivos de la marca al lado."],
-            ["Contenidos", "La biblioteca de la collab: cada pieza con su miniatura, estado, qué toca y en qué versión van guion y vídeo. Filtros «Me toca», «Esperando a la marca», «Aprobadas», «Publicadas». Nueva pieza con su fecha de publicación, de la que salen el resto de fechas."],
-            ["Pieza", "Guion y vídeo con sus versiones apiladas (v1, v2…), las notas de la marca en su sitio (cita del texto o segundo del vídeo) con progreso, el enlace de revisión sin cuenta (copiar, WhatsApp, email, caducidad) y la aprobación registrada (quién, cuándo, qué versión). Nueva versión del guion en el editor; subir el vídeo; enviar a revisión; marcar como publicada."],
-            ["Materiales", "Lo que manda la marca (brief, logos, producto, claims) y lo suyo (contrato), en mosaico con vista previa, filtro por origen, subir archivos y añadir enlaces."],
-            ["Tareas", "La lista de operar de esa collab, con las automáticas de las fechas del brief y las suyas; aparecen también en la lista general."],
+            ["Collabs", "Portada con cuatro cifras (en marcha, entregas de la semana, esperando a la marca, por cobrar), el directorio en tarjetas, tabla, lista o calendario con filtros y, a la derecha, las tareas de hoy, las de los próximos 7 días y lo que espera a la marca. «Nueva collab»: rellenarla ella o pedir el brief a la marca por enlace."],
+            ["Brief, arriba", "En todas las pestañas: la imagen de la campaña con su nombre y su estado, los datos clave, el objetivo y las piezas en miniatura. «Ver el brief completo» lo abre en tres columnas: datos que se usan sueltos (importe, fechas, rondas, derechos, menciones, código…), el texto del brief en el editor y los materiales de la marca con su descarga."],
+            ["Resumen", "Los entregables con su estado y lo que toca, y el cronograma en Gantt (por defecto: fases por pieza, línea de hoy, arrastrar para mover fechas), calendario o lista de tareas de la collab."],
+            ["Contenidos", "Las piezas una encima de otra por fecha de publicación. Al abrir una, la lista pasa a barra lateral con sus partes (guion y vídeo o fotos) y el resto es su editor: el guion en un editor de texto profesional con versiones, comparar con la anterior, plantillas y comprobación contra el brief; el vídeo o las fotos sobre un lienzo con versiones, comparar, zoom y notas en su sitio. La conversación con la marca a la derecha, ocultable."],
+            ["Materiales", "Lo de la marca y lo suyo en mosaico, subir arrastrando, enlaces y «Pedir a la marca»: un formulario solo para subir materiales."],
+            ["Contrato", "Editor de documento con variables que se rellenan con los datos de la collab («Ver con los datos»), plantillas, cláusulas tipo y la revisión de lo que conviene vigilar (rondas, derechos, exclusividad, pago, publicidad, datos que faltan). Firma ella y la marca firma por enlace. O el PDF de la marca con su lista de cláusulas a revisar."],
+            ["Facturación", "Lo pactado frente a lo facturado y cobrado, el plan de cobro por plazos con su factura, las facturas (número, base, IVA, retención, total, vencimiento, PDF, enviada, cobrada, reclamar) y a quién se factura: la marca o, en la red, Astratic. No emite facturas: las apunta y las sigue."],
+            ["Resultados", "Las cifras de cada pieza publicada a mano con sus capturas (Instagram y TikTok por API, más adelante), el resumen con CPM, interacción y clics, las conclusiones y el informe para la marca por enlace."],
           ]}
         />
       </DocSection>
 
-      <DocSection id="revisar" title="La revisión de la marca, sin cuenta">
+      <DocSection id="revisar" title="Lo que ve la marca, sin cuenta">
         <Prose>
           <p>
-            <code>/revisar/[token]</code> es lo que abre la marca: la versión actual (y las anteriores para comparar), sus
-            notas ancladas al texto seleccionado o al segundo del vídeo, «Pedir cambios» y «Aprobar» con su nombre. Sin
-            sidebar, con el tema del hijo y el modo oscuro. Viene de la pantalla de revisión diseñada para la propuesta
-            de Feedback Marketing, adaptada a una creadora y su marca: una pieza, una versión, un enlace.
+            Todo con <code>PaginaMarca</code>: cabecera con lo que es y para quién, la creadora delante, Astratic discreto y el pie con
+            la privacidad del enlace. <code>/revisar/[token]</code> es la revisión de Feedback adaptada a una creadora: la versión y
+            las anteriores, notas en la cita del texto, el segundo del vídeo o el punto de la foto, la conversación, «Pedir cambios»
+            y «Aprobar» con su nombre, y «Siguiente por revisar». <code>/formulario/[token]</code> es el brief rápido (o solo los
+            materiales), <code>/contrato/[token]</code> la firma y <code>/informe/[token]</code> los resultados.
           </p>
         </Prose>
         <DoDont
           dos={[
-            <>Un enlace por versión, imposible de adivinar, con caducidad y revocable; enseña siempre la última versión.</>,
-            <>La aprobación queda registrada con nombre, fecha y hora: es lo que vale si luego hay discusión.</>,
-            <>Las rondas incluidas se ven («Ronda 1 de 2»): si la marca pide otra, se avisa de que va aparte.</>,
+            <>Un enlace por cosa, imposible de adivinar, con caducidad y revocable.</>,
+            <>La aprobación y la firma quedan registradas con nombre, fecha y hora: es lo que vale si luego hay discusión.</>,
+            <>Formularios rápidos: solo la campaña y una pieza son obligatorias; lo demás, opcional y plegado.</>,
           ]}
           donts={[
-            <>Pedir cuenta o contraseña a la marca para comentar.</>,
-            <>Mezclar el chat del día a día aquí: lo rápido sigue en WhatsApp; esto es la revisión ordenada.</>,
+            <>Pedir cuenta o contraseña a la marca.</>,
+            <>Formatos cerrados en las piezas: la marca pone el tipo (vídeo, foto, carrusel, texto) y el nombre que quiera.</>,
           ]}
         />
       </DocSection>
@@ -90,10 +97,10 @@ export default function InfluencerOperarPage() {
         <Prose>
           <p>
             El modelo vive en <code>lib/influencer/modelo.ts</code> (en español, como la base de datos del portal) y la
-            lógica pura en <code>collabs.ts</code>, <code>tareas.ts</code>, <code>presupuesto.ts</code> y <code>agenda.ts</code>.
+            lógica pura en <code>collabs.ts</code>, <code>cronograma.ts</code>, <code>tareas.ts</code>, <code>presupuesto.ts</code>, <code>agenda.ts</code>, <code>guion.ts</code>, <code>contratos.ts</code>, <code>facturacion.ts</code>, <code>informe.ts</code> y <code>formularios.ts</code>.
             Las páginas piden los datos a <code>lib/influencer/consultas.ts</code>, que hoy devuelve los de ejemplo y en
             el Portal Astratic leerá de Prisma con las mismas funciones. Llevar el workspace al portal es copiar{" "}
-            <code>app/workspace</code>, <code>app/revisar</code>, <code>app/propuesta</code>, <code>components/influencer</code> y{" "}
+            <code>app/workspace</code>, <code>app/revisar</code>, <code>app/formulario</code>, <code>app/contrato</code>, <code>app/informe</code>, <code>app/propuesta</code>, <code>app/media-kit</code>, <code>components/influencer</code> y{" "}
             <code>lib/influencer</code>, y cambiar ese archivo.
           </p>
           <p>
@@ -105,9 +112,9 @@ export default function InfluencerOperarPage() {
 
       <NextLinks
         links={[
-          { href: "/workspace/propuestas", label: "Propuestas", text: "El tablero con datos de ejemplo." },
+          { href: "/workspace/crm", label: "CRM", text: "El pipeline con datos de ejemplo." },
           { href: "/workspace/collabs/vero", label: "Ficha de collab", text: "Maison Vero · Colección otoño." },
-          { href: "/revisar/rv-vero-reel-v1", label: "Revisión de la marca", text: "Lo que ve la marca con el enlace." },
+          { href: "/revisar/rv-vero-reel-m1", label: "Revisión de la marca", text: "Lo que ve la marca con el enlace." },
           { href: "/ds/influencer/componentes", label: "Componentes", text: "Las piezas de operar." },
         ]}
       />

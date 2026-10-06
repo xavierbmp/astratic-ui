@@ -7,23 +7,57 @@ import {
   demoActividad,
   demoAvisoDestacado,
   demoAvisos,
-  demoCollabs,
+  demoContactos,
   demoEnlaces,
+  demoInteracciones,
   demoMarcas,
-  demoMateriales,
+  demoMediaKit,
   demoPerfil,
+  demoPlantillas,
   demoPropuestas,
   demoTareas,
 } from "@/lib/influencer/demo-data"
-import { COLLABS_ACTIVAS, ESTADOS_ABIERTOS, type TipoVersion } from "@/lib/influencer/modelo"
+import { demoCollabs, demoMateriales } from "@/lib/influencer/demo-collabs"
+import {
+  demoAstratic,
+  demoClausulas,
+  demoContratos,
+  demoDatosFiscales,
+  demoFacturas,
+  demoFormularios,
+  demoInformes,
+  demoPlantillasContrato,
+  demoPlantillasGuion,
+} from "@/lib/influencer/demo-documentos"
+import { COLLABS_ACTIVAS, ESTADOS_ABIERTOS, type Collab, type Informe, type TipoVersion } from "@/lib/influencer/modelo"
 import { marcaDe } from "@/lib/influencer/collabs"
 import { importeNeto } from "@/lib/influencer/presupuesto"
 
 export const hoy = () => HOY
 
 export const obtenerPerfil = () => demoPerfil
+export const listarTarifas = () => demoPerfil.tarifas
 export const listarMarcas = () => demoMarcas
 export const obtenerMarca = (id: string) => demoMarcas.find((m) => m.id === id) ?? null
+
+export const listarContactos = () => demoContactos
+export const obtenerContacto = (id: string) => demoContactos.find((c) => c.id === id) ?? null
+/** El contacto principal de una marca, o el primero que haya. */
+export const contactoPrincipal = (marcaId: string) => {
+  const deLaMarca = demoContactos.filter((c) => c.marcaId === marcaId)
+  return deLaMarca.find((c) => c.principal) ?? deLaMarca[0] ?? null
+}
+
+export const listarInteracciones = () => demoInteracciones
+export const listarPlantillas = () => demoPlantillas
+export const obtenerPlantilla = (id: string) => demoPlantillas.find((p) => p.id === id) ?? null
+export const obtenerMediaKit = () => demoMediaKit
+
+/** Las marcas con las que ya ha hecho alguna collab, para el media kit. */
+export const marcasTrabajadas = () =>
+  Array.from(new Set(demoCollabs.map((c) => c.marcaId)))
+    .map((id) => demoMarcas.find((m) => m.id === id)?.nombre)
+    .filter((n): n is string => !!n)
 
 export const listarPropuestas = () => demoPropuestas
 export const obtenerPropuesta = (id: string) => demoPropuestas.find((p) => p.id === id) ?? null
@@ -46,11 +80,13 @@ export const listarEnlaces = () => demoEnlaces
 export const listarActividad = (filtro: { collabId?: string; propuestaId?: string }) =>
   demoActividad.filter((a) => (filtro.collabId ? a.collabId === filtro.collabId : filtro.propuestaId ? a.propuestaId === filtro.propuestaId : true))
 
+const PARTES: TipoVersion[] = ["guion", "media"]
+
 /** Lo que ve la marca al abrir un enlace de revisión: la pieza con esa versión, o nada si el enlace no existe. */
 export function obtenerRevision(token: string) {
   for (const collab of demoCollabs) {
     for (const pieza of collab.piezas) {
-      for (const tipo of ["guion", "video"] as TipoVersion[]) {
+      for (const tipo of PARTES) {
         const version = pieza[tipo].find((v) => v.enlace?.token === token)
         if (version) return { collab, pieza, version, tipo, marca: marcaDe(collab, demoMarcas) }
       }
@@ -58,6 +94,48 @@ export function obtenerRevision(token: string) {
   }
   return null
 }
+
+/** Lo que la marca tiene pendiente de revisar en una collab: una entrada por versión en revisión. */
+export function revisionesPendientes(collabId: string) {
+  const collab = obtenerCollab(collabId)
+  if (!collab) return []
+  return collab.piezas.flatMap((pieza) =>
+    PARTES.flatMap((tipo) =>
+      pieza[tipo]
+        .filter((v) => v.estado === "en-revision" && v.enlace)
+        .map((v) => ({ token: v.enlace?.token ?? "", titulo: pieza.titulo, tipo, portadaUrl: pieza.portadaUrl })),
+    ),
+  )
+}
+
+export const obtenerDatosFiscales = () => demoDatosFiscales
+/** A quién se factura en las collabs de la red. */
+export const datosAstratic = () => demoAstratic
+
+export const listarFacturas = (collabId?: string) => (collabId ? demoFacturas.filter((f) => f.collabId === collabId) : demoFacturas)
+
+export const obtenerContrato = (collabId: string) => demoContratos.find((c) => c.collabId === collabId) ?? null
+export const listarPlantillasContrato = () => demoPlantillasContrato
+export const listarClausulas = () => demoClausulas
+export const listarPlantillasGuion = () => demoPlantillasGuion
+
+/** El informe de resultados de una collab; si aún no hay, uno vacío. */
+export const obtenerInforme = (collabId: string): Informe => demoInformes.find((i) => i.collabId === collabId) ?? { collabId, resultados: [], conclusiones: "" }
+
+export const listarFormularios = (collabId?: string) => (collabId ? demoFormularios.filter((f) => f.collabId === collabId) : demoFormularios)
+
+/** Busca la collab de un enlace para la marca y la devuelve con su marca, o nada si el enlace no existe. */
+function conCollab<T extends { collabId: string }>(registro: T | undefined): { registro: T; collab: Collab; marca: ReturnType<typeof marcaDe> } | null {
+  const collab = registro ? obtenerCollab(registro.collabId) : null
+  return registro && collab ? { registro, collab, marca: marcaDe(collab, demoMarcas) } : null
+}
+
+/** El contrato que firma la marca por enlace. En el portal el token se comprueba y caduca. */
+export const obtenerContratoPorToken = (token: string) => conCollab(demoContratos.find((c) => c.enlace?.token === token))
+/** El informe de resultados que ve la marca por enlace. */
+export const obtenerInformePorToken = (token: string) => conCollab(demoInformes.find((i) => i.enlace?.token === token))
+/** El formulario que rellena la marca por enlace. */
+export const obtenerFormulario = (token: string) => conCollab(demoFormularios.find((f) => f.token === token))
 
 /** Las cifras del Inicio. En el portal se calculan en la base de datos. */
 export function resumenInicio() {

@@ -54,6 +54,7 @@ export type Contexto = { collabs: Collab[]; propuestas: Propuesta[]; marcas: Mar
 /** «Lumea Skin · Rutina de noche»: a qué pertenece la tarea, para listas mezcladas. */
 export function contextoDeTarea(t: Tarea, ctx: Contexto): string | undefined {
   if (!t.relacion) return undefined
+  if (t.relacion.tipo === "marca") return ctx.marcas.find((m) => m.id === t.relacion?.id)?.nombre
   const registro = t.relacion.tipo === "collab" ? ctx.collabs.find((c) => c.id === t.relacion?.id) : ctx.propuestas.find((p) => p.id === t.relacion?.id)
   if (!registro) return undefined
   const marca = ctx.marcas.find((m) => m.id === registro.marcaId)
@@ -62,7 +63,9 @@ export function contextoDeTarea(t: Tarea, ctx: Contexto): string | undefined {
 
 export function hrefDeTarea(t: Tarea): string | undefined {
   if (!t.relacion) return undefined
-  return t.relacion.tipo === "collab" ? `/workspace/collabs/${t.relacion.id}/tareas` : `/workspace/propuestas?propuesta=${t.relacion.id}`
+  if (t.relacion.tipo === "collab") return `/workspace/collabs/${t.relacion.id}?vista=tareas`
+  if (t.relacion.tipo === "marca") return `/workspace/crm/marcas?registro=${t.relacion.id}`
+  return `/workspace/crm?registro=${t.relacion.id}`
 }
 
 /** Pendientes que vencen hoy o ya vencieron: la insignia de la barra inferior y de la sidebar. */
