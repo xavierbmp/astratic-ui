@@ -14,6 +14,10 @@
 - Espacio: `gap-6` entre bloques, `p-5` dentro, margen de página `px-4 md:px-[34px]`, `pb-28 md:pb-10` por la barra inferior.
 - Tipografía heredada: título de página 27 px, título de bloque 16 px semibold con el contador en gris, cifra 24 px `tabular-nums`, texto 14 px y secundario 12 px.
 
+## Dos registros: mostrar y operar (Xavier, 2026-10-06)
+- **Bloques de mostrar** (el Inicio entero, resúmenes, perfil, avisos, tarjetas de collab): el estilo visual de este hijo, grande, con aire e imágenes.
+- **Bloques y páginas de operar** (la lista completa de tareas, la agenda, el tablero de propuestas, la ficha de collab, los cobros…): sin miedo a ser detallados y funcionales, al estilo de Astratic UI o de Notion: tablas, filtros, edición en el sitio, atajos. Ahí se usa el kit madre (`FilterBar`, `DataTable`, `Kanban`, `DetailSheet`, `InlineField`) dentro de bloques del hijo. Un «Ver todo» del Inicio lleva siempre a una página de operar.
+
 ## Layout
 - **Móvil primero**: una columna, `MobileTabBar` fija abajo con las cinco páginas principales (las mismas entradas que la sidebar, en `nav.ts`), filas de tarjetas que se deslizan (`CollabCardRow`).
 - Desde `md`, la sidebar heredada. Desde `xl`, dos columnas: principal y una derecha de 372 px de bloques normales (no es el `InsightsPanel` del madre).

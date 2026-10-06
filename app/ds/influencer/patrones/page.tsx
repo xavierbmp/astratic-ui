@@ -48,7 +48,7 @@ export default function InfluencerPatronesPage() {
             <><strong>Dos columnas solo desde 1280 px.</strong> Por debajo, una columna en este orden: saludo, cifras, collabs, tareas, perfil, avisos, enlaces.</>,
             <><strong>En el móvil</strong> las cifras van de dos en dos, las collabs se deslizan, el margen de página baja a 16 px y la barra inferior sustituye a la sidebar.</>,
             <><strong>Las cifras llevan a su página.</strong> Cada <code>StatTile</code> tiene <code>href</code>; no hay cifra decorativa.</>,
-            <><strong>Las tareas se marcan aquí mismo</strong>, sin abrir nada: el círculo cambia el estado y la tarjeta se tacha.</>,
+            <><strong>Las tareas se marcan aquí mismo</strong>, sin abrir nada: el círculo cambia el estado y la tarjeta se tacha. El Inicio solo enseña las de hoy, la semana y las vencidas; «Ver todo» abre la página de tareas, que es de operar: lista completa, fechas editables, filtros y creación.</>,
             <><strong>El aviso destacado es uno</strong>: el más importante (una oportunidad nueva, cambios pedidos, un cobro vencido). El resto, en lista, del más nuevo al más viejo.</>,
             <><strong>Los enlaces son suyos:</strong> añadir, editar, ordenar y borrar desde el propio bloque, con «Editar» en su cabecera. Sin página de ajustes.</>,
             <><strong>Estados:</strong> cada bloque dice cómo llenarse cuando está vacío (<code>EmptyState</code>), carga con un esqueleto de su forma y, si falla, lo dice y deja reintentar sin tumbar el resto.</>,
