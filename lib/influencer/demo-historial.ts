@@ -22,7 +22,8 @@ type Historica = {
   tint: Tint
   desde: string
   hasta: string
-  pieza: { titulo: string; formato: Formato; unidades?: number; publicada?: boolean }
+  /** `entregada`: UGC, se entregan los archivos y no se publica. */
+  pieza: { titulo: string; formato: Formato; unidades?: number; entregada?: boolean }
   contacto: Collab["brief"]["contacto"]
   factura?: Omit<Factura, "id" | "collabId" | "destinatario" | "ivaPct" | "irpfPct" | "plazoId">
 }
@@ -31,7 +32,6 @@ type Historica = {
 const base = (h: Historica) => (h.tipo === "red" ? Math.round(h.importe * 0.8) : h.importe)
 
 function collab(h: Historica): Collab {
-  const publicada = h.pieza.publicada ?? true
   const pieza: Pieza = {
     id: `${h.id}-pieza`,
     collabId: h.id,
@@ -40,11 +40,11 @@ function collab(h: Historica): Collab {
     unidades: h.pieza.unidades ?? 1,
     titulo: h.pieza.titulo,
     publicacion: h.hasta,
-    estado: publicada ? "resultados" : "aprobado",
+    estado: "resultados",
     rondaActual: 1,
     guion: [],
     media: [],
-    publicada: publicada ? { url: "https://instagram.com", fecha: h.hasta, marcadaPubli: true } : undefined,
+    publicada: h.pieza.entregada ? { url: "https://example.com/entrega", fecha: h.hasta, marcadaPubli: false } : { url: "https://instagram.com", fecha: h.hasta, marcadaPubli: true },
   }
   const cobrada = !!h.factura?.cobradaEl
   return {
@@ -86,7 +86,7 @@ const HISTORIAL: Historica[] = [
   { id: "bloom-delineador", marcaId: "bloom", campana: "Delineador líquido", importe: 1800, tint: "mint", desde: "2026-09-07", hasta: "2026-09-18", pieza: { titulo: "Reel · El trazo perfecto", formato: "reel" }, contacto: { nombre: "Álex Ferrer", email: "alex@example.com" }, factura: { numero: "2026-015", concepto: "Campaña «Delineador líquido»: 1 reel", base: 1800, emitidaEl: "2026-09-19", vencimiento: "2026-10-19", enviadaEl: "2026-09-19", cobradaEl: "2026-10-05", pdf: pdf("2026-015") } },
   // Las dos últimas aún no están cobradas: una factura sin enviar y unos vídeos entregados sin facturar.
   { id: "brisa-otono", marcaId: "brisa", campana: "Manicura de otoño", estado: "por-cobrar", importe: 900, tint: "sky", desde: "2026-09-22", hasta: "2026-10-03", pieza: { titulo: "Reel · Manicura en casa", formato: "reel" }, contacto: { nombre: "Vera Costa", email: "vera@example.com" }, factura: { numero: "2026-018", concepto: "Campaña «Manicura de otoño»: 1 reel", base: 900, emitidaEl: "2026-10-05", vencimiento: "2026-11-04", pdf: pdf("2026-018") } },
-  { id: "dermanova-ugc", marcaId: "dermanova", campana: "Vídeos para anuncios", tipo: "ugc", estado: "publicada", importe: 1200, tint: "lavender", desde: "2026-09-15", hasta: "2026-10-02", pieza: { titulo: "3 vídeos UGC · Antes y después", formato: "ugc", unidades: 3, publicada: false }, contacto: { nombre: "Rocío Peña", email: "rocio@example.com" } },
+  { id: "dermanova-ugc", marcaId: "dermanova", campana: "Vídeos para anuncios", tipo: "ugc", estado: "publicada", importe: 1200, tint: "lavender", desde: "2026-09-15", hasta: "2026-10-02", pieza: { titulo: "3 vídeos UGC · Antes y después", formato: "ugc", unidades: 3, entregada: true }, contacto: { nombre: "Rocío Peña", email: "rocio@example.com" } },
 ]
 
 export const historialCollabs: Collab[] = HISTORIAL.map(collab)

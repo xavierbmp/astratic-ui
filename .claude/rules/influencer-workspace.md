@@ -62,6 +62,11 @@
 - **Portada**: cuatro cifras que filtran (vencido, por cobrar, por facturar y cobrado este año); el bloque en tabla, lista, tablero (arrastrar cambia el estado de la factura; lo que no se puede, se explica) o calendario; ficha en `DetailSheet` con el desglose que llega al banco, la factura editable en el sitio, a quién se factura y las reclamaciones (`Factura.reclamaciones`); panel con lo que le toca (reclamar, enviar, facturar), la previsión de 30 días y el trimestre con IVA y retención, con CSV para la gestoría (`filasDeFacturas`).
 - No emite facturas (Verifactu): las apunta con el diálogo de factura de la collab (`app/workspace/factura-dialog.tsx`, compartido) y las sigue. «Cobrado este año» del Inicio sale de las mismas facturas.
 
+## Contenidos (`/workspace/contenidos`, 2026-10-06)
+- La biblioteca: una fila por pieza de cada collab (`filasDePiezas` en `lib/influencer/biblioteca.ts`) con a quién le toca (`TurnoPieza`: ella, la marca o nadie), días esperando a la marca y si va tarde. Las tarjetas van por grupos en el orden del trabajo (`GRUPOS_BIBLIOTECA`: preparando, esperando a la marca, listo para publicar, publicado), con la miniatura en grande; también tabla, lista y calendario de publicaciones. Campos para filtrar en `campos-biblioteca.ts`.
+- La pieza se trabaja en su página dentro de la collab: la fila lleva allí, sin ficha. «Nueva pieza» pregunta la collab y abre su diálogo de pieza (`?nueva=1`).
+- «Recordatorio a la marca» (cabecera o en bloque) copia, por marca, lo que tiene pendiente de revisar con un enlace por versión (`recordatorioDeRevision`). Panel: te toca, esperando a la marca y lo que se publica esta semana.
+
 ## Perfil y tarifas (`/workspace/perfil`, 2026-10-06)
 - Pestañas en `perfilTabs` (`nav.ts`): **Perfil**, **Tarifas** y **Auditoría**, con estado común en `PerfilProvider` (`app/workspace/perfil/layout.tsx`). El media kit sigue en el CRM y se enlaza desde aquí.
 - **Perfil** es de mostrar: cabecera con foto, nicho, tramo y bio; sus redes en tarjetas con «Actualizar» (cifras a mano mientras no haya API, con `CuentaRed.actualizadaEl`); audiencia; marcas con las que ha trabajado. A la derecha, su tramo con el CPM de referencia y el progreso de mejoras, sus datos editables en el sitio y el sello de Autocontrol (`Perfil.autocontrol`).
