@@ -3,7 +3,9 @@
 // es real: el repo es público. Las fechas viven alrededor del 6 de octubre de 2026 (`HOY`).
 import type {
   Actividad,
+  Auditoria,
   Aviso,
+  CambioTarifa,
   Contacto,
   Enlace,
   EtiquetaTarea,
@@ -33,9 +35,9 @@ export const demoPerfil: Perfil = {
   ciudad: "Valencia",
   bio: "Rutinas de skincare reales y maquillaje para el día a día. Pruebo todo antes de recomendarlo.",
   cuentas: [
-    { red: "instagram", handle: "@martaalbiol.beauty", url: "https://instagram.com", seguidores: 68_400, visualizacionesMedias: 24_100, interaccion: 4.8 },
-    { red: "tiktok", handle: "@martaalbiol", url: "https://tiktok.com", seguidores: 41_200, visualizacionesMedias: 38_300, interaccion: 6.1 },
-    { red: "youtube", handle: "Marta Albiol", url: "https://youtube.com", seguidores: 8_900, visualizacionesMedias: 6_200, interaccion: 3.2 },
+    { red: "instagram", handle: "@martaalbiol.beauty", url: "https://instagram.com", seguidores: 68_400, visualizacionesMedias: 24_100, interaccion: 4.8, actualizadaEl: "2026-09-15" },
+    { red: "tiktok", handle: "@martaalbiol", url: "https://tiktok.com", seguidores: 41_200, visualizacionesMedias: 38_300, interaccion: 6.1, actualizadaEl: "2026-09-15" },
+    { red: "youtube", handle: "Marta Albiol", url: "https://youtube.com", seguidores: 8_900, visualizacionesMedias: 6_200, interaccion: 3.2, actualizadaEl: "2026-09-15" },
   ],
   audiencia: { espana: 78, mujeres: 86, edades: "25–34 años (46 %)" },
   tarifas: [
@@ -48,6 +50,63 @@ export const demoPerfil: Perfil = {
   ],
   email: "hola@example.com",
 }
+
+/** Sus auditorías de Astratic, de la más nueva a la más vieja. Cifras y recomendaciones inventadas. */
+export const demoAuditorias: Auditoria[] = [
+  {
+    id: "au-2026-09",
+    fecha: "2026-09-15",
+    tramo: "50K–100K",
+    cpm: 22,
+    resumen: "Perfil sólido en skincare, con una comunidad muy de aquí y que comenta. Los reels de rutina tiran por encima de lo que toca a tu tamaño; los posts fijos se han quedado atrás y YouTube crece despacio.",
+    cifras: [
+      { red: "instagram", seguidores: 68_400, visualizacionesMedias: 24_100, interaccion: 4.8 },
+      { red: "tiktok", seguidores: 41_200, visualizacionesMedias: 38_300, interaccion: 6.1 },
+      { red: "youtube", seguidores: 8_900, visualizacionesMedias: 6_200, interaccion: 3.2 },
+    ],
+    audiencia: { espana: 78, mujeres: 86, edades: "25–34 años (46 %)" },
+    fuertes: [
+      "El 78 % de tu audiencia está en España, que es lo que buscan las marcas de aquí.",
+      "Los reels de rutina pasan de 24.000 visualizaciones de media sin promocionar.",
+      "En TikTok has crecido un 22 % desde junio con el formato de reseña rápida.",
+      "Las marcas de skincare repiten contigo: tres de cada cuatro han vuelto.",
+    ],
+    mejoras: [
+      { id: "m1", area: "perfil", texto: "Di en la primera línea de la bio a qué te dedicas y añade el email de contacto.", hechaEl: "2026-09-18" },
+      { id: "m2", area: "perfil", texto: "Deja tres historias destacadas: Rutinas, Colaboraciones y Reseñas." },
+      { id: "m3", area: "contenido", texto: "Abre los reels con el resultado: los tres primeros segundos deciden si se quedan." },
+      { id: "m4", area: "contenido", texto: "Más luz en los vídeos de maquillaje: las texturas se ven planas.", hechaEl: "2026-09-25" },
+      { id: "m5", area: "frecuencia", texto: "Vuelve a tres reels por semana; en agosto bajaste a uno." },
+      { id: "m6", area: "audiencia", texto: "Contesta los comentarios en la primera hora después de publicar." },
+      { id: "m7", area: "marcas", texto: "Pide siempre el brief por escrito antes de dar precio." },
+    ],
+  },
+  {
+    id: "au-2026-06",
+    fecha: "2026-06-10",
+    tramo: "50K–100K",
+    cpm: 20,
+    resumen: "Entrada en la red. Buena base en Instagram y un TikTok que empieza a despegar. Hay que ordenar el perfil para que una marca entienda en dos segundos qué haces.",
+    cifras: [
+      { red: "instagram", seguidores: 61_200, visualizacionesMedias: 19_800, interaccion: 4.5 },
+      { red: "tiktok", seguidores: 33_800, visualizacionesMedias: 29_500, interaccion: 5.7 },
+      { red: "youtube", seguidores: 7_600, visualizacionesMedias: 5_100, interaccion: 3 },
+    ],
+    audiencia: { espana: 76, mujeres: 85, edades: "25–34 años (44 %)" },
+    fuertes: ["Comunidad fiel y muy femenina en el nicho de skincare.", "TikTok con margen para crecer."],
+    mejoras: [
+      { id: "m0a", area: "perfil", texto: "Cambia la foto de perfil por una con la cara de cerca y luz natural.", hechaEl: "2026-06-14" },
+      { id: "m0b", area: "marcas", texto: "Prepara un media kit con tus cifras y las marcas con las que has trabajado.", hechaEl: "2026-06-20" },
+      { id: "m0c", area: "contenido", texto: "Prueba un formato fijo semanal en TikTok (reseña en 30 segundos).", hechaEl: "2026-07-02" },
+    ],
+  },
+]
+
+/** Los cambios de tarifa que ha propuesto a Astratic. */
+export const demoCambiosTarifa: CambioTarifa[] = [
+  { id: "ct-tiktok", formato: "tiktok", precio: 650, minimo: 520, antes: { precio: 590, minimo: 470 }, motivo: "Mis TikToks han pasado de 29.500 a 38.300 visualizaciones de media desde junio.", estado: "pendiente", propuestoEl: "2026-10-02" },
+  { id: "ct-reel", formato: "reel", precio: 690, minimo: 550, antes: { precio: 620, minimo: 500 }, motivo: "Subida tras la auditoría de junio.", estado: "aceptado", propuestoEl: "2026-06-20", resueltoEl: "2026-06-23", respuesta: "Aceptado: va en línea con tu CPM de referencia." },
+]
 
 export const demoMarcas: Marca[] = [
   { id: "lumea", nombre: "Lumea Skin", sector: "Skincare", web: "https://example.com", instagram: "lumea.skin", tint: "rose", atribucion: "propia", atribucionHasta: "2027-03-12", notas: "Contestan rápido. Piden el guion siempre antes de grabar.", creadaEl: "2026-03-12T10:00:00" },

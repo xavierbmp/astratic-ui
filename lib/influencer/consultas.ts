@@ -4,8 +4,10 @@
 import {
   HOY,
   demoActividad,
+  demoAuditorias,
   demoAvisoDestacado,
   demoAvisos,
+  demoCambiosTarifa,
   demoContactos,
   demoEnlaces,
   demoEtiquetasTarea,
@@ -39,6 +41,9 @@ export const hoy = () => HOY
 
 export const obtenerPerfil = () => demoPerfil
 export const listarTarifas = () => demoPerfil.tarifas
+/** Sus auditorías de Astratic, la más nueva primero. */
+export const listarAuditorias = () => [...demoAuditorias].sort((a, b) => b.fecha.localeCompare(a.fecha))
+export const listarCambiosTarifa = () => demoCambiosTarifa
 export const listarMarcas = () => demoMarcas
 export const obtenerMarca = (id: string) => demoMarcas.find((m) => m.id === id) ?? null
 

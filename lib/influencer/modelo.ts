@@ -775,6 +775,8 @@ export type CuentaRed = {
   /** Visualizaciones medias de las últimas publicaciones (reels, vídeos). */
   visualizacionesMedias: number
   interaccion: number
+  /** Cuándo se pusieron estas cifras (en la auditoría, a mano o, más adelante, por la API). */
+  actualizadaEl?: string
 }
 
 export type Perfil = {
@@ -791,6 +793,63 @@ export type Perfil = {
   tarifas: Tarifa[]
   /** A dónde le escriben las marcas. */
   email: string
+  /** El curso de Autocontrol para influencers: si lo aprobó, sale en su perfil y en el media kit. */
+  autocontrol?: { aprobadoEl: string }
+}
+
+// ───────────────────────── Auditoría y tarifas ─────────────────────────
+
+export type AreaMejora = "perfil" | "contenido" | "frecuencia" | "audiencia" | "marcas"
+
+export const AREAS_MEJORA: Record<AreaMejora, string> = {
+  perfil: "Perfil y bio",
+  contenido: "Contenido",
+  frecuencia: "Frecuencia",
+  audiencia: "Audiencia",
+  marcas: "Trabajo con marcas",
+}
+
+/** Algo que Astratic le recomienda cambiar; ella lo marca al hacerlo. */
+export type Mejora = { id: string; area: AreaMejora; texto: string; hechaEl?: string }
+
+export type CifrasRed = Pick<CuentaRed, "red" | "seguidores" | "visualizacionesMedias" | "interaccion">
+
+/** El informe que le hace Astratic al entrar en la red y cada pocos meses: su tramo, su CPM, sus cifras y qué mejorar. */
+export type Auditoria = {
+  id: string
+  fecha: string
+  tramo: string
+  /** CPM de referencia de su tramo y nicho para vídeo corto (reel y TikTok), en euros por cada mil visualizaciones. */
+  cpm: number
+  resumen: string
+  cifras: CifrasRed[]
+  audiencia: Perfil["audiencia"]
+  fuertes: string[]
+  mejoras: Mejora[]
+}
+
+export type EstadoCambioTarifa = "pendiente" | "aceptado" | "rechazado"
+
+export const ESTADOS_CAMBIO_TARIFA: Estado<EstadoCambioTarifa>[] = [
+  { id: "pendiente", label: "Pendiente de Astratic", tone: "warning" },
+  { id: "aceptado", label: "Aceptado", tone: "success" },
+  { id: "rechazado", label: "Rechazado", tone: "danger" },
+]
+
+/** Un cambio de tarifa que propone ella: no vale hasta que Astratic lo acepta. */
+export type CambioTarifa = {
+  id: string
+  formato: Formato
+  precio: number
+  minimo: number
+  /** Lo que tenía antes, para enseñar la diferencia. */
+  antes: { precio: number; minimo: number }
+  motivo?: string
+  estado: EstadoCambioTarifa
+  propuestoEl: string
+  resueltoEl?: string
+  /** La respuesta de Astratic al aceptarlo o rechazarlo. */
+  respuesta?: string
 }
 
 // ───────────────────────── Plantillas ─────────────────────────
