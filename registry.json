@@ -562,7 +562,9 @@
         { "path": "lib/influencer/contratos.ts", "type": "registry:lib" },
         { "path": "lib/influencer/facturacion.ts", "type": "registry:lib" },
         { "path": "lib/influencer/informe.ts", "type": "registry:lib" },
-        { "path": "lib/influencer/formularios.ts", "type": "registry:lib" }
+        { "path": "lib/influencer/formularios.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/cobros.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/campos-cobros.ts", "type": "registry:lib" }
       ]
     }
   ]

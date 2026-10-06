@@ -11,8 +11,9 @@ export function StatRow({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 /**
- * Cifra del inicio: icono en un círculo de color, número grande y etiqueta. Con `href` la tarjeta
- * entera lleva a su página. Solo va en las páginas de inicio: las demás no llevan cifras arriba.
+ * Cifra de una portada: icono en un círculo de color, número grande y etiqueta. Con `href` la
+ * tarjeta entera lleva a su página; con `onClick` es un atajo que filtra la lista de debajo y
+ * `active` la marca como puesta (como `KpiCard` del madre). Solo va en las portadas.
  */
 export function StatTile({
   icon: Icon,
@@ -21,6 +22,8 @@ export function StatTile({
   hint,
   tint = "lavender",
   href,
+  onClick,
+  active = false,
   className,
 }: {
   icon: LucideIcon
@@ -29,6 +32,8 @@ export function StatTile({
   hint?: React.ReactNode
   tint?: Tint
   href?: string
+  onClick?: () => void
+  active?: boolean
   className?: string
 }) {
   const body = (
@@ -51,7 +56,7 @@ export function StatTile({
       </div>
     </>
   )
-  const classes = cn("group flex flex-col rounded-2xl bg-card p-5 shadow-card", className)
+  const classes = cn("group flex flex-col rounded-2xl bg-card p-5 shadow-card", active && "bg-brand-soft ring-2 ring-brand", className)
   if (href) {
     return (
       <Link
@@ -61,6 +66,19 @@ export function StatTile({
       >
         {body}
       </Link>
+    )
+  }
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        data-slot="ws-stat-tile"
+        aria-pressed={active}
+        onClick={onClick}
+        className={cn(classes, "text-left outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring/50")}
+      >
+        {body}
+      </button>
     )
   }
   return (

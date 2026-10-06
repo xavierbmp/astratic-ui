@@ -2,6 +2,7 @@
 // resultados, formularios para la marca y plantillas de guion. Todo inventado: el repo es público
 // (NIF, IBAN y razones sociales son de relleno).
 import type { Clausula, Contrato, DatosFacturacion, DatosFiscales, Factura, FormularioMarca, Informe, PlantillaContrato, PlantillaGuion } from "@/lib/influencer/modelo"
+import { historialFacturas } from "@/lib/influencer/demo-historial"
 
 /** Sus datos fiscales: en el portal, los de Ajustes. */
 export const demoDatosFiscales: DatosFiscales = {
@@ -27,6 +28,7 @@ export const demoFacturas: Factura[] = [
   { id: "fa-botanica-verano", collabId: "botanica-verano", numero: "2026-014", destinatario: "astratic", concepto: "Campaña «Sérum de verano»: 1 reel (80 % de la red)", base: 760, ivaPct: 21, irpfPct: 15, emitidaEl: "2026-08-31", vencimiento: "2026-09-30", enviadaEl: "2026-08-31", plazoId: "botanica-verano-p1", pdf: { nombre: "Factura 2026-014.pdf", tamano: 79_000 } },
   { id: "fa-lumea-verano", collabId: "lumea-verano", numero: "2026-009", destinatario: "marca", concepto: "Campaña «Protección solar facial»: 1 reel + 2 stories", base: 1150, ivaPct: 21, irpfPct: 15, emitidaEl: "2026-06-15", vencimiento: "2026-07-15", enviadaEl: "2026-06-15", cobradaEl: "2026-07-14", plazoId: "lumea-verano-p1", pdf: { nombre: "Factura 2026-009.pdf", tamano: 81_000 } },
   { id: "fa-vero-primavera", collabId: "vero-primavera", numero: "2026-006", destinatario: "marca", concepto: "Campaña «Colección primavera»: 1 reel", base: 1400, ivaPct: 21, irpfPct: 15, emitidaEl: "2026-04-14", vencimiento: "2026-05-14", enviadaEl: "2026-04-14", cobradaEl: "2026-05-12", plazoId: "vero-primavera-p1" },
+  ...historialFacturas,
 ]
 
 const v = (clave: string) => `<span data-variable="${clave}">{{${clave}}}</span>`

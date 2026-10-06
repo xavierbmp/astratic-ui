@@ -354,9 +354,6 @@ export const demoActividad: Actividad[] = [
   { id: "a12", quien: "Marta", que: "anotó la propuesta", el: "2026-10-05T20:30:00", propuestaId: "p-petalo" },
 ]
 
-/** Cobrado en lo que va de año: en el portal saldrá de los cobros; aquí es una cifra fija. */
-export const COBRADO_ESTE_ANO = 18_650
-
 /** El seguimiento de cada marca: lo que ella apunta y lo que entra por email o por Astratic. */
 export const demoInteracciones: Interaccion[] = [
   { id: "i1", tipo: "email", sentido: "recibido", el: "2026-10-06T09:40:00", nota: "Astratic me propone la campaña del champú sólido: 1 reel y 3 stories.", marcaId: "nuura", propuestaId: "p-nuura" },

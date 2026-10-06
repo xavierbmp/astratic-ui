@@ -2,6 +2,7 @@
 // inventado (el repo es público); las fotos son de Unsplash. Las fechas viven alrededor del 6 de
 // octubre de 2026, el `HOY` de demo-data.ts.
 import type { Collab, Material, Version } from "@/lib/influencer/modelo"
+import { historialCollabs } from "@/lib/influencer/demo-historial"
 
 const UNSPLASH = "https://images.unsplash.com"
 const foto = (id: string, w = 800) => `${UNSPLASH}/photo-${id}?w=${w}&q=80&fit=crop`
@@ -519,6 +520,7 @@ export const demoCollabs: Collab[] = [
     facturacion: { razonSocial: "Maison Vero Beauty S.L.", nif: "B00000002", direccion: "Calle Ejemplo 5, 08001 Barcelona", email: "administracion@example.com" },
     creadaEl: "2026-03-10T10:00:00",
   },
+  ...historialCollabs,
 ]
 
 export const demoMateriales: Material[] = [

@@ -471,6 +471,8 @@ export type Factura = {
   vencimiento: string
   enviadaEl?: string
   cobradaEl?: string
+  /** Los días en que reclamó el pago a quien le debe la factura, del primero al último. */
+  reclamaciones?: string[]
   /** El plazo de cobro que cubre. */
   plazoId?: string
   /** El PDF que hizo con su programa. */

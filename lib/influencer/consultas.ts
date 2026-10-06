@@ -2,7 +2,6 @@
 // props; las vistas no saben de dónde sale. En el Portal Astratic este archivo lee de Prisma
 // (lib/db) con las mismas funciones; aquí devuelve los datos de ejemplo.
 import {
-  COBRADO_ESTE_ANO,
   HOY,
   demoActividad,
   demoAvisoDestacado,
@@ -34,6 +33,7 @@ import {
 import { COLLABS_ACTIVAS, ESTADOS_ABIERTOS, type Collab, type Informe, type TipoVersion } from "@/lib/influencer/modelo"
 import { marcaDe } from "@/lib/influencer/collabs"
 import { importeNeto } from "@/lib/influencer/presupuesto"
+import { cifrasCobros, lineasDeCobro } from "@/lib/influencer/cobros"
 
 export const hoy = () => HOY
 
@@ -151,7 +151,7 @@ export function resumenInicio() {
     .reduce((a, c) => a + (c.importeNeto ?? (c.tipo === "red" ? importeNeto(c.importe) : c.importe)), 0)
   return {
     pendienteDeCobro: pendiente,
-    cobradoEsteAno: COBRADO_ESTE_ANO,
+    cobradoEsteAno: cifrasCobros(lineasDeCobro({ collabs: demoCollabs, facturas: demoFacturas, hoy: HOY, impuestos: demoDatosFiscales }), HOY).cobradoAno,
     collabsEnCurso: activas.filter((c) => c.estado === "en-curso" || c.estado === "por-empezar").length,
     propuestasAbiertas: demoPropuestas.filter((p) => ESTADOS_ABIERTOS.includes(p.estado)).length,
   }
