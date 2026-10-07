@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react"
+import type { Transaction } from "@tiptap/pm/state"
 import StarterKit from "@tiptap/starter-kit"
 import Highlight from "@tiptap/extension-highlight"
 import TextAlign from "@tiptap/extension-text-align"
@@ -23,6 +24,8 @@ export type EditorTextoProps = {
   barra?: boolean
   /** Botones propios a la derecha de la barra: plantillas, variables, cláusulas. */
   extra?: React.ReactNode
+  /** Para la barra: `sticky top-0` la deja a la vista al bajar por un documento largo (su contenedor no puede recortar). */
+  barraClassName?: string
   /** Variables de contrato: qué dato tiene cada una y si se ven los datos o los nombres. */
   variables?: ContextoVariables
   /** Notas de la marca ancladas al texto, numeradas como en el panel. */
@@ -58,6 +61,7 @@ export function EditorTextoBase({
   placeholder = "Escribe aquí…",
   barra = true,
   extra,
+  barraClassName,
   variables,
   notas,
   notaSeleccionada = null,
@@ -95,7 +99,11 @@ export function EditorTextoBase({
 
   React.useEffect(() => {
     if (!editor) return
-    const actualizar = () => alCambiar(editor.getHTML())
+    // Solo lo que cambia quien escribe. Tiptap también avisa al abrir: cuando un plugin arregla el
+    // documento (un párrafo al final si acaba en una lista) y con `setEditable`; eso no es editar.
+    const actualizar = ({ transaction }: { transaction: Transaction }) => {
+      if (transaction.docChanged) alCambiar(editor.getHTML())
+    }
     editor.on("update", actualizar)
     alTenerEditor(editor)
     return () => {
@@ -144,7 +152,7 @@ export function EditorTextoBase({
   return (
     <ProveedorVariables value={variables ?? { valores: {}, verDatos: false, etiqueta: (c) => c }}>
       <div data-slot="ws-editor" className={cn("flex min-h-0 flex-col", className)}>
-        {barra && editable && editor && <EditorBarra editor={editor} extra={extra} />}
+        {barra && editable && editor && <EditorBarra editor={editor} extra={extra} className={barraClassName} />}
         <div onMouseUp={citar} onClick={pulsar} onKeyDown={tecla} className={cn("min-h-0 flex-1 overflow-y-auto", "[&_.is-editor-empty:first-child]:before:pointer-events-none [&_.is-editor-empty:first-child]:before:float-left [&_.is-editor-empty:first-child]:before:h-0 [&_.is-editor-empty:first-child]:before:text-muted-foreground/70 [&_.is-editor-empty:first-child]:before:content-[attr(data-placeholder)]")}>
           <EditorContent editor={editor} className="h-full" />
         </div>
