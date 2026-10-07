@@ -1,15 +1,9 @@
 import Link from "next/link"
 import { ArrowRightIcon, BookOpenIcon, LayoutDashboardIcon, PackageIcon, RocketIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/app/theme-toggle"
+import { DESIGN_SYSTEMS } from "@/app/ds/design-systems"
 
 const cards = [
-  {
-    href: "/ds",
-    icon: BookOpenIcon,
-    title: "Design system",
-    text: "Fundamentos, componentes, patrones de página y convenciones fijas de todos los portales.",
-  },
   {
     href: "/demo",
     icon: LayoutDashboardIcon,
@@ -46,18 +40,35 @@ export default function Home() {
           Un design system con código real sobre Next.js, Tailwind v4 y shadcn/ui. Se clona para empezar un proyecto o
           se instala por piezas en uno existente.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Button size="lg" asChild>
-            <Link href="/ds">
-              Ver el design system <ArrowRightIcon />
+      </section>
+      <section className="mt-12">
+        <h2 className="text-sm font-semibold text-muted-foreground">Elige un design system</h2>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          {DESIGN_SYSTEMS.map((d) => (
+            <Link
+              key={d.id}
+              href={d.href}
+              className="group flex flex-col gap-3 rounded-xl border bg-card p-5 shadow-xs transition-colors hover:border-brand hover:bg-brand-soft/40"
+            >
+              <span className="flex items-center gap-3">
+                <span className="grid size-9 place-items-center rounded-lg bg-foreground text-xs font-semibold text-background">
+                  {d.monogram}
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-base font-semibold">{d.label}</span>
+                  <span className="text-xs text-muted-foreground">Design system {d.kind.toLowerCase()}</span>
+                </span>
+              </span>
+              <span className="text-sm text-muted-foreground">{d.description}</span>
+              <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-brand">
+                <BookOpenIcon className="size-3.5" /> Ver la documentación
+                <ArrowRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+              </span>
             </Link>
-          </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/demo">Abrir la demo</Link>
-          </Button>
+          ))}
         </div>
       </section>
-      <section className="mt-16 grid gap-4 sm:grid-cols-2">
+      <section className="mt-12 grid gap-4 sm:grid-cols-3">
         {cards.map((c) => (
           <Link
             key={c.href}
