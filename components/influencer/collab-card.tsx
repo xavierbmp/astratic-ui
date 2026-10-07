@@ -10,7 +10,13 @@ export function CollabCardRow({ className, ...props }: React.ComponentProps<"div
   return (
     <div
       data-slot="ws-collab-row"
-      className={cn("-mx-5 flex snap-x gap-4 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}
+      // Las tarjetas se deslizan hasta el borde del bloque pero se difuminan en su margen: nunca
+      // se ven cortadas en seco contra el borde.
+      className={cn(
+        "-mx-5 flex snap-x scroll-px-5 gap-4 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "[mask-image:linear-gradient(to_right,transparent,black_1.25rem,black_calc(100%-1.25rem),transparent)]",
+        className,
+      )}
       {...props}
     />
   )
