@@ -1,7 +1,7 @@
 // Datos de ejemplo de Contenidos: el directorio de ideas y documentos de la creadora inventada, sus
 // pilares, sus contenidos propios de octubre, las plantillas de guion para lo que publica por su
 // cuenta y las fechas clave que escribe Astratic. Nada real: el repo es público.
-import type { Apunte, Carpeta, Contenido, FechaClave, Pilar, PlantillaGuion } from "@/lib/influencer/modelo"
+import type { Apunte, Carpeta, Contenido, FechaClave, Pilar, PlantillaGuion, VinculoApunte } from "@/lib/influencer/modelo"
 
 const UNSPLASH = "https://images.unsplash.com"
 const foto = (id: string, w = 600) => `${UNSPLASH}/photo-${id}?w=${w}&q=80&fit=crop`
@@ -29,7 +29,11 @@ export const demoCarpetas: Carpeta[] = [
   { id: "k-ganchos", nombre: "Ganchos", tint: "lavender" },
   { id: "k-tendencias", nombre: "Tendencias", tint: "rose" },
   { id: "k-probar", nombre: "Productos por probar", tint: "mint" },
-  { id: "k-campanas", nombre: "Navidad y Black Friday", tint: "peach" },
+  { id: "k-campanas", nombre: "Campañas del año", tint: "peach" },
+  { id: "k-halloween", nombre: "Halloween", tint: "lavender", padreId: "k-campanas" },
+  { id: "k-black-friday", nombre: "Black Friday", tint: "sky", padreId: "k-campanas" },
+  { id: "k-navidad", nombre: "Navidad", tint: "rose", padreId: "k-campanas" },
+  { id: "k-metodo", nombre: "Cómo trabajo", tint: "lime" },
 ]
 
 export const demoFechasClave: FechaClave[] = [
@@ -125,6 +129,7 @@ export const demoApuntes: Apunte[] = [
     formato: "reel",
     redes: ["instagram", "tiktok"],
     referencias: [{ id: "r1", tipo: "imagen", url: foto(FOTOS.balsamo), titulo: "La luz que quiero" }],
+    portadaUrl: foto(FOTOS.balsamo),
     creadoEl: creado("2026-09-28"),
     actualizadoEl: creado("2026-10-01"),
   },
@@ -156,6 +161,7 @@ export const demoApuntes: Apunte[] = [
     formato: "reel",
     redes: ["instagram", "tiktok"],
     referencias: [{ id: "r3", tipo: "imagen", url: foto(FOTOS.gotero) }],
+    portadaUrl: foto(FOTOS.gotero),
     creadoEl: creado("2026-09-20"),
     actualizadoEl: creado("2026-10-04"),
   },
@@ -164,13 +170,14 @@ export const demoApuntes: Apunte[] = [
     tipo: "idea",
     titulo: "Top 5 de belleza para Black Friday",
     texto: "<p>Lo que sí merece la pena comprar con descuento y lo que no. Prepararla a principios de noviembre.</p>",
-    carpetaId: "k-campanas",
+    carpetaId: "k-black-friday",
     favorito: false,
     estado: "para-hacer",
     pilarId: "p-reviews",
     formato: "reel",
     redes: ["instagram"],
     referencias: [{ id: "r4", tipo: "imagen", url: foto(FOTOS.crema) }],
+    portadaUrl: foto(FOTOS.crema),
     fechaClaveId: "black-friday",
     creadoEl: creado("2026-10-01"),
     actualizadoEl: creado("2026-10-01"),
@@ -180,7 +187,7 @@ export const demoApuntes: Apunte[] = [
     tipo: "idea",
     titulo: "Calendario de adviento de belleza: ¿vale la pena?",
     texto: "<p>Abrirlo entero y sumar lo que cuesta cada producto por separado.</p>",
-    carpetaId: "k-campanas",
+    carpetaId: "k-navidad",
     favorito: false,
     estado: "apuntada",
     formato: "tiktok",
@@ -239,13 +246,14 @@ export const demoApuntes: Apunte[] = [
     tipo: "idea",
     titulo: "Maquillaje de Halloween en 5 minutos",
     texto: "<p>Con lo que ya tienes en casa.</p>",
-    carpetaId: "k-campanas",
+    carpetaId: "k-halloween",
     favorito: false,
     estado: "para-hacer",
     pilarId: "p-consejos",
     formato: "reel",
     redes: ["instagram"],
     referencias: [{ id: "r6", tipo: "imagen", url: foto(FOTOS.pinceles) }],
+    portadaUrl: foto(FOTOS.pinceles),
     fechaClaveId: "halloween",
     creadoEl: creado("2026-09-30"),
     actualizadoEl: creado("2026-10-02"),
@@ -290,6 +298,7 @@ export const demoApuntes: Apunte[] = [
     formato: "post",
     redes: ["instagram"],
     referencias: [{ id: "r7", tipo: "imagen", url: foto(FOTOS.lumea) }],
+    portadaUrl: foto(FOTOS.lumea),
     creadoEl: creado("2026-09-18"),
     actualizadoEl: creado("2026-10-02"),
   },
@@ -308,7 +317,7 @@ export const demoApuntes: Apunte[] = [
   },
   {
     id: "a-ganchos",
-    tipo: "documento",
+    tipo: "nota",
     titulo: "Ganchos que me funcionan",
     texto: `<p>Los que mejor han ido este año, para no empezar de cero.</p>${lista([
       "«Esto es lo único que hago por la noche y…»",
@@ -327,8 +336,9 @@ export const demoApuntes: Apunte[] = [
   },
   {
     id: "a-mi-estilo",
-    tipo: "documento",
+    tipo: "nota",
     titulo: "Mi estilo: cómo hablo y qué no hago",
+    carpetaId: "k-metodo",
     texto: `<h3>Cómo hablo</h3><p>Cercana, sin tecnicismos y diciendo lo que no me gusta.</p><h3>Lo que no hago</h3>${lista(["Prometer resultados que no he visto", "Hablar de productos que no he probado al menos dos semanas", "Publicidad sin marcar"])}`,
     favorito: false,
     estado: "apuntada",
@@ -339,7 +349,7 @@ export const demoApuntes: Apunte[] = [
   },
   {
     id: "a-por-probar",
-    tipo: "documento",
+    tipo: "nota",
     titulo: "Productos por probar",
     texto: lista(["Sérum de niacinamida de farmacia", "Bálsamo limpiador nuevo de Pétalo", "Protector con color de Soleil Paris", "Brocha kabuki que me recomendasteis"]),
     carpetaId: "k-probar",
@@ -352,8 +362,9 @@ export const demoApuntes: Apunte[] = [
   },
   {
     id: "a-grabacion",
-    tipo: "documento",
+    tipo: "nota",
     titulo: "Antes de grabar",
+    carpetaId: "k-metodo",
     texto: lista(["Limpiar la lente", "Luz de la ventana de frente, nunca detrás", "Modo avión", "Batería y espacio en el móvil", "Producto limpio y con la etiqueta hacia cámara"]),
     favorito: false,
     estado: "apuntada",
@@ -362,6 +373,15 @@ export const demoApuntes: Apunte[] = [
     creadoEl: creado("2026-04-11"),
     actualizadoEl: creado("2026-08-30"),
   },
+]
+
+/** Las notas enlazadas con las ideas que salen de ellas (o que las usan). */
+export const demoVinculos: VinculoApunte[] = [
+  { desde: "a-ganchos", hasta: "a-colorete-viral" },
+  { desde: "a-ganchos", hasta: "a-rutina-noche" },
+  { desde: "a-por-probar", hasta: "a-dupes-serums" },
+  { desde: "a-por-probar", hasta: "a-retinal" },
+  { desde: "a-grabacion", hasta: "a-rutina-noche" },
 ]
 
 const base = { guion: "", caption: "", publicidad: false }

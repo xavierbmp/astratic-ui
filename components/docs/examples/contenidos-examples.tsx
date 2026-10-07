@@ -18,7 +18,7 @@ import { AntesDePublicar } from "@/components/influencer/antes-de-publicar"
 const HOY_DIA = HOY.slice(0, 10)
 const entradas = [...entradasDeContenidos(demoContenidos, demoPilares), ...entradasDePiezas(demoCollabs, demoMarcas), ...entradasDeFechasClave(demoFechasClave)]
 
-/** Tres ideas de la galería: con captura, con enlace y un documento. */
+/** Tres de la galería: una idea con captura, otra con enlace y una nota. */
 export function GaleriaIdeasExample() {
   const ids = ["a-dupes-serums", "a-audio-grwm", "a-ganchos"]
   return (
@@ -46,7 +46,7 @@ export function CapturaIdeaExample() {
   const [ultima, setUltima] = React.useState<string | null>(null)
   return (
     <div className="grid w-full gap-2">
-      <CapturaIdea onApuntar={setUltima} onDocumento={() => undefined} destino="Tendencias" />
+      <CapturaIdea onApuntar={setUltima} onNota={() => undefined} destino="Tendencias" />
       {ultima && <p className="text-xs text-muted-foreground">Apuntada: «{ultima}»</p>}
     </div>
   )

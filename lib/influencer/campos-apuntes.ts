@@ -1,4 +1,4 @@
-// Los campos por los que se filtra, se ordena y se agrupa el directorio de ideas y documentos de
+// Los campos por los que se filtra, se ordena y se agrupa el directorio de ideas y notas de
 // Contenidos (constructor «Filtros», filtros rápidos y las vistas de la base). El estado se calcula:
 // planificada o publicada sale del contenido que nació de la idea.
 import type { CampoFiltrable } from "@/lib/filtros/core"
@@ -6,6 +6,7 @@ import { socialLabel, type SocialNetwork } from "@/components/app/social-icons"
 import { ESTADOS_IDEA, FORMATOS, TIPOS_APUNTE, type Apunte, type Carpeta, type Contenido, type FechaClave, type Marca, type Pilar, type TipoApunte } from "@/lib/influencer/modelo"
 import { caducaPronto, estadoDeIdea } from "@/lib/influencer/apuntes"
 import { FORMATOS_PROPIOS } from "@/lib/influencer/planificacion"
+import { opcionesDeCarpetas } from "@/lib/influencer/carpetas"
 import { soloFecha } from "@/lib/influencer/fechas"
 
 const REDES: SocialNetwork[] = ["instagram", "tiktok", "youtube"]
@@ -17,7 +18,7 @@ export function camposApunte({ contenidos, pilares, carpetas, marcas, fechasClav
     { id: "titulo", label: "Título", tipo: "texto", grupo: "Datos", valor: (a) => a.titulo },
     { id: "tipo", label: "Tipo", tipo: "select", grupo: "Datos", opciones: (Object.keys(TIPOS_APUNTE) as TipoApunte[]).map((t) => ({ value: t, label: TIPOS_APUNTE[t] })), valor: (a) => a.tipo },
     { id: "estado", label: "Estado", tipo: "select", grupo: "Datos", opciones: ESTADOS_IDEA.map((e) => ({ value: e.id, label: e.label })), valor: (a) => estadoDeIdea(a, contenidos) },
-    { id: "carpeta", label: "Carpeta", tipo: "select", grupo: "Datos", opciones: carpetas.map((c) => ({ value: c.id, label: c.nombre })), valor: (a) => a.carpetaId ?? null },
+    { id: "carpeta", label: "Carpeta", tipo: "select", grupo: "Datos", opciones: opcionesDeCarpetas(carpetas), valor: (a) => a.carpetaId ?? null },
     { id: "pilar", label: "Pilar", tipo: "select", grupo: "Contenido", opciones: pilares.map((p) => ({ value: p.id, label: p.nombre })), valor: (a) => a.pilarId ?? null },
     { id: "formato", label: "Formato", tipo: "select", grupo: "Contenido", opciones: FORMATOS_PROPIOS.map((f) => ({ value: f, label: FORMATOS[f].label })), valor: (a) => a.formato ?? null },
     { id: "redes", label: "Redes", tipo: "multiselect", grupo: "Contenido", opciones: REDES.map((r) => ({ value: r, label: socialLabel[r] })), valor: (a) => a.redes },

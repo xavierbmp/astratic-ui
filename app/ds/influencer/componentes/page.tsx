@@ -358,8 +358,8 @@ const [editing, setEditing] = useState(false)
         </Prose>
       </DocSection>
 
-      <DocSection id="contenidos" title="Contenidos: ideas y planificación" lead="Las piezas de Contenidos: el directorio de ideas y documentos, que es una base de Notion con galería, y la planificación de lo que publica, de las collabs y propio, en un mismo calendario. Un contenido propio es un espacio de trabajo, no un formulario: un guion y un caption.">
-        <Example className={EXAMPLE} code={`<CapturaIdea onApuntar={apuntar} onImagen={conCaptura} onDocumento={nuevoDocumento} destino="Tendencias" />
+      <DocSection id="contenidos" title="Contenidos: ideas y planificación" lead="Las piezas de Contenidos: el directorio de ideas y notas (en carpetas que van unas dentro de otras), que es una base de Notion con galería, y la planificación de lo que publica, de las collabs y propio, en un mismo calendario. Un contenido propio es un espacio de trabajo, no un formulario: un guion y un caption.">
+        <Example className={EXAMPLE} code={`<CapturaIdea onApuntar={apuntar} onImagen={conCaptura} onNota={nuevaNota} destino="Tendencias" />
 <ApunteCard apunte={a} estado={estadoDeIdea(a, contenidos)} pilar={pilar} hoy={hoy} propiedades={vista.propiedades} onAbrir={abrir} onFavorito={favorita} accion={<BotonPlanificar />} />`}>
           <div className="grid w-full gap-4">
             <CapturaIdeaExample />
@@ -380,8 +380,9 @@ const [editing, setEditing] = useState(false)
         </Example>
         <Rules
           items={[
-            <><code>ApunteCard</code>: una idea o un documento en la galería (portada con su captura, el principio del texto o el tinte de su pilar), con las propiedades que pide la vista y la caducidad siempre. La estrella, la casilla y la acción no abren la ficha. <code>COLUMNAS_GALERIA</code> da el tamaño de tarjeta de la vista.</>,
+            <><code>ApunteCard</code>: una idea o una nota en la galería (portada con la imagen que elija, el principio del texto o el tinte de su pilar), con las propiedades que pide la vista y la caducidad siempre. La estrella, la casilla y la acción no abren la ficha. <code>COLUMNAS_GALERIA</code> da el tamaño de tarjeta de la vista.</>,
             <><code>CapturaIdea</code>: apuntar en cinco segundos, con texto o un enlace (la red sale del dominio) o con una captura.</>,
+            <>Las carpetas son un árbol (<code>lib/influencer/carpetas.ts</code>: cada una sabe su madre y el orden entre hermanas es el de la lista). Una carpeta enseña también lo de las que lleva dentro; al borrarla, lo suyo sube a su madre. Las notas se enlazan con ideas (<code>VinculoApunte</code>, <code>enlazar</code>). Lo que se adjunta usa los tipos de los materiales (<code>tipoDeArchivo</code>, <code>ICONOS_MATERIAL</code>).</>,
             <><code>CalendarioContenidos</code> (mes o semana) y <code>AgendaContenidos</code> (lista con los huecos libres): pintan <code>EntradaCalendario</code> de <code>lib/influencer/planificacion.ts</code>, sea contenido propio, pieza de collab (con candado: fecha pactada), hito, tarea, cobro o fecha clave. El calendario no pone su <code>DndContext</code>: lo pone la página para poder soltar ideas de fuera.</>,
             <><code>EditorCaption</code>: un solo texto con los hashtags dentro; cuenta lo que admite cada red (Instagram, 2.200 caracteres y 5 hashtags), enseña lo que se ve antes de «más» y avisa de la publicidad sin marcar. <code>AntesDePublicar</code>: lo que falta, poco y útil.</>,
             <><code>Teleprompter</code>: el guion a pantalla completa, con velocidad, tamaño de letra y espejo, para leerlo desde otro dispositivo al grabar.</>,

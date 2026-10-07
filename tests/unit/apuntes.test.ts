@@ -7,16 +7,22 @@ import {
   apuntesDeCarpeta,
   asignarCampoApunte,
   caducaPronto,
+  conReferencias,
   contarPorCarpeta,
+  desenlazar,
+  enlazadosDe,
+  enlazar,
   estadoDeIdea,
   ideasParaPlanificar,
   portadaDeApunte,
   redDeEnlace,
   resumenDeApunte,
+  sinReferencia,
   textoCaducidad,
 } from "@/lib/influencer/apuntes"
 import { demoApuntes, demoContenidos } from "@/lib/influencer/demo-contenidos"
-import type { Apunte } from "@/lib/influencer/modelo"
+import { tipoDeArchivo } from "@/lib/influencer/materiales"
+import type { Apunte, Carpeta } from "@/lib/influencer/modelo"
 
 const HOY = "2026-10-06"
 const AHORA = "2026-10-06T11:30:00"
@@ -32,8 +38,8 @@ describe("estado de una idea", () => {
     expect(estadoDeIdea(publicada, demoContenidos)).toBe("publicada")
     expect(estadoDeIdea(suelta, demoContenidos)).toBe("para-hacer")
   })
-  it("un documento no tiene estado", () => {
-    expect(estadoDeIdea(idea({ tipo: "documento" }), demoContenidos)).toBeNull()
+  it("una nota no tiene estado", () => {
+    expect(estadoDeIdea(idea({ tipo: "nota" }), demoContenidos)).toBeNull()
   })
 })
 
@@ -81,25 +87,70 @@ describe("caducidad", () => {
 })
 
 describe("carpetas y tarjetas", () => {
-  it("cuenta por carpeta, sin carpeta y favoritos", () => {
-    const cuentas = contarPorCarpeta([idea({ carpetaId: "k1" }), idea({ carpetaId: "k1", favorito: true }), idea()])
+  const carpetas: Carpeta[] = [
+    { id: "k1", nombre: "Campañas", tint: "peach" },
+    { id: "k2", nombre: "Navidad", tint: "rose", padreId: "k1" },
+    { id: "k3", nombre: "Ganchos", tint: "mint" },
+  ]
+  it("cuenta por carpeta (con lo de sus subcarpetas), sin carpeta y favoritos", () => {
+    const cuentas = contarPorCarpeta([idea({ carpetaId: "k1" }), idea({ carpetaId: "k2", favorito: true }), idea()], carpetas)
     expect(cuentas[CARPETA_TODO]).toBe(3)
     expect(cuentas.k1).toBe(2)
+    expect(cuentas.k2).toBe(1)
+    expect(cuentas.k3).toBe(0)
     expect(cuentas[CARPETA_SIN]).toBe(1)
     expect(cuentas[CARPETA_FAVORITOS]).toBe(1)
   })
-  it("filtra por carpeta y por las especiales", () => {
-    const lista = [idea({ id: "a", carpetaId: "k1" }), idea({ id: "b", favorito: true }), idea({ id: "c" })]
-    expect(apuntesDeCarpeta(lista, "k1").map((a) => a.id)).toEqual(["a"])
-    expect(apuntesDeCarpeta(lista, CARPETA_FAVORITOS).map((a) => a.id)).toEqual(["b"])
-    expect(apuntesDeCarpeta(lista, CARPETA_SIN).map((a) => a.id)).toEqual(["b", "c"])
-    expect(apuntesDeCarpeta(lista, CARPETA_TODO)).toHaveLength(3)
+  it("una carpeta enseña también lo de las que lleva dentro; las especiales, lo suyo", () => {
+    const lista = [idea({ id: "a", carpetaId: "k1" }), idea({ id: "b", favorito: true }), idea({ id: "c" }), idea({ id: "d", carpetaId: "k2" })]
+    expect(apuntesDeCarpeta(lista, "k1", carpetas).map((a) => a.id)).toEqual(["a", "d"])
+    expect(apuntesDeCarpeta(lista, "k2", carpetas).map((a) => a.id)).toEqual(["d"])
+    expect(apuntesDeCarpeta(lista, CARPETA_FAVORITOS, carpetas).map((a) => a.id)).toEqual(["b"])
+    expect(apuntesDeCarpeta(lista, CARPETA_SIN, carpetas).map((a) => a.id)).toEqual(["b", "c"])
+    expect(apuntesDeCarpeta(lista, CARPETA_TODO, carpetas)).toHaveLength(4)
   })
-  it("la portada es la primera imagen y el resumen, el texto sin etiquetas", () => {
-    const a = idea({ texto: "<p>Hola <strong>mundo</strong></p>", referencias: [{ id: "1", tipo: "enlace", url: "https://x.com" }, { id: "2", tipo: "imagen", url: "https://img/1.jpg" }] })
+  it("la portada es la que tiene y el resumen, el texto sin etiquetas", () => {
+    const a = idea({ texto: "<p>Hola <strong>mundo</strong></p>", portadaUrl: "https://img/1.jpg" })
     expect(portadaDeApunte(a)).toBe("https://img/1.jpg")
+    expect(portadaDeApunte(idea())).toBeUndefined()
     expect(resumenDeApunte(a)).toBe("Hola mundo")
     expect(resumenDeApunte(idea({ texto: `<p>${"a".repeat(200)}</p>` }), 10)).toHaveLength(10)
+  })
+})
+
+describe("portada y archivos", () => {
+  const imagen = { id: "i", tipo: "imagen" as const, url: "https://img/1.jpg" }
+  const pdf = { id: "p", tipo: "pdf" as const, url: "https://docs/brief.pdf", titulo: "brief.pdf", tamano: 1200 }
+  it("una idea que nace con captura la tiene de portada", () => {
+    expect(apunteDesdeTexto("algo", { id: "n", idReferencia: "r", ahora: AHORA }).portadaUrl).toBeUndefined()
+    expect(conReferencias(idea(), [pdf, imagen]).portadaUrl).toBe(imagen.url)
+  })
+  it("una portada elegida no la cambia una captura nueva", () => {
+    expect(conReferencias(idea({ portadaUrl: "https://img/mia.jpg" }), [imagen]).portadaUrl).toBe("https://img/mia.jpg")
+  })
+  it("cada archivo, con su tipo", () => {
+    expect(["image/png", "video/mp4", "application/pdf", "application/zip", "text/plain"].map(tipoDeArchivo)).toEqual(["imagen", "video", "pdf", "zip", "documento"])
+  })
+  it("quitar la captura que era la portada la quita; quitar otra cosa, no", () => {
+    const a = conReferencias(idea(), [imagen, pdf])
+    expect(sinReferencia(a, "p").portadaUrl).toBe(imagen.url)
+    expect(sinReferencia(a, "i")).toMatchObject({ portadaUrl: undefined, referencias: [pdf] })
+  })
+})
+
+describe("notas enlazadas con ideas", () => {
+  it("se enlazan una vez, en los dos sentidos, y nunca consigo mismas", () => {
+    let v = enlazar([], "nota", "idea1")
+    v = enlazar(v, "idea2", "nota")
+    v = enlazar(v, "idea1", "nota")
+    v = enlazar(v, "nota", "nota")
+    expect(v).toHaveLength(2)
+    expect(enlazadosDe("nota", v)).toEqual(["idea1", "idea2"])
+    expect(enlazadosDe("idea1", v)).toEqual(["nota"])
+  })
+  it("se desenlazan da igual el orden", () => {
+    const v = enlazar(enlazar([], "nota", "idea1"), "nota", "idea2")
+    expect(enlazadosDe("nota", desenlazar(v, "idea1", "nota"))).toEqual(["idea2"])
   })
 })
 
@@ -116,7 +167,7 @@ describe("asignar un campo al soltar o crear en un grupo", () => {
   it("el estado solo a mano y solo en ideas", () => {
     expect(asignarCampoApunte(idea(), "estado", "para-hacer")?.estado).toBe("para-hacer")
     expect(asignarCampoApunte(idea(), "estado", "planificada")).toBeNull()
-    expect(asignarCampoApunte(idea({ tipo: "documento" }), "estado", "para-hacer")).toBeNull()
+    expect(asignarCampoApunte(idea({ tipo: "nota" }), "estado", "para-hacer")).toBeNull()
   })
   it("el grupo sin valor lo deja vacío", () => {
     expect(asignarCampoApunte(idea({ pilarId: "p1" }), "pilar", "__vacio")?.pilarId).toBeUndefined()

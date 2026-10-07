@@ -18,13 +18,13 @@ export const COLUMNAS_GALERIA = {
   grande: "grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))]",
 } as const
 
-/** La portada: la captura si hay; si no, el principio del documento o el tinte de su pilar con el icono de su red. */
+/** La portada: la imagen que tenga; si no, el principio de la nota o el tinte de su pilar con el icono de su red. */
 function Portada({ apunte, pilar }: { apunte: Apunte; pilar?: Pilar }) {
   const imagen = portadaDeApunte(apunte)
   const resumen = resumenDeApunte(apunte, 220)
   // Una captura recién subida es un enlace local del navegador: se pinta tal cual, sin optimizar.
   if (imagen) return <Image src={imagen} alt="" fill sizes="(max-width: 768px) 50vw, 300px" unoptimized={!imagen.startsWith("https://")} className="object-cover" />
-  if (apunte.tipo === "documento")
+  if (apunte.tipo === "nota")
     return (
       <span className="absolute inset-0 grid content-start gap-2 bg-muted/60 p-3">
         <FileTextIcon className="size-4 text-muted-foreground" aria-hidden />
@@ -41,7 +41,7 @@ function Portada({ apunte, pilar }: { apunte: Apunte; pilar?: Pilar }) {
 }
 
 /**
- * Una idea o un documento en la galería del directorio de Contenidos: su portada (la captura, el
+ * Una idea o una nota en la galería del directorio de Contenidos: su portada (la imagen, el
  * texto o el tinte de su pilar), el título y las propiedades que pide la vista. La caducidad sale
  * siempre, que es lo que no puede pasarse. La tarjeta entera abre su ficha; la estrella, la casilla
  * y la acción («Planificar») hacen lo suyo sin abrirla.

@@ -1,11 +1,12 @@
-// El directorio de Contenidos: ideas y documentos. El estado que se ve de cada idea (lo pone su
-// contenido si ya lo hay), apuntar una al vuelo desde un texto con enlace, lo que caduca pronto y lo
-// que enseña su tarjeta. Pura: sin datos ni React.
+// El directorio de Contenidos: ideas y notas. El estado que se ve de cada idea (lo pone su contenido
+// si ya lo hay), apuntar una al vuelo desde un texto con enlace, lo que caduca pronto, lo que enseña
+// su tarjeta, lo que se le adjunta y con qué notas está enlazada. Pura: sin datos ni React.
 import { socialLabel, type SocialNetwork } from "@/components/app/social-icons"
-import { ESTADOS_IDEA_A_MANO, FORMATOS, type Apunte, type Contenido, type EstadoIdea, type EstadoIdeaManual, type Formato } from "@/lib/influencer/modelo"
+import { ESTADOS_IDEA_A_MANO, FORMATOS, type Apunte, type Carpeta, type Contenido, type EstadoIdea, type EstadoIdeaManual, type Formato, type Referencia, type VinculoApunte } from "@/lib/influencer/modelo"
 import { SIN_VALOR } from "@/lib/vistas/core"
 import { diasEntre } from "@/lib/influencer/fechas"
 import { textoPlano } from "@/lib/influencer/guion"
+import { conDescendientes } from "@/lib/influencer/carpetas"
 
 /** Con cuántos días de margen se avisa de que una idea caduca. */
 export const DIAS_AVISO_CADUCA = 3
@@ -20,7 +21,7 @@ export function contenidoDeIdea(a: Pick<Apunte, "id">, contenidos: Contenido[]):
   return contenidos.filter((c) => c.ideaId === a.id).sort((x, y) => y.creadoEl.localeCompare(x.creadoEl))[0]
 }
 
-/** El estado que se ve: planificada o publicada si ya tiene contenido; si no, el que puso ella. Un documento no tiene. */
+/** El estado que se ve: planificada o publicada si ya tiene contenido; si no, el que puso ella. Una nota no tiene. */
 export function estadoDeIdea(a: Apunte, contenidos: Contenido[]): EstadoIdea | null {
   if (a.tipo !== "idea") return null
   const c = contenidoDeIdea(a, contenidos)
@@ -42,9 +43,11 @@ export function redDeEnlace(url: string): SocialNetwork | undefined {
   return REDES_POR_DOMINIO.find(([patron]) => patron.test(dominio))?.[1]
 }
 
-/** Un apunte nuevo con lo que se sabe; el resto, vacío. */
+/** Un apunte nuevo con lo que se sabe; el resto, vacío. Si nace con una captura, es su portada. */
 export function nuevoApunte(datos: Pick<Apunte, "tipo" | "titulo"> & Partial<Apunte>, id: string, ahora: string): Apunte {
-  return { texto: "", favorito: false, estado: "apuntada", redes: [], referencias: [], ...datos, id, creadoEl: ahora, actualizadoEl: ahora }
+  const referencias = datos.referencias ?? []
+  const portadaUrl = datos.portadaUrl ?? referencias.find((r) => r.tipo === "imagen")?.url
+  return { texto: "", favorito: false, estado: "apuntada", redes: [], ...datos, referencias, portadaUrl, id, creadoEl: ahora, actualizadoEl: ahora }
 }
 
 /**
@@ -88,34 +91,72 @@ export function textoCaducidad(a: Pick<Apunte, "caducaEl">, hoy: string): string
   return d === 1 ? "Caduca mañana" : `Caduca en ${d} días`
 }
 
-/** La imagen de su tarjeta: la primera captura que tenga. */
-export function portadaDeApunte(a: Pick<Apunte, "referencias">): string | undefined {
-  return a.referencias.find((r) => r.tipo === "imagen")?.url
+/** La imagen de su tarjeta, si tiene. */
+export function portadaDeApunte(a: Pick<Apunte, "portadaUrl">): string | undefined {
+  return a.portadaUrl
 }
 
-/** El principio del texto, para la tarjeta de un documento o de una idea sin imagen. */
+/** Añadir enlaces, capturas o archivos. La primera captura de un apunte sin portada pasa a serlo. */
+export function conReferencias(a: Apunte, nuevas: Referencia[]): Apunte {
+  const portadaUrl = a.portadaUrl ?? nuevas.find((r) => r.tipo === "imagen")?.url
+  return { ...a, referencias: [...a.referencias, ...nuevas], portadaUrl }
+}
+
+/** Quitar una referencia; si su imagen era la portada, el apunte se queda sin portada. */
+export function sinReferencia(a: Apunte, id: string): Apunte {
+  const quitada = a.referencias.find((r) => r.id === id)
+  return { ...a, referencias: a.referencias.filter((r) => r.id !== id), portadaUrl: quitada && quitada.url === a.portadaUrl ? undefined : a.portadaUrl }
+}
+
+/** El principio del texto, para la tarjeta de una nota o de una idea sin imagen. */
 export function resumenDeApunte(a: Pick<Apunte, "texto">, max = 140): string {
   const texto = textoPlano(a.texto).replace(/\s+/g, " ").trim()
   return texto.length > max ? `${texto.slice(0, max - 1).trimEnd()}…` : texto
 }
 
-/** Cuántos apuntes hay en cada carpeta, además de todos, los que no tienen carpeta y los favoritos. */
-export function contarPorCarpeta(apuntes: Pick<Apunte, "carpetaId" | "favorito">[]): Record<string, number> {
+/**
+ * Cuántos apuntes hay en cada carpeta, contando los de las carpetas que lleva dentro, además de
+ * todos, los que no tienen carpeta y los favoritos.
+ */
+export function contarPorCarpeta(apuntes: Pick<Apunte, "carpetaId" | "favorito">[], carpetas: Carpeta[]): Record<string, number> {
   const cuentas: Record<string, number> = { [CARPETA_TODO]: apuntes.length, [CARPETA_SIN]: 0, [CARPETA_FAVORITOS]: 0 }
   for (const a of apuntes) {
-    const clave = a.carpetaId ?? CARPETA_SIN
-    cuentas[clave] = (cuentas[clave] ?? 0) + 1
     if (a.favorito) cuentas[CARPETA_FAVORITOS] += 1
+    if (!a.carpetaId) cuentas[CARPETA_SIN] += 1
+  }
+  for (const c of carpetas) {
+    const dentro = conDescendientes(carpetas, c.id)
+    cuentas[c.id] = apuntes.filter((a) => a.carpetaId && dentro.has(a.carpetaId)).length
   }
   return cuentas
 }
 
-/** Los de una carpeta (o de las especiales: todo, sin carpeta, favoritos). */
-export function apuntesDeCarpeta<T extends Pick<Apunte, "carpetaId" | "favorito">>(apuntes: T[], carpeta: string): T[] {
+/** Los de una carpeta y las que lleva dentro (o los de las especiales: todo, sin carpeta, favoritos). */
+export function apuntesDeCarpeta<T extends Pick<Apunte, "carpetaId" | "favorito">>(apuntes: T[], carpeta: string, carpetas: Carpeta[]): T[] {
   if (carpeta === CARPETA_TODO) return apuntes
   if (carpeta === CARPETA_FAVORITOS) return apuntes.filter((a) => a.favorito)
   if (carpeta === CARPETA_SIN) return apuntes.filter((a) => !a.carpetaId)
-  return apuntes.filter((a) => a.carpetaId === carpeta)
+  const dentro = conDescendientes(carpetas, carpeta)
+  return apuntes.filter((a) => a.carpetaId && dentro.has(a.carpetaId))
+}
+
+// ── Notas enlazadas con ideas ──
+
+const esVinculo = (v: VinculoApunte, x: string, y: string) => (v.desde === x && v.hasta === y) || (v.desde === y && v.hasta === x)
+
+/** Los ids de los apuntes enlazados con uno, en el orden en que se enlazaron. */
+export function enlazadosDe(id: string, vinculos: VinculoApunte[]): string[] {
+  return vinculos.flatMap((v) => (v.desde === id ? [v.hasta] : v.hasta === id ? [v.desde] : []))
+}
+
+/** Enlazar dos apuntes; si ya lo están (o son el mismo), nada cambia. */
+export function enlazar(vinculos: VinculoApunte[], desde: string, hasta: string): VinculoApunte[] {
+  if (desde === hasta || vinculos.some((v) => esVinculo(v, desde, hasta))) return vinculos
+  return [...vinculos, { desde, hasta }]
+}
+
+export function desenlazar(vinculos: VinculoApunte[], x: string, y: string): VinculoApunte[] {
+  return vinculos.filter((v) => !esVinculo(v, x, y))
 }
 
 /**
@@ -143,7 +184,7 @@ export function asignarCampoApunte(a: Apunte, campo: string, valor: string): Apu
     case "estado":
       return a.tipo === "idea" && esEstadoManual(valor) ? { ...a, estado: valor } : null
     case "tipo":
-      return valor === "idea" || valor === "documento" ? { ...a, tipo: valor } : null
+      return valor === "idea" || valor === "nota" ? { ...a, tipo: valor } : null
     case "pilar":
       return { ...a, pilarId: vacio ? undefined : valor }
     case "carpeta":

@@ -1010,10 +1010,10 @@ export type MediaKit = {
 
 // ───────────────────────── Contenidos: ideas y planificación ─────────────────────────
 
-/** Lo que se apunta en el directorio de Contenidos: una idea de contenido o un documento suelto. */
-export type TipoApunte = "idea" | "documento"
+/** Lo que se apunta en el directorio de Contenidos: una idea de contenido o una nota (lo que sea: apuntes, guiones sueltos, listas). */
+export type TipoApunte = "idea" | "nota"
 
-export const TIPOS_APUNTE: Record<TipoApunte, string> = { idea: "Idea", documento: "Documento" }
+export const TIPOS_APUNTE: Record<TipoApunte, string> = { idea: "Idea", nota: "Nota" }
 
 /** Cómo va una idea. «Planificada» y «Publicada» salen solas del contenido que nace de ella. */
 export type EstadoIdea = "apuntada" | "para-hacer" | "planificada" | "publicada" | "descartada"
@@ -1031,8 +1031,8 @@ export type EstadoIdeaManual = Exclude<EstadoIdea, "planificada" | "publicada">
 
 export const ESTADOS_IDEA_A_MANO: EstadoIdeaManual[] = ["apuntada", "para-hacer", "descartada"]
 
-/** Un enlace o una imagen que inspira: un reel, un audio, una captura. */
-export type Referencia = { id: string; tipo: "enlace" | "imagen"; url: string; titulo?: string }
+/** Lo que acompaña a un apunte: un enlace que inspira (un reel, un audio), una captura o un archivo (un PDF, un vídeo). */
+export type Referencia = { id: string; tipo: TipoMaterial; url: string; titulo?: string; tamano?: number }
 
 export type Apunte = {
   id: string
@@ -1048,6 +1048,8 @@ export type Apunte = {
   formato?: Formato
   redes: SocialNetwork[]
   referencias: Referencia[]
+  /** La imagen de su tarjeta: la primera captura que se le añade, u otra que elija ella. Sin ella, la tarjeta enseña el texto. */
+  portadaUrl?: string
   /** La marca a la que se la quiere proponer. */
   marcaId?: string
   fechaClaveId?: string
@@ -1057,8 +1059,11 @@ export type Apunte = {
   actualizadoEl: string
 }
 
-/** Donde ordena sus apuntes, con un tinte para reconocerla. */
-export type Carpeta = { id: string; nombre: string; tint: Tint }
+/** Donde ordena sus apuntes, con un tinte para reconocerla. Puede ir dentro de otra; entre hermanas, en el orden de la lista. */
+export type Carpeta = { id: string; nombre: string; tint: Tint; padreId?: string }
+
+/** Una nota enlazada con una idea (la investigación de un producto con las ideas que salen de ella). Da igual el orden. */
+export type VinculoApunte = { desde: string; hasta: string }
 
 /** Los temas fijos de los que habla (rutinas, reviews…): dan color al calendario y equilibran lo que publica. */
 export type Pilar = { id: string; nombre: string; tint: Tint }

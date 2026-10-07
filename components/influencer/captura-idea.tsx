@@ -12,15 +12,15 @@ import { Button } from "@/components/ui/button"
 export function CapturaIdea({
   onApuntar,
   onImagen,
-  onDocumento,
+  onNota,
   destino,
   className,
 }: {
   onApuntar: (texto: string) => void
   /** Apuntar con una captura del móvil. */
   onImagen?: (archivo: File) => void
-  /** Empezar un documento en blanco. */
-  onDocumento?: () => void
+  /** Empezar una nota en blanco. */
+  onNota?: () => void
   destino?: string
   className?: string
 }) {
@@ -73,8 +73,8 @@ export function CapturaIdea({
           </Button>
         </>
       )}
-      {onDocumento && (
-        <Button type="button" variant="ghost" size="icon-sm" aria-label="Nuevo documento" title="Nuevo documento" onClick={onDocumento}>
+      {onNota && (
+        <Button type="button" variant="ghost" size="icon-sm" aria-label="Nueva nota" title="Nueva nota" onClick={onNota}>
           <FileTextIcon />
         </Button>
       )}
