@@ -186,6 +186,9 @@
       "files": [
         { "path": "components/app/work-grid.tsx", "type": "registry:component" },
         { "path": "components/app/detail-panel.tsx", "type": "registry:component" },
+        { "path": "components/app/resize-handle.tsx", "type": "registry:component" },
+        { "path": "components/app/detail-info.tsx", "type": "registry:component" },
+        { "path": "components/app/resize-handle.tsx", "type": "registry:component" },
         { "path": "hooks/use-local-storage.ts", "type": "registry:hook" }
       ]
     },

@@ -3,6 +3,7 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import type { LucideIcon } from "lucide-react"
 import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, PlusIcon, Settings2Icon, XIcon } from "lucide-react"
 import { cn } from "cn"
@@ -14,6 +15,7 @@ import { InlineAutoEdit } from "@/components/app/inline-field"
 import { ReportTrigger } from "@/components/app/report-button"
 import type { PanelFicha } from "@/components/app/detail-panel"
 import { useLocalStorage } from "@/hooks/use-local-storage"
+import { ResizeHandle, useAnchoGuardado } from "@/components/app/resize-handle"
 
 // Dónde se está pintando la ficha: encima de la lista (Sheet) o en la columna derecha (panel). La
 // cabecera no puede usar los títulos del Sheet fuera de él.
@@ -26,9 +28,10 @@ function escapeDentroDeCampo(e: KeyboardEvent) {
 }
 
 /**
- * La ficha de un registro. Se abre encima de la lista, por la derecha; con `ficha` activa (la
- * persona ha elegido «Ficha en el panel»), se pinta en la columna derecha de `WorkGrid` y la lista
- * sigue entera a la vista y se puede usar.
+ * La ficha de un registro. Se abre encima de la lista, por la derecha, y se ensancha o estrecha
+ * arrastrando su borde izquierdo (cada persona la encuentra como la dejó en cada página); con
+ * `ficha` activa (la persona ha elegido «Ficha en el panel»), se pinta en la columna derecha de
+ * `WorkGrid` y la lista sigue entera a la vista y se puede usar.
  */
 export function DetailSheet({
   open,
@@ -47,6 +50,8 @@ export function DetailSheet({
   children: React.ReactNode
   className?: string
 }) {
+  const limites = { min: Math.min(380, width), porDefecto: width, max: Math.max(1200, width) }
+  const guardado = useAnchoGuardado(`ficha:${usePathname()}:${width}`, limites)
   if (ficha?.activa && ficha.nodo) {
     if (!open) return null
     return createPortal(
@@ -66,11 +71,23 @@ export function DetailSheet({
       <SheetContent
         side="right"
         onEscapeKeyDown={escapeDentroDeCampo}
-        style={{ "--detail-w": `${width}px` } as React.CSSProperties}
+        style={{ "--detail-w": `${guardado.ancho}px` } as React.CSSProperties}
         // Mismo variante que las clases de SheetContent (`data-[side=right]:sm:max-w-sm`): si no, esas
         // ganan por especificidad y la ficha se queda en 384 px pida el ancho que pida.
         className={cn("gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-(--detail-w)", className)}
       >
+        <ResizeHandle
+          ancho={guardado.ancho}
+          onAncho={guardado.setAncho}
+          limites={limites}
+          // Siempre se deja ver un trozo de la lista de detrás.
+          maximo={() => window.innerWidth - 120}
+          lado="izquierda"
+          destino={(borde) => borde.closest<HTMLElement>("[data-slot=sheet-content]")}
+          variable="--detail-w"
+          label="Ancho de la ficha"
+          className="hidden translate-x-0 sm:block"
+        />
         {children}
       </SheetContent>
     </Sheet>

@@ -308,6 +308,58 @@ export default function DetailSheetPage() {
         />
       </DocSection>
 
+      <DocSection id="informacion" title="Bloque «Información» configurable">
+        <Prose>
+          <p>
+            Cuando una ficha tiene muchos datos y se trabaja sin pestañas, sus campos van en <code>DetailInfo</code>:
+            plegado enseña solo lo esencial (el resumen) y «Ver N campos más»; desplegado, todos, editables donde se leen.
+            Su engranaje deja a cada persona elegir qué campos se ven, cuáles van en el resumen y si el bloque se abre
+            siempre desplegado. Debajo, los bloques de trabajo (tareas, seguimiento), cada uno con su «Añadir».
+          </p>
+        </Prose>
+        <CodeBlock
+          lang="tsx"
+          code={`<DetailInfo
+  storageKey="propuesta.info"
+  resumen={["estado", "importe", "siguientePaso"]}
+  fields={[
+    { id: "estado", label: "Estado", children: <InlineField … /> },
+    { id: "notas", label: "Notas", empty: !p.notas, children: <InlineField … /> },
+  ]}
+/>`}
+        />
+        <Rules
+          items={[
+            <>Se recuerda por tipo de ficha en el navegador de cada persona (<code>ficha-info:&lt;storageKey&gt;</code>), con «Volver a lo de serie».</>,
+            <>Un campo oculto no sale ni en el resumen; plegado y sin nada en el resumen, se enseña todo.</>,
+            <>Los vacíos siguen saliendo como «+ Campo», igual que en <code>DetailFields</code>.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="ancho" title="Ancho a medida">
+        <Prose>
+          <p>
+            La ficha se ensancha o estrecha arrastrando su borde izquierdo, y lo mismo el panel de la derecha de{" "}
+            <code>WorkGrid</code> y cualquier columna lateral que lo necesite: es <code>ResizeHandle</code> con{" "}
+            <code>useAnchoGuardado</code>. Doble clic vuelve al ancho de siempre, las flechas del teclado también
+            mueven el borde, y cada persona lo encuentra como lo dejó en cada página.
+          </p>
+        </Prose>
+        <CodeBlock
+          lang="tsx"
+          code={`const lado = useAnchoGuardado("tareas-lado", { min: 288, porDefecto: 416, max: 704 })
+<div data-slot="bloques" style={{ "--lado-w": \`\${lado.ancho}px\` }} className="grid grid-cols-[var(--lado-w)_1fr]">
+  <div className="relative">
+    …
+    <ResizeHandle ancho={lado.ancho} onAncho={lado.setAncho} limites={…} lado="derecha"
+      destino={(borde) => borde.closest("[data-slot=bloques]")} variable="--lado-w" />
+  </div>
+  …
+</div>`}
+        />
+      </DocSection>
+
       <DocSection id="cambios" title="Cambios sin guardar">
         <Rules
           items={[

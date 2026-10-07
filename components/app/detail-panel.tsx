@@ -2,11 +2,11 @@
 
 import * as React from "react"
 import { PanelRightIcon, SlidersHorizontalIcon } from "lucide-react"
-import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useLocalStorage } from "@/hooks/use-local-storage"
+import { ResizeHandle, acotarAncho } from "@/components/app/resize-handle"
 
 /**
  * Ficha en el panel: una página de operación puede enseñar el registro abierto en la columna de la
@@ -33,7 +33,6 @@ export type PanelFicha = {
 export const ANCHO_FICHA = { min: 380, porDefecto: 480, max: 960 }
 // La lista nunca se queda más estrecha que esto al ensanchar la ficha.
 const ANCHO_MINIMO_LISTA = 520
-const PASO_TECLADO = 24
 const DOS_COLUMNAS = "(min-width: 1280px)"
 
 type Prefs = { ficha: boolean; ancho: number }
@@ -48,9 +47,7 @@ function useDosColumnas() {
   return React.useSyncExternalStore(suscribirDosColumnas, () => window.matchMedia(DOS_COLUMNAS).matches, () => false)
 }
 
-function acotar(px: number, max = ANCHO_FICHA.max) {
-  return Math.round(Math.min(Math.max(px, ANCHO_FICHA.min), Math.max(ANCHO_FICHA.min, max)))
-}
+const acotar = (px: number) => acotarAncho(px, ANCHO_FICHA)
 
 /** Estado del panel de ficha de una página. Se pasa a `WorkGrid`, `InsightsPanel` y `DetailSheet`. */
 export function usePanelFicha(pageKey: string): PanelFicha {
@@ -123,67 +120,18 @@ function DestinoFicha({ setNodo }: { setNodo: (el: HTMLElement | null) => void }
   return <div ref={setNodo} className="flex min-h-0 flex-1 flex-col empty:hidden" />
 }
 
-/**
- * El borde izquierdo del panel: se arrastra (o se mueve con las flechas) para ensanchar la ficha y
- * doble clic la devuelve al ancho de siempre. Mientras se arrastra solo cambia la variable CSS de la
- * rejilla; el ancho se guarda al soltar, para no repintar la lista en cada píxel.
- */
+/** El borde izquierdo del panel: se arrastra (o se mueve con las flechas) para ensanchar la ficha. */
 function BordeRedimensionable({ ficha }: { ficha: PanelFicha }) {
-  const ref = React.useRef<HTMLDivElement>(null)
-  const rejilla = () => ref.current?.closest<HTMLElement>("[data-slot=work-grid]") ?? null
-  const maximo = () => {
-    const r = rejilla()
-    return r ? Math.min(ANCHO_FICHA.max, r.clientWidth - ANCHO_MINIMO_LISTA) : ANCHO_FICHA.max
-  }
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    const r = rejilla()
-    if (!r || e.button !== 0) return
-    e.preventDefault()
-    const x0 = e.clientX
-    const ancho0 = ficha.ancho
-    const max = maximo()
-    let ancho = ancho0
-    e.currentTarget.setPointerCapture(e.pointerId)
-    document.body.style.cursor = "col-resize"
-    const mover = (ev: PointerEvent) => {
-      ancho = acotar(ancho0 + (x0 - ev.clientX), max)
-      r.style.setProperty("--aside-w", `${ancho}px`)
-    }
-    const soltar = () => {
-      document.body.style.cursor = ""
-      window.removeEventListener("pointermove", mover)
-      window.removeEventListener("pointerup", soltar)
-      ficha.setAncho(ancho)
-    }
-    window.addEventListener("pointermove", mover)
-    window.addEventListener("pointerup", soltar)
-  }
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return
-    e.preventDefault()
-    ficha.setAncho(acotar(ficha.ancho + (e.key === "ArrowLeft" ? PASO_TECLADO : -PASO_TECLADO), maximo()))
-  }
-
   return (
-    <div
-      ref={ref}
-      role="separator"
-      aria-orientation="vertical"
-      aria-label="Ancho de la ficha"
-      aria-valuemin={ANCHO_FICHA.min}
-      aria-valuemax={ANCHO_FICHA.max}
-      aria-valuenow={ficha.ancho}
-      tabIndex={0}
-      title="Arrastra para cambiar el ancho · doble clic para volver al de siempre"
-      onPointerDown={onPointerDown}
-      onKeyDown={onKeyDown}
-      onDoubleClick={() => ficha.setAncho(ANCHO_FICHA.porDefecto)}
-      className={cn(
-        "absolute inset-y-0 left-0 z-10 w-2 cursor-col-resize outline-none",
-        "after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:after:bg-brand/60 focus-visible:after:bg-brand",
-      )}
+    <ResizeHandle
+      ancho={ficha.ancho}
+      onAncho={ficha.setAncho}
+      limites={ANCHO_FICHA}
+      maximo={(rejilla) => rejilla.clientWidth - ANCHO_MINIMO_LISTA}
+      lado="izquierda"
+      destino={(borde) => borde.closest<HTMLElement>("[data-slot=work-grid]")}
+      variable="--aside-w"
+      label="Ancho de la ficha"
     />
   )
 }

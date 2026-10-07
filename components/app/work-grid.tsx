@@ -1,5 +1,12 @@
+"use client"
+
+import { usePathname } from "next/navigation"
 import { cn } from "cn"
 import { DetailPanelHost, type PanelFicha } from "@/components/app/detail-panel"
+import { ResizeHandle, useAnchoGuardado } from "@/components/app/resize-handle"
+
+// El bloque de trabajo nunca se queda más estrecho que esto al ensanchar el panel.
+const ANCHO_MINIMO_BLOQUE = 520
 
 /**
  * Rejilla de la página de operación: a la izquierda las cifras, la toolbar y el bloque; a la
@@ -9,6 +16,9 @@ import { DetailPanelHost, type PanelFicha } from "@/components/app/detail-panel"
  * baja hasta el pie del bloque: el panel habla de toda la página, igual que las cifras, así que
  * empiezan juntos. Sin `stats`, la fila de cifras va arriba a ancho completo y el panel empieza a
  * la altura del bloque. En las dos, por debajo de 1280 px todo se apila y el panel va el último.
+ *
+ * El panel se ensancha o estrecha arrastrando su borde izquierdo (de 280 a 560 px, doble clic vuelve
+ * al de siempre) y cada persona lo encuentra como lo dejó en cada página.
  *
  * Con `ficha` activa (ver `usePanelFicha`), la columna derecha deja de ser el panel de información
  * y pasa a ser la ficha del registro abierto, con el ancho que haya elegido la persona.
@@ -33,6 +43,8 @@ export function WorkGrid({
   ficha?: PanelFicha
 }) {
   const conFicha = ficha?.activa === true
+  const limites = { min: 280, porDefecto: asideWidth, max: 560 }
+  const panel = useAnchoGuardado(`panel:${usePathname()}`, limites)
   const lateral = conFicha ? <DetailPanelHost ficha={ficha} /> : aside
   const filas = [stats && "auto", toolbar && "auto", "minmax(0,1fr)"].filter(Boolean)
   const filaBloque = filas.length
@@ -41,7 +53,7 @@ export function WorkGrid({
   return (
     <div
       data-slot="work-grid"
-      style={{ "--aside-w": `${conFicha ? ficha.ancho : asideWidth}px`, "--work-rows": filas.join(" ") } as React.CSSProperties}
+      style={{ "--aside-w": `${conFicha ? ficha.ancho : panel.ancho}px`, "--work-rows": filas.join(" ") } as React.CSSProperties}
       className={cn(
         "grid min-h-0 flex-1 grid-cols-1 gap-4",
         lateral && "xl:grid-cols-[minmax(0,1fr)_var(--aside-w)]",
@@ -74,6 +86,20 @@ export function WorkGrid({
           )}
         >
           <div className="flex min-h-0 flex-col xl:absolute xl:inset-0">{lateral}</div>
+          {/* La ficha en el panel lleva su propio borde; el panel de información, este. */}
+          {!conFicha && (
+            <ResizeHandle
+              ancho={panel.ancho}
+              onAncho={panel.setAncho}
+              limites={limites}
+              maximo={(rejilla) => rejilla.clientWidth - ANCHO_MINIMO_BLOQUE}
+              lado="izquierda"
+              destino={(borde) => borde.closest<HTMLElement>("[data-slot=work-grid]")}
+              variable="--aside-w"
+              label="Ancho del panel"
+              className="hidden xl:block"
+            />
+          )}
         </div>
       )}
     </div>
