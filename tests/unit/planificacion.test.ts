@@ -109,6 +109,8 @@ describe("calendario", () => {
     expect(propias.some((e) => e.ref.tipo === "contenido" && e.ref.id === "c-retinal")).toBe(false)
     expect(deCollabs.length).toBeGreaterThan(0)
     expect(deCollabs.every((e) => e.fija && e.origen === "collab" && e.clase === "contenido")).toBe(true)
+    const ugc = demoCollabs.filter((c) => c.tipo === "ugc").flatMap((c) => c.piezas.map((p) => `pieza-${p.id}`))
+    expect(deCollabs.some((e) => ugc.includes(e.id))).toBe(false)
     expect(propias.every((e) => !e.fija && e.origen === "organico")).toBe(true)
   })
   it("la hora sale de la fecha y el tinte, de su pilar", () => {

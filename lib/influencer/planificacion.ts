@@ -218,6 +218,8 @@ export type EntradaCalendario = {
   titulo: string
   /** La campaña, el pilar o de qué es. */
   contexto?: string
+  /** El pilar de lo propio, para filtrar por él. */
+  pilarId?: string
   red?: SocialNetwork
   tint?: Tint
   estado?: { label: string; tone: StatusTone }
@@ -244,9 +246,10 @@ export function etapaDePieza(p: Pieza): EtapaProduccion {
 
 const horaDe = (fecha: string) => (fecha.length > 10 ? fecha.slice(11, 16) : undefined)
 
-export function entradasDeContenidos(contenidos: Contenido[], pilares: Pilar[]): EntradaCalendario[] {
+/** Lo propio con fecha; con `sinFecha`, también lo que aún no la tiene (con el día vacío), para el tablero de producción. */
+export function entradasDeContenidos(contenidos: Contenido[], pilares: Pilar[], { sinFecha = false }: { sinFecha?: boolean } = {}): EntradaCalendario[] {
   return contenidos.flatMap((c) => {
-    if (!c.fecha) return []
+    if (!c.fecha && !sinFecha) return []
     const pilar = pilares.find((p) => p.id === c.pilarId)
     const estado = estadoDe(ESTADOS_CONTENIDO, c.estado)
     return [
@@ -254,10 +257,11 @@ export function entradasDeContenidos(contenidos: Contenido[], pilares: Pilar[]):
         id: `contenido-${c.id}`,
         clase: "contenido",
         origen: "organico",
-        dia: soloFecha(c.fecha),
-        hora: horaDe(c.fecha),
+        dia: c.fecha ? soloFecha(c.fecha) : "",
+        hora: c.fecha ? horaDe(c.fecha) : undefined,
         titulo: c.titulo,
         contexto: pilar?.nombre,
+        pilarId: c.pilarId,
         red: redDeContenido(c),
         tint: pilar?.tint,
         estado: { label: estado.label, tone: estado.tone },
@@ -272,10 +276,10 @@ export function entradasDeContenidos(contenidos: Contenido[], pilares: Pilar[]):
   })
 }
 
-/** La publicación de cada pieza de sus collabs: la fecha la pactó con la marca. */
+/** La publicación de cada pieza de sus collabs: la fecha la pactó con la marca. Las de UGC se entregan, no se publican: no salen. */
 export function entradasDePiezas(collabs: Collab[], marcas: Marca[]): EntradaCalendario[] {
   return collabs
-    .filter((c) => c.estado !== "cancelada")
+    .filter((c) => c.estado !== "cancelada" && c.tipo !== "ugc")
     .flatMap((c) => {
       const marca = marcaDe(c, marcas)
       return c.piezas.map<EntradaCalendario>((p) => {

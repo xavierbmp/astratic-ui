@@ -18,6 +18,7 @@ import { ProfilePanel } from "@/components/influencer/profile-panel"
 import { NoticeHighlight, NoticeItem } from "@/components/influencer/notice-card"
 import { LinkGridExample, TaskBlockExample, TaskTableExample } from "@/components/docs/examples/influencer-examples"
 import { EditorGuionExample, FotosExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
+import { AgendaContenidosExample, CalendarioContenidosExample, CapturaIdeaExample, CaptionExample, GaleriaIdeasExample } from "@/components/docs/examples/contenidos-examples"
 import { DocPage, DocSection, Example, NextLinks, Prose, Rules } from "@/components/docs/doc"
 
 export const metadata = { title: "Componentes · Influencer Workspace" }
@@ -355,6 +356,37 @@ const [editing, setEditing] = useState(false)
             del madre y sin tintes. Va una vez en el shell del workspace y en <code>PaginaMarca</code>.
           </p>
         </Prose>
+      </DocSection>
+
+      <DocSection id="contenidos" title="Contenidos: ideas y planificación" lead="Las piezas de Contenidos: el directorio de ideas y documentos, que es una base de Notion con galería, y la planificación de lo que publica, de las collabs y propio, en un mismo calendario. Un contenido propio es un espacio de trabajo, no un formulario: un guion y un caption.">
+        <Example className={EXAMPLE} code={`<CapturaIdea onApuntar={apuntar} onImagen={conCaptura} onDocumento={nuevoDocumento} destino="Tendencias" />
+<ApunteCard apunte={a} estado={estadoDeIdea(a, contenidos)} pilar={pilar} hoy={hoy} propiedades={vista.propiedades} onAbrir={abrir} onFavorito={favorita} accion={<BotonPlanificar />} />`}>
+          <div className="grid w-full gap-4">
+            <CapturaIdeaExample />
+            <GaleriaIdeasExample />
+          </div>
+        </Example>
+        <Example className={EXAMPLE} code={`<DndContext onDragEnd={alSoltar}>
+  <CalendarioContenidos entradas={entradas} hoy={hoy} ancla={ancla} modo="semana" onAbrir={abrir} onNuevo={planificarEse} />
+</DndContext>`}>
+          <CalendarioContenidosExample />
+        </Example>
+        <Example className={EXAMPLE} code={`<AgendaContenidos entradas={entradas} hoy={hoy} desde={hoy} dias={14} onAbrir={abrir} onNuevo={planificarEse} />`}>
+          <AgendaContenidosExample />
+        </Example>
+        <Example className={EXAMPLE} code={`<EditorCaption valor={contenido} onCambiar={(cambio) => guardar({ ...contenido, ...cambio })} />
+<AntesDePublicar pasos={antesDePublicar(contenido)} onIr={irASeccion} />`}>
+          <CaptionExample />
+        </Example>
+        <Rules
+          items={[
+            <><code>ApunteCard</code>: una idea o un documento en la galería (portada con su captura, el principio del texto o el tinte de su pilar), con las propiedades que pide la vista y la caducidad siempre. La estrella, la casilla y la acción no abren la ficha. <code>COLUMNAS_GALERIA</code> da el tamaño de tarjeta de la vista.</>,
+            <><code>CapturaIdea</code>: apuntar en cinco segundos, con texto o un enlace (la red sale del dominio) o con una captura.</>,
+            <><code>CalendarioContenidos</code> (mes o semana) y <code>AgendaContenidos</code> (lista con los huecos libres): pintan <code>EntradaCalendario</code> de <code>lib/influencer/planificacion.ts</code>, sea contenido propio, pieza de collab (con candado: fecha pactada), hito, tarea, cobro o fecha clave. El calendario no pone su <code>DndContext</code>: lo pone la página para poder soltar ideas de fuera.</>,
+            <><code>EditorCaption</code>: un solo texto con los hashtags dentro; cuenta lo que admite cada red (Instagram, 2.200 caracteres y 5 hashtags), enseña lo que se ve antes de «más» y avisa de la publicidad sin marcar. <code>AntesDePublicar</code>: lo que falta, poco y útil.</>,
+            <><code>Teleprompter</code>: el guion a pantalla completa, con velocidad, tamaño de letra y espejo, para leerlo desde otro dispositivo al grabar.</>,
+          ]}
+        />
       </DocSection>
 
       <NextLinks

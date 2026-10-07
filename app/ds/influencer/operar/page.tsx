@@ -105,7 +105,7 @@ export default function InfluencerOperarPage() {
           </p>
           <p>
             Por construir: la página general de Tareas (todas las de collabs y propuestas más las suyas, con calendario),
-            la biblioteca de Contenidos, Cobros, Perfil y tarifas, Biblia y Ajustes.
+            la revisión de contenido de Collabs, Contenidos (ideas y planificación), Cobros, Perfil y tarifas, Academia y Ajustes.
           </p>
         </Prose>
       </DocSection>

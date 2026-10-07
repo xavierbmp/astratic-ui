@@ -78,7 +78,7 @@ export default function InfluencerPatronesPage() {
           <p>
             Construidas después del Inicio: Propuestas y Collabs con su ficha completa (brief, contenidos con la revisión
             de guion y vídeo, materiales y tareas), en <a href="/ds/influencer/operar" className="text-brand underline-offset-2 hover:underline">Páginas de operar</a>.
-            Quedan Tareas (la página general), Contenidos (la biblioteca), Cobros, Perfil y tarifas, Biblia y Ajustes.
+            Quedan Tareas (la página general), Contenidos (ideas y planificación), Cobros, Perfil y tarifas, Academia y Ajustes.
           </p>
         </Prose>
       </DocSection>

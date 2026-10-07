@@ -19,7 +19,7 @@ export function EntradaFila({ entrada, activa, onAbrir, className }: { entrada: 
       className={cn("flex w-full min-w-0 items-center gap-3 rounded-xl bg-background/70 p-2 text-left transition-colors hover:bg-muted", activa && "bg-brand-soft", entrada.hecha && "opacity-70", className)}
     >
       <span className={cn("relative grid h-12 w-10 flex-none place-items-center overflow-hidden rounded-lg", entrada.tint ? tintClass[entrada.tint] : "bg-muted text-muted-foreground")}>
-        {contenido && entrada.portadaUrl ? <Image src={entrada.portadaUrl} alt="" fill sizes="40px" className="object-cover" /> : entrada.red ? <SocialIcon network={entrada.red} className="size-4" /> : null}
+        {contenido && entrada.portadaUrl ? <Image src={entrada.portadaUrl} alt="" fill sizes="40px" unoptimized={!entrada.portadaUrl.startsWith("https://")} className="object-cover" /> : entrada.red ? <SocialIcon network={entrada.red} className="size-4" /> : null}
       </span>
       <span className="grid min-w-0 flex-1 gap-0.5">
         <span className={cn("truncate text-[13px] font-semibold", entrada.clase === "tarea" && entrada.hecha && "line-through")}>{entrada.titulo}</span>

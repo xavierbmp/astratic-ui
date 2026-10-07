@@ -497,9 +497,9 @@
       "name": "influencer-workspace",
       "type": "registry:block",
       "title": "Influencer Workspace (design system hijo)",
-      "description": "Capa de estilo y componentes del workspace de influencers: bloque, cifra, tarjeta de collab, tarea, mini perfil, avisos, directorio de enlaces, barra inferior del móvil, marca, lista y diálogo de tareas, agenda, tarjeta de pieza, cronograma en Gantt, editor de texto con notas y variables, visor de vídeo y fotos con notas, conversación, piezas para formularios, compartir enlace, página de la marca y el modelo con su lógica. Requiere el tema `.theme-influencer` de globals.css.",
+      "description": "Capa de estilo y componentes del workspace de influencers: bloque, cifra, tarjeta de collab, tarea, mini perfil, avisos, directorio de enlaces, barra inferior del móvil, marca, lista y diálogo de tareas, agenda, tarjeta de pieza, cronograma en Gantt, editor de texto con notas y variables, visor de vídeo y fotos con notas, conversación, piezas para formularios, compartir enlace, página de la marca, tarjeta de idea, apuntar al vuelo, calendario y lista de contenidos, caption con los límites de cada red, antes de publicar, teleprompter y el modelo con su lógica. Requiere el tema `.theme-influencer` de globals.css.",
       "dependencies": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "react-hook-form", "@hookform/resolvers", "zod", "sonner", "lucide-react", "@tiptap/react", "@tiptap/pm", "@tiptap/starter-kit", "@tiptap/extensions", "@tiptap/extension-highlight", "@tiptap/extension-text-align"],
-      "registryDependencies": ["button", "checkbox", "dialog", "dropdown-menu", "field", "input", "popover", "radio-group", "select", "separator", "skeleton", "switch", "tabs", "textarea", "tooltip"],
+      "registryDependencies": ["button", "checkbox", "dialog", "dropdown-menu", "field", "input", "popover", "radio-group", "select", "separator", "skeleton", "slider", "switch", "tabs", "textarea", "toggle-group", "tooltip"],
       "files": [
         { "path": "components/influencer/block.tsx", "type": "registry:component" },
         { "path": "components/influencer/stat-tile.tsx", "type": "registry:component" },
@@ -545,6 +545,13 @@
         { "path": "components/influencer/theme-body.tsx", "type": "registry:component" },
         { "path": "components/influencer/doc-sheet.tsx", "type": "registry:component" },
         { "path": "components/influencer/media-kit-doc.tsx", "type": "registry:component" },
+        { "path": "components/influencer/apunte-card.tsx", "type": "registry:component" },
+        { "path": "components/influencer/captura-idea.tsx", "type": "registry:component" },
+        { "path": "components/influencer/calendario-contenidos.tsx", "type": "registry:component" },
+        { "path": "components/influencer/agenda-contenidos.tsx", "type": "registry:component" },
+        { "path": "components/influencer/editor-caption.tsx", "type": "registry:component" },
+        { "path": "components/influencer/antes-de-publicar.tsx", "type": "registry:component" },
+        { "path": "components/influencer/teleprompter.tsx", "type": "registry:component" },
         { "path": "components/influencer/navegador.ts", "type": "registry:hook" },
         { "path": "lib/influencer/tints.ts", "type": "registry:lib" },
         { "path": "lib/influencer/modelo.ts", "type": "registry:lib" },
@@ -578,7 +585,12 @@
         { "path": "lib/influencer/ics.ts", "type": "registry:lib" },
         { "path": "lib/influencer/biblia.ts", "type": "registry:lib" },
         { "path": "lib/influencer/avisos.ts", "type": "registry:lib" },
-        { "path": "lib/influencer/primeros-pasos.ts", "type": "registry:lib" }
+        { "path": "lib/influencer/primeros-pasos.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/apuntes.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/planificacion.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/campos-apuntes.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/vistas-apuntes.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/campos-planificacion.ts", "type": "registry:lib" }
       ]
     }
   ]

@@ -42,12 +42,19 @@ function IconoClase({ entrada }: { entrada: EntradaCalendario }) {
 /**
  * Una cosa del calendario. Lo que se publica va con el tinte de su marca o de su pilar y el punto de
  * su estado; lo pactado con la marca lleva candado y no se arrastra; los hitos, las tareas y los
- * cobros, más discretos. En la semana, lo que se publica sale con su portada.
+ * cobros, más discretos. En la semana va en una línea con su portada; en el mes, la red, la hora y
+ * el estado arriba y el título debajo en dos líneas, que con siete columnas en una no se lee.
  */
 export function EntradaChip({ entrada, grande, activa, onAbrir }: { entrada: EntradaCalendario; grande?: boolean; activa?: boolean; onAbrir: () => void }) {
   const arrastrable = seArrastra(entrada)
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: `${PREFIJO_ENTRADA}${entrada.id}`, data: { entradaId: entrada.id }, disabled: !arrastrable })
   const contenido = entrada.clase === "contenido"
+  const marcas = (
+    <>
+      {contenido && entrada.fija && <LockIcon className="size-3 flex-none opacity-60" aria-label="Fecha pactada con la marca" />}
+      {contenido && entrada.estado && <span className={cn("size-1.5 flex-none rounded-full", PUNTO_TONO[entrada.estado.tone])} aria-label={entrada.estado.label} />}
+    </>
+  )
   return (
     <button
       ref={setNodeRef}
@@ -56,33 +63,44 @@ export function EntradaChip({ entrada, grande, activa, onAbrir }: { entrada: Ent
       {...attributes}
       {...listeners}
       onClick={onAbrir}
-      title={[entrada.hora, entrada.titulo, entrada.contexto, entrada.estado?.label, entrada.fija && entrada.clase === "contenido" ? "Fecha pactada con la marca" : undefined].filter(Boolean).join(" · ")}
+      title={[entrada.hora, entrada.titulo, entrada.contexto, entrada.estado?.label, entrada.fija && contenido ? "Fecha pactada con la marca" : undefined].filter(Boolean).join(" · ")}
       className={cn(
-        "flex w-full min-w-0 items-center gap-1 rounded-md text-left font-medium",
-        grande ? "px-1.5 py-1 text-xs" : "px-1.5 py-0.5 text-[11px]",
+        "w-full min-w-0 rounded-md text-left font-medium",
+        grande ? "flex items-center gap-1.5 px-1.5 py-1 text-xs" : "grid gap-0.5 px-1.5 py-1 text-[11px] leading-tight",
         contenido ? (entrada.tint ? tintClass[entrada.tint] : "bg-muted text-foreground/80") : "border border-dashed bg-card text-muted-foreground",
         entrada.hecha && "opacity-60",
-        entrada.clase === "tarea" && entrada.hecha && "line-through",
         arrastrable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
         activa && "ring-2 ring-brand",
         isDragging && "relative z-20 opacity-90 shadow-pop",
       )}
     >
-      {grande && contenido && entrada.portadaUrl && (
-        <span className="relative h-9 w-7 flex-none overflow-hidden rounded">
-          <Image src={entrada.portadaUrl} alt="" fill sizes="28px" className="object-cover" />
-        </span>
+      {grande ? (
+        <>
+          {contenido && entrada.portadaUrl && (
+            <span className="relative h-9 w-7 flex-none overflow-hidden rounded">
+              <Image src={entrada.portadaUrl} alt="" fill sizes="28px" unoptimized={!entrada.portadaUrl.startsWith("https://")} className="object-cover" />
+            </span>
+          )}
+          <span className="grid min-w-0 flex-1 gap-0.5">
+            <span className="flex min-w-0 items-center gap-1">
+              <IconoClase entrada={entrada} />
+              {entrada.hora && <span className="flex-none tabular-nums opacity-70">{entrada.hora}</span>}
+              <span className={cn("truncate", entrada.clase === "tarea" && entrada.hecha && "line-through")}>{entrada.titulo}</span>
+            </span>
+            {entrada.contexto && <span className="truncate text-[11px] font-normal opacity-70">{entrada.contexto}</span>}
+          </span>
+          {marcas}
+        </>
+      ) : (
+        <>
+          <span className="flex min-w-0 items-center gap-1">
+            <IconoClase entrada={entrada} />
+            {entrada.hora && <span className="tabular-nums opacity-70">{entrada.hora}</span>}
+            <span className="ml-auto flex items-center gap-1">{marcas}</span>
+          </span>
+          <span className={cn("line-clamp-2", entrada.clase === "tarea" && entrada.hecha && "line-through")}>{entrada.titulo}</span>
+        </>
       )}
-      <span className={cn("grid min-w-0 flex-1", grande && "gap-0.5")}>
-        <span className="flex min-w-0 items-center gap-1">
-          <IconoClase entrada={entrada} />
-          {entrada.hora && <span className="flex-none tabular-nums opacity-70">{entrada.hora}</span>}
-          <span className="truncate">{entrada.titulo}</span>
-        </span>
-        {grande && entrada.contexto && <span className="truncate text-[11px] font-normal opacity-70">{entrada.contexto}</span>}
-      </span>
-      {contenido && entrada.fija && <LockIcon className="size-3 flex-none opacity-60" aria-label="Fecha pactada con la marca" />}
-      {contenido && entrada.estado && <span className={cn("size-1.5 flex-none rounded-full", PUNTO_TONO[entrada.estado.tone])} aria-label={entrada.estado.label} />}
     </button>
   )
 }
@@ -158,7 +176,7 @@ export function CalendarioContenidos({
               {fechas.map((f) => (
                 <span key={f.id} title={[f.titulo, f.contexto].filter(Boolean).join(" · ")} className="flex min-w-0 items-center gap-1 rounded-md bg-info-soft px-1.5 py-0.5 text-[10px] font-medium text-info">
                   <FlagIcon className="size-3 flex-none" />
-                  <span className="truncate">{f.titulo}</span>
+                  <span className="line-clamp-2">{f.titulo}</span>
                 </span>
               ))}
               {vistas.map((e) => (

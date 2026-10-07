@@ -11,18 +11,19 @@ import { StatusBadge } from "@/components/app/status-badge"
 import { SocialIcon } from "@/components/app/social-icons"
 import { BrandMark } from "@/components/influencer/brand-mark"
 
-/** Cuánto ocupa cada tarjeta de la galería: la vista lo elige en sus ajustes. */
+/** Cuánto ocupa cada tarjeta de la galería: la vista lo elige en sus ajustes. En el móvil, dos por fila (una si son grandes). */
 export const COLUMNAS_GALERIA = {
-  pequena: "grid-cols-[repeat(auto-fill,minmax(160px,1fr))]",
-  mediana: "grid-cols-[repeat(auto-fill,minmax(220px,1fr))]",
-  grande: "grid-cols-[repeat(auto-fill,minmax(300px,1fr))]",
+  pequena: "grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))]",
+  mediana: "grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]",
+  grande: "grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))]",
 } as const
 
 /** La portada: la captura si hay; si no, el principio del documento o el tinte de su pilar con el icono de su red. */
 function Portada({ apunte, pilar }: { apunte: Apunte; pilar?: Pilar }) {
   const imagen = portadaDeApunte(apunte)
   const resumen = resumenDeApunte(apunte, 220)
-  if (imagen) return <Image src={imagen} alt="" fill sizes="(max-width: 768px) 50vw, 300px" className="object-cover" />
+  // Una captura recién subida es un enlace local del navegador: se pinta tal cual, sin optimizar.
+  if (imagen) return <Image src={imagen} alt="" fill sizes="(max-width: 768px) 50vw, 300px" unoptimized={!imagen.startsWith("https://")} className="object-cover" />
   if (apunte.tipo === "documento")
     return (
       <span className="absolute inset-0 grid content-start gap-2 bg-muted/60 p-3">
