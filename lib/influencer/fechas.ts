@@ -35,3 +35,15 @@ const diaSemana = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "nume
 export function diaLargo(fecha: string) {
   return diaSemana.format(new Date(`${soloFecha(fecha)}T12:00:00`))
 }
+
+/** Los días que enseña un calendario (las 6 semanas del mes o los 7 de la semana), con su título. */
+export function periodoCalendario(ancla: string, modo: "mes" | "semana") {
+  const dias = modo === "mes" ? casillasDelMes(ancla) : Array.from({ length: 7 }, (_, i) => sumarDias(lunesDe(ancla), i))
+  const titulo = modo === "mes" ? nombreMes(ancla) : `Semana del ${diaLargo(lunesDe(ancla)).replace(/^lunes, /, "")}`
+  return { dias, titulo, desde: dias[0], hasta: dias[dias.length - 1] }
+}
+
+/** El mismo día un mes o una semana más allá (o más acá, con `n` negativo). */
+export function moverPeriodo(ancla: string, modo: "mes" | "semana", n: number) {
+  return modo === "mes" ? sumarMeses(ancla, n) : sumarDias(ancla, 7 * n)
+}

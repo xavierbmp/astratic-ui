@@ -42,21 +42,10 @@ export function nuevoContenido(datos: Pick<Contenido, "titulo" | "formato"> & Pa
   return {
     tipo: TIPO_POR_FORMATO[datos.formato],
     estado: "guion",
-    gancho: "",
     guion: "",
-    textoPantalla: "",
-    tomas: [],
-    lugar: "",
-    look: "",
-    productos: "",
-    audio: "",
     caption: "",
-    hashtags: [],
-    menciones: [],
     publicidad: false,
-    textoPortada: "",
     redes: red ? [{ red }] : [],
-    notas: "",
     ...datos,
     id,
     creadoEl: ahora,
@@ -102,15 +91,13 @@ export const ACCION_AVANZAR: Record<EstadoContenido, string | null> = {
   publicado: null,
 }
 
-/** Lo que toca hacer ahora con el contenido, en pocas palabras («Grabar · 2 de 5 tomas»). */
-export function queToca(c: Pick<Contenido, "estado" | "tomas">): string {
+/** Lo que toca hacer ahora con el contenido, en pocas palabras. */
+export function queToca(c: Pick<Contenido, "estado">): string {
   switch (c.estado) {
     case "guion":
       return "Escribir el guion"
-    case "grabar": {
-      const hechas = c.tomas.filter((t) => t.hecha).length
-      return c.tomas.length ? `Grabar · ${hechas} de ${c.tomas.length} tomas` : "Grabar"
-    }
+    case "grabar":
+      return "Grabar"
     case "editar":
       return "Editar"
     case "listo":
@@ -131,26 +118,14 @@ export const LIMITES_CAPTION: Partial<Record<SocialNetwork, { max: number; visib
   youtube: { max: 5000, visibles: 100 },
 }
 
-/** Un hashtag con su almohadilla y sin espacios; vacío si no queda nada. */
-export function normalizarHashtag(texto: string): string {
-  const limpio = texto.trim().replace(/^#+/, "").replace(/\s+/g, "")
-  return limpio ? `#${limpio}` : ""
-}
-
 /** Los hashtags que hay escritos dentro de un texto. */
 export function hashtagsDeTexto(texto: string): string[] {
   return [...new Set(texto.match(/#[\p{L}\p{N}_]+/gu) ?? [])]
 }
 
-/** El texto que se pega en la red: el caption y, debajo, los hashtags. */
-export function textoParaPublicar(c: Pick<Contenido, "caption" | "hashtags">): string {
-  const hashtags = c.hashtags.map(normalizarHashtag).filter(Boolean).join(" ")
-  return [c.caption.trim(), hashtags].filter(Boolean).join("\n\n")
-}
-
 /** Lo que se ve en una red antes del «más»: el gancho del caption tiene que caber ahí. */
-export function previsualizacion(c: Pick<Contenido, "caption" | "hashtags">, red: SocialNetwork): { visible: string; cortado: boolean } {
-  const texto = textoParaPublicar(c)
+export function previsualizacion(c: Pick<Contenido, "caption">, red: SocialNetwork): { visible: string; cortado: boolean } {
+  const texto = c.caption.trim()
   const limite = LIMITES_CAPTION[red]?.visibles ?? texto.length
   return { visible: texto.slice(0, limite), cortado: texto.length > limite }
 }
@@ -158,8 +133,8 @@ export function previsualizacion(c: Pick<Contenido, "caption" | "hashtags">, red
 export type AvisoCaption = { id: string; texto: string }
 
 /** Lo que no pasaría al publicar: textos largos, más hashtags de los que admite la red o la publicidad sin marcar. */
-export function revisarCaption(c: Pick<Contenido, "caption" | "hashtags" | "redes" | "publicidad">): AvisoCaption[] {
-  const texto = textoParaPublicar(c)
+export function revisarCaption(c: Pick<Contenido, "caption" | "redes" | "publicidad">): AvisoCaption[] {
+  const texto = c.caption.trim()
   const hashtags = hashtagsDeTexto(texto).length
   const avisos: AvisoCaption[] = []
   for (const { red } of c.redes) {
@@ -177,30 +152,18 @@ export function revisarCaption(c: Pick<Contenido, "caption" | "hashtags" | "rede
 
 // ───────────────────────── Antes de publicar ─────────────────────────
 
-export type SeccionContenido = "idea" | "guion" | "grabacion" | "caption" | "publicacion"
-
-export const SECCIONES_CONTENIDO: { id: SeccionContenido; label: string }[] = [
-  { id: "idea", label: "Idea" },
-  { id: "guion", label: "Guion" },
-  { id: "grabacion", label: "Grabación" },
-  { id: "caption", label: "Caption" },
-  { id: "publicacion", label: "Publicación" },
-]
+export type SeccionContenido = "guion" | "caption" | "publicacion"
 
 export type PasoPublicar = { id: string; label: string; hecho: boolean; seccion: SeccionContenido }
 
-/** Lo que conviene tener antes de publicar, cada cosa con la sección donde se hace. */
+/** Lo que conviene tener antes de publicar, cada cosa con la parte de la página donde se hace. Poco y útil, no un formulario. */
 export function antesDePublicar(c: Contenido): PasoPublicar[] {
-  const conVideo = c.tipo === "video"
-  const hechas = c.tomas.filter((t) => t.hecha).length
   const avisos = revisarCaption(c)
-  const pasos: PasoPublicar[] = [{ id: "gancho", label: "Gancho de los primeros segundos", hecho: c.gancho.trim() !== "", seccion: "guion" }]
-  if (conVideo) pasos.push({ id: "guion", label: "Guion", hecho: textoPlano(c.guion) !== "", seccion: "guion" })
-  pasos.push({ id: "tomas", label: c.tomas.length ? `Tomas grabadas (${hechas} de ${c.tomas.length})` : "Lista de tomas", hecho: c.tomas.length > 0 && hechas === c.tomas.length, seccion: "grabacion" })
+  const pasos: PasoPublicar[] = []
+  if (c.tipo === "video") pasos.push({ id: "guion", label: "Guion", hecho: textoPlano(c.guion) !== "", seccion: "guion" })
   pasos.push({ id: "caption", label: "Caption", hecho: c.caption.trim() !== "", seccion: "caption" })
   pasos.push({ id: "limites", label: "Dentro de lo que admite cada red", hecho: !avisos.some((a) => a.id !== "publi"), seccion: "caption" })
   if (c.publicidad) pasos.push({ id: "publi", label: "Marcado como publicidad", hecho: !avisos.some((a) => a.id === "publi"), seccion: "caption" })
-  if (conVideo && c.formato !== "story") pasos.push({ id: "portada", label: "Portada", hecho: !!c.portadaUrl || c.textoPortada.trim() !== "", seccion: "publicacion" })
   pasos.push({ id: "fecha", label: "Día y hora", hecho: !!c.fecha && c.fecha.length > 10, seccion: "publicacion" })
   return pasos
 }

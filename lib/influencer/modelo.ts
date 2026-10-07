@@ -1078,13 +1078,13 @@ export const ESTADOS_CONTENIDO: Estado<EstadoContenido>[] = [
   { id: "publicado", label: "Publicado", tone: "success" },
 ]
 
-/** Un plano que hay que grabar, para marcarlo al hacerlo. */
-export type Toma = { id: string; texto: string; hecha: boolean }
-
 /** Una red donde sale el contenido, con su enlace cuando ya está publicado. */
 export type PublicacionRed = { red: SocialNetwork; url?: string }
 
-/** Lo que publica por su cuenta, sin marca: se prepara entero aquí, del gancho a la publicación. */
+/**
+ * Lo que publica por su cuenta, sin marca. Es un espacio de trabajo, no un formulario: el guion es un
+ * solo documento donde escribe como quiera y el caption, un solo texto con sus hashtags dentro.
+ */
 export type Contenido = {
   id: string
   titulo: string
@@ -1096,27 +1096,15 @@ export type Contenido = {
   pilarId?: string
   /** La idea de la que nace, si nace de una. */
   ideaId?: string
-  gancho: string
-  /** El guion, del editor (HTML de Tiptap). */
+  /** El guion y lo que quiera apuntar para grabarlo, en un documento (HTML de Tiptap). */
   guion: string
-  textoPantalla: string
-  tomas: Toma[]
-  lugar: string
-  /** Ropa, maquillaje o lo que se vea. */
-  look: string
-  productos: string
-  /** El sonido o la canción, con su enlace si lo hay. */
-  audio: string
+  /** El texto de la publicación, con los hashtags dentro. */
   caption: string
-  hashtags: string[]
-  menciones: string[]
   /** Producto regalado o enlace de afiliado: entonces se marca como publicidad. */
   publicidad: boolean
   portadaUrl?: string
-  textoPortada: string
   /** Dónde se publica: la red de su formato y las de reciclarlo. */
   redes: PublicacionRed[]
-  notas: string
   creadoEl: string
   actualizadoEl: string
 }

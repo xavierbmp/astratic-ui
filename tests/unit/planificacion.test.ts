@@ -16,7 +16,6 @@ import {
   reciclarContenido,
   revisarCaption,
   siguienteEstado,
-  textoParaPublicar,
 } from "@/lib/influencer/planificacion"
 import { demoApuntes, demoContenidos, demoFechasClave, demoPilares } from "@/lib/influencer/demo-contenidos"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
@@ -53,23 +52,17 @@ describe("avanzar", () => {
     expect(siguienteEstado("programado")).toBe("publicado")
     expect(siguienteEstado("publicado")).toBeNull()
   })
-  it("lo que toca dice las tomas que faltan", () => {
-    expect(queToca({ estado: "grabar", tomas: [{ id: "1", texto: "a", hecha: true }, { id: "2", texto: "b", hecha: false }] })).toBe("Grabar · 1 de 2 tomas")
-    expect(queToca({ estado: "guion", tomas: [] })).toBe("Escribir el guion")
+  it("lo que toca, en pocas palabras", () => {
+    expect(queToca({ estado: "grabar" })).toBe("Grabar")
+    expect(queToca({ estado: "guion" })).toBe("Escribir el guion")
   })
 })
 
 describe("caption", () => {
-  it("el texto que se pega lleva los hashtags debajo, con su almohadilla", () => {
-    expect(textoParaPublicar({ caption: "Hola ", hashtags: ["skincare", "#rutina"] })).toBe("Hola\n\n#skincare #rutina")
-  })
-  it("Instagram admite 5 hashtags", () => {
-    const avisos = revisarCaption(contenido({ hashtags: ["a", "b", "c", "d", "e", "f"] }))
-    expect(avisos.map((a) => a.id)).toEqual(["hashtags-instagram"])
-    expect(revisarCaption(contenido({ hashtags: ["a", "b", "c", "d", "e"] }))).toEqual([])
-  })
-  it("cuenta también los hashtags escritos en el caption", () => {
-    expect(revisarCaption(contenido({ caption: "#uno #dos #tres", hashtags: ["cuatro", "cinco", "seis"] })).map((a) => a.id)).toEqual(["hashtags-instagram"])
+  it("Instagram admite 5 hashtags, contados dentro del caption", () => {
+    expect(revisarCaption(contenido({ caption: "Hola #a #b #c #d #e #f" })).map((a) => a.id)).toEqual(["hashtags-instagram"])
+    expect(revisarCaption(contenido({ caption: "Hola #a #b #c #d #e" }))).toEqual([])
+    expect(revisarCaption(contenido({ caption: "Hola #a #b #c #d #e #f", redes: [{ red: "tiktok" }] }))).toEqual([])
   })
   it("avisa si pasa del máximo de la red", () => {
     expect(revisarCaption(contenido({ caption: "a".repeat(2300) })).map((a) => a.id)).toEqual(["max-instagram"])
@@ -78,23 +71,21 @@ describe("caption", () => {
   it("con regalo o afiliado pide marcarlo como publicidad, y «#ad» no vale", () => {
     expect(revisarCaption(contenido({ publicidad: true, caption: "Me encanta" })).map((a) => a.id)).toEqual(["publi"])
     expect(revisarCaption(contenido({ publicidad: true, caption: "Me encanta #ad" }))[0].texto).toContain("#ad")
-    expect(revisarCaption(contenido({ publicidad: true, caption: "Me encanta", hashtags: ["publi"] }))).toEqual([])
+    expect(revisarCaption(contenido({ publicidad: true, caption: "Me encanta #publi" }))).toEqual([])
   })
   it("lo que se ve antes del «más» en cada red", () => {
-    const c = { caption: "a".repeat(150), hashtags: [] }
-    expect(previsualizacion(c, "instagram")).toEqual({ visible: "a".repeat(125), cortado: true })
-    expect(previsualizacion({ caption: "corto", hashtags: [] }, "tiktok")).toEqual({ visible: "corto", cortado: false })
+    expect(previsualizacion({ caption: "a".repeat(150) }, "instagram")).toEqual({ visible: "a".repeat(125), cortado: true })
+    expect(previsualizacion({ caption: "corto" }, "tiktok")).toEqual({ visible: "corto", cortado: false })
   })
 })
 
 describe("antes de publicar", () => {
-  it("un reel vacío tiene todo por hacer", () => {
+  it("un reel vacío tiene todo por hacer, y es poco", () => {
     const pasos = antesDePublicar(contenido())
-    expect(pasos.map((p) => p.id)).toEqual(["gancho", "guion", "tomas", "caption", "limites", "portada", "fecha"])
+    expect(pasos.map((p) => p.id)).toEqual(["guion", "caption", "limites", "fecha"])
     expect(pasos.filter((p) => p.hecho).map((p) => p.id)).toEqual(["limites"])
   })
-  it("una story no pide portada y una foto no pide guion", () => {
-    expect(antesDePublicar(contenido({ formato: "story" })).some((p) => p.id === "portada")).toBe(false)
+  it("una foto no pide guion", () => {
     expect(antesDePublicar(contenido({ formato: "post", tipo: "foto" })).some((p) => p.id === "guion")).toBe(false)
   })
   it("con publicidad, el paso de marcarla", () => {

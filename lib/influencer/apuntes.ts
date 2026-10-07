@@ -2,7 +2,8 @@
 // contenido si ya lo hay), apuntar una al vuelo desde un texto con enlace, lo que caduca pronto y lo
 // que enseña su tarjeta. Pura: sin datos ni React.
 import { socialLabel, type SocialNetwork } from "@/components/app/social-icons"
-import type { Apunte, Contenido, EstadoIdea } from "@/lib/influencer/modelo"
+import { ESTADOS_IDEA_A_MANO, FORMATOS, type Apunte, type Contenido, type EstadoIdea, type EstadoIdeaManual, type Formato } from "@/lib/influencer/modelo"
+import { SIN_VALOR } from "@/lib/vistas/core"
 import { diasEntre } from "@/lib/influencer/fechas"
 import { textoPlano } from "@/lib/influencer/guion"
 
@@ -127,4 +128,35 @@ export function ideasParaPlanificar(apuntes: Apunte[], contenidos: Contenido[], 
     .filter((a) => a.tipo === "idea" && a.estado !== "descartada" && !contenidoDeIdea(a, contenidos))
     .filter((a) => (diasParaCaducar(a, hoy) ?? 0) >= 0)
     .sort((a, b) => peso(a) - peso(b) || b.actualizadoEl.localeCompare(a.actualizadoEl))
+}
+
+const esEstadoManual = (v: string): v is EstadoIdeaManual => ESTADOS_IDEA_A_MANO.some((e) => e === v)
+const esFormato = (v: string): v is Formato => v in FORMATOS
+
+/**
+ * Darle a un apunte el valor de un campo: al soltarlo en otra columna o grupo, o al crearlo dentro
+ * de uno. Nada si ese valor no se pone a mano (planificada y publicada las pone su contenido).
+ */
+export function asignarCampoApunte(a: Apunte, campo: string, valor: string): Apunte | null {
+  const vacio = valor === SIN_VALOR
+  switch (campo) {
+    case "estado":
+      return a.tipo === "idea" && esEstadoManual(valor) ? { ...a, estado: valor } : null
+    case "tipo":
+      return valor === "idea" || valor === "documento" ? { ...a, tipo: valor } : null
+    case "pilar":
+      return { ...a, pilarId: vacio ? undefined : valor }
+    case "carpeta":
+      return { ...a, carpetaId: vacio ? undefined : valor }
+    case "formato":
+      return vacio ? { ...a, formato: undefined } : esFormato(valor) ? { ...a, formato: valor } : null
+    case "marca":
+      return { ...a, marcaId: vacio ? undefined : valor }
+    case "fechaClave":
+      return { ...a, fechaClaveId: vacio ? undefined : valor }
+    case "favorito":
+      return { ...a, favorito: valor === "true" }
+    default:
+      return null
+  }
 }

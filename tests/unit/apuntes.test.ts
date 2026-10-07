@@ -5,6 +5,7 @@ import {
   CARPETA_TODO,
   apunteDesdeTexto,
   apuntesDeCarpeta,
+  asignarCampoApunte,
   caducaPronto,
   contarPorCarpeta,
   estadoDeIdea,
@@ -108,5 +109,23 @@ describe("ideas para planificar", () => {
     expect(lista.every((a) => a.tipo === "idea" && a.estado !== "descartada")).toBe(true)
     expect(lista.some((a) => a.id === "a-rutina-noche")).toBe(false)
     expect(lista[0].id).toBe("a-audio-grwm")
+  })
+})
+
+describe("asignar un campo al soltar o crear en un grupo", () => {
+  it("el estado solo a mano y solo en ideas", () => {
+    expect(asignarCampoApunte(idea(), "estado", "para-hacer")?.estado).toBe("para-hacer")
+    expect(asignarCampoApunte(idea(), "estado", "planificada")).toBeNull()
+    expect(asignarCampoApunte(idea({ tipo: "documento" }), "estado", "para-hacer")).toBeNull()
+  })
+  it("el grupo sin valor lo deja vacío", () => {
+    expect(asignarCampoApunte(idea({ pilarId: "p1" }), "pilar", "__vacio")?.pilarId).toBeUndefined()
+    expect(asignarCampoApunte(idea(), "carpeta", "k1")?.carpetaId).toBe("k1")
+  })
+  it("formato válido o nada; favorita con sí o no", () => {
+    expect(asignarCampoApunte(idea(), "formato", "tiktok")?.formato).toBe("tiktok")
+    expect(asignarCampoApunte(idea(), "formato", "otro")).toBeNull()
+    expect(asignarCampoApunte(idea(), "favorito", "true")?.favorito).toBe(true)
+    expect(asignarCampoApunte(idea(), "redes", "tiktok")).toBeNull()
   })
 })
