@@ -1007,3 +1007,116 @@ export type MediaKit = {
   destacados: Destacado[]
   actualizadoEl: string
 }
+
+// ───────────────────────── Contenidos: ideas y planificación ─────────────────────────
+
+/** Lo que se apunta en el directorio de Contenidos: una idea de contenido o un documento suelto. */
+export type TipoApunte = "idea" | "documento"
+
+export const TIPOS_APUNTE: Record<TipoApunte, string> = { idea: "Idea", documento: "Documento" }
+
+/** Cómo va una idea. «Planificada» y «Publicada» salen solas del contenido que nace de ella. */
+export type EstadoIdea = "apuntada" | "para-hacer" | "planificada" | "publicada" | "descartada"
+
+export const ESTADOS_IDEA: Estado<EstadoIdea>[] = [
+  { id: "apuntada", label: "Apuntada", tone: "neutral" },
+  { id: "para-hacer", label: "Para hacer", tone: "warning" },
+  { id: "planificada", label: "Planificada", tone: "info" },
+  { id: "publicada", label: "Publicada", tone: "success" },
+  { id: "descartada", label: "Descartada", tone: "neutral" },
+]
+
+/** Los estados que pone ella; los otros dos los pone su contenido. */
+export type EstadoIdeaManual = Exclude<EstadoIdea, "planificada" | "publicada">
+
+export const ESTADOS_IDEA_A_MANO: EstadoIdeaManual[] = ["apuntada", "para-hacer", "descartada"]
+
+/** Un enlace o una imagen que inspira: un reel, un audio, una captura. */
+export type Referencia = { id: string; tipo: "enlace" | "imagen"; url: string; titulo?: string }
+
+export type Apunte = {
+  id: string
+  tipo: TipoApunte
+  titulo: string
+  /** El texto libre, del editor (HTML de Tiptap): el gancho, un guion rápido, lo que sea. */
+  texto: string
+  carpetaId?: string
+  favorito: boolean
+  /** Solo cuenta en las ideas. */
+  estado: EstadoIdeaManual
+  pilarId?: string
+  formato?: Formato
+  redes: SocialNetwork[]
+  referencias: Referencia[]
+  /** La marca a la que se la quiere proponer. */
+  marcaId?: string
+  fechaClaveId?: string
+  /** Hasta cuándo vale: las tendencias duran poco. */
+  caducaEl?: string
+  creadoEl: string
+  actualizadoEl: string
+}
+
+/** Donde ordena sus apuntes, con un tinte para reconocerla. */
+export type Carpeta = { id: string; nombre: string; tint: Tint }
+
+/** Los temas fijos de los que habla (rutinas, reviews…): dan color al calendario y equilibran lo que publica. */
+export type Pilar = { id: string; nombre: string; tint: Tint }
+
+/** Un día que mueve campañas (Black Friday, Día de la Madre…): lo escribe Astratic para toda la red. */
+export type FechaClave = { id: string; nombre: string; fecha: string; descripcion?: string }
+
+/** Cómo va un contenido propio, en el orden del trabajo. */
+export type EstadoContenido = "guion" | "grabar" | "editar" | "listo" | "programado" | "publicado"
+
+export const ESTADOS_CONTENIDO: Estado<EstadoContenido>[] = [
+  { id: "guion", label: "Guion", tone: "neutral" },
+  { id: "grabar", label: "Por grabar", tone: "warning" },
+  { id: "editar", label: "Por editar", tone: "info" },
+  { id: "listo", label: "Listo", tone: "success" },
+  { id: "programado", label: "Programado", tone: "info" },
+  { id: "publicado", label: "Publicado", tone: "success" },
+]
+
+/** Un plano que hay que grabar, para marcarlo al hacerlo. */
+export type Toma = { id: string; texto: string; hecha: boolean }
+
+/** Una red donde sale el contenido, con su enlace cuando ya está publicado. */
+export type PublicacionRed = { red: SocialNetwork; url?: string }
+
+/** Lo que publica por su cuenta, sin marca: se prepara entero aquí, del gancho a la publicación. */
+export type Contenido = {
+  id: string
+  titulo: string
+  formato: Formato
+  tipo: TipoPieza
+  /** Día y, si la sabe, hora en que sale: «2026-10-09T19:00». */
+  fecha?: string
+  estado: EstadoContenido
+  pilarId?: string
+  /** La idea de la que nace, si nace de una. */
+  ideaId?: string
+  gancho: string
+  /** El guion, del editor (HTML de Tiptap). */
+  guion: string
+  textoPantalla: string
+  tomas: Toma[]
+  lugar: string
+  /** Ropa, maquillaje o lo que se vea. */
+  look: string
+  productos: string
+  /** El sonido o la canción, con su enlace si lo hay. */
+  audio: string
+  caption: string
+  hashtags: string[]
+  menciones: string[]
+  /** Producto regalado o enlace de afiliado: entonces se marca como publicidad. */
+  publicidad: boolean
+  portadaUrl?: string
+  textoPortada: string
+  /** Dónde se publica: la red de su formato y las de reciclarlo. */
+  redes: PublicacionRed[]
+  notas: string
+  creadoEl: string
+  actualizadoEl: string
+}

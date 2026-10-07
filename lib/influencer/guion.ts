@@ -50,6 +50,12 @@ export type Comprobacion = { id: string; label: string; ok: boolean; detalle?: s
 /** Lo que vale como marca de publicidad en español; «#ad» no basta (Código de Autocontrol de 2025). */
 const PUBLICIDAD = /#publi\b|#publicidad\b|\bpublicidad\b|colaboraci[oó]n pagada/i
 
+/** Si un texto va marcado como publicidad en español y si solo lleva «#ad», que no vale. */
+export function marcaDePublicidad(texto: string) {
+  const ok = PUBLICIDAD.test(texto)
+  return { ok, soloAd: !ok && /#ad\b/i.test(texto) }
+}
+
 /**
  * Antes de enviar a revisión: que estén las menciones, los hashtags y el código del brief, y la marca
  * de publicidad. Con reglas simples; la comprobación de claims, más adelante.
@@ -62,8 +68,7 @@ export function comprobarGuion(html: string, brief: Pick<Brief, "menciones" | "h
     ...brief.hashtags.filter((h) => h.toLowerCase() !== "#publi").map((h) => ({ id: `h-${h}`, label: `Lleva ${h}`, ok: contiene(h) })),
   ]
   if (brief.codigo) lista.push({ id: "codigo", label: `Código ${brief.codigo}`, ok: contiene(brief.codigo) })
-  const publicidad = PUBLICIDAD.test(texto)
-  const soloAd = !publicidad && /#ad\b/i.test(texto)
+  const { ok: publicidad, soloAd } = marcaDePublicidad(texto)
   lista.push({ id: "publi", label: "Marcado como publicidad", ok: publicidad, detalle: soloAd ? "«#ad» no vale en español: usa #publi o «publicidad»" : undefined })
   return lista
 }

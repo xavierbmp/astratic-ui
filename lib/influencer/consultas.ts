@@ -42,6 +42,7 @@ import { COLLABS_ACTIVAS, ESTADOS_ABIERTOS, type Collab, type Informe, type Tipo
 import { marcaDe } from "@/lib/influencer/collabs"
 import { importeNeto } from "@/lib/influencer/presupuesto"
 import { cifrasCobros, lineasDeCobro } from "@/lib/influencer/cobros"
+import { demoApuntes, demoCarpetas, demoContenidos, demoFechasClave, demoPilares, demoPlantillasGuionPropias } from "@/lib/influencer/demo-contenidos"
 
 export const hoy = () => HOY
 
@@ -145,6 +146,15 @@ export const obtenerContrato = (collabId: string) => demoContratos.find((c) => c
 export const listarPlantillasContrato = () => demoPlantillasContrato
 export const listarClausulas = () => demoClausulas
 export const listarPlantillasGuion = () => demoPlantillasGuion
+
+// Contenidos: su directorio de ideas y documentos, sus pilares y lo que publica por su cuenta.
+export const listarApuntes = () => demoApuntes
+export const listarCarpetas = () => demoCarpetas
+export const listarPilares = () => demoPilares
+export const listarContenidos = () => demoContenidos
+export const obtenerContenido = (id: string) => demoContenidos.find((c) => c.id === id) ?? null
+export const listarFechasClave = () => demoFechasClave
+export const listarPlantillasGuionPropias = () => demoPlantillasGuionPropias
 
 /** El informe de resultados de una collab; si aún no hay, uno vacío. */
 export const obtenerInforme = (collabId: string): Informe => demoInformes.find((i) => i.collabId === collabId) ?? { collabId, resultados: [], conclusiones: "" }
