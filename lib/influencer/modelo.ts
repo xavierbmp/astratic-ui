@@ -484,8 +484,8 @@ export type Factura = {
   reclamaciones?: string[]
   /** El plazo de cobro que cubre. */
   plazoId?: string
-  /** El PDF que hizo con su programa. */
-  pdf?: { nombre: string; tamano: number }
+  /** El PDF que hizo con su programa; `url`, para abrirlo (en el workspace, su archivo guardado). */
+  pdf?: { nombre: string; tamano: number; url?: string }
 }
 
 /** Cómo va una factura. «Vencida» no se guarda: sale de la fecha. */
@@ -522,8 +522,8 @@ export type Contrato = {
   /** Enlace para que la marca lo lea y lo firme, sin cuenta. */
   enlace?: { token: string; caduca: string }
   firmas: Firma[]
-  /** Si se firma el contrato de la marca en vez del suyo: su PDF. */
-  externo?: { nombre: string; tamano: number }
+  /** Si se firma el contrato de la marca en vez del suyo: su PDF (`url`, para abrirlo). */
+  externo?: { nombre: string; tamano: number; url?: string }
   actualizadoEl: string
 }
 
