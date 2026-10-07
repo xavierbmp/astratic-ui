@@ -167,6 +167,7 @@ export function RegistroPage({ record }: { record: { id: string; name: string } 
           rows={[
             [<code key="g-label">NavGroup.label</code>, <code key="g-label-t">string</code>, "Etiqueta del grupo en la sidebar y primera miga. Opcional: sin ella el grupo no lleva cabecera ni aparece en las migas."],
             [<code key="g-items">NavGroup.items</code>, <code key="g-items-t">NavItem[]</code>, "Páginas del grupo."],
+            [<code key="g-bottom">NavGroup.bottom</code>, <code key="g-bottom-t">boolean</code>, "El grupo va pegado al pie de la sidebar, separado del resto (Ajustes, por ejemplo). Opcional."],
             [<code key="id">NavItem.id</code>, <code key="id-t">string</code>, "Identificador único. Se usa para marcar el ítem activo."],
             [<code key="label">NavItem.label</code>, <code key="label-t">string</code>, "Texto del ítem, del tooltip cuando la sidebar está colapsada y de la miga."],
             [<code key="href">NavItem.href</code>, <code key="href-t">string</code>, "Ruta. El ítem se activa por coincidencia exacta o como prefijo seguido de «/»."],

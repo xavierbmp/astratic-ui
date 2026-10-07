@@ -20,6 +20,8 @@ export type NavItem = {
 
 export type NavGroup = {
   label?: string
+  /** Va pegado al pie de la barra lateral, separado del resto (Ajustes, por ejemplo). */
+  bottom?: boolean
   items: NavItem[]
 }
 

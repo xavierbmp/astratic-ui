@@ -122,6 +122,36 @@ export function AppShell({
     ...extra,
   ]
 
+  const grupo = (group: NavGroup, key: string, className?: string) => (
+    <SidebarGroup key={key} className={className}>
+      {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {group.items.map((item) => {
+            const active = current?.item.id === item.id
+            return (
+              <SidebarMenuItem key={item.id}>
+                <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+                  <Link href={item.href}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <SidebarMenuBadge className="rounded-md bg-warning-soft text-warning">
+                    {item.badge}
+                  </SidebarMenuBadge>
+                )}
+              </SidebarMenuItem>
+            )
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  )
+  const arriba = nav.filter((g) => !g.bottom)
+  const alPie = nav.filter((g) => g.bottom)
+
   return (
     <BreadcrumbContext.Provider value={{ extra, setExtra }}>
       <SidebarProvider>
@@ -147,33 +177,9 @@ export function AppShell({
             </SidebarMenu>
           </SidebarHeader>
           <SidebarContent>
-            {nav.map((group, gi) => (
-              <SidebarGroup key={group.label ?? gi}>
-                {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {group.items.map((item) => {
-                      const active = current?.item.id === item.id
-                      return (
-                        <SidebarMenuItem key={item.id}>
-                          <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
-                            <Link href={item.href}>
-                              <item.icon />
-                              <span>{item.label}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                          {item.badge !== undefined && item.badge > 0 && (
-                            <SidebarMenuBadge className="rounded-md bg-warning-soft text-warning">
-                              {item.badge}
-                            </SidebarMenuBadge>
-                          )}
-                        </SidebarMenuItem>
-                      )
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ))}
+            {arriba.map((g, i) => grupo(g, g.label ?? `grupo-${i}`))}
+            {/* Los grupos del pie (Ajustes) se separan del resto y quedan abajo del todo. */}
+            {alPie.map((g, i) => grupo(g, g.label ?? `pie-${i}`, i === 0 ? "mt-auto" : undefined))}
           </SidebarContent>
           <SidebarFooter className="border-t p-2">
             <SidebarMenu>
