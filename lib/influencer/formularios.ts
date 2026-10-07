@@ -107,11 +107,17 @@ export function aplicarFormulario(collab: Collab, v: FormularioBrief): Collab {
   }
 }
 
-/** El token de un enlace nuevo para la marca: imposible de adivinar en el portal (aquí, único). */
+/** Cómo es un token de enlace para la marca: el prefijo de lo que abre y 32 bytes aleatorios. */
+export const FORMATO_TOKEN = /^[a-z]{2,4}-[A-Za-z0-9_-]{43}$/
+
+/** Token de un enlace para la marca, sin cuenta: 32 bytes aleatorios, imposible de adivinar. */
 export function tokenNuevo(prefijo: string) {
-  return idNuevo(prefijo)
+  const bytes = crypto.getRandomValues(new Uint8Array(32))
+  const base64 = btoa(String.fromCharCode(...bytes))
+  return `${prefijo}-${base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")}`
 }
 
+/** Hasta cuándo vale un enlace que se crea hoy. */
 export function caducidad(hoy: string) {
   return sumarDias(hoy, DIAS_ENLACE)
 }

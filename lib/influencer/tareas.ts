@@ -449,10 +449,10 @@ export function describirCambios(antes: Tarea, despues: Tarea, ctx: ContextoTare
   return cambios
 }
 
-let contador = 0
-
-/** Identificador para lo que se crea en pantalla; en el portal lo pone la base de datos. */
+/**
+ * Identificador para lo que se crea en pantalla. Es aleatorio para que no choque con lo de nadie más
+ * cuando se guarda en la base de datos.
+ */
 export function idNuevo(prefijo: string) {
-  contador += 1
-  return `${prefijo}-${Date.now().toString(36)}-${contador}`
+  return `${prefijo}-${crypto.randomUUID()}`
 }
