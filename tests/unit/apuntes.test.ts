@@ -88,9 +88,9 @@ describe("caducidad", () => {
 
 describe("carpetas y tarjetas", () => {
   const carpetas: Carpeta[] = [
-    { id: "k1", nombre: "Campañas", tint: "peach" },
-    { id: "k2", nombre: "Navidad", tint: "rose", padreId: "k1" },
-    { id: "k3", nombre: "Ganchos", tint: "mint" },
+    { id: "k1", nombre: "Campañas", tint: "peach", orden: 0 },
+    { id: "k2", nombre: "Navidad", tint: "rose", padreId: "k1", orden: 0 },
+    { id: "k3", nombre: "Ganchos", tint: "mint", orden: 1 },
   ]
   it("cuenta por carpeta (con lo de sus subcarpetas), sin carpeta y favoritos", () => {
     const cuentas = contarPorCarpeta([idea({ carpetaId: "k1" }), idea({ carpetaId: "k2", favorito: true }), idea()], carpetas)
@@ -140,16 +140,16 @@ describe("portada y archivos", () => {
 
 describe("notas enlazadas con ideas", () => {
   it("se enlazan una vez, en los dos sentidos, y nunca consigo mismas", () => {
-    let v = enlazar([], "nota", "idea1")
-    v = enlazar(v, "idea2", "nota")
-    v = enlazar(v, "idea1", "nota")
-    v = enlazar(v, "nota", "nota")
+    let v = enlazar([], { id: "1", desde: "nota", hasta: "idea1" })
+    v = enlazar(v, { id: "2", desde: "idea2", hasta: "nota" })
+    v = enlazar(v, { id: "3", desde: "idea1", hasta: "nota" })
+    v = enlazar(v, { id: "4", desde: "nota", hasta: "nota" })
     expect(v).toHaveLength(2)
     expect(enlazadosDe("nota", v)).toEqual(["idea1", "idea2"])
     expect(enlazadosDe("idea1", v)).toEqual(["nota"])
   })
   it("se desenlazan da igual el orden", () => {
-    const v = enlazar(enlazar([], "nota", "idea1"), "nota", "idea2")
+    const v = enlazar(enlazar([], { id: "1", desde: "nota", hasta: "idea1" }), { id: "2", desde: "nota", hasta: "idea2" })
     expect(enlazadosDe("nota", desenlazar(v, "idea1", "nota"))).toEqual(["idea2"])
   })
 })

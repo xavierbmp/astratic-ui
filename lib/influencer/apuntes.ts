@@ -150,9 +150,9 @@ export function enlazadosDe(id: string, vinculos: VinculoApunte[]): string[] {
 }
 
 /** Enlazar dos apuntes; si ya lo están (o son el mismo), nada cambia. */
-export function enlazar(vinculos: VinculoApunte[], desde: string, hasta: string): VinculoApunte[] {
-  if (desde === hasta || vinculos.some((v) => esVinculo(v, desde, hasta))) return vinculos
-  return [...vinculos, { desde, hasta }]
+export function enlazar(vinculos: VinculoApunte[], nuevo: VinculoApunte): VinculoApunte[] {
+  if (nuevo.desde === nuevo.hasta || vinculos.some((v) => esVinculo(v, nuevo.desde, nuevo.hasta))) return vinculos
+  return [...vinculos, nuevo]
 }
 
 export function desenlazar(vinculos: VinculoApunte[], x: string, y: string): VinculoApunte[] {

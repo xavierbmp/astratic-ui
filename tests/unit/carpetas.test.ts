@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { borrarCarpeta, carpetasEnArbol, conDescendientes, hijasDe, moverCarpeta, nombreCompleto, opcionesDeCarpetas, rutaDeCarpeta } from "@/lib/influencer/carpetas"
+import { borrarCarpeta, carpetasEnArbol, conDescendientes, hijasDe, moverCarpeta, nombreCompleto, opcionesDeCarpetas, rutaDeCarpeta, siguienteOrden } from "@/lib/influencer/carpetas"
 import type { Carpeta } from "@/lib/influencer/modelo"
 
-const k = (id: string, padreId?: string): Carpeta => ({ id, nombre: id.toUpperCase(), tint: "mint", padreId })
-// a ─ b ─ c   ·   d
-const ARBOL = [k("a"), k("b", "a"), k("c", "b"), k("d")]
+const k = (id: string, orden: number, padreId?: string): Carpeta => ({ id, nombre: id.toUpperCase(), tint: "mint", padreId, orden })
+// a ─ b ─ c   ·   d   (en la lista, d va antes que a: manda `orden`)
+const ARBOL = [k("d", 1), k("b", 0, "a"), k("a", 0), k("c", 0, "b")]
 const ids = (lista: Carpeta[]) => lista.map((c) => c.id)
 
 describe("árbol de carpetas", () => {
@@ -33,6 +33,16 @@ describe("mover una carpeta", () => {
   it("antes de una hermana, y arriba del todo", () => {
     const r = moverCarpeta(ARBOL, "c", { antesDe: "a" })
     expect(r && ids(hijasDe(r))).toEqual(["c", "a", "d"])
+    expect(r?.map((c) => `${c.id}${c.orden}`).sort()).toEqual(["a1", "b0", "c0", "d2"])
+  })
+  it("solo cambian las que cambian de sitio (lo demás se guarda igual)", () => {
+    const r = moverCarpeta(ARBOL, "d", { antesDe: "a" })
+    expect(r?.find((c) => c.id === "b")).toBe(ARBOL.find((c) => c.id === "b"))
+    expect(r && ids(hijasDe(r))).toEqual(["d", "a"])
+  })
+  it("una carpeta nueva va al final de sus hermanas", () => {
+    expect(siguienteOrden(ARBOL)).toBe(2)
+    expect(siguienteOrden(ARBOL, "c")).toBe(0)
   })
   it("nunca dentro de sí misma ni de las suyas", () => {
     expect(moverCarpeta(ARBOL, "a", { padreId: "c" })).toBeNull()
@@ -45,6 +55,7 @@ describe("borrar una carpeta", () => {
     const { carpetas, destino } = borrarCarpeta(ARBOL, "b")
     expect(destino).toBe("a")
     expect(carpetas.find((c) => c.id === "c")?.padreId).toBe("a")
+    expect(ids(hijasDe(borrarCarpeta(ARBOL, "a").carpetas))).toEqual(["d", "b"])
     expect(borrarCarpeta(ARBOL, "a").destino).toBeUndefined()
   })
 })

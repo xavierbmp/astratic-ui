@@ -26,14 +26,14 @@ export const demoPilares: Pilar[] = [
 ]
 
 export const demoCarpetas: Carpeta[] = [
-  { id: "k-ganchos", nombre: "Ganchos", tint: "lavender" },
-  { id: "k-tendencias", nombre: "Tendencias", tint: "rose" },
-  { id: "k-probar", nombre: "Productos por probar", tint: "mint" },
-  { id: "k-campanas", nombre: "Campañas del año", tint: "peach" },
-  { id: "k-halloween", nombre: "Halloween", tint: "lavender", padreId: "k-campanas" },
-  { id: "k-black-friday", nombre: "Black Friday", tint: "sky", padreId: "k-campanas" },
-  { id: "k-navidad", nombre: "Navidad", tint: "rose", padreId: "k-campanas" },
-  { id: "k-metodo", nombre: "Cómo trabajo", tint: "lime" },
+  { id: "k-ganchos", nombre: "Ganchos", tint: "lavender", orden: 0 },
+  { id: "k-tendencias", nombre: "Tendencias", tint: "rose", orden: 1 },
+  { id: "k-probar", nombre: "Productos por probar", tint: "mint", orden: 2 },
+  { id: "k-campanas", nombre: "Campañas del año", tint: "peach", orden: 3 },
+  { id: "k-halloween", nombre: "Halloween", tint: "lavender", padreId: "k-campanas", orden: 0 },
+  { id: "k-black-friday", nombre: "Black Friday", tint: "sky", padreId: "k-campanas", orden: 1 },
+  { id: "k-navidad", nombre: "Navidad", tint: "rose", padreId: "k-campanas", orden: 2 },
+  { id: "k-metodo", nombre: "Cómo trabajo", tint: "lime", orden: 4 },
 ]
 
 export const demoFechasClave: FechaClave[] = [
@@ -377,11 +377,11 @@ export const demoApuntes: Apunte[] = [
 
 /** Las notas enlazadas con las ideas que salen de ellas (o que las usan). */
 export const demoVinculos: VinculoApunte[] = [
-  { desde: "a-ganchos", hasta: "a-colorete-viral" },
-  { desde: "a-ganchos", hasta: "a-rutina-noche" },
-  { desde: "a-por-probar", hasta: "a-dupes-serums" },
-  { desde: "a-por-probar", hasta: "a-retinal" },
-  { desde: "a-grabacion", hasta: "a-rutina-noche" },
+  { id: "v-ganchos-colorete", desde: "a-ganchos", hasta: "a-colorete-viral" },
+  { id: "v-ganchos-rutina", desde: "a-ganchos", hasta: "a-rutina-noche" },
+  { id: "v-probar-dupes", desde: "a-por-probar", hasta: "a-dupes-serums" },
+  { id: "v-probar-retinal", desde: "a-por-probar", hasta: "a-retinal" },
+  { id: "v-grabacion-rutina", desde: "a-grabacion", hasta: "a-rutina-noche" },
 ]
 
 const base = { guion: "", caption: "", publicidad: false }

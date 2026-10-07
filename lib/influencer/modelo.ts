@@ -1059,11 +1059,11 @@ export type Apunte = {
   actualizadoEl: string
 }
 
-/** Donde ordena sus apuntes, con un tinte para reconocerla. Puede ir dentro de otra; entre hermanas, en el orden de la lista. */
-export type Carpeta = { id: string; nombre: string; tint: Tint; padreId?: string }
+/** Donde ordena sus apuntes, con un tinte para reconocerla. Puede ir dentro de otra; `orden`, su sitio entre sus hermanas. */
+export type Carpeta = { id: string; nombre: string; tint: Tint; padreId?: string; orden: number }
 
-/** Una nota enlazada con una idea (la investigación de un producto con las ideas que salen de ella). Da igual el orden. */
-export type VinculoApunte = { desde: string; hasta: string }
+/** Una nota enlazada con una idea (la investigación de un producto con las ideas que salen de ella). Da igual cuál es `desde`. */
+export type VinculoApunte = { id: string; desde: string; hasta: string }
 
 /** Los temas fijos de los que habla (rutinas, reviews…): dan color al calendario y equilibran lo que publica. */
 export type Pilar = { id: string; nombre: string; tint: Tint }
