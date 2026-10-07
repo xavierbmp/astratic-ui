@@ -4,8 +4,8 @@ import * as React from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { FRECUENCIAS_TAREA, PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type FrecuenciaTarea, type PaginaTarea, type PlantillaTarea, type PrioridadTarea, type Tarea } from "@/lib/influencer/modelo"
-import { idNuevo, migasDonde, nuevaTarea, type ContextoTareas } from "@/lib/influencer/tareas"
+import { FRECUENCIAS_TAREA, PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type FrecuenciaTarea, type PlantillaTarea, type PrioridadTarea, type Tarea } from "@/lib/influencer/modelo"
+import { SIN_TIPO, idNuevo, migasDonde, nuevaTarea, type ContextoTareas } from "@/lib/influencer/tareas"
 import { lunesDe, sumarDias } from "@/lib/influencer/fechas"
 import { tintFor } from "@/lib/influencer/tints"
 import { Button } from "@/components/ui/button"
@@ -15,14 +15,14 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect } from "@/components/app/multi-select"
-import { DondeSelector } from "@/components/influencer/donde-selector"
+import { SelectorDeQue, SelectorTipo, etiquetaDeQue } from "@/components/influencer/task-tipo"
 import { PrioridadBandera } from "@/components/influencer/task-cells"
 
 const NO_REPITE = "no"
 
 const esquema = z.object({
   titulo: z.string().trim().min(1, "Escribe qué hay que hacer").max(160, "Máximo 160 caracteres"),
-  donde: z.custom<DondeTarea>((v) => !!v && typeof v === "object", "Elige la página y el tipo"),
+  donde: z.custom<DondeTarea>((v) => !!v && typeof v === "object"),
   fecha: z.string().optional(),
   hora: z.string().optional(),
   fechaLimite: z.string().optional(),
@@ -53,9 +53,11 @@ const notasATexto = (html?: string) =>
     : ""
 
 /**
- * Nueva tarea, el mismo diálogo en toda la app. Se dice qué hay que hacer y dónde vive (su página
- * y su tipo, y la campaña o el registro): desde la pestaña de una página, la página ya va puesta;
- * desde una ficha, todo (`dondeFijo`). Desde una plantilla, llega rellena y con sus subtareas.
+ * Nueva tarea, el mismo diálogo en toda la app. Se dice qué hay que hacer y su tipo (la página en
+ * la que sale: sin tipo, CRM, Collabs o Cobros) y, debajo, de qué campaña o de qué ficha del CRM
+ * es, si es de alguna. Nace sin tipo salvo que se cree desde una página (`dondeInicial`) o desde
+ * una ficha, que ya lo deja decidido (`dondeFijo`). Desde una plantilla, llega rellena y con sus
+ * subtareas.
  */
 export function TaskDialog({
   open,
@@ -63,7 +65,6 @@ export function TaskDialog({
   hoy,
   ctx,
   etiquetas,
-  limitar,
   dondeInicial,
   dondeFijo,
   inicial,
@@ -76,10 +77,9 @@ export function TaskDialog({
   hoy: string
   ctx: ContextoTareas
   etiquetas: EtiquetaTarea[]
-  /** Solo se ofrece lo de esta página o esta campaña (la pestaña o la ficha en la que se crea). */
-  limitar?: { pagina?: PaginaTarea; collabId?: string }
+  /** Con lo que nace, que se puede cambiar: el tipo de la página en la que se crea. Sin él, sin tipo. */
   dondeInicial?: DondeTarea
-  /** Dónde vive ya está decidido (se crea desde su sitio): se enseña, no se elige. */
+  /** Ya está decidido (se crea desde una campaña o una ficha del CRM): se enseña, no se elige. */
   dondeFijo?: DondeTarea
   /** Lo que ya trae la tarea: lo que hereda de un grupo, del filtro de la vista o de un día del calendario. */
   inicial?: Partial<Pick<Tarea, "titulo" | "fecha" | "fechaLimite" | "prioridad" | "etiquetas" | "estado">>
@@ -95,21 +95,16 @@ export function TaskDialog({
   const { errors } = formState
   const fecha = useWatch({ control, name: "fecha" })
   const subtareas = useWatch({ control, name: "subtareas" })
+  const donde = useWatch({ control, name: "donde" }) ?? SIN_TIPO
 
   React.useEffect(() => {
     if (!open) return
-    // La plantilla trae su página y su tipo; en Campañas falta la campaña, que da la ficha o se elige.
-    const dondePlantilla = !plantilla
-      ? undefined
-      : plantilla.pagina === "campanas"
-        ? limitar?.collabId
-          ? ({ pagina: "campanas", tipo: plantilla.tipo, collabId: limitar.collabId } as DondeTarea) // el tipo de una plantilla es de su página
-          : undefined
-        : ({ pagina: plantilla.pagina, tipo: plantilla.tipo } as DondeTarea)
+    // La plantilla trae su tipo; la campaña o la ficha se eligen debajo.
+    const dondePlantilla: DondeTarea | undefined = plantilla ? { tipo: plantilla.tipo } : undefined
     const fechaInicial = inicial?.fecha ?? ""
     reset({
       titulo: inicial?.titulo ?? plantilla?.titulo ?? "",
-      donde: dondeFijo ?? dondeInicial ?? dondePlantilla,
+      donde: dondeFijo ?? dondePlantilla ?? dondeInicial ?? SIN_TIPO,
       fecha: fechaInicial.slice(0, 10),
       hora: fechaInicial.length > 10 ? fechaInicial.slice(11, 16) : "",
       fechaLimite: inicial?.fechaLimite ?? "",
@@ -119,7 +114,7 @@ export function TaskDialog({
       notas: notasATexto(plantilla?.notas),
       subtareas: plantilla?.subtareas ?? [],
     })
-  }, [open, plantilla, dondeFijo, dondeInicial, inicial, limitar, reset])
+  }, [open, plantilla, dondeFijo, dondeInicial, inicial, reset])
 
   const guardar = (v: Valores) => {
     const ahora = `${hoy.slice(0, 10)}T${new Date().toTimeString().slice(0, 8)}`
@@ -152,11 +147,13 @@ export function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle>{plantilla ? `Nueva tarea: ${plantilla.nombre}` : "Nueva tarea"}</DialogTitle>
           <DialogDescription>
-            {dondeFijo ? `Vive en ${migasDonde(dondeFijo, ctx).map((m) => m.label).join(" › ")} y sale también en Tareas.` : "Elige dónde vive: sale en esa página y en Tareas."}
+            {dondeFijo
+              ? `Es de ${migasDonde(dondeFijo, ctx).map((m) => m.label).join(" › ")} y sale también en Tareas.`
+              : "Con un tipo, sale en esa página además de en Tareas. Sin tipo, solo en Tareas."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(guardar)} noValidate className="grid gap-4">
@@ -166,15 +163,18 @@ export function TaskDialog({
             <FieldError errors={[errors.titulo]} />
           </Field>
           {!dondeFijo && (
-            <Field data-invalid={!!errors.donde || undefined}>
-              <FieldLabel htmlFor="tarea-donde">Dónde vive</FieldLabel>
-              <Controller
-                control={control}
-                name="donde"
-                render={({ field }) => <DondeSelector id="tarea-donde" value={field.value} onChange={field.onChange} ctx={ctx} limitar={limitar ?? (plantilla ? { pagina: plantilla.pagina } : undefined)} invalido={!!errors.donde} />}
-              />
-              <FieldError errors={[errors.donde]} />
-            </Field>
+            <div className="grid gap-3">
+              <Field>
+                <FieldLabel htmlFor="tarea-tipo">Tipo</FieldLabel>
+                <Controller control={control} name="donde" render={({ field }) => <SelectorTipo id="tarea-tipo" value={field.value ?? SIN_TIPO} onChange={field.onChange} />} />
+              </Field>
+              {etiquetaDeQue(donde.tipo) && (
+                <Field>
+                  <FieldLabel htmlFor="tarea-de-que">{etiquetaDeQue(donde.tipo)}</FieldLabel>
+                  <Controller control={control} name="donde" render={({ field }) => <SelectorDeQue id="tarea-de-que" value={field.value ?? SIN_TIPO} onChange={field.onChange} ctx={ctx} />} />
+                </Field>
+              )}
+            </div>
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field>

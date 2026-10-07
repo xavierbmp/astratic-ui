@@ -1,9 +1,8 @@
-// Lógica de las tareas: dónde viven, cuándo tocan (vencidas, hoy, esta semana…), en qué orden se
+// Lógica de las tareas: de qué son, cuándo tocan (vencidas, hoy, esta semana…), en qué orden se
 // hacen hoy, cómo se repiten y cómo nace una nueva. Pura: sin datos ni React.
 import {
   ESTADOS_TAREA,
   FRECUENCIAS_TAREA,
-  PAGINAS_TAREA,
   PRIORIDADES_TAREA,
   TIPOS_TAREA,
   type Collab,
@@ -13,8 +12,8 @@ import {
   type EstadoTarea,
   type GrupoEstadoTarea,
   type Marca,
-  type PaginaTarea,
   type Propuesta,
+  type RegistroTarea,
   type Repeticion,
   type Tarea,
   type TipoTarea,
@@ -265,92 +264,91 @@ export function siguienteRepeticion(t: Tarea, hoy: string, id: string): Tarea | 
   }
 }
 
-// ───────────────────────── Dónde vive ─────────────────────────
+// ───────────────────────── Tipo y de qué es ─────────────────────────
 
 export type ContextoTareas = { collabs: Collab[]; propuestas: Propuesta[]; marcas: Marca[]; contactos: Contacto[] }
 
-export function nombreDeTipo(donde: DondeTarea): string {
-  const tipos: Record<string, string> = TIPOS_TAREA[donde.pagina]
-  return tipos[donde.tipo] ?? donde.tipo
-}
+/** Una tarea nueva, sin decir otra cosa, no tiene tipo: es general. */
+export const SIN_TIPO: DondeTarea = { tipo: "sin-tipo" }
 
-/** Los tipos de una página, en su orden: para los selectores. */
-export function tiposDePagina(pagina: PaginaTarea): { id: TipoTarea; label: string }[] {
-  return Object.entries(TIPOS_TAREA[pagina]).map(([id, label]) => ({ id: id as TipoTarea, label }))
-}
+export const nombreDeTipo = (donde: Pick<DondeTarea, "tipo">) => TIPOS_TAREA[donde.tipo]
 
-/** El primer tipo de una página: con el que nace una tarea si no se dice otro. */
-export function tipoPorDefecto(pagina: PaginaTarea): TipoTarea {
-  return tiposDePagina(pagina)[0].id
-}
+type Registro = RegistroTarea & { nombre: string; marcaId?: string }
 
-/** La página a la que pertenece un tipo (cada tipo es de una sola). */
-export function paginaDeTipo(tipo: TipoTarea): PaginaTarea {
-  return (Object.keys(TIPOS_TAREA) as PaginaTarea[]).find((p) => tipo in TIPOS_TAREA[p]) ?? "personal"
-}
-
-type Registro = { tipo: "propuesta" | "marca" | "contacto"; id: string; nombre: string; marcaId?: string }
-
-/** El registro del CRM de una tarea, si lo tiene: la propuesta, la marca o el contacto. */
+/** La ficha del CRM de una tarea, si la tiene: la propuesta, la marca o el contacto. */
 export function registroDe(donde: DondeTarea, ctx: ContextoTareas): Registro | undefined {
-  if (donde.pagina !== "crm" || !donde.registroId) return undefined
-  const id = donde.registroId
-  if (donde.tipo === "propuesta") {
+  if (donde.tipo !== "crm" || !donde.registro) return undefined
+  const { tipo, id } = donde.registro
+  if (tipo === "propuesta") {
     const p = ctx.propuestas.find((x) => x.id === id)
     if (!p) return undefined
     const marca = ctx.marcas.find((m) => m.id === p.marcaId)
-    return { tipo: "propuesta", id, nombre: `${marca?.nombre ?? ""} · ${p.campana}`, marcaId: p.marcaId }
+    return { tipo, id, nombre: `${marca?.nombre ?? ""} · ${p.campana}`, marcaId: p.marcaId }
   }
-  if (donde.tipo === "marca") {
+  if (tipo === "marca") {
     const m = ctx.marcas.find((x) => x.id === id)
-    return m ? { tipo: "marca", id, nombre: m.nombre, marcaId: m.id } : undefined
+    return m ? { tipo, id, nombre: m.nombre, marcaId: m.id } : undefined
   }
-  if (donde.tipo === "contacto") {
-    const c = ctx.contactos.find((x) => x.id === id)
-    if (!c) return undefined
-    const marca = ctx.marcas.find((m) => m.id === c.marcaId)
-    return { tipo: "contacto", id, nombre: marca ? `${c.nombre} (${marca.nombre})` : c.nombre, marcaId: c.marcaId }
-  }
-  return undefined
+  const c = ctx.contactos.find((x) => x.id === id)
+  if (!c) return undefined
+  const marca = ctx.marcas.find((m) => m.id === c.marcaId)
+  return { tipo, id, nombre: marca ? `${c.nombre} (${marca.nombre})` : c.nombre, marcaId: c.marcaId }
+}
+
+/** La campaña de una tarea de Collabs o de Cobros, si es de una. */
+export function collabIdDe(donde: DondeTarea): string | undefined {
+  return donde.tipo === "collabs" || donde.tipo === "cobros" ? donde.collabId : undefined
 }
 
 export function collabDe(donde: DondeTarea, ctx: ContextoTareas): Collab | undefined {
-  return donde.pagina === "campanas" ? ctx.collabs.find((c) => c.id === donde.collabId) : undefined
+  const id = collabIdDe(donde)
+  return id ? ctx.collabs.find((c) => c.id === id) : undefined
 }
 
-/** La marca de una tarea: la de su campaña o la de su registro del CRM. */
+/** La marca de una tarea: la de su campaña o la de su ficha del CRM. */
 export function marcaIdDe(donde: DondeTarea, ctx: ContextoTareas): string | undefined {
   return collabDe(donde, ctx)?.marcaId ?? registroDe(donde, ctx)?.marcaId
 }
 
+/** «Lumea Skin · Rutina de noche»: cómo se nombra una campaña en los selectores y grupos. */
+export function nombreDeCampana(c: Collab, ctx: ContextoTareas) {
+  return `${ctx.marcas.find((m) => m.id === c.marcaId)?.nombre ?? ""} · ${c.campana}`
+}
+
 /**
- * El proyecto de una tarea: su campaña o su registro del CRM, con un id único entre todos
+ * El proyecto de una tarea: su campaña o su ficha del CRM, con un id único entre todos
  * («collab:lumea», «propuesta:p-nuura»). Sirve para filtrar y agrupar «todo lo de Lumea».
  */
 export function proyectoDe(donde: DondeTarea, ctx: ContextoTareas): { id: string; label: string } | undefined {
   const collab = collabDe(donde, ctx)
-  if (collab) {
-    const marca = ctx.marcas.find((m) => m.id === collab.marcaId)
-    return { id: `collab:${collab.id}`, label: `${marca?.nombre ?? ""} · ${collab.campana}` }
-  }
+  if (collab) return { id: `collab:${collab.id}`, label: nombreDeCampana(collab, ctx) }
   const r = registroDe(donde, ctx)
   return r ? { id: `${r.tipo}:${r.id}`, label: r.nombre } : undefined
 }
 
-/** Todos los proyectos posibles: las campañas y los registros del CRM, para los selectores y filtros. */
+/** Todos los proyectos posibles: las campañas y las fichas del CRM, para los filtros. */
 export function proyectosPosibles(ctx: ContextoTareas): { id: string; label: string; grupo: string }[] {
+  return [
+    ...ctx.collabs.map((c) => ({ id: `collab:${c.id}`, label: nombreDeCampana(c, ctx), grupo: "Campañas" })),
+    ...registrosPosibles(ctx).map((r) => ({ id: `${r.tipo}:${r.id}`, label: r.label, grupo: r.grupo })),
+  ]
+}
+
+const GRUPOS_REGISTRO: Record<RegistroTarea["tipo"], string> = { propuesta: "Propuestas", marca: "Marcas", contacto: "Contactos" }
+
+/** Las fichas del CRM a las que puede ir una tarea del CRM, agrupadas. */
+export function registrosPosibles(ctx: ContextoTareas): (RegistroTarea & { label: string; grupo: string })[] {
   const nombreMarca = (id: string) => ctx.marcas.find((m) => m.id === id)?.nombre ?? ""
   return [
-    ...ctx.collabs.map((c) => ({ id: `collab:${c.id}`, label: `${nombreMarca(c.marcaId)} · ${c.campana}`, grupo: "Campañas" })),
-    ...ctx.propuestas.map((p) => ({ id: `propuesta:${p.id}`, label: `${nombreMarca(p.marcaId)} · ${p.campana}`, grupo: "Propuestas" })),
-    ...ctx.marcas.map((m) => ({ id: `marca:${m.id}`, label: m.nombre, grupo: "Marcas" })),
-    ...ctx.contactos.map((c) => ({ id: `contacto:${c.id}`, label: `${c.nombre} (${nombreMarca(c.marcaId)})`, grupo: "Contactos" })),
+    ...ctx.propuestas.map((p) => ({ tipo: "propuesta" as const, id: p.id, label: `${nombreMarca(p.marcaId)} · ${p.campana}`, grupo: GRUPOS_REGISTRO.propuesta })),
+    ...ctx.marcas.map((m) => ({ tipo: "marca" as const, id: m.id, label: m.nombre, grupo: GRUPOS_REGISTRO.marca })),
+    ...ctx.contactos.map((c) => ({ tipo: "contacto" as const, id: c.id, label: `${c.nombre} (${nombreMarca(c.marcaId)})`, grupo: GRUPOS_REGISTRO.contacto })),
   ]
 }
 
 /**
- * Cómo se dice dónde vive, corto, para las listas: «Lumea Skin · Cobros», «Nuura · Propuesta»,
- * «CRM · Media kit», «Personal · Administración».
+ * Cómo se dice de qué es, corto, para las listas: «Lumea Skin · Cobros», «Nuura · CRM»,
+ * «Collabs». Las de sin tipo no dicen nada.
  */
 export function textoDonde(donde: DondeTarea, ctx: ContextoTareas): string {
   const tipo = nombreDeTipo(donde)
@@ -358,55 +356,39 @@ export function textoDonde(donde: DondeTarea, ctx: ContextoTareas): string {
   if (collab) return `${ctx.marcas.find((m) => m.id === collab.marcaId)?.nombre ?? collab.campana} · ${tipo}`
   const registro = registroDe(donde, ctx)
   if (registro) return `${registro.tipo === "propuesta" ? registro.nombre.split(" · ")[0] : registro.nombre} · ${tipo}`
-  return `${PAGINAS_TAREA[donde.pagina]} · ${tipo}`
+  return donde.tipo === "sin-tipo" ? "" : tipo
 }
 
-/** Las migas de la ficha: «Campañas › Lumea Skin · Rutina de noche › Cobros», con su enlace cada una. */
+/** Las migas de la ficha: «Cobros › Lumea Skin · Rutina de noche», con su enlace cada una. */
 export function migasDonde(donde: DondeTarea, ctx: ContextoTareas): { label: string; href?: string }[] {
-  const pagina = { label: PAGINAS_TAREA[donde.pagina], href: `/workspace/tareas/${donde.pagina}` }
-  const tipo = { label: nombreDeTipo(donde), href: hrefDonde(donde) }
+  if (donde.tipo === "sin-tipo") return []
+  const tipo = { label: nombreDeTipo(donde), href: HREF_TIPO[donde.tipo] }
   const proyecto = proyectoDe(donde, ctx)
-  if (!proyecto) return [pagina, tipo]
-  // La campaña lleva a su Resumen; el registro del CRM, a su ficha (la misma que el tipo).
-  const hrefProyecto = donde.pagina === "campanas" ? `/workspace/collabs/${donde.collabId}` : hrefDonde(donde)
-  return [pagina, { label: proyecto.label, href: hrefProyecto }, tipo]
+  return proyecto ? [tipo, { label: proyecto.label, href: hrefDonde(donde) }] : [tipo]
 }
 
-const PESTANA_COLLAB: Record<string, string> = { general: "", contenidos: "/contenidos", materiales: "/materiales", contrato: "/contrato", cobros: "/facturacion", resultados: "/resultados" }
+const HREF_TIPO: Record<TipoTarea, string | undefined> = { "sin-tipo": undefined, crm: "/workspace/crm", collabs: "/workspace/collabs", cobros: "/workspace/cobros" }
 
-/** La página del workspace donde vive la tarea: la pestaña de la campaña o la ficha del CRM. */
+/** Donde se trabaja la tarea: la campaña (su pieza o su facturación), la ficha del CRM o la página de su tipo. */
 export function hrefDonde(donde: DondeTarea): string | undefined {
-  if (donde.pagina === "campanas") {
-    const base = `/workspace/collabs/${donde.collabId}${PESTANA_COLLAB[donde.tipo]}`
-    return donde.tipo === "contenidos" && donde.piezaId ? `${base}/${donde.piezaId}` : base
+  if (donde.tipo === "collabs" && donde.collabId) return `/workspace/collabs/${donde.collabId}${donde.piezaId ? `/contenidos/${donde.piezaId}` : ""}`
+  if (donde.tipo === "cobros" && donde.collabId) return `/workspace/collabs/${donde.collabId}/facturacion`
+  if (donde.tipo === "crm" && donde.registro) {
+    const ruta = { propuesta: "/workspace/crm", marca: "/workspace/crm/marcas", contacto: "/workspace/crm/contactos" }[donde.registro.tipo]
+    return `${ruta}?registro=${donde.registro.id}`
   }
-  if (donde.pagina === "crm") {
-    switch (donde.tipo) {
-      case "propuesta":
-        return donde.registroId ? `/workspace/crm?registro=${donde.registroId}` : "/workspace/crm"
-      case "marca":
-        return donde.registroId ? `/workspace/crm/marcas?registro=${donde.registroId}` : "/workspace/crm/marcas"
-      case "contacto":
-        return donde.registroId ? `/workspace/crm/contactos?registro=${donde.registroId}` : "/workspace/crm/contactos"
-      case "media-kit":
-        return "/workspace/crm/media-kit"
-      case "plantillas":
-        return "/workspace/crm/plantillas"
-    }
-  }
-  return undefined
+  return HREF_TIPO[donde.tipo]
 }
 
-/** Para las listas de cada página: las tareas de una campaña, de una de sus pestañas, de una pieza o de un registro. */
-export type FiltroDonde = { pagina?: PaginaTarea; tipo?: TipoTarea; collabId?: string; piezaId?: string; registroId?: string }
+/** Para las listas de cada página: las tareas de un tipo, de una campaña, de una pieza o de una ficha del CRM. */
+export type FiltroDonde = { tipo?: TipoTarea; collabId?: string; piezaId?: string; registro?: RegistroTarea }
 
 export function perteneceA(t: Tarea, f: FiltroDonde): boolean {
   const d = t.donde
-  if (f.pagina && d.pagina !== f.pagina) return false
   if (f.tipo && d.tipo !== f.tipo) return false
-  if (f.collabId && (d.pagina !== "campanas" || d.collabId !== f.collabId)) return false
-  if (f.piezaId && (d.pagina !== "campanas" || d.piezaId !== f.piezaId)) return false
-  if (f.registroId && (d.pagina !== "crm" || d.registroId !== f.registroId)) return false
+  if (f.collabId && collabIdDe(d) !== f.collabId) return false
+  if (f.piezaId && (d.tipo !== "collabs" || d.piezaId !== f.piezaId)) return false
+  if (f.registro && (d.tipo !== "crm" || d.registro?.tipo !== f.registro.tipo || d.registro.id !== f.registro.id)) return false
   return true
 }
 
@@ -414,23 +396,15 @@ export function tareasDe(tareas: Tarea[], f: FiltroDonde) {
   return tareas.filter((t) => perteneceA(t, f))
 }
 
-/** Lo que pone una lista de una página a las tareas que nacen en ella: su sitio, ya elegido. */
-export function dondeDeFiltro(f: FiltroDonde): DondeTarea | undefined {
-  const pagina = f.pagina ?? (f.collabId ? "campanas" : f.registroId ? "crm" : undefined)
-  // Los `as` de abajo son seguros: `paginaDeTipo` acaba de comprobar que el tipo es de esa página.
-  if (pagina === "campanas" && f.collabId) {
-    const tipo = f.tipo && paginaDeTipo(f.tipo) === "campanas" ? f.tipo : "general"
-    return { pagina, tipo: tipo as Extract<DondeTarea, { pagina: "campanas" }>["tipo"], collabId: f.collabId, piezaId: f.piezaId }
-  }
-  if (pagina === "crm") {
-    const tipo = f.tipo && paginaDeTipo(f.tipo) === "crm" ? f.tipo : "propuesta"
-    return { pagina, tipo: tipo as Extract<DondeTarea, { pagina: "crm" }>["tipo"], registroId: f.registroId }
-  }
-  if (pagina === "personal") {
-    const tipo = f.tipo && paginaDeTipo(f.tipo) === "personal" ? f.tipo : "personal"
-    return { pagina, tipo: tipo as Extract<DondeTarea, { pagina: "personal" }>["tipo"] }
-  }
-  return undefined
+/**
+ * El mismo sitio con otro tipo: la campaña pasa de Collabs a Cobros (y al revés); lo demás no tiene
+ * sentido en el tipo nuevo y se quita.
+ */
+export function cambiarTipo(donde: DondeTarea, tipo: TipoTarea): DondeTarea {
+  if (donde.tipo === tipo) return donde
+  const collabId = collabIdDe(donde)
+  if (tipo === "collabs" || tipo === "cobros") return collabId ? { tipo, collabId } : { tipo }
+  return { tipo }
 }
 
 // ───────────────────────── Nueva y actividad ─────────────────────────

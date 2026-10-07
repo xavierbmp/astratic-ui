@@ -2,7 +2,7 @@
 import { ESTADOS_ABIERTOS, type Collab, type Marca, type Propuesta, type Tarea } from "@/lib/influencer/modelo"
 import type { Tint } from "@/lib/influencer/tints"
 import { hitosDePieza, marcaDe, tituloCorto, type TipoHito } from "@/lib/influencer/collabs"
-import { diaDeTarea, estaCerrada, hrefDonde } from "@/lib/influencer/tareas"
+import { collabIdDe, diaDeTarea, estaCerrada, hrefDonde } from "@/lib/influencer/tareas"
 
 export type TipoEvento = TipoHito | "cobro" | "tarea" | "paso" | "ventana"
 
@@ -57,7 +57,7 @@ export function eventosDeTareas(tareas: Tarea[], collabs: Collab[]): Evento[] {
   return tareas
     .filter((t) => t.origen !== "auto" && diaDeTarea(t))
     .map((t) => {
-      const collabId = t.donde.pagina === "campanas" ? t.donde.collabId : undefined
+      const collabId = collabIdDe(t.donde)
       const collab = collabId ? collabs.find((c) => c.id === collabId) : undefined
       return {
         id: `tarea-${t.id}`,

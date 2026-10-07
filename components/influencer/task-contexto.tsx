@@ -4,24 +4,23 @@ import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
 import { fmt } from "@/lib/format"
 import { ESTADOS_COBRO, ESTADOS_COLLAB, ESTADOS_PIEZA, ESTADOS_PROPUESTA, TIPOS_COLLAB, estadoDe, type Tarea } from "@/lib/influencer/modelo"
-import { collabDe, hrefDonde, nombreDeTipo, type ContextoTareas } from "@/lib/influencer/tareas"
+import { collabDe, hrefDonde, type ContextoTareas } from "@/lib/influencer/tareas"
 import { importeDePlazo } from "@/lib/influencer/facturacion"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/app/status-badge"
 
-/** El texto del enlace a su página, según dónde vive. */
-const IR_A: Partial<Record<Tarea["donde"]["tipo"], string>> = {
-  general: "Ir a la campaña",
-  contenidos: "Ir a los contenidos",
-  materiales: "Ir a los materiales",
-  contrato: "Ir al contrato",
-  cobros: "Ir a la facturación",
-  resultados: "Ir a los resultados",
-  propuesta: "Ir a la propuesta",
-  marca: "Ir a la marca",
-  contacto: "Ir al contacto",
-  "media-kit": "Ir al media kit",
-  plantillas: "Ir a las plantillas",
+/** El texto del enlace a donde se trabaja la tarea. */
+function irA(d: Tarea["donde"]): string {
+  switch (d.tipo) {
+    case "collabs":
+      return d.piezaId ? "Ir a la pieza" : d.collabId ? "Ir a la campaña" : "Ir a Collabs"
+    case "cobros":
+      return d.collabId ? "Ir a la facturación" : "Ir a Cobros"
+    case "crm":
+      return d.registro ? { propuesta: "Ir a la propuesta", marca: "Ir a la marca", contacto: "Ir al contacto" }[d.registro.tipo] : "Ir al CRM"
+    default:
+      return "Ir"
+  }
 }
 
 function Dato({ label, children }: { label: string; children: React.ReactNode }) {
@@ -37,15 +36,17 @@ function Datos({ children }: { children: React.ReactNode }) {
   return <dl className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1.5">{children}</dl>
 }
 
-/** Lo que hay que tener delante para hacer la tarea, según dónde vive. */
+/** Lo que hay que tener delante para hacer la tarea, según de qué es. */
 function Contenido({ tarea, ctx }: { tarea: Tarea; ctx: ContextoTareas }) {
   const d = tarea.donde
   const collab = collabDe(d, ctx)
-  if (collab && d.pagina === "campanas") {
+  if (collab) {
     const marca = ctx.marcas.find((m) => m.id === collab.marcaId)
-    switch (d.tipo) {
-      case "contenidos": {
-        const piezas = d.piezaId ? collab.piezas.filter((p) => p.id === d.piezaId) : collab.piezas
+    // De una pieza: la pieza; de Cobros: el cobro; si no, la campaña.
+    const vista = d.tipo === "cobros" ? "cobros" : d.tipo === "collabs" && d.piezaId ? "pieza" : "campana"
+    switch (vista) {
+      case "pieza": {
+        const piezas = collab.piezas.filter((p) => p.id === (d.tipo === "collabs" ? d.piezaId : undefined))
         return (
           <ul className="grid gap-2">
             {piezas.map((p) => {
@@ -85,24 +86,6 @@ function Contenido({ tarea, ctx }: { tarea: Tarea; ctx: ContextoTareas }) {
           </Datos>
         )
       }
-      case "resultados": {
-        const publicadas = collab.piezas.filter((p) => p.publicada)
-        return publicadas.length ? (
-          <ul className="grid gap-1 text-sm">
-            {publicadas.map((p) => (
-              <li key={p.id} className="flex justify-between gap-2">
-                <span className="truncate">{p.titulo}</span>
-                <span className="text-xs text-muted-foreground">{fmt.date(p.publicada?.fecha ?? p.publicacion)}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">Aún no hay nada publicado de esta campaña.</p>
-        )
-      }
-      case "materiales":
-      case "contrato":
-        return <p className="text-sm text-muted-foreground">{d.tipo === "materiales" ? "Lo que ha mandado la marca y lo tuyo, con su descarga." : "El contrato de la campaña, su firma y las cláusulas a vigilar."}</p>
       default: {
         const estado = estadoDe(ESTADOS_COLLAB, collab.estado)
         return (
@@ -126,9 +109,10 @@ function Contenido({ tarea, ctx }: { tarea: Tarea; ctx: ContextoTareas }) {
       }
     }
   }
-  if (d.pagina === "crm") {
-    if (d.tipo === "propuesta" && d.registroId) {
-      const p = ctx.propuestas.find((x) => x.id === d.registroId)
+  if (d.tipo === "crm" && d.registro) {
+    const { tipo, id } = d.registro
+    if (tipo === "propuesta") {
+      const p = ctx.propuestas.find((x) => x.id === id)
       if (!p) return null
       const e = estadoDe(ESTADOS_PROPUESTA, p.estado)
       const contacto = ctx.contactos.find((c) => c.id === p.contactoId) ?? ctx.contactos.find((c) => c.marcaId === p.marcaId && c.principal)
@@ -158,8 +142,8 @@ function Contenido({ tarea, ctx }: { tarea: Tarea; ctx: ContextoTareas }) {
         </Datos>
       )
     }
-    if (d.tipo === "marca" && d.registroId) {
-      const m = ctx.marcas.find((x) => x.id === d.registroId)
+    if (tipo === "marca") {
+      const m = ctx.marcas.find((x) => x.id === id)
       if (!m) return null
       const principal = ctx.contactos.find((c) => c.marcaId === m.id && c.principal)
       return (
@@ -170,8 +154,8 @@ function Contenido({ tarea, ctx }: { tarea: Tarea; ctx: ContextoTareas }) {
         </Datos>
       )
     }
-    if (d.tipo === "contacto" && d.registroId) {
-      const c = ctx.contactos.find((x) => x.id === d.registroId)
+    if (tipo === "contacto") {
+      const c = ctx.contactos.find((x) => x.id === id)
       if (!c) return null
       return (
         <Datos>
@@ -192,15 +176,18 @@ function Contenido({ tarea, ctx }: { tarea: Tarea; ctx: ContextoTareas }) {
   return null
 }
 
+/** Si una tarea tiene algo que enseñar en «Para hacerla»: su campaña o su ficha del CRM. */
+export const tieneContexto = (t: Tarea) => (t.donde.tipo === "collabs" || t.donde.tipo === "cobros" ? !!t.donde.collabId : t.donde.tipo === "crm" && !!t.donde.registro)
+
 /**
  * El bloque de la derecha de una tarea (o de abajo, en la ficha estrecha): lo que hace falta
- * para hacerla según dónde vive. En una campaña, su brief compacto, la pieza con su revisión o los
- * cobros; en el CRM, la propuesta, la marca o el contacto. De consulta, con un enlace a su página.
- * Las de Personal no tienen.
+ * para hacerla según de qué es. De una campaña, su resumen, la pieza con su revisión o el cobro; del
+ * CRM, la propuesta, la marca o el contacto. De consulta, con un enlace a donde se trabaja. Las que
+ * no son de ninguna campaña ni ficha no tienen.
  */
 export function TareaContexto({ tarea, ctx, className }: { tarea: Tarea; ctx: ContextoTareas; className?: string }) {
   const href = hrefDonde(tarea.donde)
-  if (tarea.donde.pagina === "personal") return null
+  if (!tieneContexto(tarea)) return null
   return (
     <div className={className}>
       <div className="grid gap-3">
@@ -208,7 +195,7 @@ export function TareaContexto({ tarea, ctx, className }: { tarea: Tarea; ctx: Co
         {href && (
           <Button variant="outline" size="sm" asChild className="justify-self-start">
             <Link href={href}>
-              {IR_A[tarea.donde.tipo] ?? `Ir a ${nombreDeTipo(tarea.donde).toLowerCase()}`} <ArrowRightIcon />
+              {irA(tarea.donde)} <ArrowRightIcon />
             </Link>
           </Button>
         )}

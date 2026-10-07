@@ -1,10 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { CheckIcon, FlagIcon, KanbanSquareIcon, ListChecksIcon, RepeatIcon, UserRoundIcon, XIcon } from "lucide-react"
+import { CheckIcon, FlagIcon, KanbanSquareIcon, ListChecksIcon, ReceiptEuroIcon, RepeatIcon, SparklesIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { tintClass } from "@/lib/influencer/tints"
-import { ESTADOS_TAREA, PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type PrioridadTarea, type Repeticion, type Tarea } from "@/lib/influencer/modelo"
+import { ESTADOS_TAREA, PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type PrioridadTarea, type Repeticion, type Tarea, type TipoTarea } from "@/lib/influencer/modelo"
 import { collabDe, describirRepeticion, estaCerrada, estaVencida, hrefDonde, horaDeTarea, marcaIdDe, textoDonde, type ContextoTareas } from "@/lib/influencer/tareas"
 import { fechaCercana } from "@/lib/influencer/cifras-collabs"
 import { diasEntre, soloFecha } from "@/lib/influencer/fechas"
@@ -15,7 +15,7 @@ import { BrandMark } from "@/components/influencer/brand-mark"
 // Las piezas pequeñas de una tarea, iguales en Hoy, la lista, la tabla, el tablero y la ficha.
 
 /** El círculo para hacerla: se rellena al hacerla y lleva una equis si se canceló. */
-export function CasillaTarea({ tarea, onToggle, size = "md" }: { tarea: Pick<Tarea, "titulo" | "estado">; onToggle: () => void; size?: "sm" | "md" }) {
+export function CasillaTarea({ tarea, onToggle, size = "md" }: { tarea: Pick<Tarea, "titulo" | "estado">; onToggle: () => void; size?: "xs" | "sm" | "md" }) {
   const hecha = tarea.estado === "hecha"
   const cancelada = tarea.estado === "cancelada"
   return (
@@ -30,11 +30,11 @@ export function CasillaTarea({ tarea, onToggle, size = "md" }: { tarea: Pick<Tar
       }}
       className={cn(
         "grid flex-none place-items-center rounded-full border-[1.5px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
-        size === "sm" ? "size-4" : "size-[18px]",
+        size === "xs" ? "size-3.5 border" : size === "sm" ? "size-4" : "size-[18px]",
         hecha ? "border-success bg-success text-background" : cancelada ? "border-dashed border-muted-foreground text-muted-foreground" : "border-control hover:border-foreground",
       )}
     >
-      {hecha && <CheckIcon className={size === "sm" ? "size-2.5" : "size-3"} strokeWidth={3} aria-hidden />}
+      {hecha && <CheckIcon className={size === "md" ? "size-3" : size === "sm" ? "size-2.5" : "size-2"} strokeWidth={3} aria-hidden />}
       {cancelada && <XIcon className="size-2.5" strokeWidth={3} aria-hidden />}
     </button>
   )
@@ -70,16 +70,21 @@ export function EstadoTareaBadge({ tarea, hoy }: { tarea: Pick<Tarea, "estado" |
   )
 }
 
+/** El icono de cada página, el mismo que en la barra de navegación. */
+const ICONO_TIPO: Record<Exclude<TipoTarea, "sin-tipo">, typeof KanbanSquareIcon> = { crm: KanbanSquareIcon, collabs: SparklesIcon, cobros: ReceiptEuroIcon }
+
 /**
- * Dónde vive la tarea, en un chip: el logo de la marca y «Lumea Skin · Cobros». Con `enlace`, lleva
- * a su página (la pestaña de la campaña o la ficha del CRM).
+ * De qué es la tarea, en un chip: el logo de la marca y «Lumea Skin · Cobros», o el icono de su
+ * página si no es de ninguna campaña ni ficha. Las de sin tipo no llevan chip. Con `enlace`, lleva
+ * a donde se trabaja (la campaña, la ficha del CRM o la página).
  */
 export function DondeChip({ donde, ctx, enlace, className }: { donde: DondeTarea; ctx: ContextoTareas; enlace?: boolean; className?: string }) {
   const marcaId = marcaIdDe(donde, ctx)
   const marca = marcaId ? ctx.marcas.find((m) => m.id === marcaId) : undefined
   const texto = textoDonde(donde, ctx)
+  if (donde.tipo === "sin-tipo") return null
   const href = enlace ? hrefDonde(donde) : undefined
-  const Icono = donde.pagina === "personal" ? UserRoundIcon : KanbanSquareIcon
+  const Icono = ICONO_TIPO[donde.tipo]
   const contenido = (
     <>
       {marca ? <BrandMark name={marca.nombre} tint={collabDe(donde, ctx)?.tint ?? marca.tint} size="xs" className="size-4 rounded text-[8px]" /> : <Icono className="size-3.5 flex-none text-muted-foreground" aria-hidden />}
@@ -207,6 +212,15 @@ export function NombreGrupoTarea({ campo, grupo, ctx, etiquetas }: { campo?: str
     }
     case "cuando":
       return <span className={cn(grupo.id === "vencidas" && "text-danger", grupo.id === "hoy" && "text-warning")}>{grupo.label}</span>
+    case "tipo": {
+      const Icono = grupo.id in ICONO_TIPO ? ICONO_TIPO[grupo.id as Exclude<TipoTarea, "sin-tipo">] : null // id de LISTA_TIPOS_TAREA
+      return (
+        <span className={cn("inline-flex items-center gap-1.5", !Icono && "text-muted-foreground")}>
+          {Icono && <Icono className="size-4 text-muted-foreground" aria-hidden />}
+          {grupo.label}
+        </span>
+      )
+    }
     default:
       return <span>{grupo.label}</span>
   }

@@ -56,15 +56,15 @@ export function TaskBlockExample() {
   )
 }
 
-const DONDE_LUMEA: DondeTarea = { pagina: "campanas", tipo: "contenidos", collabId: "lumea" }
+const DONDE_LUMEA: DondeTarea = { tipo: "collabs", collabId: "lumea" }
 
-/** La lista de tareas de un sitio (aquí, los contenidos de una campaña): agrupada por cuándo tocan y con alta rápida. */
+/** La lista de tareas de un sitio (aquí, las de una campaña): agrupada por cuándo tocan y con alta rápida. */
 export function TaskTableExample() {
   const [tareas, setTareas] = React.useState<Tarea[]>(demoTareas)
-  const deLumea = tareas.filter((t) => t.donde.pagina === "campanas" && t.donde.collabId === "lumea" && t.donde.tipo === "contenidos")
+  const deLumea = tareas.filter((t) => t.donde.tipo === "collabs" && t.donde.collabId === "lumea")
   return (
     <Block className="max-w-2xl">
-      <BlockHeader title="Tareas de los contenidos" count={deLumea.filter((t) => t.estado !== "hecha" && !t.padreId).length} />
+      <BlockHeader title="Tareas de la campaña" count={deLumea.filter((t) => t.estado !== "hecha" && !t.padreId).length} />
       <TaskTable
         tareas={deLumea}
         todas={tareas}

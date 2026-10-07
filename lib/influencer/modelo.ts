@@ -594,58 +594,27 @@ export type PlantillaGuion = { id: string; nombre: string; descripcion: string; 
 // ───────────────────────── Tareas ─────────────────────────
 
 /**
- * La página del workspace a la que pertenece una tarea: además de en Tareas, sale en ella. Dentro
- * de cada página, el tipo dice de qué parte es (en una campaña, sus pestañas). No hay catálogo de
- * tipos de acción: lo que se hace lo dice el título.
+ * El tipo de una tarea es la página del workspace en la que sale, además de en Tareas. Sin tipo es
+ * una tarea general: solo sale en Tareas y en el Inicio. Lo que se hace lo dice el título.
  */
-export type PaginaTarea = "campanas" | "crm" | "personal"
+export type TipoTarea = "sin-tipo" | "crm" | "collabs" | "cobros"
 
-export type TipoTareaCampana = "general" | "contenidos" | "materiales" | "contrato" | "cobros" | "resultados"
-export type TipoTareaCrm = "propuesta" | "marca" | "contacto" | "media-kit" | "plantillas"
-export type TipoTareaPersonal = "personal" | "administracion" | "astratic"
-export type TipoTarea = TipoTareaCampana | TipoTareaCrm | TipoTareaPersonal
+export const TIPOS_TAREA: Record<TipoTarea, string> = { "sin-tipo": "Sin tipo", crm: "CRM", collabs: "Collabs", cobros: "Cobros" }
+export const LISTA_TIPOS_TAREA = Object.keys(TIPOS_TAREA) as TipoTarea[]
+
+/** La ficha del CRM de la que es una tarea del CRM. */
+export type RegistroTarea = { tipo: "propuesta" | "marca" | "contacto"; id: string }
 
 /**
- * Dónde vive una tarea. En Campañas, siempre de una collab y, en Contenidos, quizá de una pieza; en
- * el CRM, del registro si es de uno (una propuesta, una marca o un contacto, según el tipo).
+ * De qué es una tarea: su tipo y, dentro, lo que concreta. En Collabs y Cobros, la campaña (y, si
+ * nace de un contenido, su pieza); en el CRM, la propuesta, la marca o el contacto. Lo de dentro es
+ * opcional: una tarea de Cobros puede no ser de ninguna campaña.
  */
 export type DondeTarea =
-  | { pagina: "campanas"; tipo: TipoTareaCampana; collabId: string; piezaId?: string }
-  | { pagina: "crm"; tipo: TipoTareaCrm; registroId?: string }
-  | { pagina: "personal"; tipo: TipoTareaPersonal }
-
-export const PAGINAS_TAREA: Record<PaginaTarea, string> = { campanas: "Campañas", crm: "CRM", personal: "Personal" }
-export const LISTA_PAGINAS_TAREA = Object.keys(PAGINAS_TAREA) as PaginaTarea[]
-
-export const TIPOS_TAREA_CAMPANA: Record<TipoTareaCampana, string> = {
-  general: "General",
-  contenidos: "Contenidos",
-  materiales: "Materiales",
-  contrato: "Contrato",
-  cobros: "Cobros",
-  resultados: "Resultados",
-}
-
-export const TIPOS_TAREA_CRM: Record<TipoTareaCrm, string> = {
-  propuesta: "Propuesta",
-  marca: "Marca",
-  contacto: "Contacto",
-  "media-kit": "Media kit",
-  plantillas: "Plantillas",
-}
-
-export const TIPOS_TAREA_PERSONAL: Record<TipoTareaPersonal, string> = {
-  personal: "Personal",
-  administracion: "Administración",
-  astratic: "Astratic",
-}
-
-/** Los tipos de cada página, en el orden en que se ofrecen. */
-export const TIPOS_TAREA: { [P in PaginaTarea]: Record<Extract<DondeTarea, { pagina: P }>["tipo"], string> } = {
-  campanas: TIPOS_TAREA_CAMPANA,
-  crm: TIPOS_TAREA_CRM,
-  personal: TIPOS_TAREA_PERSONAL,
-}
+  | { tipo: "sin-tipo" }
+  | { tipo: "collabs"; collabId?: string; piezaId?: string }
+  | { tipo: "cobros"; collabId?: string }
+  | { tipo: "crm"; registro?: RegistroTarea }
 
 export type EstadoTarea = "por-hacer" | "en-curso" | "esperando" | "hecha" | "cancelada"
 
@@ -728,6 +697,8 @@ export type Tarea = {
   origen: OrigenTarea
   /** La descripción (HTML del editor). */
   notas?: string
+  /** Los valores de los campos que ha creado ella, por id de campo. */
+  valores?: Record<string, ValorCampoTarea>
   actividad: EntradaTarea[]
   /** Desde cuándo está «Esperando»: para decir cuántos días lleva. */
   esperandoDesde?: string
@@ -736,13 +707,30 @@ export type Tarea = {
   hechaEl?: string
 }
 
+/** Los tipos de campo que se pueden crear para las tareas, como las propiedades de Notion. */
+export type TipoCampoTarea = "texto" | "numero" | "fecha" | "select" | "multiselect" | "casilla" | "url"
+
+export const TIPOS_CAMPO_TAREA: Record<TipoCampoTarea, string> = {
+  texto: "Texto",
+  numero: "Número",
+  fecha: "Fecha",
+  select: "Selección",
+  multiselect: "Selección múltiple",
+  casilla: "Casilla",
+  url: "Enlace",
+}
+
+/** Un campo creado por ella: sale en la ficha de todas las tareas, en la tabla y en filtros, orden y grupos. */
+export type CampoTarea = { id: string; nombre: string; tipo: TipoCampoTarea; opciones?: { id: string; label: string }[] }
+
+export type ValorCampoTarea = string | number | boolean | string[]
+
 /** Una tarea a medida para repetir: «Factura de campaña» con sus subtareas. */
 export type PlantillaTarea = {
   id: string
   nombre: string
   titulo: string
-  /** Página y tipo con los que nace; la campaña o el registro, si no los pone la pestaña, se eligen al crearla. */
-  pagina: PaginaTarea
+  /** El tipo con el que nace; la campaña o la ficha del CRM se eligen al crearla. */
   tipo: TipoTarea
   prioridad: PrioridadTarea
   etiquetas: string[]

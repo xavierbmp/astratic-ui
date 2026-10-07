@@ -1,36 +1,40 @@
 // Los campos de las tareas: por ellos se filtra, se ordena y se agrupa en la página de Tareas y en
 // sus listas de cada página. Incluyen los calculados (cuándo toca, si está vencida, el proyecto, la
-// marca, los días esperando), que no se escriben: salen de la tarea, de hoy y de dónde vive.
+// marca, los días esperando), que no se escriben: salen de la tarea, de hoy y de qué es; y los
+// campos que ha creado ella.
 import type { CampoFiltrable } from "@/lib/filtros/core"
 import { diasEntre, lunesDe, soloFecha, sumarDias } from "@/lib/filtros/fechas"
 import { SIN_VALOR } from "@/lib/vistas/core"
 import {
   ESTADOS_TAREA,
   GRUPOS_ESTADO_TAREA,
-  LISTA_PAGINAS_TAREA,
+  LISTA_TIPOS_TAREA,
   ORIGENES_TAREA,
-  PAGINAS_TAREA,
   PRIORIDADES_TAREA,
+  TIPOS_TAREA,
+  type CampoTarea,
   type EstadoTarea,
   type EtiquetaTarea,
   type GrupoEstadoTarea,
   type OrigenTarea,
-  type PaginaTarea,
   type PrioridadTarea,
   type Tarea,
+  type TipoCampoTarea,
   type TipoTarea,
+  type ValorCampoTarea,
 } from "@/lib/influencer/modelo"
 import {
   CUANDO_TAREA,
+  cambiarTipo,
+  collabIdDe,
   conEstado,
   cuandoDe,
   estaVencida,
   grupoDeEstado,
   marcaIdDe,
-  paginaDeTipo,
+  nombreDeCampana,
   proyectoDe,
   proyectosPosibles,
-  tiposDePagina,
   type ContextoTareas,
   type CuandoTarea,
 } from "@/lib/influencer/tareas"
@@ -41,14 +45,17 @@ export type ParamsCamposTarea = {
   hoy: string
   /** Todas las tareas: para saber cuáles tienen subtareas. */
   tareas: Tarea[]
-  /** En la pestaña de una página, los tipos son solo los suyos y no hace falta el campo «Página». */
-  pagina?: PaginaTarea
+  /** Los campos que ha creado ella. */
+  propios?: CampoTarea[]
 }
 
-export function camposTarea({ ctx, etiquetas, hoy, tareas, pagina }: ParamsCamposTarea): CampoFiltrable<Tarea>[] {
+/** El id con el que un campo propio entra en filtros, orden, grupos y columnas: «propio:c-plataforma». */
+export const idCampoPropio = (id: string) => `propio:${id}`
+
+const TIPO_FILTRO: Record<TipoCampoTarea, CampoFiltrable<Tarea>["tipo"]> = { texto: "texto", url: "texto", numero: "numero", fecha: "fecha", select: "select", multiselect: "multiselect", casilla: "booleano" }
+
+export function camposTarea({ ctx, etiquetas, hoy, tareas, propios = [] }: ParamsCamposTarea): CampoFiltrable<Tarea>[] {
   const conHijas = new Set(tareas.filter((t) => t.padreId).map((t) => t.padreId))
-  const paginas = pagina ? [pagina] : LISTA_PAGINAS_TAREA
-  const nombreMarca = (id: string) => ctx.marcas.find((m) => m.id === id)?.nombre ?? ""
   const campos: CampoFiltrable<Tarea>[] = [
     { id: "titulo", label: "Título", tipo: "texto", grupo: "Tarea", valor: (t) => t.titulo },
     { id: "estado", label: "Estado", tipo: "select", grupo: "Tarea", opciones: ESTADOS_TAREA.map((e) => ({ value: e.id, label: e.label })), valor: (t) => t.estado },
@@ -66,41 +73,19 @@ export function camposTarea({ ctx, etiquetas, hoy, tareas, pagina }: ParamsCampo
     { id: "subtareas", label: "Tiene subtareas", tipo: "booleano", grupo: "Tarea", valor: (t) => conHijas.has(t.id) },
     { id: "esSubtarea", label: "Es subtarea", tipo: "booleano", grupo: "Tarea", valor: (t) => !!t.padreId },
   ]
-  if (!pagina) {
-    campos.push({ id: "pagina", label: "Página", tipo: "select", grupo: "Dónde", opciones: LISTA_PAGINAS_TAREA.map((p) => ({ value: p, label: PAGINAS_TAREA[p] })), valor: (t) => t.donde.pagina })
-  }
   campos.push(
+    { id: "tipo", label: "Tipo", tipo: "select", grupo: "De qué es", opciones: LISTA_TIPOS_TAREA.map((t) => ({ value: t, label: TIPOS_TAREA[t] })), valor: (t) => t.donde.tipo },
     {
-      id: "tipo",
-      label: "Tipo",
-      tipo: "select",
-      grupo: "Dónde",
-      // En General el tipo dice también la página: «Campañas › Cobros».
-      opciones: paginas.flatMap((p) => tiposDePagina(p).map((x) => ({ value: x.id, label: pagina ? x.label : `${PAGINAS_TAREA[p]} › ${x.label}` }))),
-      valor: (t) => t.donde.tipo,
-    },
-    {
-      id: "proyecto",
-      label: "Proyecto",
-      tipo: "select",
-      grupo: "Dónde",
-      opciones: proyectosPosibles(ctx)
-        .filter((p) => !pagina || (pagina === "campanas" ? p.grupo === "Campañas" : pagina === "crm" && p.grupo !== "Campañas"))
-        .map((p) => ({ value: p.id, label: p.label })),
-      valor: (t) => proyectoDe(t.donde, ctx)?.id ?? null,
-    },
-    { id: "marca", label: "Marca", tipo: "select", grupo: "Dónde", opciones: ctx.marcas.map((m) => ({ value: m.id, label: m.nombre })), valor: (t) => marcaIdDe(t.donde, ctx) ?? null },
-  )
-  if (!pagina || pagina === "campanas") {
-    campos.push({
       id: "campana",
       label: "Campaña",
       tipo: "select",
-      grupo: "Dónde",
-      opciones: ctx.collabs.map((c) => ({ value: c.id, label: `${nombreMarca(c.marcaId)} · ${c.campana}` })),
-      valor: (t) => (t.donde.pagina === "campanas" ? t.donde.collabId : null),
-    })
-  }
+      grupo: "De qué es",
+      opciones: ctx.collabs.map((c) => ({ value: c.id, label: nombreDeCampana(c, ctx) })),
+      valor: (t) => collabIdDe(t.donde) ?? null,
+    },
+    { id: "proyecto", label: "Proyecto", tipo: "select", grupo: "De qué es", opciones: proyectosPosibles(ctx).map((p) => ({ value: p.id, label: p.label })), valor: (t) => proyectoDe(t.donde, ctx)?.id ?? null },
+    { id: "marca", label: "Marca", tipo: "select", grupo: "De qué es", opciones: ctx.marcas.map((m) => ({ value: m.id, label: m.nombre })), valor: (t) => marcaIdDe(t.donde, ctx) ?? null },
+  )
   campos.push(
     { id: "cuando", label: "Cuándo", tipo: "select", grupo: "Fechas", opciones: CUANDO_TAREA.map((c) => ({ value: c.id, label: c.label })), valor: (t) => cuandoDe(t, hoy) },
     { id: "fecha", label: "Fecha", tipo: "fecha", grupo: "Fechas", valor: (t) => (t.fecha ? soloFecha(t.fecha) : null) },
@@ -110,8 +95,24 @@ export function camposTarea({ ctx, etiquetas, hoy, tareas, pagina }: ParamsCampo
     { id: "origen", label: "Origen", tipo: "select", grupo: "Más", opciones: (Object.keys(ORIGENES_TAREA) as OrigenTarea[]).map((o) => ({ value: o, label: ORIGENES_TAREA[o] })), valor: (t) => t.origen },
     { id: "creadaEl", label: "Creada", tipo: "fecha", grupo: "Más", valor: (t) => soloFecha(t.creadaEl) },
     { id: "hechaEl", label: "Hecha el", tipo: "fecha", grupo: "Más", valor: (t) => (t.hechaEl ? soloFecha(t.hechaEl) : null) },
+    ...propios.map((c): CampoFiltrable<Tarea> => ({
+      id: idCampoPropio(c.id),
+      label: c.nombre,
+      tipo: TIPO_FILTRO[c.tipo],
+      grupo: "Mis campos",
+      opciones: c.opciones?.map((o) => ({ value: o.id, label: o.label })),
+      valor: (t) => t.valores?.[c.id] ?? (c.tipo === "casilla" ? false : null),
+    })),
   )
   return campos
+}
+
+/** La tarea con otro valor en un campo propio; vacío lo quita. */
+export function conValor(t: Tarea, campoId: string, valor: ValorCampoTarea | null | undefined): Tarea {
+  const valores = { ...t.valores }
+  if (valor === null || valor === undefined || valor === "" || (Array.isArray(valor) && valor.length === 0)) delete valores[campoId]
+  else valores[campoId] = valor
+  return { ...t, valores }
 }
 
 // ───────────────────────── Dar un valor a una tarea ─────────────────────────
@@ -150,7 +151,7 @@ function diaDeTramo(tramo: CuandoTarea, hoy: string): string | null | undefined 
  * calculado, como la marca, o una campaña sin elegir cuál). Lo usan arrastrar entre grupos y
  * crear dentro de un grupo o de una vista filtrada, como en Notion.
  */
-export function asignarCampo(t: Tarea, a: Asignacion, ref: { hoy: string; ahora: string }): Tarea | null {
+export function asignarCampo(t: Tarea, a: Asignacion, ref: { hoy: string; ahora: string; propios?: CampoTarea[] }): Tarea | null {
   const vacio = a.valor === SIN_VALOR
   switch (a.campo) {
     case "estado":
@@ -181,39 +182,33 @@ export function asignarCampo(t: Tarea, a: Asignacion, ref: { hoy: string; ahora:
       return vacio ? { ...t, fecha: undefined, fechaFin: undefined } : /^\d{4}-\d{2}-\d{2}$/.test(a.valor) ? { ...t, fecha: mismoDiaConHora(t, a.valor) } : null
     case "fechaLimite":
       return vacio ? { ...t, fechaLimite: undefined } : /^\d{4}-\d{2}-\d{2}$/.test(a.valor) ? { ...t, fechaLimite: a.valor } : null
-    case "pagina": {
-      if (vacio) return null
-      if (t.donde.pagina === a.valor) return t
-      // A Campañas no se puede pasar sin elegir la campaña: eso se hace en la ficha.
-      if (a.valor === "crm") return { ...t, donde: { pagina: "crm", tipo: "propuesta" } }
-      if (a.valor === "personal") return { ...t, donde: { pagina: "personal", tipo: "personal" } }
-      return null
-    }
     case "tipo":
-      return vacio ? null : conTipo(t, a.valor as TipoTarea) // valor de las opciones de «tipo»
+      return vacio ? null : { ...t, donde: cambiarTipo(t.donde, a.valor as TipoTarea) } // valor de las opciones de «tipo»
     case "campana": {
-      if (vacio) return null
-      const tipo = t.donde.pagina === "campanas" ? t.donde.tipo : "general"
-      return { ...t, donde: { pagina: "campanas", tipo, collabId: a.valor } }
+      // Sin campaña sigue siendo de su tipo; con campaña, si no era de Collabs ni de Cobros, pasa a Collabs.
+      if (vacio) return t.donde.tipo === "collabs" || t.donde.tipo === "cobros" ? { ...t, donde: { tipo: t.donde.tipo } } : t
+      return { ...t, donde: { tipo: t.donde.tipo === "cobros" ? "cobros" : "collabs", collabId: a.valor } }
     }
     case "proyecto": {
       if (vacio) return null
       const [clase, id] = a.valor.split(":")
       if (clase === "collab") return asignarCampo(t, { campo: "campana", valor: id }, ref)
-      if (clase === "propuesta" || clase === "marca" || clase === "contacto") return { ...t, donde: { pagina: "crm", tipo: clase, registroId: id } }
+      if (clase === "propuesta" || clase === "marca" || clase === "contacto") return { ...t, donde: { tipo: "crm", registro: { tipo: clase, id } } }
       return null
     }
-    default:
-      return null
+    default: {
+      const campo = ref.propios?.find((c) => idCampoPropio(c.id) === a.campo)
+      if (!campo) return null
+      if (campo.tipo === "multiselect") {
+        // Como las etiquetas: se quita el valor del grupo del que sale y se pone el nuevo.
+        const actual = t.valores?.[campo.id]
+        const lista = (Array.isArray(actual) ? actual : []).filter((v) => v !== a.desde)
+        return conValor(t, campo.id, vacio ? lista : [...new Set([...lista, a.valor])])
+      }
+      if (vacio) return conValor(t, campo.id, null)
+      if (campo.tipo === "casilla") return conValor(t, campo.id, a.valor === "true")
+      if (campo.tipo === "numero") return Number.isFinite(Number(a.valor)) ? conValor(t, campo.id, Number(a.valor)) : null
+      return conValor(t, campo.id, a.valor)
+    }
   }
-}
-
-/** Cambia el tipo dentro de su página; si el tipo es de otra página, solo se puede sin campaña de por medio. */
-function conTipo(t: Tarea, tipo: TipoTarea): Tarea | null {
-  const pagina = paginaDeTipo(tipo)
-  const d = t.donde
-  // Los `as` son seguros: `paginaDeTipo` dice de qué página es el tipo.
-  if (pagina === "campanas") return d.pagina === "campanas" ? { ...t, donde: { ...d, tipo: tipo as typeof d.tipo, piezaId: tipo === "contenidos" ? d.piezaId : undefined } } : null
-  if (pagina === "crm") return { ...t, donde: { pagina, tipo: tipo as Extract<Tarea["donde"], { pagina: "crm" }>["tipo"], registroId: d.pagina === "crm" && d.tipo === tipo ? d.registroId : undefined } }
-  return { ...t, donde: { pagina: "personal", tipo: tipo as Extract<Tarea["donde"], { pagina: "personal" }>["tipo"] } }
 }

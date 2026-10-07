@@ -7,7 +7,7 @@ import { demoContactos, demoMarcas, demoPropuestas } from "@/lib/influencer/demo
 const ctx = { collabs: demoCollabs, propuestas: demoPropuestas, marcas: demoMarcas, contactos: demoContactos }
 let n = 0
 const reloj = { hoy: "2026-10-06", ahora: "2026-10-06T12:00:00", id: (p: string) => `${p}${(n += 1)}` }
-const t = (datos: Partial<Tarea>): Tarea => ({ id: "x", titulo: "Tarea", estado: "por-hacer", prioridad: "normal", donde: { pagina: "personal", tipo: "personal" }, etiquetas: [], orden: 1, origen: "manual", actividad: [], creadaEl: "2026-10-01", ...datos })
+const t = (datos: Partial<Tarea>): Tarea => ({ id: "x", titulo: "Tarea", estado: "por-hacer", prioridad: "normal", donde: { tipo: "sin-tipo" }, etiquetas: [], orden: 1, origen: "manual", actividad: [], creadaEl: "2026-10-01", ...datos })
 
 describe("guardar", () => {
   it("apunta los cambios en la actividad", () => {
@@ -46,7 +46,7 @@ describe("borrar, deshacer, duplicar y colocar", () => {
     expect(r.find((x) => x.id === "otra")?.orden).toBe(1.5)
   })
   it("una con subtareas nace con todas en su sitio", () => {
-    const hijas = conSubtareas(t({ id: "f", donde: { pagina: "campanas", tipo: "cobros", collabId: "lumea" } }), ["Hacer", "Enviar"], reloj)
-    expect(hijas.slice(1).every((h) => h.padreId === "f" && h.donde.pagina === "campanas")).toBe(true)
+    const hijas = conSubtareas(t({ id: "f", donde: { tipo: "cobros", collabId: "lumea" } }), ["Hacer", "Enviar"], reloj)
+    expect(hijas.slice(1).every((h) => h.padreId === "f" && h.donde.tipo === "cobros")).toBe(true)
   })
 })

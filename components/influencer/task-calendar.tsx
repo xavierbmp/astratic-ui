@@ -150,57 +150,60 @@ export function CalendarioTareas({
 
   return (
     <DndContext id={dndId} sensors={sensors} onDragEnd={alSoltar}>
-      <div className="flex flex-col gap-3 p-3 lg:flex-row">
-        <div className="min-w-0 flex-1">
-          <div className="mb-2 flex items-center gap-2">
-            <Button variant="outline" size="icon-sm" aria-label="Anterior" onClick={() => mover(-1)}>
-              <ChevronLeftIcon />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setAncla(dia)}>
-              Hoy
-            </Button>
-            <Button variant="outline" size="icon-sm" aria-label="Siguiente" onClick={() => mover(1)}>
-              <ChevronRightIcon />
-            </Button>
-            <span className="text-sm font-semibold first-letter:uppercase">{titulo}</span>
+      {/* Se adapta a su sitio, no a la pantalla: cabe igual en el bloque de al lado que a todo lo ancho. */}
+      <div className="@container">
+        <div className="flex flex-col gap-3 p-3 @3xl:flex-row">
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex items-center gap-2">
+              <Button variant="outline" size="icon-sm" aria-label="Anterior" onClick={() => mover(-1)}>
+                <ChevronLeftIcon />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setAncla(dia)}>
+                Hoy
+              </Button>
+              <Button variant="outline" size="icon-sm" aria-label="Siguiente" onClick={() => mover(1)}>
+                <ChevronRightIcon />
+              </Button>
+              <span className="text-sm font-semibold first-letter:uppercase">{titulo}</span>
+            </div>
+            <div className="grid gap-px overflow-hidden rounded-lg border bg-border" style={{ gridTemplateColumns: `repeat(${columnas}, minmax(0, 1fr))` }}>
+              {DIAS.slice(0, columnas).map((d) => (
+                <div key={d} className="bg-muted/60 px-2 py-1 text-center text-xs font-medium text-muted-foreground">
+                  {d}
+                </div>
+              ))}
+              {visibles.map((d) => {
+                const lista = porDia.get(d) ?? []
+                const enMes = modo === "semana" || mismoMes(d, ancla)
+                const abierto = abiertos.has(d) || modo === "semana"
+                const vistas = abierto ? lista : lista.slice(0, MAX_EN_MES)
+                return (
+                  <Dia key={d} dia={d} className={cn("group/dia flex min-w-0 flex-col gap-1 bg-card p-1 @2xl:p-1.5", modo === "mes" ? "min-h-16 @2xl:min-h-24" : "min-h-40 @2xl:min-h-56", !enMes && "bg-muted/30")}>
+                    <div className="flex items-center justify-between">
+                      <span className={cn("grid size-6 place-items-center rounded-full text-xs tabular-nums", d === dia ? "bg-foreground font-semibold text-background" : enMes ? "text-foreground" : "text-muted-foreground")}>{Number(d.slice(8))}</span>
+                      {onCrear && <NuevaEnDia dia={d} onCrear={(t) => onCrear(d, t)} />}
+                    </div>
+                    {vistas.map((t) => (
+                      <Chip key={`${d}-${t.id}`} tarea={t} dia={d} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
+                    ))}
+                    {!abierto && lista.length > MAX_EN_MES && (
+                      <button type="button" onClick={() => setAbiertos((s) => new Set(s).add(d))} className="px-1 text-left text-[11px] text-muted-foreground hover:text-foreground">
+                        +{lista.length - MAX_EN_MES} más
+                      </button>
+                    )}
+                  </Dia>
+                )
+              })}
+            </div>
           </div>
-          <div className="grid gap-px overflow-hidden rounded-lg border bg-border" style={{ gridTemplateColumns: `repeat(${columnas}, minmax(0, 1fr))` }}>
-            {DIAS.slice(0, columnas).map((d) => (
-              <div key={d} className="bg-muted/60 px-2 py-1 text-center text-xs font-medium text-muted-foreground">
-                {d}
-              </div>
+          <Dia dia={SIN_FECHA} className="flex w-full flex-none flex-col gap-1.5 rounded-lg border bg-muted/30 p-2 @3xl:w-56">
+            <span className="text-xs font-semibold text-muted-foreground">Sin {campo === "fecha" ? "fecha" : "fecha límite"} · {sinFecha.length}</span>
+            <span className="text-[11px] text-muted-foreground">Arrástralas a un día para darles fecha.</span>
+            {sinFecha.map((t) => (
+              <Chip key={`sin-${t.id}`} tarea={t} dia={SIN_FECHA} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
             ))}
-            {visibles.map((d) => {
-              const lista = porDia.get(d) ?? []
-              const enMes = modo === "semana" || mismoMes(d, ancla)
-              const abierto = abiertos.has(d) || modo === "semana"
-              const vistas = abierto ? lista : lista.slice(0, MAX_EN_MES)
-              return (
-                <Dia key={d} dia={d} className={cn("group/dia flex flex-col gap-1 bg-card p-1.5", modo === "mes" ? "min-h-24" : "min-h-56", !enMes && "bg-muted/30")}>
-                  <div className="flex items-center justify-between">
-                    <span className={cn("grid size-6 place-items-center rounded-full text-xs tabular-nums", d === dia ? "bg-foreground font-semibold text-background" : enMes ? "text-foreground" : "text-muted-foreground")}>{Number(d.slice(8))}</span>
-                    {onCrear && <NuevaEnDia dia={d} onCrear={(t) => onCrear(d, t)} />}
-                  </div>
-                  {vistas.map((t) => (
-                    <Chip key={`${d}-${t.id}`} tarea={t} dia={d} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
-                  ))}
-                  {!abierto && lista.length > MAX_EN_MES && (
-                    <button type="button" onClick={() => setAbiertos((s) => new Set(s).add(d))} className="px-1 text-left text-[11px] text-muted-foreground hover:text-foreground">
-                      +{lista.length - MAX_EN_MES} más
-                    </button>
-                  )}
-                </Dia>
-              )
-            })}
-          </div>
+          </Dia>
         </div>
-        <Dia dia={SIN_FECHA} className="flex w-full flex-none flex-col gap-1.5 rounded-lg border bg-muted/30 p-2 lg:w-56">
-          <span className="text-xs font-semibold text-muted-foreground">Sin {campo === "fecha" ? "fecha" : "fecha límite"} · {sinFecha.length}</span>
-          <span className="text-[11px] text-muted-foreground">Arrástralas a un día para darles fecha.</span>
-          {sinFecha.map((t) => (
-            <Chip key={`sin-${t.id}`} tarea={t} dia={SIN_FECHA} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
-          ))}
-        </Dia>
       </div>
     </DndContext>
   )

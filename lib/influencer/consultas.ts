@@ -17,6 +17,7 @@ import {
   demoPerfil,
   demoPlantillas,
   demoPlantillasTarea,
+  demoCamposTarea,
   demoPropuestas,
   demoTareas,
 } from "@/lib/influencer/demo-data"
@@ -88,7 +89,8 @@ export const listarMateriales = (collabId: string) => demoMateriales.filter((m) 
 export const listarTareas = () => demoTareas
 export const listarEtiquetasTarea = () => demoEtiquetasTarea
 export const listarPlantillasTarea = () => demoPlantillasTarea
-/** Lo que hace falta para decir dónde vive cada tarea: campañas, propuestas, marcas y contactos. */
+export const listarCamposTarea = () => demoCamposTarea
+/** Lo que hace falta para decir de qué es cada tarea: campañas, propuestas, marcas y contactos. */
 export const contextoTareas = () => ({ collabs: demoCollabs, propuestas: demoPropuestas, marcas: demoMarcas, contactos: demoContactos })
 export const listarAvisos = () => ({ destacado: demoAvisoDestacado, avisos: demoAvisos })
 export const listarEnlaces = () => demoEnlaces

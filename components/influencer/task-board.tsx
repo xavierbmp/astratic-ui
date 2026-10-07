@@ -9,7 +9,8 @@ import type { GrupoFilas } from "@/lib/vistas/core"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ArrastreFilas, FinDeGrupo, GrupoArrastrable, useFilaArrastrable, type Soltar } from "@/components/app/arrastre-filas"
-import { CasillaTarea, DondeChip, EsperandoDias, EstadoTareaBadge, EtiquetasTarea, FechaTarea, PrioridadBandera, ProgresoSubtareas } from "@/components/influencer/task-cells"
+import { CasillaTarea, DondeChip, EsperandoDias, EstadoTareaBadge, EtiquetasTarea, FechaTarea, PrioridadBandera } from "@/components/influencer/task-cells"
+import { BotonSubtareas, MiniSubtareas } from "@/components/influencer/task-subtareas"
 import type { AccionesTarea } from "@/components/influencer/task-list"
 
 /** Separa la fila y la columna en el id de un grupo del tablero con filas: «collab:lumea|en-curso». */
@@ -22,7 +23,7 @@ function Tarjeta({
   ctx,
   etiquetas,
   propiedades,
-  subtareas,
+  hijas,
   activa,
   acciones,
 }: {
@@ -32,11 +33,12 @@ function Tarjeta({
   ctx: ContextoTareas
   etiquetas: EtiquetaTarea[]
   propiedades: string[]
-  subtareas?: { hechas: number; total: number }
+  hijas: Tarea[]
   activa: boolean
   acciones: AccionesTarea
 }) {
   const { ref, style, asa, arrastrando } = useFilaArrastrable(tarea.id, grupoId)
+  const [abiertas, setAbiertas] = React.useState(false)
   const ver = (p: string) => propiedades.includes(p)
   return (
     <li
@@ -62,9 +64,10 @@ function Tarjeta({
         {ver("fecha") && <FechaTarea tarea={tarea} hoy={hoy} />}
         {ver("fechaLimite") && tarea.fechaLimite && <FechaTarea tarea={tarea} hoy={hoy} campo="fechaLimite" />}
         {ver("estado") ? <EstadoTareaBadge tarea={tarea} hoy={hoy} /> : <EsperandoDias tarea={tarea} hoy={hoy} />}
-        {ver("subtareas") && subtareas && <ProgresoSubtareas hechas={subtareas.hechas} total={subtareas.total} />}
+        <BotonSubtareas hechas={hijas.filter(estaCerrada).length} total={hijas.length} abiertas={abiertas} onAlternar={() => setAbiertas((v) => !v)} className="-ml-1" />
         {ver("etiquetas") && <EtiquetasTarea ids={tarea.etiquetas} etiquetas={etiquetas} max={2} />}
       </span>
+      {abiertas && <MiniSubtareas hijas={hijas} onToggle={acciones.onToggle} onAbrir={acciones.onAbrir} className="-mx-1 border-t pt-1.5" />}
     </li>
   )
 }
@@ -77,7 +80,7 @@ function Columna({
   ctx,
   etiquetas,
   propiedades,
-  subtareasDe,
+  hijasDe,
   activaId,
   acciones,
   onCrear,
@@ -89,7 +92,7 @@ function Columna({
   ctx: ContextoTareas
   etiquetas: EtiquetaTarea[]
   propiedades: string[]
-  subtareasDe: (t: Tarea) => { hechas: number; total: number } | undefined
+  hijasDe: (t: Tarea) => Tarea[]
   activaId?: string | null
   acciones: AccionesTarea
   onCrear?: (titulo: string) => void
@@ -110,7 +113,7 @@ function Columna({
       <GrupoArrastrable grupoId={grupoId} ids={grupo.filas.map((t) => t.id)}>
         <ul className="grid gap-2">
           {grupo.filas.map((t) => (
-            <Tarjeta key={t.id} tarea={t} grupoId={grupoId} hoy={hoy} ctx={ctx} etiquetas={etiquetas} propiedades={propiedades} subtareas={subtareasDe(t)} activa={activaId === t.id} acciones={acciones} />
+            <Tarjeta key={t.id} tarea={t} grupoId={grupoId} hoy={hoy} ctx={ctx} etiquetas={etiquetas} propiedades={propiedades} hijas={hijasDe(t)} activa={activaId === t.id} acciones={acciones} />
           ))}
         </ul>
       </GrupoArrastrable>
@@ -143,7 +146,7 @@ export function TableroTareas({
   ctx,
   etiquetas,
   propiedades,
-  subtareasDe,
+  hijasDe,
   cabeceraGrupo,
   activaId,
   acciones,
@@ -156,7 +159,8 @@ export function TableroTareas({
   ctx: ContextoTareas
   etiquetas: EtiquetaTarea[]
   propiedades: string[]
-  subtareasDe: (t: Tarea) => { hechas: number; total: number } | undefined
+  /** Las subtareas de una tarea, en su orden: la tarjeta las despliega en pequeño. */
+  hijasDe: (t: Tarea) => Tarea[]
   cabeceraGrupo: (g: GrupoFilas<Tarea>) => React.ReactNode
   activaId?: string | null
   acciones: AccionesTarea
@@ -207,7 +211,7 @@ export function TableroTareas({
                         ctx={ctx}
                         etiquetas={etiquetas}
                         propiedades={propiedades}
-                        subtareasDe={subtareasDe}
+                        hijasDe={hijasDe}
                         activaId={activaId}
                         acciones={acciones}
                         onCrear={onCrearEnGrupo ? (titulo) => onCrearEnGrupo(grupoId, titulo) : undefined}

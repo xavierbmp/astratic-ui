@@ -223,29 +223,31 @@ const [editing, setEditing] = useState(false)
         <Example className={EXAMPLE} code={`<TaskTable
   tareas={tareasDe(todas, { collabId: "lumea", tipo: "contenidos" })}
   todas={todas} hoy="2026-10-06" ctx={ctx} etiquetas={etiquetas}
-  donde={{ pagina: "campanas", tipo: "contenidos", collabId: "lumea" }}
+  donde={{ tipo: "collabs", collabId: "lumea" }}
   acciones={acciones}   // onAbrir, onToggle, onCrear, onGuardarVarias, onBorrarVarias…
 />`}>
           <TaskTableExample />
         </Example>
         <Rules
           items={[
-            <>Cada tarea vive en <strong>una página y un tipo</strong> (<code>DondeTarea</code>): Campañas (con su collab y, en Contenidos, quizá la pieza), CRM (con su propuesta, marca o contacto) o Personal. No hay catálogo de tipos de acción: lo que se hace lo dice el título.</>,
+            <>Cada tarea tiene <strong>un tipo</strong> (<code>DondeTarea</code>), que es la página en la que sale además de en Tareas: <strong>Sin tipo</strong> (general, la de por defecto, solo en Tareas y el Inicio), CRM, Collabs o Cobros. En Collabs y Cobros puede ser de una campaña (y, desde Contenidos, de una pieza); en el CRM, de una propuesta, una marca o un contacto. Siempre se puede no concretar: «Sin campaña». Lo que se hace lo dice el título.</>,
             <>Una sola base de tareas: cada página enseña su trozo con <code>tareasDe(tareas, filtro)</code> y lo que se crea ahí nace con su <code>donde</code>, así que sale en su página y en Tareas.</>,
-            <><code>TaskDialog</code> es el alta de toda la app: con <code>dondeFijo</code> no pregunta dónde; con <code>limitar</code> solo ofrece una página o una campaña; con <code>plantilla</code> llega rellena y con sus subtareas.</>,
+            <><code>TaskDialog</code> es el alta de toda la app: «Tipo» y, debajo, la campaña o la ficha del CRM si el tipo la tiene (<code>SelectorTipo</code> y <code>SelectorDeQue</code>). Nace sin tipo; con <code>dondeInicial</code>, con el de la página desde la que se crea; con <code>dondeFijo</code> no pregunta; con <code>plantilla</code> llega rellena y con sus subtareas.</>,
             <>Los cambios pasan por <code>lib/influencer/tareas-cambios.ts</code> (guardar apuntando la actividad, la siguiente de una que se repite, borrar con sus subtareas, deshacer, colocar a mano).</>,
           ]}
         />
       </DocSection>
 
-      <DocSection id="tareas" title="Página de Tareas" lead="Las piezas de la página de Tareas, que replica una base de datos de Notion: lo de hoy primero y debajo todas las tareas con sus vistas.">
+      <DocSection id="tareas" title="Página de Tareas" lead="Las piezas de la página de Tareas, que replica una base de datos de Notion: lo de hoy primero, compacto, y debajo todas las tareas en dos bloques, una vista a elegir al lado (plegable) y la base con sus vistas.">
         <Rules
           items={[
-            <><code>TareasHoy</code> (registro de mostrar): las vencidas arriba con «Pasar todo a hoy»; lo de hoy por importancia (<code>ordenarHoy</code>: prioridad, hora y lo que vence antes), reordenable arrastrando; las hechas de hoy, plegadas; y el pie con mañana, esperando y esta semana.</>,
+            <><code>TareasHoy</code>, compacto para que quepa la base debajo: cabecera con el día y los atajos a mañana, esperando y esta semana; filas de una línea con las vencidas arriba («Pasar todo a hoy») y lo de hoy por importancia (<code>ordenarHoy</code>), reordenable arrastrando; seis a la vista y «Ver N más»; las hechas de hoy, plegadas.</>,
+            <>Subtareas: toda tarea que las tiene lleva su flechita con el progreso (<code>BotonSubtareas</code>) en Hoy, la lista, el tablero y la tabla; al desplegarla salen en pequeño (<code>MiniSubtareas</code>) para marcarlas sin abrir la ficha. Al hacer la última, un aviso ofrece dar por hecha la tarea.</>,
+            <>Campos propios (<code>CampoTarea</code>: texto, número, fecha, selección, selección múltiple, casilla o enlace) en <code>Tarea.valores</code>: se crean y editan con <code>CampoTareaDialog</code> desde la ficha («+ Nuevo campo», o pulsando su nombre) o desde «Propiedades», y entran en filtros, orden, grupos y columnas (<code>idCampoPropio</code>, <code>CampoPropioInline</code>).</>,
             <><code>TareasLista</code>: grupos plegables con su «+», subtareas anidadas, selección y arrastre por el asa para colocar a mano o mover de grupo (lo que cambia su valor, con <code>asignarCampo</code>).</>,
             <><code>TableroTareas</code>: columnas por un campo (el estado, por defecto) y filas por otro (una por campaña); el mismo arrastre que la lista. <code>CalendarioTareas</code>: mes o semana, por fecha o por fecha límite, arrastrar a otro día, «+» en un día y «Sin fecha».</>,
             <><code>columnasTareas</code> da las columnas de la tabla (<code>TablaAgrupada</code> del madre), todas editables en su celda. <code>NombreGrupoTarea</code> pinta la cabecera de un grupo según el campo (estado, prioridad, campaña con su logo, etiqueta…).</>,
-            <><code>TaskSheet</code> / <code>TareaDetalle</code>: la ficha, con sus propiedades editables, «Para hacerla» (<code>TareaContexto</code>, según la página y el tipo), descripción, subtareas, comentarios y actividad. <code>DondeSelector</code> elige la página y el tipo con buscador por palabras.</>,
+            <><code>TaskSheet</code> / <code>TareaDetalle</code>: la ficha, con una sola lista de campos editables (tipo y campaña o ficha primero, después estado, prioridad, fechas, etiquetas y los campos propios, con «+ Nuevo campo»), «Para hacerla» (<code>TareaContexto</code>, si es de una campaña o una ficha), subtareas, descripción, comentarios y actividad.</>,
             <>Celdas comunes en <code>task-cells.tsx</code>: <code>CasillaTarea</code>, <code>PrioridadBandera</code>, <code>EstadoTareaBadge</code>, <code>DondeChip</code>, <code>FechaTarea</code>, <code>EtiquetasTarea</code>, <code>ProgresoSubtareas</code>, <code>EsperandoDias</code>.</>,
           ]}
         />

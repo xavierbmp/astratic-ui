@@ -1,14 +1,14 @@
-// Las vistas de serie de la página de Tareas, una lista por pestaña. Cada persona las cambia,
-// las ordena, crea las suyas o las borra; esto es solo con lo que empieza.
+// Las vistas de serie de la página de Tareas: las del bloque de todas las tareas y las del bloque
+// de al lado. Cada persona las cambia, las ordena, crea las suyas o las borra; esto es solo con lo
+// que empieza.
 import { GRUPO_VACIO } from "@/lib/filtros/core"
 import type { DisenoVista, Vista } from "@/lib/vistas/core"
-import type { PaginaTarea } from "@/lib/influencer/modelo"
 
 /** Las propiedades que se pueden enseñar, en el orden del panel de propiedades. */
 export const PROPIEDADES_TAREA: { id: string; label: string }[] = [
   { id: "titulo", label: "Título" },
   { id: "estado", label: "Estado" },
-  { id: "donde", label: "Dónde vive" },
+  { id: "donde", label: "Tipo" },
   { id: "fecha", label: "Fecha" },
   { id: "fechaLimite", label: "Fecha límite" },
   { id: "prioridad", label: "Prioridad" },
@@ -43,56 +43,48 @@ const tablero = (id: string, filas?: string): Vista => ({
 })
 const calendario = (id: string): Vista => ({ ...base, id, nombre: "Calendario", diseno: "calendario", orden: [], propiedades: ["donde"], ajustes: { ...base.ajustes, calendarioPor: "fecha", calendarioModo: "mes", finesDeSemana: true } })
 
-/** Las vistas con las que empieza cada pestaña. */
-export const VISTAS_TAREAS: Record<PaginaTarea | "general", Vista[]> = {
-  general: [
-    porFecha("g-fecha"),
-    tablero("g-tablero"),
-    calendario("g-calendario"),
-    tabla("g-tabla"),
-    { ...base, id: "g-pagina", nombre: "Por página", diseno: "lista", orden: POR_IMPORTANCIA, agrupar: { campo: "tipo", ocultarVacios: true }, propiedades: PROPIEDADES_LISTA },
-    {
-      ...base,
-      id: "g-esperando",
-      nombre: "Esperando a otros",
-      diseno: "lista",
-      filtro: { union: "y", condiciones: [{ campo: "estado", op: "alguno", valor: ["esperando"] }] },
-      orden: [{ campo: "diasEsperando", dir: "desc" }],
-      agrupar: { campo: "proyecto", ocultarVacios: true },
-      propiedades: ["donde", "estado", "fechaLimite"],
-    },
-    {
-      ...base,
-      id: "g-hechas",
-      nombre: "Hechas",
-      diseno: "lista",
-      filtro: { union: "y", condiciones: [{ campo: "grupoEstado", op: "alguno", valor: ["cerrada"] }] },
-      orden: [{ campo: "hechaEl", dir: "desc" }],
-      agrupar: { campo: "hechaEl", modoFecha: "dia" },
-      propiedades: ["donde", "estado"],
-    },
-  ],
-  campanas: [
-    { ...base, id: "c-campana", nombre: "Por campaña", diseno: "lista", orden: POR_IMPORTANCIA, agrupar: { campo: "campana", ocultarVacios: true }, propiedades: PROPIEDADES_LISTA },
-    { ...porFecha("c-fecha") },
-    { ...base, id: "c-tipo", nombre: "Por tipo", diseno: "lista", orden: POR_IMPORTANCIA, agrupar: { campo: "tipo" }, propiedades: PROPIEDADES_LISTA },
-    tablero("c-tablero", "campana"),
-    calendario("c-calendario"),
-    tabla("c-tabla"),
-  ],
-  crm: [
-    { ...base, id: "r-registro", nombre: "Por registro", diseno: "lista", orden: POR_IMPORTANCIA, agrupar: { campo: "proyecto", ocultarVacios: true }, propiedades: PROPIEDADES_LISTA },
-    porFecha("r-fecha"),
-    tablero("r-tablero"),
-    tabla("r-tabla"),
-  ],
-  personal: [
-    porFecha("p-fecha"),
-    { ...base, id: "p-tipo", nombre: "Por tipo", diseno: "lista", orden: POR_IMPORTANCIA, agrupar: { campo: "tipo" }, propiedades: PROPIEDADES_LISTA },
-    calendario("p-calendario"),
-    tabla("p-tabla"),
-  ],
-}
+const porTipo = (id: string): Vista => ({ ...base, id, nombre: "Por tipo", diseno: "lista", orden: POR_IMPORTANCIA, agrupar: { campo: "tipo", ocultarVacios: true }, propiedades: PROPIEDADES_LISTA })
+
+/** Las vistas con las que empieza el bloque de todas las tareas. */
+export const VISTAS_TAREAS: Vista[] = [
+  porFecha("g-fecha"),
+  tablero("g-tablero"),
+  calendario("g-calendario"),
+  tabla("g-tabla"),
+  porTipo("g-tipo"),
+  {
+    ...base,
+    id: "g-esperando",
+    nombre: "Esperando a otros",
+    diseno: "lista",
+    filtro: { union: "y", condiciones: [{ campo: "estado", op: "alguno", valor: ["esperando"] }] },
+    orden: [{ campo: "diasEsperando", dir: "desc" }],
+    agrupar: { campo: "proyecto", ocultarVacios: true },
+    propiedades: ["donde", "estado", "fechaLimite"],
+  },
+  {
+    ...base,
+    id: "g-hechas",
+    nombre: "Hechas",
+    diseno: "lista",
+    filtro: { union: "y", condiciones: [{ campo: "grupoEstado", op: "alguno", valor: ["cerrada"] }] },
+    orden: [{ campo: "hechaEl", dir: "desc" }],
+    agrupar: { campo: "hechaEl", modoFecha: "dia" },
+    propiedades: ["donde", "estado"],
+  },
+]
+
+/**
+ * Las del bloque de al lado, más estrecho: lo que se quiere tener a la vista mientras se trabaja
+ * en la lista (el calendario del mes, el tablero, lo de cada tipo…). Pocas propiedades, que cabe poco.
+ */
+export const VISTAS_LATERAL: Vista[] = [
+  { ...calendario("l-calendario"), propiedades: [] },
+  { ...porFecha("l-fecha"), propiedades: ["fecha"] },
+  { ...tablero("l-tablero"), propiedades: ["fecha"] },
+  { ...porTipo("l-tipo"), propiedades: ["fecha"] },
+  { ...tabla("l-tabla"), propiedades: ["estado", "fecha"] },
+]
 
 /** Con qué nace una vista nueva de un diseño: las propiedades de siempre y, en el tablero, por estado. */
 export function vistaNuevaDeTareas(diseno: DisenoVista): Omit<Vista, "id"> {
