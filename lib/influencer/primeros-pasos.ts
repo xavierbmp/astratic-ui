@@ -11,7 +11,7 @@ export function primerosPasos({ perfil, acuerdo, fiscales, capitulos, lecturas }
     { id: "perfil", label: "Completa tu perfil y tus redes", hecho: perfilCompleto, href: "/workspace/perfil" },
     { id: "bio", label: "Pon la mención de la red en tu bio", hecho: !!acuerdo.mencionComprobadaEl, href: "/workspace/ajustes/plan" },
     { id: "fiscales", label: "Rellena tus datos fiscales", hecho: faltaParaFacturar(fiscales).length === 0, href: "/workspace/ajustes/fiscales" },
-    { id: "biblia", label: "Lee los capítulos esenciales de la Biblia", hecho: capitulos.filter((c) => c.esencial).every((c) => lecturas[c.id]), href: "/workspace/biblia" },
-    { id: "autocontrol", label: "Aprueba el curso de Autocontrol", hecho: !!perfil.autocontrol, href: "/workspace/biblia/publicidad" },
+    { id: "biblia", label: "Lee los capítulos esenciales de la Academia", hecho: capitulos.filter((c) => c.esencial).every((c) => lecturas[c.id]), href: "/workspace/academia" },
+    { id: "autocontrol", label: "Aprueba el curso de Autocontrol", hecho: !!perfil.autocontrol, href: "/workspace/academia/publicidad" },
   ]
 }

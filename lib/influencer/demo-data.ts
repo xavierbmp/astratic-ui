@@ -357,7 +357,7 @@ const datosTareas: DatosTarea[] = [
   { id: "t30", titulo: "Pedir el certificado de Autocontrol", estado: "hecha", hechaEl: "2026-10-02T12:00:00", donde: { tipo: "sin-tipo" }, fecha: "2026-10-02" },
   { id: "t31", titulo: "Pasar las facturas del trimestre a la gestoría", prioridad: "alta", donde: { tipo: "sin-tipo" }, fechaLimite: "2026-10-15", repetir: { frecuencia: "trimestral" }, etiquetas: ["e-gestiones"], notas: "<p>IVA e IRPF del tercer trimestre: el plazo acaba el 20 de octubre.</p>" },
   { id: "t32", titulo: "Responder comentarios y mensajes", donde: { tipo: "sin-tipo" }, fecha: "2026-10-06T21:00", repetir: { frecuencia: "laborables" }, etiquetas: ["e-responder"] },
-  { id: "t33", titulo: "Leer el capítulo de negociación de la Biblia", prioridad: "baja", donde: { tipo: "sin-tipo" }, fecha: "2026-10-08" },
+  { id: "t33", titulo: "Leer el capítulo de negociación de la Academia", prioridad: "baja", donde: { tipo: "sin-tipo" }, fecha: "2026-10-08" },
   { id: "t34", titulo: "Dentista", donde: { tipo: "sin-tipo" }, fecha: "2026-10-07T17:00" },
 ]
 
@@ -387,7 +387,7 @@ export const demoAvisoDestacado: Aviso = {
 export const demoAvisos: Aviso[] = [
   { id: "n1", tipo: "cambios", titulo: "Maison Vero ha pedido cambios en el reel", descripcion: "2 notas en la V1", el: "2026-10-06T10:15:00", leido: false, href: "/workspace/collabs/vero/contenidos/vero-reel" },
   { id: "n2", tipo: "aprobado", titulo: "Lumea Skin ha aprobado el guion", el: "2026-10-05T18:20:00", leido: false, href: "/workspace/collabs/lumea/contenidos/lumea-reel" },
-  { id: "n11", tipo: "astratic", titulo: "Capítulo actualizado en la Biblia: Facturar y cobrar", descripcion: "Con las fechas de Verifactu", el: "2026-10-05T12:00:00", leido: false, href: "/workspace/biblia/facturar" },
+  { id: "n11", tipo: "astratic", titulo: "Capítulo actualizado en la Academia: Facturar y cobrar", descripcion: "Con las fechas de Verifactu", el: "2026-10-05T12:00:00", leido: false, href: "/workspace/academia/facturar" },
   { id: "n5", tipo: "cobro", titulo: "Bloom Beauty te ha pagado", descripcion: "Factura 2026-015 · 1.800 €", el: "2026-10-05T10:30:00", leido: true, href: "/workspace/cobros?registro=bloom-delineador-p1" },
   { id: "n6", tipo: "aprobado", titulo: "Glow Studio ha aprobado la V2 del reel", el: "2026-10-04T12:10:00", leido: true, href: "/workspace/collabs/glow/contenidos/glow-reel" },
   { id: "n3", tipo: "cobro", titulo: "Cobro vencido: Botánica Lab", descripcion: "Factura 2026-014 · 760 € para ti", el: "2026-10-03T09:00:00", leido: true, href: "/workspace/cobros?registro=botanica-verano-p1" },

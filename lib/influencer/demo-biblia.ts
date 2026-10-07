@@ -1,4 +1,4 @@
-// La Biblia de la red: la guía que escribe Astratic para sus creadoras. En el portal vendrá de la base
+// La Academia de la red (la Biblia en el código): la guía que escribe Astratic para sus creadoras. En el portal vendrá de la base
 // de datos y Astratic la editará desde su lado; aquí va el texto de la primera versión. Cada frase
 // tiene que ser cierta hoy: nada de cifras de mercado sin fuente.
 import type { CapituloBiblia, LecturasBiblia } from "@/lib/influencer/modelo"
