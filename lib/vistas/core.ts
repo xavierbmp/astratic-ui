@@ -7,12 +7,13 @@
 import { GRUPO_VACIO, type CampoFiltrable, type GrupoCondiciones, type TipoFiltro, type ValorFila } from "@/lib/filtros/core"
 import { TRAMOS_FECHA, lunesDe, soloFecha, tramoDeFecha } from "@/lib/filtros/fechas"
 
-export type DisenoVista = "lista" | "tabla" | "tablero" | "calendario" | "cronograma"
+export type DisenoVista = "lista" | "tabla" | "tablero" | "galeria" | "calendario" | "cronograma"
 
 export const DISENOS_VISTA: Record<DisenoVista, string> = {
   lista: "Lista",
   tabla: "Tabla",
   tablero: "Tablero",
+  galeria: "Galería",
   calendario: "Calendario",
   cronograma: "Cronograma",
 }

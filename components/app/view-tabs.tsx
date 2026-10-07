@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import type { LucideIcon } from "lucide-react"
-import { CalendarDaysIcon, ChartGanttIcon, ChevronDownIcon, Columns3Icon, CopyIcon, ListIcon, PencilIcon, PlusIcon, RotateCcwIcon, Table2Icon, Trash2Icon } from "lucide-react"
+import { CalendarDaysIcon, ChartGanttIcon, ChevronDownIcon, Columns3Icon, CopyIcon, LayoutGridIcon, ListIcon, PencilIcon, PlusIcon, RotateCcwIcon, Table2Icon, Trash2Icon } from "lucide-react"
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core"
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
@@ -25,6 +25,7 @@ export const ICONOS_DISENO: Record<DisenoVista, LucideIcon> = {
   lista: ListIcon,
   tabla: Table2Icon,
   tablero: Columns3Icon,
+  galeria: LayoutGridIcon,
   calendario: CalendarDaysIcon,
   cronograma: ChartGanttIcon,
 }

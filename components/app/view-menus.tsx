@@ -360,6 +360,17 @@ export function AjustesVistaMenu({
             </DropdownMenuCheckboxItem>
           </>
         )}
+        {vista.diseno === "galeria" && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Tamaño de las tarjetas</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={ajustes.tamanoTarjeta ?? "mediana"} onValueChange={(t) => ajustar({ tamanoTarjeta: t === "pequena" || t === "grande" ? t : "mediana" })}>
+              <DropdownMenuRadioItem value="pequena">Pequeñas</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="mediana">Medianas</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="grande">Grandes</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </>
+        )}
         {vista.diseno === "calendario" && (
           <>
             <DropdownMenuSeparator />

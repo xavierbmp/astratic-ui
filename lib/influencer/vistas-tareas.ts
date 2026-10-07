@@ -88,7 +88,7 @@ export const VISTAS_LATERAL: Vista[] = [
 
 /** Con qué nace una vista nueva de un diseño: las propiedades de siempre y, en el tablero, por estado. */
 export function vistaNuevaDeTareas(diseno: DisenoVista): Omit<Vista, "id"> {
-  const nombres: Record<DisenoVista, string> = { lista: "Lista", tabla: "Tabla", tablero: "Tablero", calendario: "Calendario", cronograma: "Cronograma" }
+  const nombres: Record<DisenoVista, string> = { lista: "Lista", tabla: "Tabla", tablero: "Tablero", galeria: "Galería", calendario: "Calendario", cronograma: "Cronograma" }
   return {
     ...base,
     nombre: nombres[diseno],
