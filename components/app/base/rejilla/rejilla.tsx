@@ -654,7 +654,7 @@ function FilaRegistro<T>(f: PropsFila<T>) {
   const alta = f.altura !== "corta"
   return (
     <div style={f.estilo} className="group/fila flex">
-      <CeldaIzquierda indice={f.indice} numero={f.numero} color={f.color} marcada={f.marcada} abierta={f.abierta} onMarcar={f.onMarcar} onExpandir={f.onExpandir} />
+      <CeldaIzquierda indice={f.indice} numero={f.numero} color={f.color} alta={alta} marcada={f.marcada} abierta={f.abierta} onMarcar={f.onMarcar} onExpandir={f.onExpandir} />
       {f.columnas.map((c, ci) => (
         <CeldaRegistro key={c.campo.id} {...f} columna={c} col={ci} alta={alta} />
       ))}

@@ -19,9 +19,9 @@ export const FONDO = {
  * La columna de la izquierda de un registro, como en Airtable: el número de fila (y la marca de su
  * color); al pasar el ratón o marcada, la casilla y el botón de expandir, que abre la ficha.
  */
-export function CeldaIzquierda({ indice, numero, color, marcada, abierta, onMarcar, onExpandir }: { indice: number; numero: number; color?: ColorOpcion; marcada: boolean; abierta: boolean; onMarcar: (m: boolean) => void; onExpandir: () => void }) {
+export function CeldaIzquierda({ indice, numero, color, alta, marcada, abierta, onMarcar, onExpandir }: { indice: number; numero: number; color?: ColorOpcion; alta: boolean; marcada: boolean; abierta: boolean; onMarcar: (m: boolean) => void; onExpandir: () => void }) {
   return (
-    <div data-fila={indice} className={cn("sticky left-0 z-[6] flex flex-none items-center gap-1 border-r border-b pr-1 pl-2 text-xs text-muted-foreground", marcada || abierta ? FONDO.marcada : FONDO.normal)} style={{ width: ANCHO_IZQUIERDA }}>
+    <div data-fila={indice} className={cn("sticky left-0 z-[6] flex flex-none gap-1 border-r border-b pr-1 pl-2 text-xs text-muted-foreground", alta ? "items-start pt-1.5" : "items-center", marcada || abierta ? FONDO.marcada : FONDO.normal)} style={{ width: ANCHO_IZQUIERDA }}>
       {color && <span className={cn("absolute inset-y-1 left-0.5 w-1 rounded-full", CLASE_FUERTE[color])} aria-hidden />}
       <span className="flex w-7 flex-none items-center">
         <span className={cn("tabular-nums group-hover/fila:hidden", marcada && "hidden")}>{numero}</span>

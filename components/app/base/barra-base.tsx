@@ -54,7 +54,8 @@ const BotonBarra = React.forwardRef<HTMLButtonElement, React.ComponentProps<"but
       {...props}
     >
       <Icono className="size-4 flex-none" />
-      <span className="hidden @4xl/barra:inline">{texto}</span>
+      {/* Si no cabe todo, los botones apagados se quedan en icono; los activos siguen diciendo qué hacen. */}
+      <span className={tinte ? "max-w-44 truncate" : "hidden @6xl/barra:inline"}>{texto}</span>
     </button>
   )
 })
