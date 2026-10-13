@@ -23,8 +23,7 @@ const ModoFicha = React.createContext<"sheet" | "panel">("sheet")
 
 /** Escape dentro de un campo cancela la edición de ese campo, no cierra la ficha. */
 function escapeDentroDeCampo(e: KeyboardEvent) {
-  const t = e.target as HTMLElement | null
-  if (t?.closest("input, textarea, select, [contenteditable='true']")) e.preventDefault()
+  if (e.target instanceof Element && e.target.closest("input, textarea, select, [contenteditable='true']")) e.preventDefault()
 }
 
 /**

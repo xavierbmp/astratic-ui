@@ -123,22 +123,29 @@ export function FichaVinculo({ label, onAbrir, className, children }: { label: s
         {children}
       </span>
     )
+  const abrir = (e: React.SyntheticEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    onAbrir()
+  }
   return (
     <span className={clase}>
-      {/* Se abre sin seleccionar la celda de debajo ni abrir la tarjeta en la que va. */}
-      <button
-        type="button"
+      {/*
+        Se abre sin seleccionar la celda de debajo ni abrir la tarjeta o el campo en el que va. Es un
+        span con rol de botón y no un <button>: puede ir dentro de otro botón (el de un campo de la ficha).
+      */}
+      <span
+        role="button"
+        tabIndex={0}
         title={`Abrir ${label}`}
-        className="flex min-w-0 items-center gap-1.5 text-left"
+        className="flex min-w-0 cursor-pointer items-center gap-1.5 text-left outline-none focus-visible:underline"
         onMouseDown={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
-          e.stopPropagation()
-          onAbrir()
-        }}
+        onClick={abrir}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && abrir(e)}
       >
         {contenido}
-      </button>
+      </span>
       {children}
     </span>
   )
