@@ -7,6 +7,7 @@ import {
   TIPOS_TAREA,
   type Collab,
   type Contacto,
+  type DiaDelMes,
   type DondeTarea,
   type EntradaTarea,
   type EstadoTarea,
@@ -183,14 +184,29 @@ export function siguienteOrden(tareas: Tarea[]) {
 
 // ───────────────────────── Repetir ─────────────────────────
 
-/** El mismo día del mes `meses` después; si ese mes es más corto, su último día (31 ene → 28 feb). */
-function mismoDiaEnMeses(fecha: string, meses: number) {
+const dosCifras = (n: number) => String(n).padStart(2, "0")
+
+/** Cuántos días tiene un mes (`mes` desde 0). */
+const diasDelMes = (ano: number, mes: number) => new Date(Date.UTC(ano, mes + 1, 0)).getUTCDate()
+
+/**
+ * El día que toca `meses` después de `fecha`. Con «dia», el mismo número (si el mes es más corto, su
+ * último día: 31 ene → 28 feb); con «semana», el mismo día de la misma semana («el segundo martes»;
+ * si no hay quinto, el último); con «ultima-semana», el último de ese día («el último viernes»).
+ */
+function mismoDiaEnMeses(fecha: string, meses: number, diaDelMes: DiaDelMes = "dia") {
   const [a, m, d] = soloFecha(fecha).split("-").map(Number)
-  const total = (m - 1) + meses
+  const total = m - 1 + meses
   const ano = a + Math.floor(total / 12)
   const mes = ((total % 12) + 12) % 12
-  const ultimo = new Date(Date.UTC(ano, mes + 1, 0)).getUTCDate()
-  return `${ano}-${String(mes + 1).padStart(2, "0")}-${String(Math.min(d, ultimo)).padStart(2, "0")}`
+  const ultimo = diasDelMes(ano, mes)
+  const iso = (dia: number) => `${ano}-${dosCifras(mes + 1)}-${dosCifras(dia)}`
+  if (diaDelMes === "dia") return iso(Math.min(d, ultimo))
+  // El primer día del mes que cae en el mismo día de la semana que `fecha`.
+  const primero = 1 + ((diaDeLaSemana(soloFecha(fecha)) - diaDeLaSemana(iso(1)) + 7) % 7)
+  const ultimoMismo = primero + 7 * Math.floor((ultimo - primero) / 7)
+  if (diaDelMes === "ultima-semana") return iso(ultimoMismo)
+  return iso(Math.min(primero + 7 * (Math.ceil(d / 7) - 1), ultimoMismo))
 }
 
 /** El día de la siguiente vez, después de `fecha`. */
@@ -217,42 +233,75 @@ export function siguienteFecha(fecha: string, r: Repeticion): string {
       return sumarDias(dia, 7 * cada)
     }
     case "mensual":
-      return mismoDiaEnMeses(dia, cada)
+      return mismoDiaEnMeses(dia, cada, r.diaDelMes)
     case "trimestral":
-      return mismoDiaEnMeses(dia, 3 * cada)
+      return mismoDiaEnMeses(dia, 3 * cada, r.diaDelMes)
     case "anual":
-      return mismoDiaEnMeses(dia, 12 * cada)
+      return mismoDiaEnMeses(dia, 12 * cada, r.diaDelMes)
   }
 }
 
-/** «Cada semana: lunes y jueves», «Cada 2 meses». */
-export function describirRepeticion(r: Repeticion): string {
+const NOMBRES_DIA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
+const ORDINALES = ["primer", "segundo", "tercer", "cuarto", "quinto"]
+
+/** El día del mes de una repetición, dicho a partir de la fecha de la tarea: «el día 13», «el segundo martes», «el último viernes». */
+export function describirDiaDelMes(fecha: string, diaDelMes: DiaDelMes = "dia"): string {
+  const dia = soloFecha(fecha)
+  const numero = Number(dia.slice(8, 10))
+  const nombre = NOMBRES_DIA[diaDeLaSemana(dia)]
+  if (diaDelMes === "dia") return `el día ${numero}`
+  if (diaDelMes === "ultima-semana") return `el último ${nombre}`
+  return `el ${ORDINALES[Math.ceil(numero / 7) - 1]} ${nombre}`
+}
+
+/** Si el día de `fecha` es el último de ese día de la semana en su mes (el 27 de un mes de 31, por ejemplo). */
+export function esUltimaSemanaDelMes(fecha: string): boolean {
+  const [a, m, d] = soloFecha(fecha).split("-").map(Number)
+  return d + 7 > diasDelMes(a, m - 1)
+}
+
+/**
+ * «Cada semana: lunes y jueves», «Cada 2 meses: el segundo martes», «Cada 3 días después de hacerla,
+ * hasta el 20 dic». Con `fecha` (la de la tarea) se dice qué día del mes; sin ella, «la misma semana».
+ */
+export function describirRepeticion(r: Repeticion, fecha?: string): string {
   const cada = Math.max(1, r.cada ?? 1)
-  const nombres = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
   const plural: Record<Repeticion["frecuencia"], string> = { diaria: "días", laborables: "días laborables", semanal: "semanas", mensual: "meses", trimestral: "trimestres", anual: "años" }
-  const base = cada > 1 && r.frecuencia !== "laborables" ? `Cada ${cada} ${plural[r.frecuencia]}` : FRECUENCIAS_TAREA[r.frecuencia]
-  if (r.frecuencia !== "semanal" || !r.dias?.length) return base
-  const dias = [...r.dias].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map((d) => nombres[d])
-  const lista = dias.length > 1 ? `${dias.slice(0, -1).join(", ")} y ${dias[dias.length - 1]}` : dias[0]
-  return `${base}: ${lista}`
+  let texto = cada > 1 && r.frecuencia !== "laborables" ? `Cada ${cada} ${plural[r.frecuencia]}` : FRECUENCIAS_TAREA[r.frecuencia]
+  if (r.frecuencia === "semanal" && r.dias?.length) {
+    const dias = [...r.dias].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map((d) => NOMBRES_DIA[d])
+    texto += `: ${dias.length > 1 ? `${dias.slice(0, -1).join(", ")} y ${dias[dias.length - 1]}` : dias[0]}`
+  }
+  const porMeses = r.frecuencia === "mensual" || r.frecuencia === "trimestral" || r.frecuencia === "anual"
+  if (porMeses && r.diaDelMes && r.diaDelMes !== "dia") {
+    texto += `: ${fecha ? describirDiaDelMes(fecha, r.diaDelMes) : r.diaDelMes === "semana" ? "la misma semana del mes" : "la última semana del mes"}`
+  }
+  if (r.desde === "hecha") texto += " después de hacerla"
+  const fin = [r.hasta && `hasta el ${diaLegible(r.hasta)}`, r.veces && `${r.veces === 1 ? "esta es la última" : `quedan ${r.veces}`}`].filter(Boolean)
+  return fin.length ? `${texto}, ${fin.join(", ")}` : texto
 }
 
 /**
  * La siguiente de una tarea que se repite, ya con su fecha: se mueven juntas la fecha, el fin y la
- * fecha límite. Si se hace tarde, la siguiente no nace ya vencida: salta hasta hoy o después.
+ * fecha límite. Se cuenta desde su fecha o, si así se pidió, desde hoy (el día en que se hace). Si
+ * se hace tarde, la siguiente no nace ya vencida: salta hasta hoy o después. No hay siguiente si
+ * pasaría de `hasta` o si era la última de sus `veces`.
  */
 export function siguienteRepeticion(t: Tarea, hoy: string, id: string): Tarea | null {
-  if (!t.repetir) return null
-  const base = diaDeTarea(t) ?? soloFecha(hoy)
-  let nueva = siguienteFecha(base, t.repetir)
-  while (nueva < soloFecha(hoy)) nueva = siguienteFecha(nueva, t.repetir)
-  const salto = diasEntre(base, nueva)
+  const r = t.repetir
+  if (!r || (r.veces !== undefined && r.veces <= 1)) return null
+  const origen = diaDeTarea(t) ?? soloFecha(hoy)
+  let nueva = siguienteFecha(r.desde === "hecha" ? soloFecha(hoy) : origen, r)
+  while (nueva < soloFecha(hoy)) nueva = siguienteFecha(nueva, r)
+  if (r.hasta && nueva > r.hasta) return null
+  const salto = diasEntre(origen, nueva)
   const mover = (f?: string) => (f ? `${sumarDias(f, salto)}${f.slice(10)}` : undefined)
   return {
     ...t,
     id,
     estado: "por-hacer",
     origen: "repetida",
+    repetir: r.veces !== undefined ? { ...r, veces: r.veces - 1 } : r,
     fecha: mover(t.fecha),
     fechaFin: mover(t.fechaFin),
     fechaLimite: mover(t.fechaLimite),
@@ -451,7 +500,7 @@ export function describirCambios(antes: Tarea, despues: Tarea, ctx: ContextoTare
   if (antes.fecha !== despues.fecha) cambios.push(`Fecha: ${diaLegible(antes.fecha)} → ${diaLegible(despues.fecha)}`)
   if (antes.fechaLimite !== despues.fechaLimite) cambios.push(`Fecha límite: ${diaLegible(antes.fechaLimite)} → ${diaLegible(despues.fechaLimite)}`)
   if (JSON.stringify(antes.donde) !== JSON.stringify(despues.donde)) cambios.push(`Ahora en ${migasDonde(despues.donde, ctx).map((m) => m.label).join(" › ")}`)
-  if (JSON.stringify(antes.repetir) !== JSON.stringify(despues.repetir)) cambios.push(despues.repetir ? `Se repite: ${describirRepeticion(despues.repetir).toLowerCase()}` : "Ya no se repite")
+  if (JSON.stringify(antes.repetir) !== JSON.stringify(despues.repetir)) cambios.push(despues.repetir ? `Se repite: ${describirRepeticion(despues.repetir, diaDeTarea(despues)).toLowerCase()}` : "Ya no se repite")
   return cambios
 }
 

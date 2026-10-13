@@ -6,13 +6,14 @@ import { CSS } from "@dnd-kit/utilities"
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react"
 import { cn } from "cn"
 import type { Tarea } from "@/lib/influencer/modelo"
-import { tintClass } from "@/lib/influencer/tints"
-import { collabDe, estaCerrada, horaDeTarea, type ContextoTareas } from "@/lib/influencer/tareas"
+import { estaCerrada, horaDeTarea, type ContextoTareas } from "@/lib/influencer/tareas"
+import { colorDeTarea } from "@/lib/influencer/colores-tareas"
 import { casillasDelMes, diaLargo, lunesDe, mismoMes, nombreMes, soloFecha, sumarDias, sumarMeses } from "@/lib/influencer/fechas"
 import { diasEntre } from "@/lib/filtros/fechas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { fondoDe, useColoresTareas } from "@/components/influencer/task-colores"
 
 const DIAS = ["L", "M", "X", "J", "V", "S", "D"]
 const MAX_EN_MES = 3
@@ -28,9 +29,9 @@ function diasDe(t: Tarea, campo: "fecha" | "fechaLimite"): string[] {
   return Array.from({ length: n + 1 }, (_, i) => sumarDias(inicio, i))
 }
 
-function Chip({ tarea, dia, ctx, activa, onAbrir }: { tarea: Tarea; dia: string; ctx: ContextoTareas; activa: boolean; onAbrir: () => void }) {
+function Chip({ tarea, dia, hoy, ctx, activa, onAbrir }: { tarea: Tarea; dia: string; hoy: string; ctx: ContextoTareas; activa: boolean; onAbrir: () => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: `${dia}::${tarea.id}`, data: { id: tarea.id } })
-  const tint = collabDe(tarea.donde, ctx)?.tint
+  const { colores, etiquetas } = useColoresTareas()
   const hora = horaDeTarea(tarea)
   return (
     <button
@@ -42,7 +43,7 @@ function Chip({ tarea, dia, ctx, activa, onAbrir }: { tarea: Tarea; dia: string;
       onClick={onAbrir}
       className={cn(
         "flex w-full min-w-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-left text-[11px] font-medium",
-        tint ? tintClass[tint] : "bg-muted text-foreground/80",
+        fondoDe(colorDeTarea(tarea, colores, { hoy, ctx, etiquetas })),
         estaCerrada(tarea) && "line-through opacity-50",
         activa && "ring-2 ring-brand",
         isDragging && "z-10 opacity-80 shadow-pop",
@@ -95,7 +96,8 @@ function NuevaEnDia({ dia, onCrear }: { dia: string; onCrear: (titulo: string) =
 /**
  * El calendario de tareas: mes o semana, por su fecha o por su fecha límite. Se arrastra una tarea
  * a otro día para moverla (también desde «Sin fecha»), el «+» de un día crea una con esa fecha y
- * pulsar una abre su ficha. Cada tarea lleva el tinte de su campaña.
+ * pulsar una abre su ficha. Cada tarea lleva el color que ella haya elegido (`useColoresTareas`; de
+ * serie, por urgencia).
  */
 export function CalendarioTareas({
   tareas,
@@ -184,7 +186,7 @@ export function CalendarioTareas({
                       {onCrear && <NuevaEnDia dia={d} onCrear={(t) => onCrear(d, t)} />}
                     </div>
                     {vistas.map((t) => (
-                      <Chip key={`${d}-${t.id}`} tarea={t} dia={d} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
+                      <Chip key={`${d}-${t.id}`} tarea={t} dia={d} hoy={hoy} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
                     ))}
                     {!abierto && lista.length > MAX_EN_MES && (
                       <button type="button" onClick={() => setAbiertos((s) => new Set(s).add(d))} className="px-1 text-left text-[11px] text-muted-foreground hover:text-foreground">
@@ -200,7 +202,7 @@ export function CalendarioTareas({
             <span className="text-xs font-semibold text-muted-foreground">Sin {campo === "fecha" ? "fecha" : "fecha límite"} · {sinFecha.length}</span>
             <span className="text-[11px] text-muted-foreground">Arrástralas a un día para darles fecha.</span>
             {sinFecha.map((t) => (
-              <Chip key={`sin-${t.id}`} tarea={t} dia={SIN_FECHA} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
+              <Chip key={`sin-${t.id}`} tarea={t} dia={SIN_FECHA} hoy={hoy} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
             ))}
           </Dia>
         </div>

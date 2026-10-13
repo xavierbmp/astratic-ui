@@ -652,6 +652,12 @@ export const FRECUENCIAS_TAREA: Record<FrecuenciaTarea, string> = {
   anual: "Cada año",
 }
 
+/**
+ * En las mensuales, qué día del mes: el mismo número («el día 13», por defecto), la misma semana y
+ * día («el segundo martes») o el último de ese día («el último viernes»), según la fecha de la tarea.
+ */
+export type DiaDelMes = "dia" | "semana" | "ultima-semana"
+
 /** Cómo se repite una tarea: al hacerla, aparece la siguiente con su fecha. */
 export type Repeticion = {
   frecuencia: FrecuenciaTarea
@@ -659,6 +665,14 @@ export type Repeticion = {
   cada?: number
   /** En las semanales, qué días (0 domingo … 6 sábado). Sin días, el de la fecha de la tarea. */
   dias?: number[]
+  /** En las mensuales (y trimestrales y anuales), qué día del mes. Por defecto, el mismo número. */
+  diaDelMes?: DiaDelMes
+  /** Se cuenta desde su fecha (por defecto) o desde el día en que la hace: «cada 3 días después de regar». */
+  desde?: "fecha" | "hecha"
+  /** El último día en que puede tocar: la que caería después ya no se crea. */
+  hasta?: string
+  /** Las veces que quedan, contando esta: con 1, al hacerla ya no sale otra. */
+  veces?: number
 }
 
 export type EtiquetaTarea = { id: string; nombre: string; tint: Tint }

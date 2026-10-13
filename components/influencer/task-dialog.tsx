@@ -4,7 +4,7 @@ import * as React from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { FRECUENCIAS_TAREA, PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type FrecuenciaTarea, type PlantillaTarea, type PrioridadTarea, type Tarea } from "@/lib/influencer/modelo"
+import { PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type PlantillaTarea, type PrioridadTarea, type Repeticion, type Tarea } from "@/lib/influencer/modelo"
 import { SIN_TIPO, idNuevo, migasDonde, nuevaTarea, type ContextoTareas } from "@/lib/influencer/tareas"
 import { lunesDe, sumarDias } from "@/lib/influencer/fechas"
 import { tintFor } from "@/lib/influencer/tints"
@@ -17,8 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MultiSelect } from "@/components/app/multi-select"
 import { SelectorDeQue, SelectorTipo, etiquetaDeQue } from "@/components/influencer/task-tipo"
 import { PrioridadBandera } from "@/components/influencer/task-cells"
-
-const NO_REPITE = "no"
+import { SelectorRepeticion } from "@/components/influencer/task-repeticion"
 
 const esquema = z.object({
   titulo: z.string().trim().min(1, "Escribe qué hay que hacer").max(160, "Máximo 160 caracteres"),
@@ -28,7 +27,7 @@ const esquema = z.object({
   fechaLimite: z.string().optional(),
   prioridad: z.enum(["urgente", "alta", "normal", "baja"]),
   etiquetas: z.array(z.string()),
-  repetir: z.string(),
+  repetir: z.custom<Repeticion>().optional(),
   notas: z.string().trim().max(2000, "Máximo 2.000 caracteres").optional(),
   subtareas: z.array(z.string()),
 })
@@ -90,7 +89,7 @@ export function TaskDialog({
 }) {
   const { register, handleSubmit, control, reset, setValue, formState } = useForm<Valores>({
     resolver: zodResolver(esquema),
-    defaultValues: { titulo: "", fecha: "", hora: "", fechaLimite: "", prioridad: "normal", etiquetas: [], repetir: NO_REPITE, notas: "", subtareas: [] },
+    defaultValues: { titulo: "", fecha: "", hora: "", fechaLimite: "", prioridad: "normal", etiquetas: [], repetir: undefined, notas: "", subtareas: [] },
   })
   const { errors } = formState
   const fecha = useWatch({ control, name: "fecha" })
@@ -110,7 +109,7 @@ export function TaskDialog({
       fechaLimite: inicial?.fechaLimite ?? "",
       prioridad: inicial?.prioridad ?? plantilla?.prioridad ?? "normal",
       etiquetas: inicial?.etiquetas ?? plantilla?.etiquetas ?? [],
-      repetir: NO_REPITE,
+      repetir: undefined,
       notas: notasATexto(plantilla?.notas),
       subtareas: plantilla?.subtareas ?? [],
     })
@@ -118,7 +117,6 @@ export function TaskDialog({
 
   const guardar = (v: Valores) => {
     const ahora = `${hoy.slice(0, 10)}T${new Date().toTimeString().slice(0, 8)}`
-    const frecuencia = v.repetir === NO_REPITE ? undefined : (v.repetir as FrecuenciaTarea) // valor de FRECUENCIAS_TAREA
     const tarea = nuevaTarea(
       {
         titulo: v.titulo,
@@ -127,7 +125,7 @@ export function TaskDialog({
         fechaLimite: v.fechaLimite || undefined,
         prioridad: v.prioridad as PrioridadTarea,
         etiquetas: v.etiquetas,
-        repetir: frecuencia ? { frecuencia } : undefined,
+        repetir: v.repetir,
         notas: textoANotas(v.notas),
         estado: inicial?.estado,
         origen: plantilla ? "plantilla" : "manual",
@@ -224,21 +222,7 @@ export function TaskDialog({
               <Controller
                 control={control}
                 name="repetir"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="tarea-repetir" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NO_REPITE}>No se repite</SelectItem>
-                      {(Object.keys(FRECUENCIAS_TAREA) as FrecuenciaTarea[]).map((f) => (
-                        <SelectItem key={f} value={f}>
-                          {FRECUENCIAS_TAREA[f]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                render={({ field }) => <SelectorRepeticion id="tarea-repetir" value={field.value} onChange={field.onChange} fecha={fecha || hoy.slice(0, 10)} />}
               />
             </Field>
           </div>

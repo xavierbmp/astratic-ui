@@ -4,7 +4,7 @@ import * as React from "react"
 import { CalendarIcon, ChevronRightIcon, CopyIcon, EllipsisIcon, GripVerticalIcon, PlusIcon, StickyNoteIcon, Trash2Icon } from "lucide-react"
 import { cn } from "cn"
 import type { EtiquetaTarea, Tarea } from "@/lib/influencer/modelo"
-import { estaCerrada, type ContextoTareas } from "@/lib/influencer/tareas"
+import { diaDeTarea, estaCerrada, type ContextoTareas } from "@/lib/influencer/tareas"
 import { sumarDias } from "@/lib/influencer/fechas"
 import type { GrupoFilas } from "@/lib/vistas/core"
 import { Button } from "@/components/ui/button"
@@ -108,7 +108,7 @@ export function FilaTarea({
         {ver("subtareas") && subtareas && <ProgresoSubtareas hechas={subtareas.hechas} total={subtareas.total} />}
         {ver("etiquetas") && <span className="hidden lg:inline-flex"><EtiquetasTarea ids={tarea.etiquetas} etiquetas={etiquetas} max={2} /></span>}
         {ver("estado") ? <EstadoTareaBadge tarea={tarea} hoy={hoy} /> : <EsperandoDias tarea={tarea} hoy={hoy} />}
-        {ver("repite") && <RepiteIcono repetir={tarea.repetir} />}
+        {ver("repite") && <RepiteIcono repetir={tarea.repetir} fecha={diaDeTarea(tarea)} />}
         {ver("prioridad") && <PrioridadBandera prioridad={tarea.prioridad} soloSiImporta />}
         {ver("donde") && <DondeChip donde={tarea.donde} ctx={ctx} className="hidden max-w-56 md:inline-flex" />}
         {ver("fecha") && <FechaTarea tarea={tarea} hoy={hoy} />}

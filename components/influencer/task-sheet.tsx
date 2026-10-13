@@ -6,8 +6,8 @@ import { CopyIcon, EllipsisIcon, ExternalLinkIcon, PlusIcon, Trash2Icon } from "
 import { toast } from "sonner"
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
-import { ESTADOS_TAREA, FRECUENCIAS_TAREA, ORIGENES_TAREA, PRIORIDADES_TAREA, type CampoTarea, type EstadoTarea, type EtiquetaTarea, type FrecuenciaTarea, type PrioridadTarea, type Tarea } from "@/lib/influencer/modelo"
-import { conEstado, describirRepeticion, estaCerrada, migasDonde, type ContextoTareas } from "@/lib/influencer/tareas"
+import { ESTADOS_TAREA, ORIGENES_TAREA, PRIORIDADES_TAREA, type CampoTarea, type EstadoTarea, type EtiquetaTarea, type PrioridadTarea, type Tarea } from "@/lib/influencer/modelo"
+import { conEstado, diaDeTarea, estaCerrada, migasDonde, type ContextoTareas } from "@/lib/influencer/tareas"
 import { soloFecha } from "@/lib/influencer/fechas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,8 +22,8 @@ import { TareaContexto, tieneContexto } from "@/components/influencer/task-conte
 import { SelectorDeQue, SelectorTipo, etiquetaDeQue } from "@/components/influencer/task-tipo"
 import { CampoPropioInline } from "@/components/influencer/task-campos-propios"
 import { CampoTareaDialog } from "@/components/influencer/task-campo-dialog"
+import { SelectorRepeticion } from "@/components/influencer/task-repeticion"
 
-const NO_REPITE = "no"
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/
 const fechaHora = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
 
@@ -187,14 +187,7 @@ export function TareaDetalle({
             </DetailField>
           )}
           <DetailField key="repetir" label="Repetir" empty={!tarea.repetir}>
-            <InlineField
-              value={tarea.repetir?.frecuencia ?? NO_REPITE}
-              tipo="select"
-              required
-              opciones={[{ value: NO_REPITE, label: "No se repite" }, ...(Object.keys(FRECUENCIAS_TAREA) as FrecuenciaTarea[]).map((f) => ({ value: f, label: FRECUENCIAS_TAREA[f] }))]}
-              onSave={async (v) => guardar({ repetir: v === NO_REPITE || !v ? undefined : { frecuencia: String(v) as FrecuenciaTarea } })}
-              render={() => <span className="text-sm">{tarea.repetir ? describirRepeticion(tarea.repetir) : "No se repite"}</span>}
-            />
+            <SelectorRepeticion variant="inline" value={tarea.repetir} onChange={(repetir) => guardar({ repetir })} fecha={diaDeTarea(tarea) ?? hoy} />
           </DetailField>
           <DetailField key="etiquetas" label="Etiquetas" empty={tarea.etiquetas.length === 0}>
             <InlineField

@@ -5,7 +5,7 @@ import { CalendarClockIcon, CalendarIcon, CircleDotIcon, FlagIcon, HourglassIcon
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { ESTADOS_TAREA, ORIGENES_TAREA, PRIORIDADES_TAREA, type CampoTarea, type EstadoTarea, type EtiquetaTarea, type PrioridadTarea, type Tarea } from "@/lib/influencer/modelo"
-import { conEstado, describirRepeticion, estaCerrada, type ContextoTareas } from "@/lib/influencer/tareas"
+import { conEstado, describirRepeticion, diaDeTarea, estaCerrada, type ContextoTareas } from "@/lib/influencer/tareas"
 import { diasEntre, soloFecha } from "@/lib/influencer/fechas"
 import type { ColumnaTabla } from "@/components/app/grouped-table"
 import { InlineField } from "@/components/app/inline-field"
@@ -183,7 +183,7 @@ export function columnasTareas({
       ),
     },
     { id: "subtareas", header: "Subtareas", icon: ListChecksIcon, campo: "subtareas", width: 110, cell: (t) => <ProgresoSubtareas hechas={hijas(t).filter(estaCerrada).length} total={hijas(t).length} /> },
-    { id: "repite", header: "Se repite", icon: RepeatIcon, campo: "repite", width: 160, cell: (t) => <span className="text-xs text-muted-foreground">{t.repetir ? describirRepeticion(t.repetir) : "—"}</span> },
+    { id: "repite", header: "Se repite", icon: RepeatIcon, campo: "repite", width: 160, cell: (t) => <span className="text-xs text-muted-foreground">{t.repetir ? describirRepeticion(t.repetir, diaDeTarea(t)) : "—"}</span> },
     {
       id: "diasEsperando",
       header: "Días esperando",

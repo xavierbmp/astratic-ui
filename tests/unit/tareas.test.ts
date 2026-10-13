@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import type { CampoTarea, Tarea } from "@/lib/influencer/modelo"
 import { asignarCampo, camposTarea } from "@/lib/influencer/campos-tareas"
-import { cambiarTipo, cuandoDe, migasDonde, nuevaTarea, ordenarHoy, perteneceA, siguienteFecha, siguienteRepeticion, tareasDeHoy, textoDonde, describirRepeticion } from "@/lib/influencer/tareas"
+import { cambiarTipo, cuandoDe, migasDonde, nuevaTarea, ordenarHoy, perteneceA, siguienteFecha, siguienteRepeticion, tareasDeHoy, textoDonde, describirRepeticion, describirDiaDelMes } from "@/lib/influencer/tareas"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
 import { demoContactos, demoMarcas, demoPropuestas, demoTareas, demoEtiquetasTarea } from "@/lib/influencer/demo-data"
 import { SIN_VALOR, agruparFilas } from "@/lib/vistas/core"
@@ -65,6 +65,22 @@ describe("repetir", () => {
   it("la siguiente mueve fecha y límite juntas y no nace vencida", () => {
     const s = siguienteRepeticion(t({ fecha: "2026-09-28T09:00", fechaLimite: "2026-09-30", repetir: { frecuencia: "semanal" }, estado: "hecha" }), HOY, "nueva")
     expect(s).toMatchObject({ id: "nueva", estado: "por-hacer", origen: "repetida", fecha: "2026-10-12T09:00", fechaLimite: "2026-10-14" })
+  })
+  it("cada mes el mismo día de la semana: el segundo martes, el último viernes y el quinto que no existe", () => {
+    expect(siguienteFecha("2026-10-13", { frecuencia: "mensual", diaDelMes: "semana" })).toBe("2026-11-10")
+    expect(siguienteFecha("2026-10-30", { frecuencia: "mensual", diaDelMes: "ultima-semana" })).toBe("2026-11-27")
+    expect(siguienteFecha("2026-10-29", { frecuencia: "mensual", diaDelMes: "semana" })).toBe("2026-11-26")
+    expect(describirDiaDelMes("2026-10-13", "semana")).toBe("el segundo martes")
+    expect(describirDiaDelMes("2026-10-30", "ultima-semana")).toBe("el último viernes")
+    expect(describirRepeticion({ frecuencia: "mensual", cada: 2, diaDelMes: "semana" }, "2026-10-13")).toBe("Cada 2 meses: el segundo martes")
+  })
+  it("desde el día en que se hace, hasta una fecha y un número de veces", () => {
+    const regar = t({ fecha: "2026-10-01", repetir: { frecuencia: "diaria", cada: 3, desde: "hecha" }, estado: "hecha" })
+    expect(siguienteRepeticion(regar, HOY, "n")?.fecha).toBe("2026-10-09")
+    expect(siguienteRepeticion(t({ fecha: HOY, repetir: { frecuencia: "semanal", hasta: "2026-10-10" } }), HOY, "n")).toBeNull()
+    expect(siguienteRepeticion(t({ fecha: HOY, repetir: { frecuencia: "diaria", veces: 1 } }), HOY, "n")).toBeNull()
+    expect(siguienteRepeticion(t({ fecha: HOY, repetir: { frecuencia: "diaria", veces: 3 } }), HOY, "n")?.repetir).toEqual({ frecuencia: "diaria", veces: 2 })
+    expect(describirRepeticion({ frecuencia: "diaria", cada: 3, desde: "hecha", veces: 2 })).toBe("Cada 3 días después de hacerla, quedan 2")
   })
 })
 

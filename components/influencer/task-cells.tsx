@@ -11,6 +11,8 @@ import { diasEntre, soloFecha } from "@/lib/influencer/fechas"
 import { StatusBadge } from "@/components/app/status-badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { BrandMark } from "@/components/influencer/brand-mark"
+import { TEXTO_COLOR, useColoresTareas } from "@/components/influencer/task-colores"
+import { tramoDeDia } from "@/lib/influencer/colores-tareas"
 
 // Las piezas pequeñas de una tarea, iguales en Hoy, la lista, la tabla, el tablero y la ficha.
 
@@ -107,17 +109,19 @@ export function DondeChip({ donde, ctx, enlace, className }: { donde: DondeTarea
 }
 
 /**
- * Cuándo toca, como se dice en una lista: «Hoy 10:00», «Mañana», «jue 8», «3 oct». En rojo si
- * venció y en naranja si es hoy. Si además tiene fecha límite más tarde, «vence el vie 9».
+ * Cuándo toca, como se dice en una lista: «Hoy 10:00», «Mañana», «jue 8», «3 oct». Del color de su
+ * tramo de urgencia (`useColoresTareas`: de serie, rojo si venció y verde hoy y los tres días
+ * siguientes). Si además tiene fecha límite más tarde, «vence el vie 9».
  */
 export function FechaTarea({ tarea, hoy, campo = "auto", className }: { tarea: Tarea; hoy: string; campo?: "auto" | "fecha" | "fechaLimite"; className?: string }) {
+  const { colores } = useColoresTareas()
   const cerrada = estaCerrada(tarea)
   const valor = campo === "fechaLimite" ? tarea.fechaLimite : campo === "fecha" ? tarea.fecha : (tarea.fecha ?? tarea.fechaLimite)
   if (!valor) return campo === "auto" ? null : <span className={cn("text-xs text-muted-foreground", className)}>—</span>
   const dia = soloFecha(valor)
   const faltan = diasEntre(soloFecha(hoy), dia)
   const vencida = campo === "auto" ? estaVencida(tarea, hoy) : faltan < 0 && !cerrada
-  const tono = cerrada ? "text-muted-foreground" : vencida ? "text-danger" : faltan === 0 ? "text-warning" : "text-muted-foreground"
+  const tono = cerrada ? "text-muted-foreground" : TEXTO_COLOR[colores.urgencia[vencida ? "vencida" : tramoDeDia(dia, hoy, colores.diasProximos)]]
   const hora = campo !== "fechaLimite" && valor.length > 10 ? valor.slice(11, 16) : undefined
   const limiteDespues = campo === "auto" && tarea.fecha && tarea.fechaLimite && soloFecha(tarea.fechaLimite) > soloFecha(tarea.fecha)
   return (
@@ -165,16 +169,18 @@ export function EsperandoDias({ tarea, hoy }: { tarea: Pick<Tarea, "estado" | "e
   return <span className="text-xs whitespace-nowrap text-warning">Esperando{dias > 0 ? ` ${dias} d` : ""}</span>
 }
 
-export function RepiteIcono({ repetir }: { repetir?: Repeticion }) {
+/** El icono de que se repite, con cómo en el tooltip. `fecha` es la de la tarea («el segundo martes»). */
+export function RepiteIcono({ repetir, fecha }: { repetir?: Repeticion; fecha?: string }) {
   if (!repetir) return null
+  const texto = describirRepeticion(repetir, fecha)
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="inline-flex text-muted-foreground" aria-label={describirRepeticion(repetir)}>
+        <span className="inline-flex text-muted-foreground" aria-label={texto}>
           <RepeatIcon className="size-3.5" />
         </span>
       </TooltipTrigger>
-      <TooltipContent>{describirRepeticion(repetir)}</TooltipContent>
+      <TooltipContent>{texto}</TooltipContent>
     </Tooltip>
   )
 }
