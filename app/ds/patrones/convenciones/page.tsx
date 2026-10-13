@@ -20,9 +20,9 @@ export default function ConvencionesPage() {
             ["Subpáginas", "Derecha del título, antes de las acciones", "Pestañas de texto (PageTabs), una ruta por pestaña. El título del módulo no cambia entre subpáginas. Ver Navegación y subpáginas."],
             ["Acciones de página", "Derecha del título", "Acciones secundarias de toda la página (Exportar, Editar fases) y, si no hay subpáginas, un segmentado de toda la página (periodo, segmentos). Nunca la acción principal ni el conmutador de vistas."],
             ["Cifras", "Fila bajo el título", "De 3 a 5 tarjetas, nunca más. Cada una: icono + etiqueta, cifra grande, una línea de apoyo (delta o alerta)."],
-            ["Toolbar", "Justo encima del bloque de operación y con su mismo ancho", "Buscador · filtros · [espacio] · conmutador de vistas · acción principal. En ese orden y sin excepciones. Termina en el borde derecho del bloque: nada de la toolbar queda encima del panel de información."],
+            ["Barra de la base", "Dentro de la base de datos, en su borde superior", "Lateral · vista · [espacio] · campos · filtro · grupos · orden · color · altura · buscar · acción principal · ficha integrada. En ese orden y sin excepciones."],
             ["Bloque de operación", "Centro, ocupa el resto de la altura", "Un solo bloque. Cabecera con icono, nombre, contador y acciones del bloque; cuerpo con la vista activa; pie con paginación."],
-            ["Panel de información", "Derecha, 320 px, misma altura que el bloque", "Empieza a la altura del bloque, no de la toolbar. Bloques de apoyo apilados y personalizables. Nunca contiene acciones sobre los registros."],
+            ["Panel de información", "Derecha, 320 px, misma altura que el bloque", "Desde las cifras hasta el pie de la base. Bloques de apoyo apilados y personalizables, o la ficha integrada. Nunca contiene acciones sobre los registros."],
             ["Detalle de un registro", "Sheet lateral derecho, 440 px", "Se abre al pulsar la fila o la tarjeta, por encima de la página. La página sigue debajo con su estado."],
             ["Barra de selección", "Flotante, fija al pie de la ventana y centrada", "Aparece con la primera fila marcada: contador, acciones con icono y X para deseleccionar. Se ve aunque la tabla sea más larga que la pantalla."],
             ["Toasts", "Abajo a la derecha", "Éxito y error. Con «Deshacer» cuando la acción sea reversible."],
@@ -34,7 +34,7 @@ export default function ConvencionesPage() {
         <SpecTable
           columns={["Variante", "Uso", "Ubicación"]}
           rows={[
-            ["Primario (negro)", "La única acción principal de la página: crear el registro que gestiona la página («Nuevo registro», «Nueva campaña»).", "Último elemento de la toolbar, pegado al borde derecho del bloque de operación. Uno por página."],
+            ["Primario (negro)", "La única acción principal de la página: crear el registro que gestiona la página («Nuevo registro», «Nueva campaña»).", "Al final de la barra de la base. Uno por página."],
             ["Outline", "Acciones secundarias con peso: Exportar, Importar, Editar fases, Configurar.", "Acciones de página (derecha del título) o cabecera del bloque."],
             ["Ghost", "Acciones dentro de listas y barras: acciones en bloque, acciones de fila al pasar el ratón, «Ver todas».", "Barra de selección, filas, cabeceras de sección."],
             ["Icono (ghost)", "Menú «más» (…), cerrar, personalizar un panel, configurar (engranaje).", "Extremo derecho del elemento al que afecta."],
@@ -45,39 +45,34 @@ export default function ConvencionesPage() {
         <Rules
           items={[
             <>Todo botón lleva <strong>icono lucide + verbo + objeto</strong>: «Nuevo registro», «Exportar», «Avanzar fase». Nunca «OK», «Aceptar», «Click aquí».</>,
-            <>Tamaño <code>default</code> (32 px) en toolbars, acciones de página y pies de sheet; <code>sm</code> (28 px) dentro de tablas, barras de selección y cabeceras de sección.</>,
+            <>Tamaño <code>default</code> (32 px) en acciones de página y pies de sheet; <code>sm</code> (28 px) en la barra de la base, barras de selección y cabeceras de sección.</>,
             <>El botón principal aparece <strong>una vez</strong>. Si una página necesita dos acciones de creación, una es principal y la otra outline, o van en un menú desplegable del principal.</>,
             <>Los botones de icono solo llevan <code>aria-label</code>. Los de texto no llevan tooltip.</>,
           ]}
         />
       </DocSection>
 
-      <DocSection id="vistas" title="Vistas del bloque de operación">
+      <DocSection id="vistas" title="Vistas de la base">
         <Prose>
           <p>
-            Cuando la naturaleza de la página admite más de una forma de ver los mismos datos (una tabla para comparar,
-            un kanban para mover por fase, un calendario para plazos), el <strong>conmutador de vistas</strong> es un control
-            segmentado de iconos (fondo gris, la vista activa en blanco, igual que las pestañas), siempre en la toolbar, justo
-            antes de la acción principal. No se confunde con las pestañas de subpágina: esas son de texto, van en la
-            cabecera de página y cambian la URL. Iconos fijos:
+            Cada base tiene sus vistas, personales y guardadas: se eligen y se crean en el lateral o en el menú del nombre de la vista, dentro de la
+            barra. No se confunden con las pestañas de subpágina: esas son de texto, van en la cabecera de página y cambian la URL. Tipos e iconos fijos:
           </p>
         </Prose>
         <SpecTable
           columns={["Vista", "Icono", "Cuándo"]}
           rows={[
-            ["Tabla", "table-2", "Comparar muchos campos, ordenar, seleccionar en bloque. Vista por defecto de las páginas de registros."],
-            ["Lista", "list", "Pocos campos por fila, lectura rápida, móvil."],
-            ["Kanban", "columns-3", "El registro tiene una fase y se mueve entre fases arrastrando."],
-            ["Calendario", "calendar-days", "El registro tiene fecha y la fecha manda (eventos, plazos)."],
-            ["Tarjetas", "layout-grid", "El registro es visual (personas, talentos, productos)."],
+            ["Cuadrícula", "table-2", "Comparar muchos campos, editar en la celda, seleccionar, agrupar. La de serie de casi todas las bases."],
+            ["Kanban", "columns-3", "El registro tiene una fase o un vínculo y se mueve entre columnas arrastrando."],
+            ["Galería", "layout-grid", "El registro es visual (campañas, personas, ideas): tarjetas con su portada."],
+            ["Calendario", "calendar-days", "El registro tiene fecha y la fecha manda (hitos, vencimientos, pasos)."],
           ]}
         />
         <Rules
           items={[
-            <>La vista elegida se recuerda por página con <code>usePageView</code> (en <code>localStorage</code> con la clave de la página). En móvil la tabla desaparece del conmutador y se usa la siguiente vista: lista o tarjetas. Si solo queda una vista, el conmutador no se pinta.</>,
-            <>Cambiar de vista <strong>no</strong> cambia búsqueda, filtros ni selección: los tres se comparten entre vistas.</>,
-            <>El contador de la cabecera del bloque cuenta lo filtrado, no el total.</>,
-            <>Los filtros de la toolbar se aplican a la vista; los campos visibles van en el botón de la cabecera del bloque (<code>ColumnSettings</code>), nunca en la toolbar.</>,
+            <>Cada vista guarda su filtro, orden, grupos, campos, color y altura, por persona, al momento. En móvil, la base pasa a tarjetas con la vista abierta.</>,
+            <>El pie cuenta lo que deja ver la vista; las cifras de arriba cuentan toda la base.</>,
+            <>Los campos visibles se eligen en «Ocultar campos» de la barra; los propios se crean desde la cabecera de una columna.</>,
           ]}
         />
       </DocSection>
@@ -170,8 +165,8 @@ export default function ConvencionesPage() {
       <DocSection id="si-no" title="Sí y no">
         <DoDont
           dos={[
-            "Una acción principal negra al final de la toolbar.",
-            "Toolbar con el ancho del bloque de operación, no de la página.",
+            "Una acción principal negra al final de la barra de la base.",
+            "Los controles de la lista dentro de la base, no en una toolbar aparte.",
             "Fila clicable que abre la ficha; checkbox que selecciona; lo seleccionado en brand-soft.",
             "Ficha por bloques, editable en el sitio, con los vacíos como «+ Campo».",
             "Badges de estado con los cinco tonos fijos.",

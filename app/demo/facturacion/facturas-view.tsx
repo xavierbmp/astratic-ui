@@ -12,22 +12,19 @@ import {
   DownloadIcon,
   FileTextIcon,
   LayersIcon,
-  PlusIcon,
   ReceiptTextIcon,
   SendIcon,
 } from "lucide-react"
 import { fmt } from "@/lib/format"
 import { demoPayments, invoiceStatus, invoiceTotal, type DemoInvoice, type InvoiceStatus } from "@/lib/demo-data"
-import { usePageView } from "@/hooks/use-page-view"
+import { useBaseLocal, useEnNavegador } from "@/hooks/use-base-local"
+import { camposDemoFacturas, escribirEnFactura, vistasDemoFacturas } from "@/lib/demo-base"
 import { Button } from "@/components/ui/button"
 import { PageBody, PageHeader } from "@/components/app/page-header"
 import { PageTabs } from "@/components/app/page-tabs"
 import { KpiCard, KpiRow } from "@/components/app/kpi"
-import { Section, SectionBody, SectionFooter, SectionHeader } from "@/components/app/section"
 import { WorkGrid } from "@/components/app/work-grid"
-import { ActiveFilters, FilterMenu, Toolbar, ToolbarActions, ToolbarSearch, ViewSwitcher } from "@/components/app/toolbar"
-import { CellPrimary, DataTable, TablePagination, type Column } from "@/components/app/data-table"
-import { RecordList, RecordListItem } from "@/components/app/record-list"
+import { BaseDatos } from "@/components/app/base/base-datos"
 import { StatusBadge } from "@/components/app/status-badge"
 import { AvatarInitials } from "@/components/app/avatar-initials"
 import { EmptyState } from "@/components/app/states"
@@ -35,7 +32,6 @@ import { InsightList, InsightsPanel } from "@/components/app/insights-panel"
 import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, DetailSection, DetailSheet } from "@/components/app/detail-sheet"
 import { facturacionTabs } from "../nav"
 
-const PAGE_SIZE = 10
 const MONTH = "2026-09"
 
 export function FacturasView({
@@ -46,13 +42,9 @@ export function FacturasView({
   initialOpenId?: string | null
 }) {
   const [invoices, setInvoices] = React.useState<DemoInvoice[]>(initialInvoices)
-  const { view, setView, views } = usePageView("demo-facturas", ["table", "list"])
-  const [query, setQuery] = React.useState("")
-  const [statusFilter, setStatusFilter] = React.useState<string[]>([])
-  const filterKey = JSON.stringify([query, statusFilter, view])
-  const [pageState, setPageState] = React.useState({ key: filterKey, page: 1 })
-  const page = pageState.key === filterKey ? pageState.page : 1
-  const setPage = (p: number) => setPageState({ key: filterKey, page: p })
+  const enNavegador = useEnNavegador()
+  const camposBase = React.useMemo(() => camposDemoFacturas(), [])
+  const base = useBaseLocal("demo-facturas", camposBase, vistasDemoFacturas)
   const [openId, setOpenIdState] = React.useState<string | null>(initialOpenId)
   const setOpenId = (id: string | null) => {
     setOpenIdState(id)
@@ -62,15 +54,6 @@ export function FacturasView({
     window.history.replaceState(null, "", url)
   }
 
-  const filtered = invoices.filter((f) => {
-    const q = query.trim().toLowerCase()
-    return (
-      (!q || f.code.toLowerCase().includes(q) || f.recordName.toLowerCase().includes(q)) &&
-      (statusFilter.length === 0 || statusFilter.includes(f.status))
-    )
-  })
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const open = openId ? invoices.find((f) => f.id === openId) ?? null : null
 
   const sum = (list: DemoInvoice[]) => list.reduce((a, f) => a + invoiceTotal(f.base), 0)
@@ -79,35 +62,8 @@ export function FacturasView({
   const overdue = invoices.filter((f) => f.status === "vencida")
   const collectedThisMonth = demoPayments.filter((p) => p.paidAt.startsWith(MONTH)).reduce((a, p) => a + p.amount, 0)
 
-  const chips = statusFilter.map((v) => ({
-    label: `Estado: ${invoiceStatus[v as InvoiceStatus].label}`,
-    onRemove: () => setStatusFilter(statusFilter.filter((x) => x !== v)),
-  }))
-
   const setStatus = (id: string, status: InvoiceStatus) =>
     setInvoices((list) => list.map((f) => (f.id === id ? { ...f, status, paidAt: status === "pagada" ? "2026-09-15" : f.paidAt } : f)))
-
-  const columns: Column<DemoInvoice>[] = [
-    {
-      id: "code",
-      header: "Factura",
-      minWidth: 200,
-      sortValue: (f) => f.code,
-      cell: (f) => <CellPrimary leading={<AvatarInitials name={f.recordName} size="md" variant="entity" />} title={f.code} subtitle={f.recordName} />,
-    },
-    { id: "issued", header: "Emisión", hideBelow: "lg", sortValue: (f) => f.issuedAt, cell: (f) => <span className="text-muted-foreground">{fmt.date(f.issuedAt)}</span> },
-    { id: "due", header: "Vencimiento", hideBelow: "md", sortValue: (f) => f.dueAt, cell: (f) => <span className="text-muted-foreground">{fmt.date(f.dueAt)}</span> },
-    { id: "status", header: "Estado", cell: (f) => <StatusBadge tone={invoiceStatus[f.status].tone}>{invoiceStatus[f.status].label}</StatusBadge> },
-    { id: "total", header: "Importe", align: "right", sortValue: (f) => f.base, cell: (f) => <span className="font-semibold">{fmt.eur(invoiceTotal(f.base))}</span> },
-  ]
-
-  const emptyState = (
-    <EmptyState
-      title="Ninguna factura coincide"
-      description="Prueba con otra búsqueda o quita el filtro de estado."
-      action={<Button variant="outline" size="sm" onClick={() => { setQuery(""); setStatusFilter([]) }}>Quitar filtros</Button>}
-    />
-  )
 
   return (
     <PageBody>
@@ -130,26 +86,6 @@ export function FacturasView({
       </KpiRow>
 
       <WorkGrid
-        toolbar={
-          <>
-            <Toolbar>
-              <ToolbarSearch placeholder="Buscar factura o registro…" value={query} onChange={(e) => setQuery(e.target.value)} />
-              <FilterMenu
-                label="Estado"
-                options={(Object.keys(invoiceStatus) as InvoiceStatus[]).map((s) => ({ value: s, label: invoiceStatus[s].label, count: invoices.filter((f) => f.status === s).length }))}
-                value={statusFilter}
-                onChange={setStatusFilter}
-              />
-              <ToolbarActions>
-                <ViewSwitcher views={views} value={view} onChange={setView} />
-                <Button onClick={() => toast("Aquí se abriría el formulario de la factura")}>
-                  <PlusIcon /> Nueva factura
-                </Button>
-              </ToolbarActions>
-            </Toolbar>
-            <ActiveFilters chips={chips} onClear={() => setStatusFilter([])} />
-          </>
-        }
         aside={
           <InsightsPanel
             storageKey="demo-facturas"
@@ -198,37 +134,32 @@ export function FacturasView({
           />
         }
       >
-        <Section className="min-h-[480px]">
-          <SectionHeader icon={ReceiptTextIcon} title="Facturas" count={filtered.length} />
-          <SectionBody>
-            {view === "table" && (
-              <DataTable rows={paged} columns={columns} getRowId={(f) => f.id} onRowClick={(f) => setOpenId(f.id)} emptyState={emptyState} />
-            )}
-            {view === "list" &&
-              (filtered.length === 0 ? (
-                emptyState
-              ) : (
-                <RecordList>
-                  {paged.map((f) => (
-                    <RecordListItem
-                      key={f.id}
-                      leading={<AvatarInitials name={f.recordName} variant="entity" />}
-                      title={f.code}
-                      subtitle={`${f.recordName} · vence el ${fmt.date(f.dueAt)}`}
-                      status={<StatusBadge tone={invoiceStatus[f.status].tone}>{invoiceStatus[f.status].label}</StatusBadge>}
-                      value={fmt.eur(invoiceTotal(f.base))}
-                      onClick={() => setOpenId(f.id)}
-                    />
-                  ))}
-                </RecordList>
-              ))}
-          </SectionBody>
-          {filtered.length > 0 && (
-            <SectionFooter>
-              <TablePagination page={page} pageCount={pageCount} onPageChange={setPage} total={filtered.length} pageSize={PAGE_SIZE} />
-            </SectionFooter>
+        <div className="h-[600px] xl:h-full">
+          {enNavegador && (
+            <BaseDatos
+              clave="demo-facturas"
+              lateralInicial={false}
+              base={base}
+              campos={camposBase}
+              filas={invoices}
+              getId={(f) => f.id}
+              hoy="2026-09-15"
+              objeto={{ singular: "factura", plural: "facturas", nuevo: "Nueva factura" }}
+              abiertoId={openId}
+              onAbrir={setOpenId}
+              onEscribir={(cambios) => setInvoices((fs) => fs.map((f) => cambios.filter((c) => c.fila.id === f.id).reduce((x, c) => escribirEnFactura(x, c.campo, c.valor), f)))}
+              onNuevo={() => toast("Aquí se abriría el formulario de la factura")}
+              kanban={{ resumen: (fs) => fmt.eur(sum(fs)) }}
+              vacio={(hayFiltro, limpiar) => (
+                <EmptyState
+                  title={hayFiltro ? "Ninguna factura coincide" : "Aún no hay facturas"}
+                  description={hayFiltro ? "Prueba con otra búsqueda o quita algún filtro." : "Crea la primera con «Nueva factura»."}
+                  action={hayFiltro ? <Button variant="outline" size="sm" onClick={limpiar}>Quitar filtros</Button> : undefined}
+                />
+              )}
+            />
           )}
-        </Section>
+        </div>
       </WorkGrid>
 
       <DetailSheet open={open !== null} onOpenChange={(o) => !o && setOpenId(null)} width={400}>

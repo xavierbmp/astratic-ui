@@ -98,17 +98,15 @@ export default function InsightsPanelPage() {
           </p>
           <p>
             <strong><code>useLocalStorage</code></strong> (<code>hooks/use-local-storage.ts</code>) es el hook que hay
-            debajo, y sirve para cualquier preferencia de interfaz: la vista elegida en el <code>ViewSwitcher</code>, una
-            sidebar secundaria plegada. Usa <code>useSyncExternalStore</code>: en el servidor devuelve el valor inicial,
+            debajo, y sirve para cualquier preferencia de interfaz: si un lateral está abierto, el ancho de un
+            bloque, un bloque plegado. Usa <code>useSyncExternalStore</code>: en el servidor devuelve el valor inicial,
             así que no hay desajuste de hidratación, y escucha el evento <code>storage</code> para que dos pestañas del
             mismo portal se mantengan sincronizadas.
           </p>
         </Prose>
         <CodeBlock
           title="useLocalStorage"
-          code={`const [view, setView] = useLocalStorage<ViewKind>("view:registros", "table")
-
-<ViewSwitcher views={["table", "list", "kanban"]} value={view} onChange={setView} />`}
+          code={`const [abierto, setAbierto] = useLocalStorage("ideas-lado-abierto", true)`}
         />
         <Rules
           items={[

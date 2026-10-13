@@ -51,7 +51,7 @@ export default function EspaciadoPage() {
             ["Padding de tarjeta y sección", "16 px lateral", <code key="e">px-4</code>, "KpiCard (py-3), cabecera y pie de Section (py-2), cabecera del sheet (p-4)."],
             ["Fila de tabla", "40 px", <code key="f">py-2.5</code>, "DataTable con texto de 13,5 px. Cabecera de 36 px (h-9)."],
             ["Fila de tabla densa", "32 px", <code key="g">py-1.5</code>, "DataTable con dense. Para listados largos de consulta."],
-            ["Toolbar y controles", "32 px", <code key="h">h-8</code>, "ToolbarSearch, FilterMenu, ViewSwitcher, Button default, Input. Button sm mide 28 px (h-7)."],
+            ["Controles", "32 px", <code key="h">h-8</code>, "Button default, Input. Button sm y los botones de la barra de la base miden 28 px (h-7)."],
             ["Cabecera de la app", "48 px", <code key="i">h-12</code>, "AppShell: migas a la izquierda, buscador y acciones a la derecha."],
             ["Sidebar", "256 px", <code key="j">--sidebar-width</code>, "AppShell. Colapsa a 48 px."],
             ["Sheet de detalle", "440 px", <code key="k">width</code>, "DetailSheet. 400 px para fichas simples."],

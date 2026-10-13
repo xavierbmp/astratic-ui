@@ -1,10 +1,6 @@
 import { DocPage, DocSection, DoDont, Example, NextLinks, Prose, Rules, SpecTable } from "@/components/docs/doc"
 import { CodeBlock } from "@/components/docs/code-block"
 import { DataTableDemo } from "@/components/docs/examples/data-table-demo"
-import { RecordList, RecordListItem } from "@/components/app/record-list"
-import { AvatarInitials } from "@/components/app/avatar-initials"
-import { StatusBadge } from "@/components/app/status-badge"
-import { fmt } from "@/lib/format"
 
 export const metadata = { title: "Tabla de datos" }
 
@@ -13,7 +9,7 @@ export default function DataTablePage() {
     <DocPage
       eyebrow="Componentes"
       title="Tabla de datos"
-      lead="La vista por defecto del bloque de operación. Columnas declarativas y tipadas, orden por columna, selección múltiple, fila clicable que abre el detalle y paginación en el pie."
+      lead="Una tabla simple para listas cortas y fijas que no son una base de datos: las tarifas por formato, las facturas de una collab, una tabla dentro de un dashboard o de una ficha. Columnas declarativas y tipadas, orden por columna y fila clicable. Toda lista de registros que se filtra, se agrupa o tiene vistas es una Base de datos."
     >
       <DocSection id="uso" title="Cuándo se usa">
         <Prose>
@@ -217,65 +213,6 @@ export default function DataTablePage() {
         />
       </DocSection>
 
-      <DocSection
-        id="lista"
-        title="Vista lista"
-        lead="La otra vista de filas. Menos campos por fila, lectura rápida y la que se usa en móvil en lugar de la tabla. RecordList y RecordListItem, en components/app/record-list.tsx."
-      >
-        <Example
-          padded={false}
-          code={`<RecordList>
-  {paged.map((r) => (
-    <RecordListItem
-      key={r.id}
-      leading={<AvatarInitials name={r.name} variant="entity" />}
-      title={r.name}
-      subtitle={\`\${r.code} · \${r.category} · \${r.owner}\`}
-      status={<StatusBadge tone={fase.tone}>{fase.label}</StatusBadge>}
-      value={fmt.eur(r.value)}
-      selected={selected.has(r.id)}
-      onClick={() => setOpenId(r.id)}
-    />
-  ))}
-</RecordList>`}
-        >
-          <RecordList>
-            {[
-              { n: 1, fase: "Propuesta enviada", tone: "warning" as const, v: 58249 },
-              { n: 2, fase: "En contacto", tone: "info" as const, v: 29993 },
-              { n: 3, fase: "Ganado", tone: "success" as const, v: 61737 },
-            ].map((r) => (
-              <RecordListItem
-                key={r.n}
-                leading={<AvatarInitials name={`Registro ${r.n}`} variant="entity" />}
-                title={`Registro ${r.n}`}
-                subtitle={`REG-000${r.n} · Categoría A · Usuario ${r.n}`}
-                status={<StatusBadge tone={r.tone}>{r.fase}</StatusBadge>}
-                value={fmt.eur(r.v)}
-              />
-            ))}
-          </RecordList>
-        </Example>
-        <Rules
-          items={[
-            <>Una fila: monograma, nombre y subtítulo a la izquierda; estado y cifra a la derecha. En pantallas estrechas el estado y la cifra se apilan para que el nombre nunca desaparezca.</>,
-            <>Con <code>onClick</code> la fila es un botón que abre el sheet; sin él, es una fila de solo lectura. <code>selected</code> la marca con el mismo fondo que una fila seleccionada de la tabla.</>,
-            <>Comparte búsqueda, filtros, orden, selección y paginación con la tabla: cambiar de vista no cambia qué filas se ven.</>,
-          ]}
-        />
-        <SpecTable
-          columns={["Prop", "Tipo", "Descripción"]}
-          rows={[
-            [<code key="l-leading">leading</code>, <code key="l-leading-t">ReactNode</code>, "Monograma o avatar. Opcional."],
-            [<code key="l-title">title</code>, <code key="l-title-t">ReactNode</code>, "Nombre del registro, en 13,5 px semibold. Obligatoria."],
-            [<code key="l-subtitle">subtitle</code>, <code key="l-subtitle-t">ReactNode</code>, "Código, categoría, responsable. Se trunca. Opcional."],
-            [<code key="l-status">status</code>, <code key="l-status-t">ReactNode</code>, "Normalmente un StatusBadge. Opcional."],
-            [<code key="l-value">value</code>, <code key="l-value-t">ReactNode</code>, "Cifra a la derecha con tabular-nums. Opcional."],
-            [<code key="l-selected">selected</code>, <code key="l-selected-t">boolean</code>, "Marca la fila como seleccionada. Por defecto false."],
-            [<code key="l-onClick">onClick</code>, <code key="l-onClick-t">{"() => void"}</code>, "Convierte la fila en botón. Normalmente abre el DetailSheet."],
-          ]}
-        />
-      </DocSection>
 
       <DocSection id="instalar" title="Instalar">
         <CodeBlock lang="bash" code="npx shadcn@latest add https://ui.astraticnetwork.com/r/data-table.json" />
@@ -290,7 +227,7 @@ export default function DataTablePage() {
       <DocSection id="siguiente" title="Relacionado">
         <NextLinks
           links={[
-            { href: "/ds/componentes/toolbar", label: "Toolbar", text: "Búsqueda, filtros y vistas que alimentan la tabla." },
+            { href: "/ds/componentes/base-de-datos", label: "Base de datos", text: "Para cualquier lista de registros con filtros y vistas." },
             { href: "/ds/componentes/bulk-bar", label: "Barra de selección", text: "Qué pasa con las filas marcadas." },
             { href: "/ds/componentes/detail-sheet", label: "Sheet de detalle", text: "Lo que abre la fila al pulsarla." },
             { href: "/ds/componentes/states", label: "Estados", text: "EmptyState, TableSkeleton y ErrorState." },

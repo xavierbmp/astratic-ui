@@ -159,7 +159,7 @@ export default function IconosPage() {
             <>Se importan con sufijo <code>Icon</code> (<code>PlusIcon</code>, nunca <code>Plus</code>): evita choques con <code>Link</code> de Next, <code>Table</code> de shadcn o un <code>Filter</code> propio.</>,
             <>Trazo 2, el de lucide por defecto. No se toca <code>strokeWidth</code> ni <code>absoluteStrokeWidth</code>: un icono más fino o más grueso se nota enseguida al lado de los demás.</>,
             <>Color <code>currentColor</code>: el icono toma el color del texto que acompaña. En cabeceras de sección y etiquetas de cifra va en <code>text-muted-foreground</code>. Solo lleva color propio cuando el color significa algo: deltas (<code>text-success</code>, <code>text-danger</code>) y el estado de error.</>,
-            <>Los componentes del kit reciben el componente, no el nodo: <code>icon={"{"}BanknoteIcon{"}"}</code> en <code>KpiCard</code>, <code>SectionHeader</code>, <code>FilterMenu</code> y <code>EmptyState</code>. Ellos ponen tamaño, color y <code>aria-hidden</code>.</>,
+            <>Los componentes del kit reciben el componente, no el nodo: <code>icon={"{"}BanknoteIcon{"}"}</code> en <code>KpiCard</code>, <code>SectionHeader</code> y <code>EmptyState</code>. Ellos ponen tamaño, color y <code>aria-hidden</code>.</>,
             <>Un concepto nuevo se resuelve buscando en lucide el icono más cercano y añadiéndolo a la tabla de vocabulario. Si no existe, no hay icono: nunca otro pack, nunca un emoji.</>,
           ]}
         />
@@ -260,7 +260,7 @@ export default function IconosPage() {
         <Rules
           items={[
             <>El nombre del componente es el nombre de lucide en PascalCase con sufijo <code>Icon</code>: <code>trash-2</code> es <code>Trash2Icon</code>, <code>square-kanban</code> es <code>SquareKanbanIcon</code>.</>,
-            <>Las cinco vistas tienen su icono fijo en <code>ViewSwitcher</code>; no se pasa ninguno. Calendario comparte icono con el área de eventos: la posición (toolbar o sidebar) deja claro cuál es cuál.</>,
+            <>Los cuatro tipos de vista de una base tienen su icono fijo (<code>ICONO_VISTA</code>: Table2, Columns3, LayoutGrid, CalendarDays) y los tipos de campo el suyo (<code>ICONO_TIPO</code>); no se pasa ninguno.</>,
             <>Un icono de esta tabla no se reutiliza para otro concepto. Si «archivar» es <code>archive</code>, ninguna otra acción del portal usa <code>archive</code>.</>,
           ]}
         />

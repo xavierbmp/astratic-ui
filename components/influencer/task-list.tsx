@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CalendarIcon, ChevronRightIcon, CopyIcon, EllipsisIcon, GripVerticalIcon, PlusIcon, StickyNoteIcon, Trash2Icon } from "lucide-react"
+import { CalendarIcon, ChevronDownIcon, ChevronRightIcon, CopyIcon, EllipsisIcon, GripVerticalIcon, PlusIcon, StickyNoteIcon, Trash2Icon } from "lucide-react"
 import { cn } from "cn"
 import type { EtiquetaTarea, Tarea } from "@/lib/influencer/modelo"
 import { diaDeTarea, estaCerrada, type ContextoTareas } from "@/lib/influencer/tareas"
@@ -12,7 +12,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ArrastreFilas, FinDeGrupo, GrupoArrastrable, useFilaArrastrable, type Soltar } from "@/components/app/arrastre-filas"
-import { CabeceraGrupo } from "@/components/app/grouped-table"
 import { CasillaTarea, DondeChip, EsperandoDias, EstadoTareaBadge, EtiquetasTarea, FechaTarea, PrioridadBandera, ProgresoSubtareas, RepiteIcono } from "@/components/influencer/task-cells"
 
 /** Propiedades que la lista enseña a la derecha de cada tarea, en este orden si se eligen. */
@@ -311,5 +310,23 @@ export function TareasLista({
         {altaFinal && <AltaRapida placeholder={altaFinal.placeholder} onCrear={altaFinal.onCrear} />}
       </div>
     </ArrastreFilas>
+  )
+}
+
+/** La cabecera de un grupo de la lista: plegarlo, cuántas tiene y, al pasar, «+» para crear dentro. */
+function CabeceraGrupo({ label, count, plegado, onPlegar, onNueva }: { label: React.ReactNode; count: number; plegado: boolean; onPlegar: () => void; onNueva?: () => void }) {
+  return (
+    <div className="group/cabecera flex items-center gap-1.5 py-1">
+      <button type="button" onClick={onPlegar} aria-expanded={!plegado} className="flex min-w-0 items-center gap-1.5 rounded-md px-1 py-0.5 text-left text-sm font-medium hover:bg-muted">
+        <ChevronDownIcon className={cn("size-4 flex-none text-muted-foreground transition-transform", plegado && "-rotate-90")} />
+        <span className="min-w-0 truncate">{label}</span>
+        <span className="text-xs font-normal tabular-nums text-muted-foreground">{count}</span>
+      </button>
+      {onNueva && (
+        <Button variant="ghost" size="icon-sm" aria-label="Nueva en este grupo" className="size-6 text-muted-foreground opacity-0 group-hover/cabecera:opacity-100 focus-visible:opacity-100" onClick={onNueva}>
+          <PlusIcon />
+        </Button>
+      )}
+    </div>
   )
 }

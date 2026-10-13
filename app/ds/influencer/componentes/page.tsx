@@ -205,8 +205,8 @@ const [editing, setEditing] = useState(false)
         <Prose>
           <p>
             Regla de los dos registros: lo que resume y las cifras de arriba van en el estilo visual del hijo; el bloque
-            donde se trabaja es el del madre sin adornos: <code>WorkGrid</code>, <code>FilterBar</code>, <code>Section</code>,{" "}
-            <code>Kanban</code>, <code>DataTable</code>, <code>InsightsPanel</code> y <code>DetailSheet</code>. Lo que no
+            donde se trabaja es el del madre sin adornos: <code>WorkGrid</code>, la <code>BaseDatos</code> al estilo Airtable,{" "}
+            <code>InsightsPanel</code> y <code>DetailSheet</code>. Lo que no
             existía en el madre y hacía falta para operar nace aquí.
           </p>
         </Prose>
@@ -250,9 +250,8 @@ const [editing, setEditing] = useState(false)
             <><code>TareasHoy</code>, compacto para que quepa la base debajo: cabecera con el día y los atajos a mañana, esperando y esta semana; filas de una línea con las vencidas arriba («Pasar todo a hoy») y lo de hoy por importancia (<code>ordenarHoy</code>), reordenable arrastrando; seis a la vista y «Ver N más»; las hechas de hoy, plegadas.</>,
             <>Subtareas: toda tarea que las tiene lleva su flechita con el progreso (<code>BotonSubtareas</code>) en Hoy, la lista, el tablero y la tabla; al desplegarla salen en pequeño (<code>MiniSubtareas</code>) para marcarlas sin abrir la ficha. Al hacer la última, un aviso ofrece dar por hecha la tarea.</>,
             <>Campos propios (<code>CampoTarea</code>: texto, número, fecha, selección, selección múltiple, casilla o enlace) en <code>Tarea.valores</code>: se crean y editan con <code>CampoTareaDialog</code> desde la ficha («+ Nuevo campo», o pulsando su nombre) o desde «Propiedades», y entran en filtros, orden, grupos y columnas (<code>idCampoPropio</code>, <code>CampoPropioInline</code>).</>,
-            <><code>TareasLista</code>: grupos plegables con su «+», subtareas anidadas, selección y arrastre por el asa para colocar a mano o mover de grupo (lo que cambia su valor, con <code>asignarCampo</code>).</>,
-            <><code>TableroTareas</code>: columnas por un campo (el estado, por defecto) y filas por otro (una por campaña); el mismo arrastre que la lista. <code>CalendarioTareas</code>: mes o semana, por fecha o por fecha límite, arrastrar a otro día, «+» en un día y «Sin fecha».</>,
-            <><code>columnasTareas</code> da las columnas de la tabla (<code>TablaAgrupada</code> del madre), todas editables en su celda. <code>NombreGrupoTarea</code> pinta la cabecera de un grupo según el campo (estado, prioridad, campaña con su logo, etiqueta…).</>,
+            <>La página de Tareas es una <code>BaseDatos</code> (<code>base-tareas.ts</code>) con <code>CalendarioTareas</code> en su lateral (mes o semana, por fecha o por fecha límite, arrastrar a otro día, «+» en un día y «Sin fecha»).</>,
+            <><code>TareasLista</code>: las tareas dentro de una ficha (<code>TaskTable</code>): grupos plegables con su «+», subtareas anidadas y arrastre por el asa (cambia su valor con <code>asignarCampo</code>).</>,
             <><code>TaskSheet</code> / <code>TareaDetalle</code>: la ficha, con una sola lista de campos editables (tipo y campaña o ficha primero, después estado, prioridad, fechas, etiquetas y los campos propios, con «+ Nuevo campo»), «Para hacerla» (<code>TareaContexto</code>, si es de una campaña o una ficha), subtareas, descripción, comentarios y actividad.</>,
             <>Celdas comunes en <code>task-cells.tsx</code>: <code>CasillaTarea</code>, <code>PrioridadBandera</code>, <code>EstadoTareaBadge</code>, <code>DondeChip</code>, <code>FechaTarea</code>, <code>EtiquetasTarea</code>, <code>ProgresoSubtareas</code>, <code>EsperandoDias</code>.</>,
             <><strong>Repetir</strong> (<code>SelectorRepeticion</code> con <code>EditorRepeticion</code>, en la ficha y en el alta): atajos y, debajo, cada cuántos días, días laborables, semanas, meses o años; los días de la semana; el día del mes («el día 13», «el segundo martes», «el último viernes»); si se cuenta desde su fecha o desde que se hace; y si termina un día o tras N veces. Se guarda una vez, al cerrar. La lógica, en <code>siguienteRepeticion</code>.</>,

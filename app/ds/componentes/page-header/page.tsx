@@ -138,7 +138,7 @@ export default function PageHeaderPage() {
             </>,
             <>
               <strong>Un solo segmentado por cabecera.</strong> Si hay pestañas de subpágina, el periodo pasa a un botón
-              outline con desplegable y los segmentos a un <code>FilterMenu</code> de selección única en la toolbar.
+              outline con desplegable y los segmentos, a una condición del filtro de la base.
             </>,
             <>
               <strong>No va</strong> la acción principal («Nuevo registro»): es el último elemento de la toolbar. Tampoco
@@ -164,7 +164,7 @@ export default function PageHeaderPage() {
           ]}
           donts={[
             "El botón negro «Nuevo registro» en la cabecera.",
-            "Un FilterMenu o un buscador junto al título.",
+            "Un filtro o un buscador junto al título.",
             "Dos controles segmentados en la misma cabecera.",
             "Título con icono, emoji o badge de estado.",
           ]}

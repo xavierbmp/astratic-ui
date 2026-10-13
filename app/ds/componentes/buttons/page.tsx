@@ -15,7 +15,6 @@ import { DocPage, DocSection, DoDont, Example, NextLinks, Prose, Rules, SpecTabl
 import { CodeBlock } from "@/components/docs/code-block"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ViewSwitcher } from "@/components/app/toolbar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,9 +47,7 @@ const named = `<Button><PlusIcon /> Nuevo registro</Button>
 </Button>
 <Button disabled><SaveIcon /> Guardando…</Button>`
 
-const groups = `<ViewSwitcher views={["table", "list", "kanban"]} value={view} onChange={setView} />
-
-<Tabs value={period} onValueChange={setPeriod}>
+const groups = `<Tabs value={period} onValueChange={setPeriod}>
   <TabsList>
     <TabsTrigger value="mes">Mes</TabsTrigger>
     <TabsTrigger value="trimestre">Trimestre</TabsTrigger>
@@ -168,9 +165,8 @@ export default function ButtonsPage() {
           </div>
         </Example>
 
-        <Example title="Grupos" description="ViewSwitcher para elegir una vista, Tabs para segmentar y DropdownMenu para «más acciones». Los dos primeros comparten forma: control segmentado gris con el activo en blanco." code={groups}>
+        <Example title="Grupos" description="Tabs para segmentar (control gris con el activo en blanco) y DropdownMenu para «más acciones». Las vistas de una lista se eligen en la barra de la base." code={groups}>
           <div className="flex flex-wrap items-center gap-4">
-            <ViewSwitcher views={["table", "list", "kanban"]} defaultValue="table" />
             <Tabs defaultValue="mes">
               <TabsList>
                 <TabsTrigger value="mes">Mes</TabsTrigger>
@@ -230,7 +226,7 @@ export default function ButtonsPage() {
               navegable con teclado y abrible en otra pestaña.
             </>,
             <>
-              Grupos: <code>ViewSwitcher</code> para elegir una vista, <code>Tabs</code> para segmentar contenido y{" "}
+              Grupos: <code>Tabs</code> para segmentar contenido y{" "}
               <code>DropdownMenu</code> para «más acciones». Nunca una fila de botones outline pegados a mano.
             </>,
           ]}
@@ -289,7 +285,7 @@ export default function ButtonsPage() {
         <NextLinks
           links={[
             { href: "/ds/patrones/convenciones", label: "Convenciones", text: "Qué variante va en cada sitio de la página." },
-            { href: "/ds/componentes/toolbar", label: "Toolbar", text: "La acción principal y el conmutador de vistas." },
+            { href: "/ds/componentes/toolbar", label: "Barra de la base", text: "Donde va la acción principal de una lista." },
             { href: "/ds/componentes/feedback", label: "Feedback", text: "El botón destructivo dentro del diálogo." },
             { href: "/ds/fundamentos/iconos", label: "Iconos", text: "Lucide, tamaños y cuándo va un icono." },
           ]}

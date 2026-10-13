@@ -293,7 +293,7 @@ export default function FormsPage() {
             ["Varias opciones", <code key="c">Checkbox</code>, "Una por opción, dentro de FieldSet con FieldLegend."],
             ["Sí / no como preferencia", <code key="c">Switch</code>, "Field horizontal con FieldContent para etiqueta y ayuda."],
             ["Aceptar algo (aviso, condiciones)", <code key="c">Checkbox</code>, "Field horizontal. Nunca un Switch para un consentimiento."],
-            ["Búsqueda", <code key="c">InputGroup + SearchIcon</code>, "En la toolbar ya existe como ToolbarSearch."],
+            ["Búsqueda", <code key="c">InputGroup + SearchIcon</code>, "En una lista ya existe: el buscador de la barra de la base."],
           ]}
         />
       </DocSection>

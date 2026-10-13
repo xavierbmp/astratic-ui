@@ -25,8 +25,8 @@ export default function NavegacionPage() {
           rows={[
             ["Página", "Sidebar", "Izquierda, en grupos con etiqueta", <code key="a">/facturacion</code>],
             ["Subpágina", <code key="b">PageTabs</code>, "Cabecera de página, a la derecha del título", <code key="c">/facturacion/cobros</code>],
-            ["Vista", <code key="d">ViewSwitcher</code>, "Toolbar del bloque, antes de la acción principal", "No cambia: se recuerda por página"],
-            ["Filtro", <code key="e">ToolbarSearch · FilterMenu</code>, "Toolbar del bloque", "Recorta la lista; no cambia de página"],
+            ["Vista", <code key="d">BarraBase · LateralVistas</code>, "Barra de la base: el nombre de la vista y el lateral", "No cambia: se guarda por persona"],
+            ["Filtro", <code key="e">PanelFiltro</code>, "Barra de la base: botón «Filtro» y buscar", "Recorta la vista; no cambia de página"],
             ["Registro", <code key="f">DetailSheet</code>, "Panel lateral derecho, encima de la página", <code key="g">?registro=id</code>],
           ]}
         />
@@ -163,7 +163,7 @@ export const nav: NavGroup[] = [
           columns={["Si…", "Entonces", "Ejemplo"]}
           rows={[
             ["Son los mismos datos presentados de otra forma", "Vista, con el conmutador de iconos de la toolbar", "Tabla y kanban de registros"],
-            ["Es un recorte de la misma lista", "Filtro (FilterMenu) o segmento", "Facturas vencidas"],
+            ["Es un recorte de la misma lista", "Filtro de la vista o una vista guardada", "Facturas vencidas"],
             ["Es otro contenido del mismo módulo, con sus propias cifras y columnas", "Subpágina, con PageTabs", "Facturas y Cobros"],
             ["Se usa a diario por separado o lo usa otro equipo", "Página propia en la sidebar", "Registros y Tareas"],
             ["Es un registro con operación propia", "Página de registro con pestañas de línea", "Una campaña con sus piezas"],
@@ -174,7 +174,7 @@ export const nav: NavGroup[] = [
             <strong>Un solo segmentado por cabecera.</strong> La cabecera admite un control segmentado de texto: las
             pestañas de subpágina o, si no hay subpáginas, el periodo de un dashboard o los segmentos de una lista. Si una
             página con subpáginas necesita también periodo o segmentos, el periodo pasa a un botón outline con
-            desplegable y los segmentos, a un <code>FilterMenu</code> de selección única en la toolbar.
+            desplegable y los segmentos, a una condición del filtro de la base.
           </p>
         </Prose>
       </DocSection>

@@ -46,12 +46,8 @@ const usage = `{
   cell: (r) => <StatusBadge tone={recordStatus[r.status].tone} dot>{recordStatus[r.status].label}</StatusBadge>,
 }
 
-<FilterMenu
-  label="Estado"
-  options={Object.entries(recordStatus).map(([value, s]) => ({ value, label: s.label }))}
-  value={statusFilter}
-  onChange={setStatusFilter}
-/>`
+// En una base de datos, un campo de estado con sus tonos se ve como StatusBadge:
+{ id: "status", nombre: "Estado", tipo: "select", opciones: opcionesDeEstados(ESTADOS), valor: (r) => r.status }`
 
 function PropsTitle({ children }: { children: React.ReactNode }) {
   return <h3 className="font-mono text-[13px] font-semibold">{children}</h3>

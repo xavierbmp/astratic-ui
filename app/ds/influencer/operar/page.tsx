@@ -13,9 +13,9 @@ export default function InfluencerOperarPage() {
       <DocSection id="estructura" title="Cómo se arma una página de operar">
         <Rules
           items={[
-            <><strong>La anatomía del madre, sin adornos</strong>: <code>PageHeader</code> con <code>PageTabs</code>, <code>WorkGrid</code> con <code>FilterBar</code>, un <code>Section</code> con la lista o el tablero e <code>InsightsPanel</code> a la derecha. Nada de <code>Block</code> del hijo alrededor de una tabla.</>,
-            <><strong>Cifras bonitas solo en las portadas</strong> (el Pipeline): <code>StatRow</code> del hijo en <code>WorkGrid stats</code>. Las bases de datos empiezan por su toolbar.</>,
-            <><strong>Filtrar como en el portal</strong>: buscador, filtros rápidos, constructor «Filtros» con los campos de <code>lib/influencer/campos.ts</code> (en la URL, <code>?f=</code>), vistas y campos visibles (<code>ColumnSettings</code>).</>,
+            <><strong>La anatomía del madre, sin adornos</strong>: <code>PageHeader</code> con <code>PageTabs</code>, <code>WorkGrid</code> con la <code>BaseDatos</code> al estilo Airtable e <code>InsightsPanel</code> a la derecha. Nada de <code>Block</code> del hijo alrededor de una base.</>,
+            <><strong>Cifras bonitas solo en las portadas</strong> (el Pipeline): <code>StatRow</code> del hijo en <code>WorkGrid stats</code>. Las demás bases empiezan por la base.</>,
+            <><strong>Cada lista es una base</strong> con sus campos en <code>lib/influencer/base-*.ts</code> y las vistas de cada una guardadas en su base de datos (<code>useBaseConCampos</code>): cuadrícula, kanban, galería y calendario, filtros con los operadores de Airtable, grupos, campos propios y la ficha encima o integrada.</>,
             <><strong>Registro abierto</strong>: propuesta, marca y persona en <code>DetailSheet</code> con <code>?registro=id</code>; la collab y la plantilla, página propia.</>,
             <><strong>Todo se edita donde se lee</strong> (<code>InlineField</code>); crear lleva diálogo (react-hook-form + zod); borrar, <code>ConfirmDialog</code> o toast con «Deshacer» si se puede recuperar.</>,
             <><strong>Nada se pide dos veces</strong>: el diálogo de tarea, la lista de tareas, la marca y las piezas de revisión son los mismos componentes en todas las páginas.</>,
@@ -25,17 +25,15 @@ export default function InfluencerOperarPage() {
           code={`<PageBody className="gap-6 px-4 pb-28 md:px-[34px] md:pb-10">
   <CrmHeader description="Tus propuestas por fase…" />          {/* PageHeader + PageTabs del CRM */}
   <WorkGrid
+    ficha={ficha}
     stats={<StatRow>…4 StatTile…</StatRow>}
-    toolbar={<FilterBar filtros={av} campos={campos} vistas={…} actions={<Button>Nueva propuesta</Button>} />}
-    aside={<InsightsPanel blocks={[porFase, proximosPasos, cerradas]} />}
+    aside={<InsightsPanel ficha={ficha} blocks={[tareas, porFase, proximosPasos, cerradas]} />}
   >
-    <Section>
-      <SectionHeader title="Propuestas" count={8} action={<ColumnSettings … />} />
-      <SectionBody>{kanban · tabla · lista · calendario}</SectionBody>
-      <BulkBar … />
-    </Section>
+    <BaseDatos clave="ws-pipeline" base={basePropuestas.api} campos={basePropuestas.campos} filas={propuestas} …
+      ficha={ficha} onNuevo={() => setNueva(true)} kanban={{ resumen: sumaImportes, plegadas: ["ganada", "perdida"] }}>
+      {(visibles, ficha) => <PropuestaSheet lista={visibles} ficha={ficha} … />}
+    </BaseDatos>
   </WorkGrid>
-  <PropuestaSheet … />   {/* DetailSummary + pestañas Seguimiento · Datos · Tareas */}
 </PageBody>`}
         />
       </DocSection>

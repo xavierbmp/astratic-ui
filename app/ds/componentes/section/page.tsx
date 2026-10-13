@@ -57,8 +57,8 @@ export default function SectionPage() {
               <code>meta</code> en gris pequeño al lado para el total en euros o el periodo.
             </>,
             <>
-              <strong>La acción de la cabecera es del bloque</strong>, no de la página: «Ver todas», el engranaje de campos
-              visibles (<code>ColumnSettings</code>) o el de configurar lo que enseña el bloque (<code>ConfigButton</code>).
+              <strong>La acción de la cabecera es del bloque</strong>, no de la página: «Ver todas» o el engranaje de configurar lo que
+              enseña el bloque (<code>ConfigButton</code>). Una lista de registros no va en un bloque: es una base de datos, con su barra.
               Botones <code>ghost</code> tamaño <code>sm</code>.
             </>,
           ]}

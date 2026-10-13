@@ -16,8 +16,8 @@ export default function KanbanPage() {
         <Prose>
           <p>
             Cuando los registros pasan por fases ordenadas (nuevo, en contacto, propuesta, ganado) y el usuario las
-            cambia a mano. Comparte búsqueda, filtros y selección con la tabla: es otra forma de ver el mismo conjunto,
-            elegida desde el <code>ViewSwitcher</code>. Si la fase la decide el sistema y no la persona, no hay kanban.
+            cambia a mano. En una base de datos es una vista más (apilada por una selección o un vínculo, con <code>KanbanBase</code>), con sus propios
+            filtros. Si la fase la decide el sistema y no la persona, no hay kanban.
           </p>
         </Prose>
         <Rules
