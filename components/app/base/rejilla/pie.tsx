@@ -5,7 +5,7 @@ import { CheckIcon, ChevronDownIcon, PlusIcon } from "lucide-react"
 import { cn } from "cn"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { CALCULOS, calculosDe, calcular, type Calculo } from "@/lib/vistas/core"
-import { aFiltrable } from "@/lib/base/campos"
+import { aFiltrable, textoDeValor } from "@/lib/base/campos"
 import { ALTO_PIE, ANCHO_ANADIR, ANCHO_IZQUIERDA, type Columna } from "@/components/app/base/rejilla/medidas"
 
 /**
@@ -56,7 +56,9 @@ export function Pie<T>({
 function Resumen<T>({ columna, filas, calculo, onCalculo }: { columna: Columna<T>; filas: T[]; calculo: Calculo | undefined; onCalculo: (c: Calculo | null) => void }) {
   const filtrable = React.useMemo(() => aFiltrable(columna.campo), [columna.campo])
   const opciones = calculosDe(filtrable.tipo).filter((c) => c !== "contar")
-  const resultado = calculo ? calcular(filas, filtrable, calculo) : null
+  // Los totales de un número salen con su formato: «1.550,50 €», «32 %».
+  const conFormato = ["numero", "moneda", "porcentaje"].includes(columna.campo.tipo)
+  const resultado = calculo ? calcular(filas, filtrable, calculo, conFormato ? (n) => textoDeValor(columna.campo, n) : undefined) : null
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

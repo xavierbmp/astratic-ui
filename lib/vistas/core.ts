@@ -308,7 +308,7 @@ export function gruposPosibles<T>(filas: T[], agrupacion: Agrupacion, campos: Ca
 const numeroEs = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 })
 
 /** El resultado de un cálculo del pie, ya escrito: «12», «35 %», «6 oct». */
-export function calcular<T>(filas: T[], campo: CampoFiltrable<T> | undefined, calculo: Calculo): string {
+export function calcular<T>(filas: T[], campo: CampoFiltrable<T> | undefined, calculo: Calculo, formatoNumero: (n: number) => string = (n) => numeroEs.format(n)): string {
   const n = filas.length
   if (calculo === "contar" || !campo) return String(n)
   const valores = filas.map((f) => campo.valor(f))
@@ -344,7 +344,7 @@ export function calcular<T>(filas: T[], campo: CampoFiltrable<T> | undefined, ca
         maximo: nums[nums.length - 1],
         rango: nums[nums.length - 1] - nums[0],
       }[calculo]
-      return numeroEs.format(r)
+      return formatoNumero(r)
     }
     case "mas_temprana":
     case "mas_tardia":
