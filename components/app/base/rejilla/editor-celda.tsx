@@ -6,7 +6,7 @@ import { cn } from "cn"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { opcionDe, valorDeTexto, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
-import { FichaOpcion } from "@/components/app/base/apariencia"
+import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
 
 /** Cómo termina una edición: guardar y quedarse, o guardar y pasar a la celda de al lado o de abajo. */
 export type Salida = "quedarse" | "derecha" | "izquierda" | "abajo"
@@ -37,6 +37,7 @@ export function EditorCelda<T>(props: PropsEditor<T>) {
   switch (props.campo.tipo) {
     case "select":
     case "multiselect":
+    case "vinculo":
       return <EditorOpciones {...props} />
     case "fecha":
       return <EditorFecha {...props} />
@@ -195,13 +196,14 @@ function EditorFecha<T>({ campo, valor, onGuardar, onCancelar, error }: PropsEdi
 /**
  * Las opciones en una lista con buscador. En la de una sola, elegir guarda y cierra; en la de
  * varias, cada clic añade o quita y la lista sigue abierta. Si el campo lo permite, lo escrito
- * que no existe se ofrece como opción nueva.
+ * que no existe se ofrece como opción nueva. Un vínculo es igual, con los registros de la otra base.
  */
 function EditorOpciones<T>({ campo, valor, inicial, onGuardar, onAplicar, onCancelar, onCrearOpcion }: PropsEditor<T>) {
   const varias = campo.tipo === "multiselect"
   const [elegidas, setElegidas] = React.useState<string[]>(Array.isArray(valor) ? valor : typeof valor === "string" && valor ? [valor] : [])
   const [busqueda, setBusqueda] = React.useState(inicial ?? "")
   const existe = (campo.opciones ?? []).some((o) => o.label.toLowerCase() === busqueda.trim().toLowerCase())
+  const objeto = campo.vinculo?.objeto
 
   const elegir = (id: string) => {
     if (!varias) return onGuardar(id, "quedarse")
@@ -239,13 +241,13 @@ function EditorOpciones<T>({ campo, valor, inicial, onGuardar, onAplicar, onCanc
           </div>
         )}
         <Command>
-          <CommandInput autoFocus placeholder="Encuentra una opción" value={busqueda} onValueChange={setBusqueda} />
+          <CommandInput autoFocus placeholder={objeto ? `Busca una ${objeto}` : "Encuentra una opción"} value={busqueda} onValueChange={setBusqueda} />
           <CommandList className="max-h-64">
-            <CommandEmpty>{onCrearOpcion ? "Escribe para crear una opción" : "Ninguna opción se llama así"}</CommandEmpty>
+            <CommandEmpty>{onCrearOpcion ? "Escribe para crear una opción" : objeto ? `Ninguna ${objeto} se llama así` : "Ninguna opción se llama así"}</CommandEmpty>
             <CommandGroup>
               {(campo.opciones ?? []).map((o) => (
                 <CommandItem key={o.id} value={`${o.label} ${o.id}`} onSelect={() => elegir(o.id)}>
-                  <FichaOpcion label={o.label} color={o.color} />
+                  {objeto ? <FichaVinculo label={o.label} /> : <FichaOpcion label={o.label} color={o.color} />}
                   {elegidas.includes(o.id) && <CheckIcon className="ml-auto size-3.5" />}
                 </CommandItem>
               ))}
@@ -256,7 +258,7 @@ function EditorOpciones<T>({ campo, valor, inicial, onGuardar, onAplicar, onCanc
               )}
               {!varias && !campo.obligatorio && elegidas.length > 0 && (
                 <CommandItem value="quitar la opción" onSelect={() => onGuardar(null, "quedarse")} className="text-muted-foreground">
-                  <XIcon className="size-3.5" /> Quitar la opción
+                  <XIcon className="size-3.5" /> {objeto ? `Quitar la ${objeto}` : "Quitar la opción"}
                 </CommandItem>
               )}
             </CommandGroup>

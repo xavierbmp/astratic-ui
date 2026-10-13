@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import type { DefCampo } from "@/lib/base/campos"
-import { idBase, normalizarConfig, normalizarVista, vistaNueva, camposDeFormulario, type CampoFormulario, type ConfigBase, type VistaBase } from "@/lib/base/vistas"
+import { TIPOS_VISTA, idBase, normalizarConfig, normalizarVista, vistaNueva, camposDeFormulario, type CampoFormulario, type ConfigBase, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 
 /** Tiempo que se espera antes de guardar: ensanchar una columna no manda un guardado por píxel. */
 const ESPERA_GUARDADO = 500
@@ -77,14 +77,16 @@ export function useBase<T>({
 
   const activar = React.useCallback((id: string) => actualizar((c) => ({ ...c, activa: id })), [actualizar])
 
+  /** Crea una vista del tipo que se pida («Kanban 2») y la abre. Devuelve su id. */
   const crear = React.useCallback(
-    (nombre?: string) => {
+    (tipo: TipoVista = "cuadricula") => {
       const id = idBase("v")
       actualizar((c) => {
         const usados = new Set(c.vistas.map((v) => v.nombre))
-        let n = c.vistas.length + 1
-        while (!nombre && usados.has(`Cuadrícula ${n}`)) n += 1
-        return { ...c, vistas: [...c.vistas, vistaNueva(nombre ?? `Cuadrícula ${n}`, camposRef.current, id)], activa: id }
+        const base = TIPOS_VISTA[tipo].label
+        let n = c.vistas.filter((v) => (v.tipo ?? "cuadricula") === tipo).length + 1
+        while (usados.has(`${base} ${n}`)) n += 1
+        return { ...c, vistas: [...c.vistas, vistaNueva(`${base} ${n}`, camposRef.current, { id, tipo })], activa: id }
       })
       return id
     },

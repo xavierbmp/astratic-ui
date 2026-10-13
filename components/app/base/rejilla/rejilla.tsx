@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { toast } from "sonner"
-import { CopyIcon, CopyPlusIcon, Maximize2Icon, Trash2Icon } from "lucide-react"
+import { CopyIcon, CopyPlusIcon, PanelRightOpenIcon, Trash2Icon } from "lucide-react"
 import { cn } from "cn"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from "@/components/ui/context-menu"
 import { esValorVacio, textoParaCopiar, valorDeTexto, type ColorOpcion, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
@@ -11,9 +11,9 @@ import { aHtml, aTsv, deTsv, repartirPegado } from "@/lib/base/portapapeles"
 import { ajustarRango, caja, celdasDeRelleno, enCaja, esMultiple, moverSeleccion, tabular, unaCelda, type Celda, type Direccion, type Rango } from "@/lib/base/seleccion"
 import { ALTO_CABECERA, ALTO_GRUPO, ALTURAS_FILA, type LineaRejilla, type VistaBase } from "@/lib/base/vistas"
 import { Cabecera } from "@/components/app/base/rejilla/cabecera"
-import { CeldaIzquierda, FONDO, LineaGrupo, anchoDeFijas } from "@/components/app/base/rejilla/lineas"
-import { EditorCelda, type Salida } from "@/components/app/base/rejilla/editor-celda"
-import { ValorCelda } from "@/components/app/base/rejilla/valor-celda"
+import { LineaGrupo, anchoDeFijas } from "@/components/app/base/rejilla/lineas"
+import type { Salida } from "@/components/app/base/rejilla/editor-celda"
+import { FilaRegistro, tintesDeColumnas } from "@/components/app/base/rejilla/fila"
 import { Pie } from "@/components/app/base/rejilla/pie"
 import type { AccionesCampo } from "@/components/app/base/rejilla/menu-campo"
 import { ALTO_PIE, ALTO_SUBGRUPO, anchoTotal, colocarColumnas, type Columna } from "@/components/app/base/rejilla/medidas"
@@ -51,6 +51,10 @@ export type PropsRejilla<T> = {
   onCrearOpcion?: (campoId: string, label: string) => OpcionCampo | null
   onDuplicar?: (id: string) => void
   onBorrar?: (ids: string[]) => void
+  /** Pulsar un registro vinculado (la marca de un contacto) abre su ficha. */
+  onAbrirVinculo?: (campoId: string, id: string) => void
+  /** El registro de la celda activa, cada vez que cambia (la ficha en el panel lo sigue). */
+  onActiva?: (id: string) => void
   vacio?: React.ReactNode
 }
 
@@ -88,6 +92,16 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
   const limites = { filas: p.registros.length, cols: columnas.length }
   const rango = rangoGuardado ? ajustarRango(rangoGuardado, limites) : null
   const sel = rango ? caja(rango) : null
+  const filaActiva = rango ? registros[rango.foco.fila] : undefined
+  const idActiva = filaActiva ? getId(filaActiva) : null
+  // Avisa solo cuando cambia el registro activo (no en cada repintado: cerrar su ficha no la reabre).
+  const onActiva = React.useRef(p.onActiva)
+  React.useEffect(() => {
+    onActiva.current = p.onActiva
+  })
+  React.useEffect(() => {
+    if (idActiva) onActiva.current?.(idActiva)
+  }, [idActiva])
 
   // Dónde está cada registro entre las líneas (las cabeceras de grupo también son líneas).
   const lineaDeRegistro = React.useMemo(() => {
@@ -527,6 +541,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
                       enfocar()
                     }}
                     onCrearOpcion={p.onCrearOpcion}
+                    onAbrirVinculo={p.onAbrirVinculo}
                   />
                 )
               })}
@@ -541,7 +556,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
             {filaObjetivo && (
               <>
                 <ContextMenuItem onSelect={() => p.onAbrir(p.getId(filaObjetivo))}>
-                  <Maximize2Icon /> Expandir el registro <ContextMenuShortcut>⇧␣</ContextMenuShortcut>
+                  <PanelRightOpenIcon /> Abrir la ficha <ContextMenuShortcut>⇧␣</ContextMenuShortcut>
                 </ContextMenuItem>
                 <ContextMenuItem onSelect={() => void navigator.clipboard.writeText(aTsv(matrizSeleccion())).then(() => toast.success("Copiado"))}>
                   <CopyIcon /> Copiar las celdas <ContextMenuShortcut>⌘C</ContextMenuShortcut>
@@ -569,21 +584,6 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
       </div>
     </div>
   )
-}
-
-/**
- * Como en Airtable, las columnas por las que se filtra se tiñen de verde y las que ordenan, de
- * naranja: se ve de un vistazo qué está mandando en la vista.
- */
-function tintesDeColumnas(vista: VistaBase): Map<string, string> {
-  const tintes = new Map<string, string>()
-  const recorrer = (g: VistaBase["filtro"]) => {
-    g.condiciones.forEach((c) => tintes.set(c.campo, "bg-opcion-verde opacity-50"))
-    g.grupos?.forEach(recorrer)
-  }
-  vista.orden.forEach((o) => tintes.set(o.campo, "bg-opcion-naranja opacity-50"))
-  recorrer(vista.filtro)
-  return tintes
 }
 
 /**
@@ -619,97 +619,6 @@ function AsaFijas<T>({ finFijas, alto, columnas, onCongelar }: { finFijas: numbe
       >
         <span className={cn("h-full w-0.5 group-hover/asa:bg-brand", x !== null && "bg-brand")} />
       </span>
-    </div>
-  )
-}
-
-type PropsFila<T> = {
-  estilo: React.CSSProperties
-  fila: T
-  indice: number
-  numero: number
-  columnas: Columna<T>[]
-  congelar: number
-  altura: VistaBase["altura"]
-  color?: ColorOpcion
-  marcada: boolean
-  abierta: boolean
-  sel: ReturnType<typeof caja> | null
-  cursor: Celda | null
-  rellenoHasta: number | null
-  editando: { celda: Celda; inicial?: string } | null
-  celdas?: Partial<Record<string, (fila: T) => React.ReactNode>>
-  tintes: Map<string, string>
-  editable: boolean
-  onMarcar: (m: boolean) => void
-  onExpandir: () => void
-  onCambiar: (campo: DefCampo<T>, valor: ValorCampo) => void
-  onGuardar: (valor: ValorCampo, salida: Salida) => void
-  onCancelar: () => void
-  onCrearOpcion?: (campoId: string, label: string) => OpcionCampo | null
-}
-
-/** Un registro: la columna de la izquierda y una celda por campo, con su selección y su editor. */
-function FilaRegistro<T>(f: PropsFila<T>) {
-  const alta = f.altura !== "corta"
-  return (
-    <div style={f.estilo} className="group/fila flex">
-      <CeldaIzquierda indice={f.indice} numero={f.numero} color={f.color} alta={alta} marcada={f.marcada} abierta={f.abierta} onMarcar={f.onMarcar} onExpandir={f.onExpandir} />
-      {f.columnas.map((c, ci) => (
-        <CeldaRegistro key={c.campo.id} {...f} columna={c} col={ci} alta={alta} />
-      ))}
-    </div>
-  )
-}
-
-function CeldaRegistro<T>({ columna: c, col, alta, ...f }: PropsFila<T> & { columna: Columna<T>; col: number; alta: boolean }) {
-  const celda = { fila: f.indice, col }
-  const enSeleccion = !!f.sel && enCaja(f.sel, celda)
-  const activa = f.cursor?.fila === f.indice && f.cursor.col === col
-  const esquina = !!f.sel && f.sel.f1 === f.indice && f.sel.c1 === col && f.rellenoHasta === null
-  const enRelleno = f.rellenoHasta !== null && !!f.sel && col >= f.sel.c0 && col <= f.sel.c1 && ((f.indice > f.sel.f1 && f.indice <= f.rellenoHasta) || (f.indice < f.sel.f0 && f.indice >= f.rellenoHasta))
-  const editandoAqui = f.editando?.celda.col === col
-  const valor = c.campo.valor(f.fila)
-  const aMedida = f.celdas?.[c.campo.id]
-  const ultimaFija = c.fija && col === f.congelar - 1
-  return (
-    <div
-      data-celda
-      data-fila={f.indice}
-      data-col={col}
-      role="gridcell"
-      aria-selected={enSeleccion}
-      className={cn(
-        "relative flex flex-none overflow-hidden border-r border-b px-1.5 text-[13px] leading-[18px]",
-        alta ? "items-start py-1.5" : "items-center",
-        f.marcada || f.abierta ? FONDO.marcada : FONDO.normal,
-        c.fija && "sticky z-[5]",
-        ultimaFija && "border-r-2 border-r-control",
-        (activa || editandoAqui) && "z-[7] overflow-visible",
-      )}
-      style={{ width: c.ancho, left: c.fija ? c.x : undefined }}
-    >
-      {f.tintes.has(c.campo.id) && <span aria-hidden className={cn("pointer-events-none absolute inset-0", f.tintes.get(c.campo.id))} />}
-      {(enSeleccion || enRelleno) && <span aria-hidden className={cn("pointer-events-none absolute inset-0 bg-brand-soft", enRelleno && "border border-dashed border-brand")} />}
-      {activa && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[2px] ring-2 ring-brand ring-inset" />}
-      {editandoAqui && f.editando ? (
-        <>
-          <span className="relative min-w-0 flex-1 opacity-0">{aMedida ? aMedida(f.fila) : <ValorCelda campo={c.campo} valor={valor} altura={f.altura} editable={false} onCambiar={() => undefined} />}</span>
-          <EditorCelda
-            campo={c.campo}
-            valor={valor}
-            inicial={f.editando.inicial}
-            onGuardar={f.onGuardar}
-            onAplicar={(v) => f.onCambiar(c.campo, v)}
-            onCancelar={f.onCancelar}
-            onCrearOpcion={c.campo.propio && f.onCrearOpcion ? (label) => f.onCrearOpcion?.(c.campo.id, label) ?? null : undefined}
-            error={(m) => toast.error(m)}
-          />
-        </>
-      ) : (
-        <span className="relative flex min-w-0 flex-1">{aMedida ? aMedida(f.fila) : <ValorCelda campo={c.campo} valor={valor} altura={f.altura} editable={f.editable && !c.campo.soloLectura} onCambiar={(v) => f.onCambiar(c.campo, v)} />}</span>
-      )}
-      {esquina && f.editable && !f.editando && <span data-relleno aria-label="Arrastra para rellenar" className="absolute -right-[3px] -bottom-[3px] z-10 size-[7px] cursor-crosshair rounded-[1px] border border-card bg-brand" />}
     </div>
   )
 }

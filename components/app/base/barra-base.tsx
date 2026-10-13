@@ -1,74 +1,39 @@
 "use client"
 
 import * as React from "react"
-import {
-  ArrowUpDownIcon,
-  CheckIcon,
-  ChevronDownIcon,
-  CopyIcon,
-  EyeOffIcon,
-  LayoutListIcon,
-  ListFilterIcon,
-  PaintBucketIcon,
-  PanelLeftIcon,
-  PencilIcon,
-  Rows3Icon,
-  SearchIcon,
-  Table2Icon,
-  Trash2Icon,
-  WrapTextIcon,
-  XIcon,
-  type LucideIcon,
-} from "lucide-react"
-import { cn } from "cn"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Switch } from "@/components/ui/switch"
+import { ArrowUpDownIcon, CalendarDaysIcon, Columns3Icon, EyeOffIcon, PaletteIcon, PanelLeftIcon, PanelRightIcon, Rows3Icon, SlidersHorizontalIcon, type LucideIcon } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { contarCondiciones } from "@/lib/filtros/core"
 import type { DefCampo } from "@/lib/base/campos"
-import { ALTURAS_FILA, camposOcultos, textoCampos, textoFiltro, type AlturaFila, type VistaBase } from "@/lib/base/vistas"
+import { camposApilables, camposDeFecha, camposOcultos, textoCampos, textoFiltro, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 import type { CampoMenu } from "@/components/app/base/selector-campo"
+import { BotonBarra } from "@/components/app/base/boton-barra"
+import { Buscador, MenuAltura, MenuNombreVista, SelectorCampoVista, type AccionesVista } from "@/components/app/base/controles-barra"
 import { PanelFiltro } from "@/components/app/base/panel-filtro"
 import { MenuCampos } from "@/components/app/base/menu-campos"
 import { MenuOrden } from "@/components/app/base/menu-orden"
 import { MenuGrupos } from "@/components/app/base/menu-grupos"
 import { MenuColor } from "@/components/app/base/menu-color"
 
-/** Cada botón activo se tiñe de su color, como en Airtable: campos ocultos, filtro, grupos, orden y color. */
-const TINTE = {
-  campos: "bg-opcion-azul text-opcion-azul-foreground hover:bg-opcion-azul",
-  filtro: "bg-opcion-verde text-opcion-verde-foreground hover:bg-opcion-verde",
-  grupos: "bg-opcion-morado text-opcion-morado-foreground hover:bg-opcion-morado",
-  orden: "bg-opcion-naranja text-opcion-naranja-foreground hover:bg-opcion-naranja",
-  color: "bg-opcion-rosa text-opcion-rosa-foreground hover:bg-opcion-rosa",
-} as const
-
-const BotonBarra = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button"> & { icono: LucideIcon; texto: string; tinte?: string }>(function BotonBarra({ icono: Icono, texto, tinte, className, ...props }, ref) {
-  return (
-    <button
-      ref={ref}
-      type="button"
-      className={cn("inline-flex h-7 flex-none items-center gap-1.5 rounded-md px-2 text-[13px] whitespace-nowrap text-foreground/80 hover:bg-muted aria-expanded:bg-muted", tinte, className)}
-      title={texto}
-      {...props}
-    >
-      <Icono className="size-4 flex-none" />
-      {/* Si no cabe todo, los botones apagados se quedan en icono; los activos siguen diciendo qué hacen. */}
-      <span className={tinte ? "hidden max-w-44 truncate @3xl/barra:inline" : "hidden @6xl/barra:inline"}>{texto}</span>
-    </button>
-  )
-})
+export type { AccionesVista }
 
 /** Los menús de la barra, para abrirlos desde fuera («Filtrar por este campo» abre el de filtro). */
 export type MenuDeBarra = "campos" | "filtro" | "grupos" | "orden" | "color"
 
-/** Un botón de la barra que abre su menú, como los de Airtable. */
-function MenuBarra({ icono, texto, tinte, children, align = "start", abierto, onAbierto }: { icono: LucideIcon; texto: string; tinte?: string; children: React.ReactNode; align?: "start" | "end"; abierto: boolean; onAbierto: (a: boolean) => void }) {
+/** Qué menús tiene cada tipo de vista: el calendario no oculta campos ni ordena; solo la cuadrícula agrupa. */
+const MENUS: Record<TipoVista, MenuDeBarra[]> = {
+  cuadricula: ["campos", "filtro", "grupos", "orden", "color"],
+  kanban: ["campos", "filtro", "orden", "color"],
+  galeria: ["campos", "filtro", "orden", "color"],
+  calendario: ["filtro", "color"],
+}
+
+/** Un botón de la barra que abre su menú. */
+function MenuBarra({ icono, texto, activo, children, align = "start", abierto, onAbierto }: { icono: LucideIcon; texto: string; activo?: boolean; children: React.ReactNode; align?: "start" | "end"; abierto: boolean; onAbierto: (a: boolean) => void }) {
   return (
     <Popover open={abierto} onOpenChange={onAbierto}>
       <PopoverTrigger asChild>
-        <BotonBarra icono={icono} texto={texto} tinte={tinte} />
+        <BotonBarra icono={icono} texto={texto} activo={activo} />
       </PopoverTrigger>
       {/* Se abre también desde el menú de una cabecera («Filtrar por este campo»), que al cerrarse devuelve el foco: eso no lo cierra. */}
       <PopoverContent align={align} className="w-auto p-0" onFocusOutside={(e) => e.preventDefault()}>
@@ -78,16 +43,11 @@ function MenuBarra({ icono, texto, tinte, children, align = "start", abierto, on
   )
 }
 
-export type AccionesVista = {
-  renombrar: (nombre: string) => void
-  duplicar: () => void
-  borrar?: () => void
-}
-
 /**
- * La barra de una vista de la base, como la de Airtable: a la izquierda el lateral de vistas y el
- * nombre de la vista (con su menú); a la derecha ocultar campos, filtro, agrupar, ordenar, color,
- * altura de fila y buscar, y al final la acción principal de la página.
+ * La barra de una vista de la base, con la colocación de Airtable: a la izquierda el lateral de
+ * vistas y el nombre de la vista (con su menú); a la derecha lo que tenga su tipo (ocultar campos,
+ * filtro, agrupar, ordenar, color, altura de fila, el campo del kanban o del calendario) y buscar;
+ * al final la acción principal de la página y el botón que pone la ficha en el panel de la derecha.
  */
 export function BarraBase<T>({
   vista,
@@ -104,6 +64,7 @@ export function BarraBase<T>({
   busqueda,
   onBuscar,
   accion,
+  panelFicha,
   menu,
   onMenu,
 }: {
@@ -122,14 +83,19 @@ export function BarraBase<T>({
   busqueda: string
   onBuscar: (q: string) => void
   accion?: React.ReactNode
+  /** La ficha del registro abierto, integrada a la derecha en vez de encima (solo en pantallas anchas). */
+  panelFicha?: { activo: boolean; onAlternar: () => void }
   menu: MenuDeBarra | null
   onMenu: (m: MenuDeBarra | null) => void
 }) {
+  const tipo = vista.tipo ?? "cuadricula"
+  const tiene = (m: MenuDeBarra) => MENUS[tipo].includes(m)
   const de = (m: MenuDeBarra) => ({ abierto: menu === m, onAbierto: (a: boolean) => onMenu(a ? m : null) })
   const otras = vistas.filter((v) => v.id !== vista.id)
   const ocultos = camposOcultos(vista)
   const filtrado = textoFiltro(vista.filtro, campos)
-  const coloreado = vista.color?.modo === "campo" ? `Coloreado por ${campos.find((c) => c.id === (vista.color?.modo === "campo" ? vista.color.campo : ""))?.nombre ?? "un campo"}` : vista.color ? "Coloreado por condiciones" : null
+  const nombreDe = (id: string | undefined) => campos.find((c) => c.id === id)?.nombre
+  const coloreado = vista.color?.modo === "campo" ? `Coloreado por ${nombreDe(vista.color.campo) ?? "un campo"}` : vista.color ? "Coloreado por condiciones" : null
 
   return (
     <div className="@container/barra flex h-11 flex-none items-center gap-1 border-b px-2">
@@ -139,146 +105,49 @@ export function BarraBase<T>({
       <MenuNombreVista vista={vista} acciones={acciones} />
 
       <div className="ml-auto flex min-w-0 items-center gap-0.5 overflow-x-auto">
-        <MenuBarra icono={EyeOffIcon} texto={ocultos ? `${ocultos} ${ocultos === 1 ? "campo oculto" : "campos ocultos"}` : "Ocultar campos"} tinte={ocultos ? TINTE.campos : undefined} {...de("campos")}>
-          <MenuCampos vista={vista} campos={campos} onCambiar={(lista) => onCambiar({ campos: lista })} />
-        </MenuBarra>
-        <MenuBarra icono={ListFilterIcon} texto={filtrado ?? "Filtro"} tinte={contarCondiciones(vista.filtro) ? TINTE.filtro : undefined} {...de("filtro")}>
+        {tipo === "kanban" && (
+          <SelectorCampoVista icono={Columns3Icon} texto={`Apilado por ${nombreDe(vista.apilar) ?? "…"}`} titulo="Las columnas salen de" campos={camposApilables(campos)} valor={vista.apilar} vacio="Crea un campo de selección única para repartir las tarjetas." onCambiar={(apilar) => onCambiar({ apilar })} />
+        )}
+        {tipo === "calendario" && (
+          <SelectorCampoVista icono={CalendarDaysIcon} texto={`Fecha: ${nombreDe(vista.fecha) ?? "…"}`} titulo="Cada registro va en el día de" campos={camposDeFecha(campos)} valor={vista.fecha} vacio="Crea un campo de fecha para ver los registros en el calendario." onCambiar={(fecha) => onCambiar({ fecha })} />
+        )}
+        {tiene("campos") && (
+          <MenuBarra icono={EyeOffIcon} texto={ocultos ? `${ocultos} ${ocultos === 1 ? "campo oculto" : "campos ocultos"}` : "Ocultar campos"} activo={ocultos > 0} {...de("campos")}>
+            <MenuCampos vista={vista} campos={campos} onCambiar={(lista) => onCambiar({ campos: lista })} />
+          </MenuBarra>
+        )}
+        <MenuBarra icono={SlidersHorizontalIcon} texto={filtrado ?? "Filtro"} activo={contarCondiciones(vista.filtro) > 0} {...de("filtro")}>
           <PanelFiltro campos={camposMenu} value={vista.filtro} onChange={(filtro) => onCambiar({ filtro })} objeto={objeto} otrasVistas={otras} />
         </MenuBarra>
-        <MenuBarra icono={LayoutListIcon} texto={vista.grupos.length ? textoCampos(vista.grupos.length, "Agrupados") : "Agrupar"} tinte={vista.grupos.length ? TINTE.grupos : undefined} {...de("grupos")}>
-          <MenuGrupos campos={camposMenu} grupos={vista.grupos} otrasVistas={otras} onCambiar={(grupos) => onCambiar({ grupos, plegados: [] })} onContraer={onContraer} onExpandir={onExpandir} />
-        </MenuBarra>
-        <MenuBarra icono={ArrowUpDownIcon} texto={vista.orden.length ? textoCampos(vista.orden.length, "Ordenado") : "Ordenar"} tinte={vista.orden.length ? TINTE.orden : undefined} {...de("orden")}>
-          <MenuOrden campos={camposMenu} orden={vista.orden} otrasVistas={otras} onCambiar={(orden) => onCambiar({ orden })} />
-        </MenuBarra>
-        <MenuBarra icono={PaintBucketIcon} texto={coloreado ?? "Configurar color"} tinte={coloreado ? TINTE.color : undefined} align="end" {...de("color")}>
+        {tiene("grupos") && (
+          <MenuBarra icono={Rows3Icon} texto={vista.grupos.length ? textoCampos(vista.grupos.length, "Agrupados") : "Agrupar"} activo={vista.grupos.length > 0} {...de("grupos")}>
+            <MenuGrupos campos={camposMenu} grupos={vista.grupos} otrasVistas={otras} onCambiar={(grupos) => onCambiar({ grupos, plegados: [] })} onContraer={onContraer} onExpandir={onExpandir} />
+          </MenuBarra>
+        )}
+        {tiene("orden") && (
+          <MenuBarra icono={ArrowUpDownIcon} texto={vista.orden.length ? textoCampos(vista.orden.length, "Ordenado") : "Ordenar"} activo={vista.orden.length > 0} {...de("orden")}>
+            <MenuOrden campos={camposMenu} orden={vista.orden} otrasVistas={otras} onCambiar={(orden) => onCambiar({ orden })} />
+          </MenuBarra>
+        )}
+        <MenuBarra icono={PaletteIcon} texto={coloreado ?? "Color"} activo={!!coloreado} align="end" {...de("color")}>
           <MenuColor campos={camposMenu} color={vista.color} onCambiar={(color) => onCambiar({ color })} />
         </MenuBarra>
-        <MenuAltura altura={vista.altura} ajustarCabeceras={!!vista.ajustarCabeceras} onCambiar={onCambiar} />
+        {tipo === "cuadricula" && <MenuAltura altura={vista.altura} ajustarCabeceras={!!vista.ajustarCabeceras} onCambiar={onCambiar} />}
         <Buscador valor={busqueda} onCambiar={onBuscar} />
       </div>
       {accion && <div className="ml-1 flex-none">{accion}</div>}
+      {panelFicha && (
+        <button
+          type="button"
+          aria-pressed={panelFicha.activo}
+          aria-label={panelFicha.activo ? "Abrir la ficha encima" : "Ficha integrada a la derecha"}
+          title={panelFicha.activo ? "Abrir la ficha encima" : "Ficha integrada a la derecha"}
+          onClick={panelFicha.onAlternar}
+          className="ml-0.5 hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground aria-pressed:bg-brand-soft aria-pressed:text-brand xl:inline-flex"
+        >
+          <PanelRightIcon className="size-4" />
+        </button>
+      )}
     </div>
-  )
-}
-
-function MenuNombreVista({ vista, acciones }: { vista: VistaBase; acciones: AccionesVista }) {
-  const [renombrando, setRenombrando] = React.useState(false)
-  const [nombre, setNombre] = React.useState(vista.nombre)
-  return (
-    <Popover open={renombrando} onOpenChange={setRenombrando}>
-      <DropdownMenu>
-        <PopoverAnchor asChild>
-          <DropdownMenuTrigger asChild>
-            <button type="button" className="inline-flex h-7 min-w-0 items-center gap-1.5 rounded-md px-2 text-[13px] font-medium hover:bg-muted">
-              <Table2Icon className="size-4 flex-none text-brand" />
-              <span className="max-w-56 truncate">{vista.nombre}</span>
-              <ChevronDownIcon className="size-3.5 flex-none text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-        </PopoverAnchor>
-        <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuItem
-            onSelect={() => {
-              setNombre(vista.nombre)
-              // El menú se cierra antes de abrir el campo del nombre.
-              setTimeout(() => setRenombrando(true), 0)
-            }}
-          >
-            <PencilIcon /> Cambiar el nombre
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={acciones.duplicar}>
-            <CopyIcon /> Duplicar la vista
-          </DropdownMenuItem>
-          {acciones.borrar && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onSelect={acciones.borrar}>
-                <Trash2Icon /> Eliminar la vista
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <PopoverContent align="start" className="w-64 p-2">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            acciones.renombrar(nombre)
-            setRenombrando(false)
-          }}
-        >
-          <Input value={nombre} onChange={(e) => setNombre(e.target.value)} autoFocus aria-label="Nombre de la vista" className="h-8 text-[13px]" />
-        </form>
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-function MenuAltura({ altura, ajustarCabeceras, onCambiar }: { altura: AlturaFila; ajustarCabeceras: boolean; onCambiar: (parcial: Partial<VistaBase>) => void }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <BotonBarra icono={Rows3Icon} texto="Altura de la fila" className="[&>span]:hidden" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
-        {(Object.keys(ALTURAS_FILA) as AlturaFila[]).map((a) => (
-          <DropdownMenuItem key={a} onSelect={() => onCambiar({ altura: a })}>
-            <span className="flex-1">{ALTURAS_FILA[a].label}</span>
-            {a === altura && <CheckIcon />}
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={(e) => {
-            e.preventDefault()
-            onCambiar({ ajustarCabeceras: !ajustarCabeceras })
-          }}
-        >
-          <WrapTextIcon />
-          <span className="flex-1">Encabezados con ajuste de texto</span>
-          <Switch size="sm" checked={ajustarCabeceras} tabIndex={-1} aria-hidden />
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-/** La lupa de Airtable: al pulsarla se abre el buscador; Escape lo cierra y lo vacía. */
-function Buscador({ valor, onCambiar }: { valor: string; onCambiar: (q: string) => void }) {
-  const [abierto, setAbierto] = React.useState(valor !== "")
-  if (!abierto)
-    return (
-      <button type="button" aria-label="Buscar" className="inline-flex size-7 flex-none items-center justify-center rounded-md text-foreground/80 hover:bg-muted" onClick={() => setAbierto(true)}>
-        <SearchIcon className="size-4" />
-      </button>
-    )
-  return (
-    <label className="flex h-7 w-52 flex-none items-center gap-1.5 rounded-md border bg-background px-2">
-      <SearchIcon className="size-3.5 flex-none text-muted-foreground" />
-      <input
-        autoFocus
-        className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-muted-foreground"
-        placeholder="Buscar en todos los campos"
-        value={valor}
-        onChange={(e) => onCambiar(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key !== "Escape") return
-          onCambiar("")
-          setAbierto(false)
-        }}
-      />
-      <button
-        type="button"
-        aria-label="Cerrar el buscador"
-        className="text-muted-foreground hover:text-foreground"
-        onClick={() => {
-          onCambiar("")
-          setAbierto(false)
-        }}
-      >
-        <XIcon className="size-3.5" />
-      </button>
-    </label>
   )
 }

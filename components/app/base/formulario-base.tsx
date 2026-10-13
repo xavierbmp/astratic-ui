@@ -190,7 +190,8 @@ function Control<T>({ campo, autoFocus, valor, texto, onValor, onTexto }: { camp
         </label>
       )
     case "select":
-      return <ElegirOpcion opciones={opciones} valor={typeof valor === "string" ? valor : undefined} onChange={(v) => onValor(v ?? null)} className="h-9 w-full rounded-md border border-input bg-background" />
+    case "vinculo":
+      return <ElegirOpcion opciones={opciones} valor={typeof valor === "string" ? valor : undefined} onChange={(v) => onValor(v ?? null)} vinculo={campo.vinculo?.objeto} className="h-9 w-full rounded-md border border-input bg-background" />
     case "multiselect":
       return <ElegirOpciones opciones={opciones} valores={Array.isArray(valor) ? valor : []} onChange={onValor} className="rounded-md border border-input bg-background" />
     case "calificacion": {

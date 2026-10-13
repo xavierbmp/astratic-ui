@@ -15,6 +15,7 @@ import {
   vistaNueva,
 } from "@/lib/base/vistas"
 import { aFiltrable } from "@/lib/base/campos"
+import { nombreMes, semanasDelMes, sumarMeses } from "@/lib/base/calendario"
 
 type Fila = { id: string; nombre: string; marca: string; plataformas: string[]; importe: number | null; alta: string }
 const filas: Fila[] = [
@@ -57,17 +58,17 @@ describe("valores de los campos", () => {
 
 describe("vistas", () => {
   it("una vista nueva enseña todo menos lo que nace oculto, con la principal primero", () => {
-    const v = vistaNueva("Todos", campos, "v1")
+    const v = vistaNueva("Todos", campos, { id: "v1" })
     expect(columnasDeVista(v, campos).map((c) => c.campo.id)).toEqual(["nombre", "marca", "plataformas", "importe", "alta"])
   })
   it("se pone al día con los campos: quita los que no existen y añade los nuevos", () => {
-    const v = { ...vistaNueva("Todos", campos, "v1"), campos: [{ id: "marca", visible: true }, { id: "borrado", visible: true }] }
+    const v = { ...vistaNueva("Todos", campos, { id: "v1" }), campos: [{ id: "marca", visible: true }, { id: "borrado", visible: true }] }
     const n = normalizarVista(v, campos)
     expect(n.campos.map((c) => c.id)).toEqual(["nombre", "marca", "plataformas", "importe", "alta", "notas"])
     expect(n.campos.find((c) => c.id === "notas")?.visible).toBe(false)
   })
   it("sin configuración guardada, las de serie; y la activa siempre existe", () => {
-    const config = normalizarConfig({ vistas: [], activa: "no" }, campos, [vistaNueva("Todos", campos, "serie")])
+    const config = normalizarConfig({ vistas: [], activa: "no" }, campos, [vistaNueva("Todos", campos, { id: "serie" })])
     expect(config.vistas.map((v) => v.id)).toEqual(["serie"])
     expect(config.activa).toBe("serie")
   })
@@ -134,5 +135,34 @@ describe("portapapeles", () => {
   it("una celda pegada sobre un rango se repite; un bloque se pega desde arriba a la izquierda", () => {
     expect(repartirPegado([["x"]], { f0: 0, f1: 1, c0: 0, c1: 0 }, { filas: 5, cols: 5 })).toEqual([{ fila: 0, col: 0, texto: "x" }, { fila: 1, col: 0, texto: "x" }])
     expect(repartirPegado([["a", "b"], ["c", "d"]], { f0: 4, f1: 4, c0: 4, c1: 4 }, { filas: 5, cols: 5 })).toEqual([{ fila: 4, col: 4, texto: "a" }])
+  })
+})
+
+describe("calendario de la base", () => {
+  it("las semanas van de lunes a domingo y completan el mes", () => {
+    const semanas = semanasDelMes("2026-10")
+    expect(semanas[0][0]).toBe("2026-09-28")
+    expect(semanas.at(-1)?.at(-1)).toBe("2026-11-01")
+    expect(semanas.every((s) => s.length === 7)).toBe(true)
+  })
+
+  it("pasa de mes cruzando el año", () => {
+    expect(sumarMeses("2026-12", 1)).toBe("2027-01")
+    expect(sumarMeses("2026-01", -1)).toBe("2025-12")
+    expect(nombreMes("2026-10")).toBe("octubre de 2026")
+  })
+})
+
+describe("tipos de vista", () => {
+  it("un kanban nuevo se apila por la primera selección o vínculo y enseña pocos campos en la tarjeta", () => {
+    const v = vistaNueva("Kanban", campos, { id: "k", tipo: "kanban" })
+    expect(v.tipo).toBe("kanban")
+    expect(v.apilar).toBe("marca")
+    expect(v.campos.find((c) => c.id === "marca")?.visible).toBe(false)
+  })
+
+  it("si el campo del kanban desaparece, toma otro que sirva", () => {
+    const v = { ...vistaNueva("Kanban", campos, { id: "k", tipo: "kanban" }), apilar: "borrado" }
+    expect(normalizarVista(v, campos).apilar).toBe("marca")
   })
 })

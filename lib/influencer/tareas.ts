@@ -391,7 +391,7 @@ export function registrosPosibles(ctx: ContextoTareas): (RegistroTarea & { label
   return [
     ...ctx.propuestas.map((p) => ({ tipo: "propuesta" as const, id: p.id, label: `${nombreMarca(p.marcaId)} · ${p.campana}`, grupo: GRUPOS_REGISTRO.propuesta })),
     ...ctx.marcas.map((m) => ({ tipo: "marca" as const, id: m.id, label: m.nombre, grupo: GRUPOS_REGISTRO.marca })),
-    ...ctx.contactos.map((c) => ({ tipo: "contacto" as const, id: c.id, label: `${c.nombre} (${nombreMarca(c.marcaId)})`, grupo: GRUPOS_REGISTRO.contacto })),
+    ...ctx.contactos.map((c) => ({ tipo: "contacto" as const, id: c.id, label: c.marcaId ? `${c.nombre} (${nombreMarca(c.marcaId)})` : c.nombre, grupo: GRUPOS_REGISTRO.contacto })),
   ]
 }
 

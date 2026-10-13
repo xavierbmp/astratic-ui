@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { BulkBar } from "@/components/app/bulk-bar"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
+import { usePanelFicha, type PanelFicha } from "@/components/app/detail-panel"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { BaseApi } from "@/hooks/use-base"
@@ -19,6 +20,10 @@ import { LateralVistas } from "@/components/app/base/lateral-vistas"
 import { EditorCampo } from "@/components/app/base/editor-campo"
 import { FormularioBase, type ValoresFormulario } from "@/components/app/base/formulario-base"
 import { ListaMovil } from "@/components/app/base/lista-movil"
+import { KanbanBase } from "@/components/app/base/kanban-base"
+import { GaleriaBase } from "@/components/app/base/galeria-base"
+import { CalendarioBase } from "@/components/app/base/calendario-base"
+import { PanelFichaBase } from "@/components/app/base/panel-ficha-base"
 import { camposMenuDeBase } from "@/components/app/base/selector-campo"
 import { Rejilla, type CambioCelda } from "@/components/app/base/rejilla/rejilla"
 import type { AccionesCampo } from "@/components/app/base/rejilla/menu-campo"
@@ -30,12 +35,14 @@ const sinAcentos = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{D
 type EditorAbierto = { ancla: HTMLElement; campo?: CampoPropio; lugar?: { antesDe?: string; despuesDe?: string } }
 
 /**
- * Una base de datos al estilo Airtable, entera: la barra de la vista, el lateral de vistas, la
- * rejilla, el formulario de alta y los campos propios. La página pone los datos y lo que pasa al
- * escribir, crear o borrar; la base hace el resto (filtrar, buscar, ordenar, agrupar, colorear,
- * seleccionar, copiar y pegar, y recordar las vistas de cada persona con `useBase`).
+ * Una base de datos con la colocación de Airtable y el aspecto del design system, entera: la barra
+ * de la vista, el lateral de vistas (que se ensancha arrastrando), la vista (cuadrícula, kanban,
+ * galería o calendario), el formulario de alta, los campos propios y la ficha, encima o integrada a
+ * la derecha. La página pone los datos y lo que pasa al escribir, crear o borrar; la base hace el
+ * resto (filtrar, buscar, ordenar, agrupar, colorear, seleccionar, copiar y pegar, y recordar las
+ * vistas de cada persona con `useBase`).
  *
- * En el móvil la rejilla cede el sitio a una lista de tarjetas, con los mismos filtros y orden.
+ * En el móvil la vista cede el sitio a una lista de tarjetas, con los mismos filtros y orden.
  */
 export function BaseDatos<T>({
   clave,
@@ -55,13 +62,14 @@ export function BaseDatos<T>({
   propios,
   onGuardarCampo,
   onBorrarCampo,
+  onAbrirVinculo,
   accionesSeleccion,
   formulario,
   nuevoInicial = false,
   vacio,
   children,
 }: {
-  /** Para recordar en este navegador si el lateral de vistas está abierto. */
+  /** Para recordar en este navegador el lateral de vistas, su ancho y si la ficha va integrada. */
   clave: string
   base: BaseApi<T>
   campos: DefCampo<T>[]
@@ -81,14 +89,19 @@ export function BaseDatos<T>({
   propios?: CampoPropio[]
   onGuardarCampo?: (campo: CampoPropio) => void
   onBorrarCampo?: (id: string) => void
+  /** Pulsar un registro vinculado (la marca de un contacto) abre su ficha. */
+  onAbrirVinculo?: (campoId: string, id: string) => void
   /** Botones de más en la barra de la selección (copiar emails, exportar…). */
   accionesSeleccion?: (ids: string[]) => React.ReactNode
   formulario?: { titulo?: string; descripcion?: string; textoCrear?: string }
   /** Llegar con el formulario abierto («Nuevo contacto» desde otra página). */
   nuevoInicial?: boolean
   vacio?: (hayFiltro: boolean, limpiar: () => void) => React.ReactNode
-  /** Lo que la página pinta con los registros que se ven, en su orden (la ficha y sus flechas). */
-  children?: (registros: T[]) => React.ReactNode
+  /**
+   * Lo que la página pinta con los registros que se ven, en su orden: la ficha y sus flechas. Se le
+   * pasa `ficha` para su `DetailSheet`: con la ficha integrada, se pinta a la derecha de la base.
+   */
+  children?: (registros: T[], ficha: PanelFicha) => React.ReactNode
 }) {
   const { vista } = base
   const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, true)
@@ -99,6 +112,8 @@ export function BaseDatos<T>({
   const [editor, setEditor] = React.useState<EditorAbierto | null>(null)
   const [borrandoCampo, setBorrandoCampo] = React.useState<DefCampo<T> | null>(null)
   const movil = useIsMobile()
+  const ficha = usePanelFicha(`base:${clave}`)
+  const tipo = vista.tipo ?? "cuadricula"
 
   const filtrables = React.useMemo(() => campos.map(aFiltrable), [campos])
   const camposMenu = React.useMemo(() => camposMenuDeBase(campos), [campos])
@@ -109,11 +124,13 @@ export function BaseDatos<T>({
     const q = sinAcentos(busqueda.trim())
     const buscadas = q ? filas.filter((f) => campos.some((c) => sinAcentos(textoDeValor(c, c.valor(f))).includes(q))) : filas
     const ordenadas = ordenarFilas(filtrarFilas(buscadas, vista.filtro, filtrables, ref), vista.orden, filtrables)
-    const nodos = vista.grupos.length ? agruparEnNiveles(ordenadas, vista.grupos, filtrables, ref) : []
+    // Los grupos son de la cuadrícula: las demás vistas enseñan todo, en el orden de la vista.
+    const enCuadricula = (vista.tipo ?? "cuadricula") === "cuadricula"
+    const nodos = enCuadricula && vista.grupos.length ? agruparEnNiveles(ordenadas, vista.grupos, filtrables, ref) : []
     const lineas = lineasDeRejilla(ordenadas, nodos, new Set(vista.plegados))
-    const registros = lineas.flatMap((l) => (l.tipo === "registro" ? [l.fila] : []))
+    const registros = enCuadricula ? lineas.flatMap((l) => (l.tipo === "registro" ? [l.fila] : [])) : ordenadas
     return { registros, lineas, nodos }
-  }, [busqueda, filas, campos, vista.filtro, vista.orden, vista.grupos, vista.plegados, filtrables, ref])
+  }, [busqueda, filas, campos, vista.tipo, vista.filtro, vista.orden, vista.grupos, vista.plegados, filtrables, ref])
 
   const columnas = React.useMemo(() => columnasDeVista(vista, campos), [vista, campos])
   const hayFiltro = busqueda.trim() !== "" || vista.filtro.condiciones.length > 0 || (vista.filtro.grupos ?? []).length > 0
@@ -192,49 +209,29 @@ export function BaseDatos<T>({
     </Button>
   ) : undefined
 
-  return (
-    <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-xl border bg-card">
-      <BarraBase
-        vista={vista}
-        vistas={base.vistas}
-        campos={campos}
-        camposMenu={camposMenu}
-        objeto={objeto.plural}
-        lateralAbierto={lateral && !movil}
-        onLateral={() => setLateral(!lateral)}
-        onCambiar={base.cambiar}
-        acciones={{ renombrar: (n) => base.renombrar(vista.id, n), duplicar: () => base.duplicar(vista.id), borrar: base.vistas.length > 1 ? () => borrarVista(vista.id) : undefined }}
-        onContraer={() => base.cambiar({ plegados: clavesDeGrupos(nodos) })}
-        onExpandir={() => base.cambiar({ plegados: [] })}
-        busqueda={busqueda}
-        onBuscar={setBusqueda}
-        accion={accionNueva}
-        menu={menu}
-        onMenu={setMenu}
-      />
-      <div className="flex min-h-0 flex-1">
-        {lateral && !movil && (
-          <LateralVistas
-            vistas={base.vistas}
-            activa={vista.id}
-            onActivar={base.activar}
-            onCrear={() => base.crear()}
-            onRenombrar={base.renombrar}
-            onDuplicar={base.duplicar}
-            onBorrar={borrarVista}
-            onReordenar={base.reordenar}
-          />
-        )}
-        {movil ? (
-          <ListaMovil registros={registros} columnas={columnas} getId={getId} celdas={celdas} abiertoId={abiertoId} onAbrir={onAbrir} vacio={registros.length === 0 ? vacio?.(hayFiltro, limpiar) : undefined} />
-        ) : (
+  const colorDe = (f: T) => colorDeFila(f, vista.color, campos, ref)
+  const escribirUno = onEscribir ? (fila: T, campo: DefCampo<T>, valor: ValorCampo) => onEscribir([{ fila, campo, valor }]) : undefined
+  const tarjetas = { campos: columnas.map((c) => c.campo), colorDe, celdas, onAbrirVinculo }
+  const textoVacio = registros.length === 0 ? vacio?.(hayFiltro, limpiar) : undefined
+
+  const cuerpo = () => {
+    if (movil) return <ListaMovil registros={registros} columnas={columnas} getId={getId} celdas={celdas} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
+    switch (tipo) {
+      case "kanban":
+        return <KanbanBase {...tarjetas} campo={campos.find((c) => c.id === vista.apilar)} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} onEscribir={escribirUno} clave={`${clave}:${vista.id}`} />
+      case "galeria":
+        return <GaleriaBase {...tarjetas} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
+      case "calendario":
+        return <CalendarioBase campo={campos.find((c) => c.id === vista.fecha)} principal={campos.find((c) => c.principal)} registros={registros} getId={getId} hoy={hoy} colorDe={colorDe} abiertoId={abiertoId} onAbrir={onAbrir} onEscribir={escribirUno} />
+      default:
+        return (
           <Rejilla
             lineas={lineas}
             registros={registros}
             columnas={columnas}
             vista={vista}
             getId={getId}
-            colorDe={(f) => colorDeFila(f, vista.color, campos, ref)}
+            colorDe={colorDe}
             celdas={celdas}
             objeto={objeto}
             marcadas={marcadas}
@@ -260,9 +257,52 @@ export function BaseDatos<T>({
                   }
                 : undefined
             }
+            onAbrirVinculo={onAbrirVinculo}
+            // Con la ficha integrada, la ficha sigue a la celda activa: se ve el registro en el que se está.
+            onActiva={(id) => ficha.activa && id !== abiertoId && onAbrir(id)}
             vacio={vacio?.(hayFiltro, limpiar)}
           />
+        )
+    }
+  }
+
+  return (
+    <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-xl border bg-card">
+      <BarraBase
+        vista={vista}
+        vistas={base.vistas}
+        campos={campos}
+        camposMenu={camposMenu}
+        objeto={objeto.plural}
+        lateralAbierto={lateral && !movil}
+        onLateral={() => setLateral(!lateral)}
+        onCambiar={base.cambiar}
+        acciones={{ renombrar: (n) => base.renombrar(vista.id, n), duplicar: () => base.duplicar(vista.id), borrar: base.vistas.length > 1 ? () => borrarVista(vista.id) : undefined }}
+        onContraer={() => base.cambiar({ plegados: clavesDeGrupos(nodos) })}
+        onExpandir={() => base.cambiar({ plegados: [] })}
+        busqueda={busqueda}
+        onBuscar={setBusqueda}
+        accion={accionNueva}
+        panelFicha={{ activo: ficha.preferida, onAlternar: () => ficha.alternar(!ficha.preferida) }}
+        menu={menu}
+        onMenu={setMenu}
+      />
+      <div data-slot="base-datos" className="flex min-h-0 flex-1" style={{ "--ficha-w": `${ficha.ancho}px` } as React.CSSProperties}>
+        {lateral && !movil && (
+          <LateralVistas
+            clave={clave}
+            vistas={base.vistas}
+            activa={vista.id}
+            onActivar={base.activar}
+            onCrear={base.crear}
+            onRenombrar={base.renombrar}
+            onDuplicar={base.duplicar}
+            onBorrar={borrarVista}
+            onReordenar={base.reordenar}
+          />
         )}
+        <div className="flex min-w-0 flex-1 flex-col">{cuerpo()}</div>
+        {ficha.activa && <PanelFichaBase ficha={ficha} objeto={objeto.singular} />}
       </div>
 
       <Popover open={!!editor} onOpenChange={(abierto) => !abierto && setEditor(null)}>
@@ -312,7 +352,7 @@ export function BaseDatos<T>({
         />
       )}
 
-      {children?.(registros)}
+      {children?.(registros, ficha)}
 
       <ConfirmDialog
         open={!!borrandoCampo}

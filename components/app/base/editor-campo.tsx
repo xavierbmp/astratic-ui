@@ -20,7 +20,7 @@ import {
   type CampoPropio,
   type FormatoCampo,
   type OpcionCampo,
-  type TipoCampo,
+  type TipoCampoPropio,
 } from "@/lib/base/campos"
 import { idBase } from "@/lib/base/vistas"
 import { ICONO_TIPO, IconoCampo } from "@/components/app/base/apariencia"
@@ -28,11 +28,11 @@ import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { SelectorColor } from "@/components/app/base/menu-color"
 
 /** Los tipos entre los que se puede cambiar un campo ya creado sin tocar sus valores. */
-const FAMILIAS: TipoCampo[][] = [
+const FAMILIAS: TipoCampoPropio[][] = [
   ["texto", "texto_largo", "email", "url", "telefono"],
   ["numero", "moneda", "porcentaje", "calificacion"],
 ]
-const tiposPosibles = (tipo: TipoCampo) => FAMILIAS.find((f) => f.includes(tipo)) ?? [tipo]
+const tiposPosibles = (tipo: TipoCampoPropio) => FAMILIAS.find((f) => f.includes(tipo)) ?? [tipo]
 
 /**
  * Crear o editar un campo propio, como el de Airtable: nombre (opcional), tipo con buscador, su
@@ -52,7 +52,7 @@ export function EditorCampo({
   onCancelar: () => void
 }) {
   const [nombre, setNombre] = React.useState(campo?.nombre ?? "")
-  const [tipo, setTipo] = React.useState<TipoCampo>(campo?.tipo ?? "texto")
+  const [tipo, setTipo] = React.useState<TipoCampoPropio>(campo?.tipo ?? "texto")
   const [opciones, setOpciones] = React.useState<OpcionCampo[]>(campo?.opciones ?? [])
   const [formato, setFormato] = React.useState<FormatoCampo>(campo?.formato ?? {})
   const [descripcion, setDescripcion] = React.useState(campo?.descripcion ?? "")
@@ -171,7 +171,7 @@ export function EditorCampo({
   )
 }
 
-function SelectorTipo({ value, posibles, onChange }: { value: TipoCampo; posibles: TipoCampo[]; onChange: (t: TipoCampo) => void }) {
+function SelectorTipo({ value, posibles, onChange }: { value: TipoCampoPropio; posibles: TipoCampoPropio[]; onChange: (t: TipoCampoPropio) => void }) {
   const [abierto, setAbierto] = React.useState(false)
   return (
     <Popover open={abierto} onOpenChange={setAbierto}>

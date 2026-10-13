@@ -6,22 +6,22 @@ import { cn } from "cn"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { ColorOpcion } from "@/lib/base/campos"
-import { FichaOpcion } from "@/components/app/base/apariencia"
+import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
 
 export type OpcionElegible = { value: string; label: string; color?: ColorOpcion }
 
 // Los desplegables son modales: dentro de un diálogo (el formulario de alta), el diálogo no les quita el foco.
 
-function Lista({ opciones, marcadas, onElegir }: { opciones: OpcionElegible[]; marcadas: string[]; onElegir: (id: string) => void }) {
+function Lista({ opciones, marcadas, onElegir, vinculo }: { opciones: OpcionElegible[]; marcadas: string[]; onElegir: (id: string) => void; vinculo?: string }) {
   return (
     <Command>
-      <CommandInput placeholder="Encuentra una opción" autoFocus />
+      <CommandInput placeholder={vinculo ? `Busca una ${vinculo}` : "Encuentra una opción"} autoFocus />
       <CommandList className="max-h-64">
-        <CommandEmpty>Ninguna opción se llama así</CommandEmpty>
+        <CommandEmpty>{vinculo ? `Ninguna ${vinculo} se llama así` : "Ninguna opción se llama así"}</CommandEmpty>
         <CommandGroup>
           {opciones.map((o) => (
             <CommandItem key={o.value} value={`${o.label} ${o.value}`} onSelect={() => onElegir(o.value)}>
-              <FichaOpcion label={o.label} color={o.color} />
+              {vinculo ? <FichaVinculo label={o.label} /> : <FichaOpcion label={o.label} color={o.color} />}
               {marcadas.includes(o.value) && <CheckIcon className="ml-auto size-3.5" />}
             </CommandItem>
           ))}
@@ -31,15 +31,18 @@ function Lista({ opciones, marcadas, onElegir }: { opciones: OpcionElegible[]; m
   )
 }
 
-/** Elegir una opción de una lista con buscador, con su ficha de color (filtros y formularios de la base). */
-export function ElegirOpcion({ opciones, valor, onChange, placeholder = "Selecciona una opción", className }: { opciones: OpcionElegible[]; valor: string | undefined; onChange: (v: string | undefined) => void; placeholder?: string; className?: string }) {
+/**
+ * Elegir una opción de una lista con buscador, con su ficha de color (filtros y formularios de la
+ * base). Con `vinculo` («marca»), los registros de otra base, con su ficha de registro.
+ */
+export function ElegirOpcion({ opciones, valor, onChange, placeholder, vinculo, className }: { opciones: OpcionElegible[]; valor: string | undefined; onChange: (v: string | undefined) => void; placeholder?: string; vinculo?: string; className?: string }) {
   const [abierto, setAbierto] = React.useState(false)
   const opcion = opciones.find((o) => o.value === valor)
   return (
     <Popover open={abierto} onOpenChange={setAbierto} modal>
       <PopoverTrigger asChild>
         <button type="button" className={cn("flex h-8 min-w-0 items-center justify-between gap-1 px-2 text-left text-[13px] hover:bg-muted/60", className)}>
-          {opcion ? <FichaOpcion label={opcion.label} color={opcion.color} /> : <span className="truncate text-muted-foreground">{placeholder}</span>}
+          {opcion && vinculo ? <FichaVinculo label={opcion.label} /> : opcion ? <FichaOpcion label={opcion.label} color={opcion.color} /> : <span className="truncate text-muted-foreground">{placeholder ?? (vinculo ? `Elige una ${vinculo}` : "Selecciona una opción")}</span>}
           <ChevronDownIcon className="size-3.5 flex-none text-muted-foreground" />
         </button>
       </PopoverTrigger>
@@ -47,6 +50,7 @@ export function ElegirOpcion({ opciones, valor, onChange, placeholder = "Selecci
         <Lista
           opciones={opciones}
           marcadas={valor ? [valor] : []}
+          vinculo={vinculo}
           onElegir={(id) => {
             onChange(id === valor ? undefined : id)
             setAbierto(false)

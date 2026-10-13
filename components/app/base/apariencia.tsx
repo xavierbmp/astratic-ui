@@ -6,47 +6,62 @@
 import * as React from "react"
 import {
   AlignLeftIcon,
-  CalendarIcon,
-  CircleChevronDownIcon,
+  CalendarDaysIcon,
+  CircleDotIcon,
+  Columns3Icon,
   EuroIcon,
+  GlobeIcon,
   HashIcon,
-  LinkIcon,
-  ListChecksIcon,
+  LayoutGridIcon,
+  Link2Icon,
   MailIcon,
   PercentIcon,
   PhoneIcon,
   SquareCheckIcon,
   StarIcon,
+  Table2Icon,
+  TagsIcon,
   TypeIcon,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "cn"
+import { AvatarInitials } from "@/components/app/avatar-initials"
 import type { TipoFiltro } from "@/lib/filtros/core"
 import type { ColorOpcion, TipoCampo } from "@/lib/base/campos"
+import type { TipoVista } from "@/lib/base/vistas"
 
 export const ICONO_TIPO: Record<TipoCampo, LucideIcon> = {
   texto: TypeIcon,
   texto_largo: AlignLeftIcon,
   casilla: SquareCheckIcon,
-  multiselect: ListChecksIcon,
-  select: CircleChevronDownIcon,
-  fecha: CalendarIcon,
+  multiselect: TagsIcon,
+  select: CircleDotIcon,
+  fecha: CalendarDaysIcon,
   telefono: PhoneIcon,
   email: MailIcon,
-  url: LinkIcon,
+  url: GlobeIcon,
   numero: HashIcon,
   moneda: EuroIcon,
   porcentaje: PercentIcon,
   calificacion: StarIcon,
+  vinculo: Link2Icon,
+}
+
+/** El icono de cada tipo de vista: los mismos del conmutador de vistas del design system. */
+export const ICONO_VISTA: Record<TipoVista, LucideIcon> = {
+  cuadricula: Table2Icon,
+  kanban: Columns3Icon,
+  galeria: LayoutGridIcon,
+  calendario: CalendarDaysIcon,
 }
 
 /** El icono para los campos que solo se conocen por su tipo de filtro (fuera de una base). */
 export const ICONO_FILTRO: Record<TipoFiltro, LucideIcon> = {
   texto: TypeIcon,
   numero: HashIcon,
-  fecha: CalendarIcon,
-  select: CircleChevronDownIcon,
-  multiselect: ListChecksIcon,
+  fecha: CalendarDaysIcon,
+  select: CircleDotIcon,
+  multiselect: TagsIcon,
   booleano: SquareCheckIcon,
 }
 
@@ -80,6 +95,46 @@ export function FichaOpcion({ label, color, className, children }: { label: stri
   return (
     <span className={cn("inline-flex max-w-full min-w-0 items-center gap-1 rounded-full px-2 py-px text-xs leading-[18px] whitespace-nowrap", CLASE_OPCION[color ?? "gris"], className)}>
       <span className="truncate">{label}</span>
+      {children}
+    </span>
+  )
+}
+
+/**
+ * Un registro de otra base (la marca de un contacto): sus iniciales y su nombre en una ficha con
+ * borde, distinta de las opciones de color. Con `onAbrir`, se pulsa y abre su ficha.
+ */
+export function FichaVinculo({ label, onAbrir, className, children }: { label: string; onAbrir?: () => void; className?: string; children?: React.ReactNode }) {
+  const contenido = (
+    <>
+      <AvatarInitials name={label} size="xs" variant="entity" className="size-4 rounded-[4px] text-[8px]" />
+      <span className={cn("truncate", onAbrir && "group-hover/vinculo:underline group-hover/vinculo:underline-offset-2")}>{label}</span>
+    </>
+  )
+  const clase = cn("group/vinculo inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-md border bg-background py-px pr-2 pl-0.5 text-xs leading-[18px] whitespace-nowrap", className)
+  if (!onAbrir)
+    return (
+      <span className={clase}>
+        {contenido}
+        {children}
+      </span>
+    )
+  return (
+    <span className={clase}>
+      {/* Se abre sin seleccionar la celda de debajo ni abrir la tarjeta en la que va. */}
+      <button
+        type="button"
+        title={`Abrir ${label}`}
+        className="flex min-w-0 items-center gap-1.5 text-left"
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation()
+          onAbrir()
+        }}
+      >
+        {contenido}
+      </button>
       {children}
     </span>
   )

@@ -7,7 +7,22 @@
 
 import { GRUPO_VACIO, contarCondiciones, cumpleGrupo, grupoVacio, type CampoFiltrable, type GrupoCondiciones } from "@/lib/filtros/core"
 import { SIN_VALOR, agruparFilas, type Agrupacion, type Calculo, type Orden } from "@/lib/vistas/core"
-import { aFiltrable, opcionDe, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
+import { aFiltrable, esDeUnaOpcion, opcionDe, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
+
+/** Las formas de ver una base: la cuadrícula, el kanban, la galería de tarjetas y el calendario. */
+export type TipoVista = "cuadricula" | "kanban" | "galeria" | "calendario"
+
+export const TIPOS_VISTA: Record<TipoVista, { label: string; ayuda: string }> = {
+  cuadricula: { label: "Cuadrícula", ayuda: "Una fila por registro, como una hoja de cálculo." },
+  kanban: { label: "Kanban", ayuda: "Columnas por una selección o un vínculo; arrastra para cambiarla." },
+  galeria: { label: "Galería", ayuda: "Una tarjeta por registro, con los campos que elijas." },
+  calendario: { label: "Calendario", ayuda: "Los registros en el día de un campo de fecha." },
+}
+
+export const LISTA_TIPOS_VISTA = Object.keys(TIPOS_VISTA) as TipoVista[]
+
+/** Los campos que se ven de serie en una tarjeta nueva (kanban y galería), además del principal. */
+const CAMPOS_EN_TARJETA = 4
 
 export type AlturaFila = "corta" | "media" | "alta" | "extra"
 
@@ -40,6 +55,12 @@ export type ColorVista = { modo: "campo"; campo: string } | { modo: "condiciones
 export type VistaBase = {
   id: string
   nombre: string
+  /** Sin él, cuadrícula (las vistas guardadas antes del kanban). */
+  tipo?: TipoVista
+  /** Kanban: el campo que reparte las columnas (una selección o un vínculo). */
+  apilar?: string
+  /** Calendario: el campo de fecha que pone cada registro en su día. */
+  fecha?: string
   filtro: GrupoCondiciones
   orden: Orden[]
   grupos: Agrupacion[]
@@ -67,21 +88,43 @@ let contador = 0
 /** Un id nuevo para vistas, reglas y opciones. */
 export const idBase = (prefijo: string) => `${prefijo}-${Date.now().toString(36)}-${(contador += 1).toString(36)}`
 
-/** Una vista de cuadrícula nueva: todo visible salvo lo que nace oculto, sin filtro, orden ni grupos. */
-export function vistaNueva<T>(nombre: string, campos: DefCampo<T>[], id = idBase("v")): VistaBase {
+/**
+ * Una vista nueva, sin filtro, orden ni grupos. La cuadrícula enseña todo salvo lo que nace oculto;
+ * las tarjetas (kanban y galería), el principal y unos pocos más, como Airtable.
+ */
+export function vistaNueva<T>(nombre: string, campos: DefCampo<T>[], { id = idBase("v"), tipo = "cuadricula" }: { id?: string; tipo?: TipoVista } = {}): VistaBase {
+  const apilar = tipo === "kanban" ? camposApilables(campos)[0]?.id : undefined
+  let enTarjeta = 0
+  const visible = (c: DefCampo<T>) => {
+    if (c.principal) return true
+    if (c.ocultoDeSerie) return false
+    if (tipo === "cuadricula") return true
+    if (c.id === apilar || enTarjeta >= CAMPOS_EN_TARJETA) return false
+    enTarjeta += 1
+    return true
+  }
   return {
     id,
     nombre,
+    ...(tipo === "cuadricula" ? {} : { tipo }),
+    ...(apilar ? { apilar } : {}),
+    ...(tipo === "calendario" && camposDeFecha(campos)[0] ? { fecha: camposDeFecha(campos)[0].id } : {}),
     filtro: GRUPO_VACIO,
     orden: [],
     grupos: [],
-    campos: campos.map((c) => ({ id: c.id, visible: !!c.principal || !c.ocultoDeSerie })),
+    campos: campos.map((c) => ({ id: c.id, visible: visible(c) })),
     calculos: {},
     altura: "corta",
     congelar: 1,
     plegados: [],
   }
 }
+
+/** Los campos que pueden repartir las columnas de un kanban: una selección única o un vínculo. */
+export const camposApilables = <T>(campos: DefCampo<T>[]) => campos.filter((c) => esDeUnaOpcion(c.tipo))
+
+/** Los campos que pueden poner los registros en el calendario. */
+export const camposDeFecha = <T>(campos: DefCampo<T>[]) => campos.filter((c) => c.tipo === "fecha")
 
 /**
  * La vista al día con los campos que hay ahora: quita los que ya no existen y añade al final los
@@ -99,8 +142,13 @@ export function normalizarVista<T>(vista: VistaBase, campos: DefCampo<T>[]): Vis
     ? [{ ...(lista.find((c) => c.id === principal.id) ?? { id: principal.id }), visible: true }, ...lista.filter((c) => c.id !== principal.id)]
     : lista
   const sigue = (id: string) => existen.has(id)
+  // Si el campo del kanban o del calendario ya no está, se toma otro que sirva.
+  const apilar = vista.tipo === "kanban" ? (camposApilables(campos).find((c) => c.id === vista.apilar) ?? camposApilables(campos)[0])?.id : vista.apilar
+  const fecha = vista.tipo === "calendario" ? (camposDeFecha(campos).find((c) => c.id === vista.fecha) ?? camposDeFecha(campos)[0])?.id : vista.fecha
   return {
     ...vista,
+    apilar,
+    fecha,
     campos: ordenada,
     orden: vista.orden.filter((o) => sigue(o.campo)),
     grupos: vista.grupos.filter((g) => sigue(g.campo)).slice(0, MAX_NIVELES_GRUPO),

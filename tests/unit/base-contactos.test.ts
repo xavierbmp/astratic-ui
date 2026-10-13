@@ -30,8 +30,15 @@ describe("base de contactos", () => {
     const despues = aplicarCambiosContactos(contactos, [{ id: "c2", campo: campo("principal"), valor: true }])
     expect(despues.map((c) => [c.id, !!c.principal])).toEqual([["c1", false], ["c2", true]])
   })
-  it("del formulario: pide nombre y marca; el primero de una marca es su principal", () => {
-    expect(contactoDeFormulario({ nombre: "Carla" }, campos, { id: "c3", hoy: "2026-10-13", contactos })).toBe("Elige la marca")
+  it("la marca es un registro vinculado; quitarla deja al contacto suelto y sin ser principal", () => {
+    expect(campo("marca")).toMatchObject({ tipo: "vinculo", vinculo: { objeto: "marca" } })
+    expect(campo("marca").obligatorio).toBeFalsy()
+    expect(escribirEnContacto(contactos[0], campo("marca"), null)).toMatchObject({ marcaId: undefined, principal: false })
+  })
+  it("del formulario: pide el nombre; la marca es opcional y el primero de una marca es su principal", () => {
+    expect(contactoDeFormulario({}, campos, { id: "c3", hoy: "2026-10-13", contactos })).toBe("Escribe el nombre")
+    const suelto = contactoDeFormulario({ nombre: "Carla" }, campos, { id: "c3", hoy: "2026-10-13", contactos })
+    expect(suelto).toEqual({ id: "c3", nombre: "Carla", creadoEl: "2026-10-13" })
     const nuevo = contactoDeFormulario({ nombre: "Carla", marca: "m2", email: "carla@nuura.es", f1: 50 }, campos, { id: "c3", hoy: "2026-10-13", contactos })
     expect(nuevo).toMatchObject({ id: "c3", nombre: "Carla", marcaId: "m2", email: "carla@nuura.es", principal: true, valores: { f1: 50 } })
     if (typeof nuevo === "string") throw new Error(nuevo)

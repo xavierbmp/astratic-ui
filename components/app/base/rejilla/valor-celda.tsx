@@ -5,14 +5,15 @@ import { CheckIcon, StarIcon } from "lucide-react"
 import { cn } from "cn"
 import { ESTRELLAS_POR_DEFECTO, opcionDe, textoDeValor, type DefCampo, type ValorCampo } from "@/lib/base/campos"
 import { ALTURAS_FILA, type AlturaFila } from "@/lib/base/vistas"
-import { FichaOpcion } from "@/components/app/base/apariencia"
+import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
 
 /** Líneas de texto que caben en una fila de esta altura (el texto mide 18 px con 6 px de margen arriba y abajo). */
 const lineas = (altura: AlturaFila) => Math.max(1, Math.floor((ALTURAS_FILA[altura].px - 12) / 18))
 
 /**
  * El valor de una celda en reposo, como en Airtable: texto cortado (o en varias líneas si la fila
- * es alta), números a la derecha, opciones como fichas de color, la casilla, enlaces y estrellas.
+ * es alta), números a la derecha, opciones como fichas de color, el registro vinculado (que se
+ * abre al pulsarlo), la casilla, enlaces y estrellas.
  */
 export function ValorCelda<T>({
   campo,
@@ -20,6 +21,7 @@ export function ValorCelda<T>({
   altura,
   editable,
   onCambiar,
+  onAbrirVinculo,
 }: {
   campo: DefCampo<T>
   valor: ValorCampo
@@ -27,6 +29,8 @@ export function ValorCelda<T>({
   editable: boolean
   /** Casilla y estrellas se cambian con un clic, sin editor. */
   onCambiar: (v: ValorCampo) => void
+  /** Abre la ficha del registro vinculado (la marca de un contacto). */
+  onAbrirVinculo?: (id: string) => void
 }) {
   const varias = lineas(altura) > 1
   const recorte = varias ? ({ WebkitLineClamp: lineas(altura), display: "-webkit-box", WebkitBoxOrient: "vertical" } as React.CSSProperties) : undefined
@@ -57,6 +61,11 @@ export function ValorCelda<T>({
           })}
         </span>
       )
+    }
+    case "vinculo": {
+      if (typeof valor !== "string" || !valor) return null
+      const label = opcionDe(campo, valor)?.label ?? valor
+      return <FichaVinculo label={label} onAbrir={onAbrirVinculo ? () => onAbrirVinculo(valor) : undefined} className="flex-none" />
     }
     case "calificacion": {
       const maximo = campo.formato?.maximo ?? ESTRELLAS_POR_DEFECTO

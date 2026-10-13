@@ -82,7 +82,8 @@ export const RELACIONES_MARCA: Estado<RelacionMarca>[] = [
 
 export type Contacto = {
   id: string
-  marcaId: string
+  /** La marca en la que trabaja. Puede no tener (alguien suelto, una agencia por decidir). */
+  marcaId?: string
   nombre: string
   cargo?: string
   email?: string

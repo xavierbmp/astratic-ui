@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowDownIcon, ArrowLeftToLineIcon, ArrowRightToLineIcon, ArrowUpIcon, EyeOffIcon, LayoutListIcon, ListFilterIcon, PencilIcon, Trash2Icon } from "lucide-react"
+import { ArrowDownIcon, ArrowLeftToLineIcon, ArrowRightToLineIcon, ArrowUpIcon, EyeOffIcon, PencilIcon, Rows3Icon, SlidersHorizontalIcon, Trash2Icon } from "lucide-react"
 import { ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu"
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import type { TipoFiltro } from "@/lib/filtros/core"
@@ -58,10 +58,10 @@ export function ItemsCampo({ acciones: a, contexto }: { acciones: AccionesCampo;
       </Item>
       <Separador />
       <Item onSelect={a.filtrar}>
-        <ListFilterIcon /> Filtrar por este campo
+        <SlidersHorizontalIcon /> Filtrar por este campo
       </Item>
       <Item onSelect={a.agrupar}>
-        <LayoutListIcon /> Agrupar por este campo
+        <Rows3Icon /> Agrupar por este campo
       </Item>
       {a.ocultar && (
         <>

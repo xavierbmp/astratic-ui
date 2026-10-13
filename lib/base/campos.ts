@@ -21,6 +21,10 @@ export type TipoCampo =
   | "email"
   | "telefono"
   | "calificacion"
+  | "vinculo"
+
+/** Los tipos que se pueden crear: el vínculo a otra base solo lo pone la página en sus campos de serie. */
+export type TipoCampoPropio = Exclude<TipoCampo, "vinculo">
 
 /** Cada tipo: su nombre, qué hace y con qué operadores se filtra. */
 export const TIPOS_CAMPO: Record<TipoCampo, { label: string; ayuda: string; filtro: TipoFiltro }> = {
@@ -37,13 +41,17 @@ export const TIPOS_CAMPO: Record<TipoCampo, { label: string; ayuda: string; filt
   moneda: { label: "Moneda", ayuda: "Un importe en euros.", filtro: "numero" },
   porcentaje: { label: "Porcentaje", ayuda: "Un tanto por ciento.", filtro: "numero" },
   calificacion: { label: "Calificación", ayuda: "De una a cinco estrellas.", filtro: "numero" },
+  vinculo: { label: "Registro vinculado", ayuda: "Un registro de otra base, que se abre con un clic (la marca de un contacto).", filtro: "select" },
 }
 
 /** El orden en que se ofrecen al crear un campo, como en Airtable. */
-export const LISTA_TIPOS_CAMPO = Object.keys(TIPOS_CAMPO) as TipoCampo[]
+export const LISTA_TIPOS_CAMPO = (Object.keys(TIPOS_CAMPO) as TipoCampo[]).filter((t): t is TipoCampoPropio => t !== "vinculo")
 
 /** Los que llevan opciones. */
 export const TIPOS_CON_OPCIONES: TipoCampo[] = ["select", "multiselect"]
+
+/** Los de una sola opción o un solo registro: colorean filas y apilan las columnas del kanban. */
+export const esDeUnaOpcion = (tipo: TipoCampo) => tipo === "select" || tipo === "vinculo"
 
 /** Los colores de las opciones y de las filas (tokens `opcion-*` del design system). */
 export const COLORES_OPCION = ["azul", "cian", "verde", "amarillo", "naranja", "rojo", "rosa", "morado", "gris"] as const
@@ -80,7 +88,7 @@ export type ValorCampo = string | number | boolean | string[] | null
 export type CampoPropio = {
   id: string
   nombre: string
-  tipo: TipoCampo
+  tipo: TipoCampoPropio
   opciones?: OpcionCampo[]
   formato?: FormatoCampo
   /** Texto de ayuda que sale al pasar por su cabecera. */
@@ -107,6 +115,11 @@ export type DefCampo<T> = {
   ocultoDeSerie?: boolean
   /** Agrupa los campos en los selectores («Datos», «Cómo escribirle»…). */
   grupo?: string
+  /**
+   * Un vínculo a otra base: sus `opciones` son los registros de allí (id y nombre) y esto, cómo se
+   * llama uno («marca»), para los textos («Sin marca», «Abrir la marca»).
+   */
+  vinculo?: { objeto: string }
   valor: (fila: T) => ValorCampo
 }
 
@@ -147,6 +160,7 @@ export function textoDeValor<T>(campo: Pick<DefCampo<T>, "tipo" | "opciones" | "
     case "casilla":
       return valor === true ? "Sí" : ""
     case "select":
+    case "vinculo":
     case "multiselect": {
       const ids = Array.isArray(valor) ? valor : [String(valor)]
       return ids.map((id) => opcionDe(campo, id)?.label ?? id).join(", ")
@@ -248,7 +262,8 @@ export function valorDeTexto<T>(campo: Pick<DefCampo<T>, "tipo" | "opciones" | "
     }
     case "email":
       return EMAIL.test(t) ? ok(t) : mal("No es un email")
-    case "select": {
+    case "select":
+    case "vinculo": {
       const opcion = buscarOpcion(campo, t)
       return opcion ? ok(opcion.id) : mal(`«${t}» no es una de sus opciones`)
     }
