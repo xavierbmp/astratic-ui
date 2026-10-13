@@ -68,6 +68,7 @@ export function BaseDatos<T>({
   lateral: lateralPropio,
   ficha: fichaPagina,
   kanban,
+  lateralInicial,
   accionesSeleccion,
   formulario,
   nuevoInicial = false,
@@ -110,6 +111,8 @@ export function BaseDatos<T>({
    * panel: entonces la ficha ocupa la columna del panel y la base no pinta la suya.
    */
   ficha?: PanelFicha
+  /** Si el lateral de vistas empieza abierto (de serie, sí; cerrado si la página tiene panel). */
+  lateralInicial?: boolean
   /** Del kanban: el resumen de cada columna y las que empiezan plegadas. */
   kanban?: { resumen?: (filas: T[]) => React.ReactNode; plegadas?: string[] }
   /** Botones de más en la barra de la selección (copiar emails, exportar…). */
@@ -126,7 +129,7 @@ export function BaseDatos<T>({
 }) {
   const { vista } = base
   // Con el panel de la página al lado, el lateral de vistas empieza cerrado para dejar sitio a la base.
-  const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, !fichaPagina)
+  const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, lateralInicial ?? !fichaPagina)
   const [busqueda, setBusqueda] = React.useState("")
   const [marcadas, setMarcadas] = React.useState<Set<string>>(new Set())
   const [menu, setMenu] = React.useState<MenuDeBarra | null>(null)
