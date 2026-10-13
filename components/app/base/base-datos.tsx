@@ -57,7 +57,9 @@ export function BaseDatos<T>({
   onBorrarCampo,
   accionesSeleccion,
   formulario,
+  nuevoInicial = false,
   vacio,
+  children,
 }: {
   /** Para recordar en este navegador si el lateral de vistas está abierto. */
   clave: string
@@ -82,14 +84,18 @@ export function BaseDatos<T>({
   /** Botones de más en la barra de la selección (copiar emails, exportar…). */
   accionesSeleccion?: (ids: string[]) => React.ReactNode
   formulario?: { titulo?: string; descripcion?: string; textoCrear?: string }
+  /** Llegar con el formulario abierto («Nuevo contacto» desde otra página). */
+  nuevoInicial?: boolean
   vacio?: (hayFiltro: boolean, limpiar: () => void) => React.ReactNode
+  /** Lo que la página pinta con los registros que se ven, en su orden (la ficha y sus flechas). */
+  children?: (registros: T[]) => React.ReactNode
 }) {
   const { vista } = base
   const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, true)
   const [busqueda, setBusqueda] = React.useState("")
   const [marcadas, setMarcadas] = React.useState<Set<string>>(new Set())
   const [menu, setMenu] = React.useState<MenuDeBarra | null>(null)
-  const [nuevo, setNuevo] = React.useState(false)
+  const [nuevo, setNuevo] = React.useState(nuevoInicial)
   const [editor, setEditor] = React.useState<EditorAbierto | null>(null)
   const [borrandoCampo, setBorrandoCampo] = React.useState<DefCampo<T> | null>(null)
   const movil = useIsMobile()
@@ -304,6 +310,8 @@ export function BaseDatos<T>({
           textoCrear={formulario?.textoCrear}
         />
       )}
+
+      {children?.(registros)}
 
       <ConfirmDialog
         open={!!borrandoCampo}
