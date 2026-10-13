@@ -597,9 +597,9 @@ export type PlantillaGuion = { id: string; nombre: string; descripcion: string; 
  * El tipo de una tarea es la página del workspace en la que sale, además de en Tareas. Sin tipo es
  * una tarea general: solo sale en Tareas y en el Inicio. Lo que se hace lo dice el título.
  */
-export type TipoTarea = "sin-tipo" | "crm" | "collabs" | "cobros"
+export type TipoTarea = "sin-tipo" | "crm" | "collabs" | "contenidos" | "cobros"
 
-export const TIPOS_TAREA: Record<TipoTarea, string> = { "sin-tipo": "Sin tipo", crm: "CRM", collabs: "Collabs", cobros: "Cobros" }
+export const TIPOS_TAREA: Record<TipoTarea, string> = { "sin-tipo": "Sin tipo", crm: "CRM", collabs: "Collabs", contenidos: "Contenido", cobros: "Cobros" }
 export const LISTA_TIPOS_TAREA = Object.keys(TIPOS_TAREA) as TipoTarea[]
 
 /** La ficha del CRM de la que es una tarea del CRM. */
@@ -613,6 +613,7 @@ export type RegistroTarea = { tipo: "propuesta" | "marca" | "contacto"; id: stri
 export type DondeTarea =
   | { tipo: "sin-tipo" }
   | { tipo: "collabs"; collabId?: string; piezaId?: string }
+  | { tipo: "contenidos" }
   | { tipo: "cobros"; collabId?: string }
   | { tipo: "crm"; registro?: RegistroTarea }
 

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { CheckIcon, FlagIcon, KanbanSquareIcon, ListChecksIcon, ReceiptEuroIcon, RepeatIcon, SparklesIcon, XIcon } from "lucide-react"
+import { CheckIcon, ClapperboardIcon, FlagIcon, KanbanSquareIcon, ListChecksIcon, ReceiptEuroIcon, RepeatIcon, SparklesIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { tintClass } from "@/lib/influencer/tints"
 import { ESTADOS_TAREA, PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type PrioridadTarea, type Repeticion, type Tarea, type TipoTarea } from "@/lib/influencer/modelo"
@@ -71,7 +71,12 @@ export function EstadoTareaBadge({ tarea, hoy }: { tarea: Pick<Tarea, "estado" |
 }
 
 /** El icono de cada página, el mismo que en la barra de navegación. */
-const ICONO_TIPO: Record<Exclude<TipoTarea, "sin-tipo">, typeof KanbanSquareIcon> = { crm: KanbanSquareIcon, collabs: SparklesIcon, cobros: ReceiptEuroIcon }
+const ICONO_TIPO: Record<Exclude<TipoTarea, "sin-tipo">, typeof KanbanSquareIcon> = {
+  crm: KanbanSquareIcon,
+  collabs: SparklesIcon,
+  contenidos: ClapperboardIcon,
+  cobros: ReceiptEuroIcon,
+}
 
 /**
  * De qué es la tarea, en un chip: el logo de la marca y «Lumea Skin · Cobros», o el icono de su

@@ -367,7 +367,13 @@ export function migasDonde(donde: DondeTarea, ctx: ContextoTareas): { label: str
   return proyecto ? [tipo, { label: proyecto.label, href: hrefDonde(donde) }] : [tipo]
 }
 
-const HREF_TIPO: Record<TipoTarea, string | undefined> = { "sin-tipo": undefined, crm: "/workspace/crm", collabs: "/workspace/collabs", cobros: "/workspace/cobros" }
+const HREF_TIPO: Record<TipoTarea, string | undefined> = {
+  "sin-tipo": undefined,
+  crm: "/workspace/crm",
+  collabs: "/workspace/collabs",
+  contenidos: "/workspace/contenidos",
+  cobros: "/workspace/cobros",
+}
 
 /** Donde se trabaja la tarea: la campaña (su pieza o su facturación), la ficha del CRM o la página de su tipo. */
 export function hrefDonde(donde: DondeTarea): string | undefined {

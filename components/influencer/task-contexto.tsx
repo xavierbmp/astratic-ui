@@ -16,6 +16,8 @@ function irA(d: Tarea["donde"]): string {
       return d.piezaId ? "Ir a la pieza" : d.collabId ? "Ir a la campaña" : "Ir a Collabs"
     case "cobros":
       return d.collabId ? "Ir a la facturación" : "Ir a Cobros"
+    case "contenidos":
+      return "Ir a Contenidos"
     case "crm":
       return d.registro ? { propuesta: "Ir a la propuesta", marca: "Ir a la marca", contacto: "Ir al contacto" }[d.registro.tipo] : "Ir al CRM"
     default:
