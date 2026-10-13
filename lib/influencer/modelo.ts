@@ -4,6 +4,7 @@
 import type { StatusTone } from "@/lib/status"
 import type { Tint } from "@/lib/influencer/tints"
 import type { SocialNetwork } from "@/components/app/social-icons"
+import type { ValorCampo } from "@/lib/base/campos"
 
 /** Un estado con su etiqueta y el tono de `StatusBadge`. */
 export type Estado<T extends string> = { id: T; label: string; tone: StatusTone }
@@ -91,6 +92,8 @@ export type Contacto = {
   principal?: boolean
   notas?: string
   creadoEl: string
+  /** Los valores de los campos que ha creado ella en su base de contactos, por id de campo. */
+  valores?: Record<string, ValorCampo>
 }
 
 /** Lo que se apunta en el seguimiento: cada email, mensaje o llamada con la marca. */
