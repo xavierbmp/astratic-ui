@@ -417,6 +417,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
     p.onCambiarVista({ campos: p.vista.campos.map((c) => (c.id === id ? { ...c, ancho } : c)) })
   }
 
+  const tintes = React.useMemo(() => tintesDeColumnas(vista), [vista])
   const ids = p.registros.map(p.getId)
   const marcadasTodas = ids.length > 0 && ids.every((id) => p.marcadas.has(id)) ? true : ids.some((id) => p.marcadas.has(id)) ? "indeterminate" : false
   const plegados = new Set(p.vista.plegados)
@@ -510,6 +511,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
                     rellenoHasta={rellenoHasta}
                     editando={editando?.celda.fila === f ? editando : null}
                     celdas={p.celdas}
+                    tintes={tintes}
                     editable={!!p.onEscribir}
                     onMarcar={(m) => {
                       const s = new Set(p.marcadas)
@@ -570,6 +572,21 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
 }
 
 /**
+ * Como en Airtable, las columnas por las que se filtra se tiñen de verde y las que ordenan, de
+ * naranja: se ve de un vistazo qué está mandando en la vista.
+ */
+function tintesDeColumnas(vista: VistaBase): Map<string, string> {
+  const tintes = new Map<string, string>()
+  const recorrer = (g: VistaBase["filtro"]) => {
+    g.condiciones.forEach((c) => tintes.set(c.campo, "bg-opcion-verde opacity-50"))
+    g.grupos?.forEach(recorrer)
+  }
+  vista.orden.forEach((o) => tintes.set(o.campo, "bg-opcion-naranja opacity-50"))
+  recorrer(vista.filtro)
+  return tintes
+}
+
+/**
  * La línea gruesa tras las columnas fijas, de arriba abajo: se arrastra para fijar más o menos
  * columnas, como en Airtable. Va pegada a la izquierda (`sticky`), así que no se mueve con el scroll.
  */
@@ -622,6 +639,7 @@ type PropsFila<T> = {
   rellenoHasta: number | null
   editando: { celda: Celda; inicial?: string } | null
   celdas?: Partial<Record<string, (fila: T) => React.ReactNode>>
+  tintes: Map<string, string>
   editable: boolean
   onMarcar: (m: boolean) => void
   onExpandir: () => void
@@ -671,6 +689,7 @@ function CeldaRegistro<T>({ columna: c, col, alta, ...f }: PropsFila<T> & { colu
       )}
       style={{ width: c.ancho, left: c.fija ? c.x : undefined }}
     >
+      {f.tintes.has(c.campo.id) && <span aria-hidden className={cn("pointer-events-none absolute inset-0", f.tintes.get(c.campo.id))} />}
       {(enSeleccion || enRelleno) && <span aria-hidden className={cn("pointer-events-none absolute inset-0 bg-brand-soft", enRelleno && "border border-dashed border-brand")} />}
       {activa && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[2px] ring-2 ring-brand ring-inset" />}
       {editandoAqui && f.editando ? (
