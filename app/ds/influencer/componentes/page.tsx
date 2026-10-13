@@ -16,7 +16,7 @@ import { StatRow, StatTile } from "@/components/influencer/stat-tile"
 import { CollabCard, CollabCardRow } from "@/components/influencer/collab-card"
 import { ProfilePanel } from "@/components/influencer/profile-panel"
 import { NoticeHighlight, NoticeItem } from "@/components/influencer/notice-card"
-import { LinkGridExample, TaskBlockExample, TaskTableExample } from "@/components/docs/examples/influencer-examples"
+import { LinkGridExample, LinkRowExample, TaskBlockExample, TaskTableExample } from "@/components/docs/examples/influencer-examples"
 import { EditorGuionExample, FotosExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
 import { AgendaContenidosExample, CalendarioContenidosExample, CapturaIdeaExample, CaptionExample, GaleriaIdeasExample } from "@/components/docs/examples/contenidos-examples"
 import { DocPage, DocSection, Example, NextLinks, Prose, Rules } from "@/components/docs/doc"
@@ -177,11 +177,16 @@ const [editing, setEditing] = useState(false)
 <LinkGrid links={links} onChange={setLinks} editing={editing} />`}>
           <LinkGridExample />
         </Example>
+        <Example className={EXAMPLE} code={`// En la cabecera de una página: los cinco primeros, «+N» y el lápiz
+<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} />`}>
+          <LinkRowExample />
+        </Example>
         <Prose>
           <p>
             El icono sale del servicio de favicons de Google a partir del dominio; si la dirección no es válida, la
             inicial del nombre. Nuevo y editar comparten el mismo diálogo (react-hook-form + zod); borrar pide
-            confirmación y el toast ofrece deshacer.
+            confirmación y el toast ofrece deshacer. <code>LinkRow</code> es la misma lista en una fila de iconos para la
+            cabecera del Inicio: cinco a la vista, «+N» despliega el resto y el lápiz abre este directorio en un diálogo.
           </p>
         </Prose>
       </DocSection>

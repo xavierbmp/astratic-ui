@@ -14,7 +14,8 @@ export type ProfileAccount = {
 
 /**
  * Mini panel del perfil: foto grande, nombre, nicho y tramo, y una fila por red con sus seguidores,
- * sus visualizaciones medias y el enlace a su perfil. Las acciones (media kit, ver perfil) van en `actions`.
+ * sus visualizaciones medias y el enlace a su perfil. Las acciones (media kit, ver perfil) van en `actions`,
+ * siempre al pie aunque el panel se estire. Con sitio (768 px o más de panel), las redes van en columnas; desde 448 px los botones dejan de estirarse.
  */
 export function ProfilePanel({
   name,
@@ -38,7 +39,7 @@ export function ProfilePanel({
   className?: string
 }) {
   return (
-    <section data-slot="ws-profile" className={cn("flex flex-col rounded-2xl bg-card p-5 shadow-card", className)}>
+    <section data-slot="ws-profile" className={cn("@container flex flex-col rounded-2xl bg-card p-5 shadow-card", className)}>
       <div className="flex items-center gap-4">
         <span className="relative size-20 flex-none overflow-hidden rounded-2xl bg-muted">
           <Image src={photoUrl} alt={name} fill sizes="80px" className="object-cover" />
@@ -59,7 +60,7 @@ export function ProfilePanel({
         </div>
       </div>
 
-      <ul className="mt-4 flex flex-col gap-1.5">
+      <ul className="mt-4 grid gap-1.5 @3xl:grid-cols-3">
         {accounts.map((a) => (
           <li key={a.network}>
             <a
@@ -94,7 +95,7 @@ export function ProfilePanel({
         ))}
       </ul>
 
-      {actions && <div className="mt-4 flex gap-2 [&>*]:flex-1">{actions}</div>}
+      {actions && <div className="mt-auto flex gap-2 pt-4 [&>*]:flex-1 @md:[&>*]:flex-none">{actions}</div>}
     </section>
   )
 }

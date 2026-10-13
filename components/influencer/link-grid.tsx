@@ -8,13 +8,14 @@ import { CSS } from "@dnd-kit/utilities"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { GripVerticalIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { ChevronLeftIcon, GripVerticalIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
 
 export type QuickLink = { id: string; label: string; url: string }
@@ -147,15 +148,10 @@ function LinkTile({
   onDelete: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: link.id, disabled: !editing })
-  const icon = faviconUrl(link.url)
   const inner = (
     <>
       <span className="grid size-9 place-items-center overflow-hidden rounded-lg bg-card shadow-xs">
-        {icon ? (
-          <Image src={icon} alt="" width={20} height={20} className="size-5" unoptimized />
-        ) : (
-          <span className="text-sm font-semibold">{link.label.slice(0, 1).toUpperCase()}</span>
-        )}
+        <LinkIcon link={link} />
       </span>
       <span className="w-full truncate text-center text-[11px] leading-tight font-medium">{link.label}</span>
     </>
@@ -264,5 +260,109 @@ function LinkDialog({
         </form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+/** Los enlaces que se ven en la fila antes de «+N». */
+const EN_FILA = 5
+
+/**
+ * Los enlaces en una fila de iconos, para la cabecera de una página: los cinco primeros a la vista y
+ * «+N» despliega el resto en la misma fila. El lápiz abre el directorio (`LinkGrid` en modo edición)
+ * para añadir, ordenar, editar o borrar; `editing` y `onEditingChange` lo abren también desde fuera
+ * (un «Nuevo › Enlace»).
+ */
+export function LinkRow({
+  links,
+  onChange,
+  editing,
+  onEditingChange,
+  className,
+}: {
+  links: QuickLink[]
+  onChange: (links: QuickLink[]) => void
+  editing: boolean
+  onEditingChange: (editing: boolean) => void
+  className?: string
+}) {
+  const [expanded, setExpanded] = React.useState(false)
+  const visibles = expanded ? links : links.slice(0, EN_FILA)
+  const ocultos = links.length - visibles.length
+
+  return (
+    <>
+      {links.length === 0 ? (
+        <Button variant="outline" onClick={() => onEditingChange(true)} className={className}>
+          <PlusIcon /> Añadir enlace
+        </Button>
+      ) : (
+        <ul data-slot="ws-link-row" aria-label="Mis enlaces" className={cn("flex flex-wrap items-center justify-end gap-1.5", className)}>
+          {visibles.map((link) => (
+            <li key={link.id}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={link.label}
+                    className="grid size-9 place-items-center rounded-full bg-card shadow-xs outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring/50"
+                  >
+                    <LinkIcon link={link} />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>{link.label}</TooltipContent>
+              </Tooltip>
+            </li>
+          ))}
+          {links.length > EN_FILA && (
+            <li>
+              <button
+                type="button"
+                onClick={() => setExpanded((e) => !e)}
+                aria-expanded={expanded}
+                aria-label={expanded ? "Ver menos enlaces" : `Ver ${ocultos} enlaces más`}
+                className="grid h-9 min-w-9 place-items-center rounded-full bg-muted px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+              >
+                {expanded ? <ChevronLeftIcon className="size-4" aria-hidden /> : `+${ocultos}`}
+              </button>
+            </li>
+          )}
+          <li>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon-lg" className="rounded-full text-muted-foreground" aria-label="Editar mis enlaces" onClick={() => onEditingChange(true)}>
+                  <PencilIcon className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Editar mis enlaces</TooltipContent>
+            </Tooltip>
+          </li>
+        </ul>
+      )}
+
+      <Dialog open={editing} onOpenChange={onEditingChange}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Mis enlaces</DialogTitle>
+            <DialogDescription>Arrastra para ordenarlos: los {EN_FILA} primeros son los que se ven siempre.</DialogDescription>
+          </DialogHeader>
+          <LinkGrid links={links} onChange={onChange} editing />
+          <DialogFooter>
+            <Button onClick={() => onEditingChange(false)}>Listo</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
+/** El icono de la web del enlace o, si la dirección no vale, su inicial. */
+function LinkIcon({ link }: { link: QuickLink }) {
+  const icon = faviconUrl(link.url)
+  return icon ? (
+    <Image src={icon} alt="" width={20} height={20} className="size-5" unoptimized />
+  ) : (
+    <span className="text-sm font-semibold">{link.label.slice(0, 1).toUpperCase()}</span>
   )
 }

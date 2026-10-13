@@ -14,28 +14,28 @@ export default function InfluencerPatronesPage() {
         <SpecTable
           columns={["Zona", "Bloque", "Qué responde"]}
           rows={[
-            ["Cabecera", "Saludo con la fecha, la frase de lo urgente (lleva a las tareas) y el botón «Nuevo»", "¿Qué día es y qué hay que hacer ya?"],
-            ["Columna principal", "Cifras (4): pendiente de cobro, cobrado este año, collabs en curso, propuestas abiertas", "¿Cómo voy?"],
-            ["", "Collabs en curso: tarjetas grandes que se deslizan", "¿En qué estoy trabajando?"],
+            ["Cabecera", "Saludo con la fecha y la frase de lo urgente (lleva a las tareas); a la derecha, sus enlaces en una fila de iconos (LinkRow) y el botón «Nuevo»", "¿Qué día es, qué hay que hacer ya y dónde está lo que uso a diario?"],
+            ["Arriba (3:2, misma altura)", "Mini panel del perfil con sus redes, a la izquierda y más ancho", "¿Cómo me ven las marcas?"],
+            ["", "Cifras (4, de dos en dos): pendiente de cobro, cobrado este año, collabs en curso, propuestas abiertas", "¿Cómo voy?"],
+            ["Columna principal", "Collabs en curso: tarjetas grandes que se deslizan", "¿En qué estoy trabajando?"],
             ["", "Tareas: pestañas Hoy · Esta semana · Vencidas, tarjetas con el círculo para marcarlas", "¿Qué me toca?"],
-            ["Columna derecha (372 px)", "Mini panel del perfil con sus redes", "¿Cómo me ven las marcas?"],
-            ["", "Avisos: el destacado en color y la lista", "¿Qué ha pasado?"],
-            ["", "Mis enlaces: el directorio editable", "¿Dónde está lo que uso a diario?"],
+            ["Columna derecha (372 px)", "Avisos: el destacado en color y la lista", "¿Qué ha pasado?"],
           ]}
         />
         <CodeBlock
           code={`<PageBody className="gap-6 px-4 pb-28 md:px-[34px] md:pb-10">
-  <header>…saludo, frase de lo urgente, botón Nuevo…</header>
+  <header>…saludo, frase de lo urgente · <LinkRow … /> + botón Nuevo…</header>
+  <div className="grid gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <ProfilePanel … />
+    <StatRow className="xl:grid-cols-2 xl:grid-rows-2 xl:[&>*]:justify-between">…4 StatTile…</StatRow>
+  </div>
   <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_372px]">
     <div className="flex min-w-0 flex-col gap-6">
-      <StatRow>…4 StatTile…</StatRow>
       <Block>…CollabCardRow…</Block>
       <Block>…pestañas + TaskCard…</Block>
     </div>
     <div className="flex min-w-0 flex-col gap-6">
-      <ProfilePanel … />
       <Block>…NoticeHighlight + NoticeItem…</Block>
-      <Block>…LinkGrid…</Block>
     </div>
   </div>
 </PageBody>`}
@@ -45,12 +45,12 @@ export default function InfluencerPatronesPage() {
       <DocSection id="reglas" title="Reglas">
         <Rules
           items={[
-            <><strong>Dos columnas solo desde 1280 px.</strong> Por debajo, una columna en este orden: saludo, cifras, collabs, tareas, perfil, avisos, enlaces.</>,
+            <><strong>Dos columnas solo desde 1280 px.</strong> Por debajo, una columna en este orden: saludo con los enlaces, perfil, cifras, collabs, tareas y avisos. El perfil y las cifras van juntos arriba y a la misma altura (Xavier, 2026-10-13).</>,
             <><strong>En el móvil</strong> las cifras van de dos en dos, las collabs se deslizan, el margen de página baja a 16 px y la barra inferior sustituye a la sidebar.</>,
             <><strong>Las cifras llevan a su página.</strong> Cada <code>StatTile</code> tiene <code>href</code>; no hay cifra decorativa.</>,
             <><strong>Las tareas se marcan aquí mismo</strong>, sin abrir nada: el círculo cambia el estado y la tarjeta se tacha. El Inicio solo enseña las de hoy, la semana y las vencidas; «Ver todo» abre la página de tareas, que es de operar: lista completa, fechas editables, filtros y creación.</>,
             <><strong>El aviso destacado es uno</strong>: el más importante (una oportunidad nueva, cambios pedidos, un cobro vencido). El resto, en lista, del más nuevo al más viejo.</>,
-            <><strong>Los enlaces son suyos:</strong> añadir, editar, ordenar y borrar desde el propio bloque, con «Editar» en su cabecera. Sin página de ajustes.</>,
+            <><strong>Los enlaces son suyos y van en la cabecera</strong> (Xavier, 2026-10-13): los cinco primeros a la vista, «+N» despliega el resto en la misma fila y el lápiz abre el directorio para añadir, ordenar, editar y borrar. Sin página de ajustes.</>,
             <><strong>Estados:</strong> cada bloque dice cómo llenarse cuando está vacío (<code>EmptyState</code>), carga con un esqueleto de su forma y, si falla, lo dice y deja reintentar sin tumbar el resto.</>,
           ]}
         />

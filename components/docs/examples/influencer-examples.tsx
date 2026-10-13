@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Block, BlockHeader } from "@/components/influencer/block"
 import { TaskCard } from "@/components/influencer/task-card"
-import { LinkGrid, type QuickLink } from "@/components/influencer/link-grid"
+import { LinkGrid, LinkRow, type QuickLink } from "@/components/influencer/link-grid"
 import { TaskTable } from "@/components/influencer/task-table"
 import { HOY, demoContactos, demoEnlaces, demoEtiquetasTarea, demoMarcas, demoPropuestas, demoTareas } from "@/lib/influencer/demo-data"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
@@ -101,4 +101,11 @@ export function LinkGridExample() {
       <LinkGrid links={links} onChange={setLinks} editing={editing} />
     </Block>
   )
+}
+
+/** Los mismos enlaces en la fila de la cabecera del Inicio. */
+export function LinkRowExample() {
+  const [links, setLinks] = React.useState<QuickLink[]>(demoEnlaces.map((e) => ({ id: e.id, label: e.etiqueta, url: e.url })))
+  const [editing, setEditing] = React.useState(false)
+  return <LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} className="justify-start" />
 }
