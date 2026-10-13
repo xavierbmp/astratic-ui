@@ -66,7 +66,7 @@ export const demoPlantillasGuionPropias: PlantillaGuion[] = [
     ]),
   },
   {
-    id: "pg-tutorial",
+    id: "pg-paso-a-paso",
     nombre: "Tutorial paso a paso",
     descripcion: "Para enseñar a hacer algo en tres o cuatro pasos",
     texto: apartados([
@@ -78,7 +78,7 @@ export const demoPlantillasGuionPropias: PlantillaGuion[] = [
     ]),
   },
   {
-    id: "pg-antes-despues",
+    id: "pg-antes-despues-propia",
     nombre: "Antes y después",
     descripcion: "Un cambio que se ve, con lo que hiciste entre medias",
     texto: apartados([
