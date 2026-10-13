@@ -13,7 +13,8 @@ type VistaBase = {
   orden: Orden[]; grupos: Agrupacion[]
   campos: { id: string; visible: boolean; ancho?: number }[]
   calculos: Record<string, Calculo>
-  color?: ColorVista; altura: AlturaFila; congelar: number
+  color?: ColorVista         // { campo?, reglas? }: la marca por una selección y reglas de fila o de celda
+  altura: AlturaFila; congelar: number
   plegados: string[]
 }`
 

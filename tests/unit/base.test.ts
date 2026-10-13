@@ -4,13 +4,17 @@ import { aHtml, aTsv, deTsv, repartirPegado } from "@/lib/base/portapapeles"
 import { caja, celdasDeRelleno, moverSeleccion, tabular, unaCelda } from "@/lib/base/seleccion"
 import {
   agruparEnNiveles,
+  aplicarAjustes,
   camposDeFormulario,
+  colorAlDia,
   colorDeFila,
+  coloresDeRegistro,
   columnasDeVista,
   lineasDeRejilla,
   mover,
   normalizarConfig,
   normalizarVista,
+  reglasDeCampo,
   textoFiltro,
   vistaNueva,
 } from "@/lib/base/vistas"
@@ -92,12 +96,47 @@ describe("grupos de varios niveles", () => {
   })
 })
 
-describe("color de las filas", () => {
-  it("por el color de su opción o por la primera regla que cumple", () => {
-    expect(colorDeFila(filas[1], { modo: "campo", campo: "marca" }, campos, ref)).toBe("rosa")
-    const reglas = { modo: "condiciones" as const, reglas: [{ id: "r1", color: "rojo" as const, filtro: { union: "y" as const, condiciones: [{ campo: "importe", op: "vacio" as const }] } }] }
-    expect(colorDeFila(filas[1], reglas, campos, ref)).toBe("rojo")
-    expect(colorDeFila(filas[0], reglas, campos, ref)).toBeUndefined()
+describe("color de filas y celdas", () => {
+  const vacioImporte = { id: "r1", color: "rojo" as const, filtro: { union: "y" as const, condiciones: [{ campo: "importe", op: "vacio" as const }] } }
+  const contieneAna = { id: "r2", color: "amarillo" as const, alcance: "celda" as const, filtro: { union: "y" as const, condiciones: [{ campo: "nombre", op: "contiene" as const, valor: "an" }] } }
+  const filtrables = campos.map(aFiltrable)
+
+  it("la marca, por el color de su opción o por la primera regla de fila que cumple", () => {
+    expect(colorDeFila(filas[1], { campo: "marca" }, campos, ref)).toBe("rosa")
+    expect(colorDeFila(filas[1], { campo: "marca", reglas: [vacioImporte] }, campos, ref)).toBe("rojo")
+    expect(colorDeFila(filas[0], { reglas: [vacioImporte] }, campos, ref)).toBeUndefined()
+  })
+  it("una regla de fila pinta la fila entera; una de celda, solo la celda de su campo", () => {
+    const color = { campo: "marca", reglas: [vacioImporte, contieneAna] }
+    expect(coloresDeRegistro(filas[1], color, campos, filtrables, ref)).toEqual({ marca: "rojo", fondo: "rojo", celdas: new Map() })
+    const ana = coloresDeRegistro(filas[0], color, campos, filtrables, ref)
+    expect(ana.marca).toBe("verde")
+    expect(ana.fondo).toBeUndefined()
+    expect([...ana.celdas]).toEqual([["nombre", "amarillo"]])
+  })
+  it("el color guardado antes (por modo) se pasa a la forma de ahora y se queda sin lo que ya no existe", () => {
+    const existe = (id: string) => campos.some((c) => c.id === id)
+    expect(colorAlDia({ modo: "campo", campo: "marca" }, existe)).toEqual({ campo: "marca" })
+    expect(colorAlDia({ modo: "condiciones", reglas: [vacioImporte] }, existe)).toEqual({ reglas: [vacioImporte] })
+    expect(colorAlDia({ campo: "borrado" }, existe)).toBeUndefined()
+    expect(colorAlDia({ campo: "marca", reglas: [] }, existe)).toEqual({ campo: "marca" })
+  })
+  it("las reglas de un campo son las que solo lo miran a él", () => {
+    const deVarios = { id: "r3", color: "azul" as const, filtro: { union: "y" as const, condiciones: [{ campo: "nombre", op: "no_vacio" as const }, { campo: "importe", op: "vacio" as const }] } }
+    expect(reglasDeCampo({ reglas: [vacioImporte, contieneAna, deVarios] }, "nombre").map((r) => r.id)).toEqual(["r2"])
+  })
+})
+
+describe("ajustes de los campos de serie", () => {
+  it("cada persona ordena y colorea las opciones; las que faltan en el ajuste van al final y los estados conservan su color", () => {
+    const conEstado: DefCampo<Fila>[] = [
+      ...campos,
+      { id: "estado", nombre: "Estado", tipo: "select", opciones: [{ id: "abierta", label: "Abierta", tono: "info", color: "azul" }, { id: "cerrada", label: "Cerrada", tono: "success", color: "verde" }], valor: () => null },
+    ]
+    const ajustados = aplicarAjustes(conEstado, { marca: { opciones: [{ id: "nuura" }, { id: "lumea", color: "naranja" }] }, estado: { opciones: [{ id: "cerrada", color: "rojo" }] } })
+    expect(ajustados[1].opciones?.map((o) => [o.id, o.color])).toEqual([["nuura", "rosa"], ["lumea", "naranja"]])
+    expect(ajustados[6].opciones?.map((o) => [o.id, o.color])).toEqual([["cerrada", "verde"], ["abierta", "azul"]])
+    expect(aplicarAjustes(campos, undefined)).toBe(campos)
   })
 })
 

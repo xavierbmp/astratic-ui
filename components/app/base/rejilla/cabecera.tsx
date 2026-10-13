@@ -21,7 +21,8 @@ const UMBRAL = 5
 /**
  * La fila de cabeceras, como en Airtable: la casilla de todas las filas, cada campo con su icono y
  * su flecha de menú (también con clic derecho), el borde que se arrastra para cambiar el ancho, la
- * columna entera que se arrastra para cambiarla de sitio y el «+» para crear un campo. La línea de
+ * columna entera que se arrastra para cambiarla de sitio, el doble clic que abre sus ajustes y el «+»
+ * para crear un campo, que se queda a la vista aunque falten columnas por la derecha. La línea de
  * las columnas fijas se arrastra desde la rejilla (`AsaFijas`).
  */
 export function Cabecera<T>({
@@ -38,6 +39,7 @@ export function Cabecera<T>({
   onMover,
   onAnadirCampo,
   onEditarCampo,
+  anadirFijo,
 }: {
   columnas: Columna<T>[]
   alto: number
@@ -52,6 +54,8 @@ export function Cabecera<T>({
   onMover: (id: string, destino: number) => void
   onAnadirCampo?: (ancla: HTMLElement) => void
   onEditarCampo?: (id: string, ancla: HTMLElement) => void
+  /** Quedan columnas fuera a la derecha: el «+» se pega al borde, con lo de debajo difuminado. */
+  anadirFijo?: boolean
 }) {
   const [arrastre, setArrastre] = React.useState<Arrastre | null>(null)
   /** El clic que llega al soltar un arrastre (ancho o mover) no elige la columna. */
@@ -142,7 +146,9 @@ export function Cabecera<T>({
                   if ((e.target as HTMLElement).closest("[data-no-arrastre]")) return
                   if (!c.campo.principal) onElegirColumna(i, e.shiftKey)
                 }}
-                onDoubleClick={(e) => c.campo.propio && onEditarCampo?.(c.campo.id, e.currentTarget)}
+                onDoubleClick={(e) => {
+                  if (!(e.target as HTMLElement).closest("[data-no-arrastre]")) onEditarCampo?.(c.campo.id, e.currentTarget)
+                }}
               >
                 <IconoCampo icono={Icono} />
                 <span className={cn("min-w-0 flex-1", ajustar ? "line-clamp-2 leading-tight break-words" : "truncate")}>{c.campo.nombre}</span>
@@ -184,9 +190,17 @@ export function Cabecera<T>({
           </ContextMenu>
         )
       })}
-      <div className="flex flex-none items-center justify-center border-r bg-card" style={{ width: ANCHO_ANADIR }}>
+      <div
+        className={cn(
+          "flex flex-none items-center justify-center border-r bg-card",
+          anadirFijo &&
+            onAnadirCampo &&
+            "sticky right-0 z-10 border-l before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-12 before:bg-linear-to-l before:from-card before:to-transparent",
+        )}
+        style={{ width: ANCHO_ANADIR }}
+      >
         {onAnadirCampo && (
-          <button type="button" aria-label="Añadir un campo" className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" onClick={(e) => onAnadirCampo(e.currentTarget)}>
+          <button type="button" aria-label="Añadir un campo" title="Añadir un campo" className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" onClick={(e) => onAnadirCampo(e.currentTarget)}>
             <PlusIcon className="size-4" />
           </button>
         )}

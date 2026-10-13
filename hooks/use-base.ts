@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import type { DefCampo } from "@/lib/base/campos"
-import { TIPOS_VISTA, idBase, normalizarConfig, normalizarVista, vistaNueva, camposDeFormulario, type CampoFormulario, type ConfigBase, type TipoVista, type VistaBase } from "@/lib/base/vistas"
+import { TIPOS_VISTA, idBase, normalizarConfig, normalizarVista, vistaNueva, camposDeFormulario, type AjusteCampo, type CampoFormulario, type ConfigBase, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 
 /** Tiempo que se espera antes de guardar: ensanchar una columna no manda un guardado por píxel. */
 const ESPERA_GUARDADO = 500
@@ -143,7 +143,19 @@ export function useBase<T>({
   const formulario = React.useMemo(() => camposDeFormulario(normal.formulario, campos), [normal.formulario, campos])
   const cambiarFormulario = React.useCallback((lista: CampoFormulario[]) => actualizar((c) => ({ ...c, formulario: lista })), [actualizar])
 
-  return { vistas: normal.vistas, vista, activar, cambiar, crear, duplicar, renombrar, borrar, restaurar, reordenar, formulario, cambiarFormulario }
+  const ajustes = React.useMemo(() => normal.ajustes ?? {}, [normal.ajustes])
+  /** El orden y los colores propios de las opciones de un campo de serie; sin ajuste, vuelve a los de serie. */
+  const ajustarCampo = React.useCallback(
+    (id: string, ajuste: AjusteCampo | undefined) =>
+      actualizar((c) => {
+        const resto = Object.fromEntries(Object.entries(c.ajustes ?? {}).filter(([clave]) => clave !== id))
+        const siguientes = ajuste ? { ...resto, [id]: ajuste } : resto
+        return { ...c, ajustes: Object.keys(siguientes).length ? siguientes : undefined }
+      }),
+    [actualizar],
+  )
+
+  return { vistas: normal.vistas, vista, activar, cambiar, crear, duplicar, renombrar, borrar, restaurar, reordenar, formulario, cambiarFormulario, ajustes, ajustarCampo }
 }
 
 export type BaseApi<T> = ReturnType<typeof useBase<T>>

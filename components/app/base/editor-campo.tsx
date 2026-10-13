@@ -34,6 +34,9 @@ const FAMILIAS: TipoCampoPropio[][] = [
 ]
 const tiposPosibles = (tipo: TipoCampoPropio) => FAMILIAS.find((f) => f.includes(tipo)) ?? [tipo]
 
+/** Para comparar nombres de campo: «Teléfono» y «telefono » son el mismo. */
+const claveNombre = (nombre: string) => nombre.trim().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "")
+
 /**
  * Crear o editar un campo propio, como el de Airtable: nombre (opcional), tipo con buscador, su
  * explicación y lo que tiene ese tipo (opciones con color que se ordenan arrastrando, decimales,
@@ -59,17 +62,19 @@ export function EditorCampo({
   const [conDescripcion, setConDescripcion] = React.useState(!!campo?.descripcion)
   const [error, setError] = React.useState<string | null>(null)
   const conOpciones = TIPOS_CON_OPCIONES.includes(tipo)
+  const usados = new Set(nombresUsados.map(claveNombre))
+  // Dos campos no se llaman igual, sea cual sea su tipo: se avisa mientras se escribe y no deja crearlo.
+  const repetido = nombre.trim() !== "" && usados.has(claveNombre(nombre))
 
   const guardar = (e: React.FormEvent) => {
     e.preventDefault()
-    const usados = new Set(nombresUsados.map((n) => n.toLowerCase()))
     let limpio = nombre.trim()
     if (!limpio) {
       let n = 1
       while (usados.has(`campo ${n}`)) n += 1
       limpio = `Campo ${n}`
     }
-    if (usados.has(limpio.toLowerCase())) return setError("Ya hay un campo con ese nombre")
+    if (usados.has(claveNombre(limpio))) return setError("Ya hay un campo con ese nombre: ponle otro")
     const validas = opciones.map((o) => ({ ...o, label: o.label.trim() })).filter((o) => o.label)
     if (conOpciones && validas.length === 0) return setError("Añade al menos una opción")
     onGuardar({
@@ -86,7 +91,8 @@ export function EditorCampo({
 
   return (
     <form onSubmit={guardar} noValidate className="flex w-[min(92vw,380px)] flex-col gap-3 p-3 text-[13px]">
-      <Input autoFocus placeholder="Nombre del campo (opcional)" value={nombre} onChange={(e) => { setNombre(e.target.value); setError(null) }} aria-invalid={!!error} className="h-8 text-[13px]" />
+      <Input autoFocus placeholder="Nombre del campo (opcional)" value={nombre} onChange={(e) => { setNombre(e.target.value); setError(null) }} aria-invalid={repetido || !!error} className="h-8 text-[13px]" />
+      {repetido && <p className="-mt-1.5 text-danger">Ya hay un campo que se llama así: ponle otro nombre.</p>}
       <SelectorTipo value={tipo} posibles={campo ? tiposPosibles(campo.tipo) : LISTA_TIPOS_CAMPO} onChange={(t) => { setTipo(t); setFormato({}); setError(null) }} />
       <p className="text-muted-foreground">{TIPOS_CAMPO[tipo].ayuda}{campo && " Un campo ya creado solo cambia a tipos que guardan lo mismo."}</p>
 
@@ -165,7 +171,7 @@ export function EditorCampo({
       {error && <p className="text-danger">{error}</p>}
       <div className="flex justify-end gap-2 pt-1">
         <Button type="button" variant="ghost" size="sm" onClick={onCancelar}>Cancelar</Button>
-        <Button type="submit" size="sm">{campo ? "Guardar" : "Crear campo"}</Button>
+        <Button type="submit" size="sm" disabled={repetido}>{campo ? "Guardar" : "Crear campo"}</Button>
       </div>
     </form>
   )

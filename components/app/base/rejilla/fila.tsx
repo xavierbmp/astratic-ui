@@ -6,10 +6,10 @@
 import * as React from "react"
 import { toast } from "sonner"
 import { cn } from "cn"
-import type { ColorOpcion, DefCampo, OpcionCampo, ValorCampo } from "@/lib/base/campos"
+import type { DefCampo, OpcionCampo, ValorCampo } from "@/lib/base/campos"
 import { enCaja, type caja, type Celda } from "@/lib/base/seleccion"
-import type { VistaBase } from "@/lib/base/vistas"
-import { CeldaIzquierda, FONDO } from "@/components/app/base/rejilla/lineas"
+import type { ColoresRegistro, VistaBase } from "@/lib/base/vistas"
+import { CeldaIzquierda, FONDO, VeloColor } from "@/components/app/base/rejilla/lineas"
 import { EditorCelda, type Salida } from "@/components/app/base/rejilla/editor-celda"
 import { ValorCelda } from "@/components/app/base/rejilla/valor-celda"
 import type { Columna } from "@/components/app/base/rejilla/medidas"
@@ -39,7 +39,7 @@ export type PropsFila<T> = {
   columnas: Columna<T>[]
   congelar: number
   altura: VistaBase["altura"]
-  color?: ColorOpcion
+  colores?: ColoresRegistro
   marcada: boolean
   abierta: boolean
   sel: ReturnType<typeof caja> | null
@@ -63,7 +63,7 @@ export function FilaRegistro<T>(f: PropsFila<T>) {
   const alta = f.altura !== "corta"
   return (
     <div style={f.estilo} className="group/fila flex">
-      <CeldaIzquierda indice={f.indice} numero={f.numero} color={f.color} alta={alta} marcada={f.marcada} abierta={f.abierta} onMarcar={f.onMarcar} onExpandir={f.onExpandir} />
+      <CeldaIzquierda indice={f.indice} numero={f.numero} color={f.colores?.marca} fondo={f.colores?.fondo} alta={alta} marcada={f.marcada} abierta={f.abierta} onMarcar={f.onMarcar} onExpandir={f.onExpandir} />
       {f.columnas.map((c, ci) => (
         <CeldaRegistro key={c.campo.id} {...f} columna={c} col={ci} alta={alta} />
       ))}
@@ -81,6 +81,9 @@ function CeldaRegistro<T>({ columna: c, col, alta, ...f }: PropsFila<T> & { colu
   const valor = c.campo.valor(f.fila)
   const aMedida = f.celdas?.[c.campo.id]
   const ultimaFija = c.fija && col === f.congelar - 1
+  // Lo marcado o abierto manda sobre el color; si no, la regla de la celda y, si no hay, la de la fila.
+  const colorCelda = f.marcada || f.abierta ? undefined : f.colores?.celdas.get(c.campo.id)
+  const colorFila = f.marcada || f.abierta || colorCelda ? undefined : f.colores?.fondo
   return (
     <div
       data-celda
@@ -98,6 +101,8 @@ function CeldaRegistro<T>({ columna: c, col, alta, ...f }: PropsFila<T> & { colu
       )}
       style={{ width: c.ancho, left: c.fija ? c.x : undefined }}
     >
+      {colorCelda && <VeloColor color={colorCelda} />}
+      {colorFila && <VeloColor color={colorFila} fila />}
       {f.tintes.has(c.campo.id) && <span aria-hidden className={cn("pointer-events-none absolute inset-0", f.tintes.get(c.campo.id))} />}
       {(enSeleccion || enRelleno) && <span aria-hidden className={cn("pointer-events-none absolute inset-0 bg-brand-soft", enRelleno && "border border-dashed border-brand")} />}
       {activa && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[2px] ring-2 ring-brand ring-inset" />}

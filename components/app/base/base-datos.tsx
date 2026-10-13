@@ -14,10 +14,11 @@ import type { BaseApi } from "@/hooks/use-base"
 import { filtrarFilas, operadorPorDefecto } from "@/lib/filtros/core"
 import { ordenarFilas, valoresDeFiltro } from "@/lib/vistas/core"
 import { TIPOS_CAMPO, aFiltrable, colorPorDefecto, textoDeValor, type CampoPropio, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
-import { agruparEnNiveles, clavesDeGrupos, colorDeFila, columnasDeVista, idBase, lineasDeRejilla, type VistaBase } from "@/lib/base/vistas"
+import { agruparEnNiveles, aplicarAjustes, clavesDeGrupos, coloresDeRegistro, columnasDeVista, idBase, lineasDeRejilla, type VistaBase } from "@/lib/base/vistas"
 import { BarraBase, type MenuDeBarra } from "@/components/app/base/barra-base"
 import { LateralVistas } from "@/components/app/base/lateral-vistas"
 import { EditorCampo } from "@/components/app/base/editor-campo"
+import { AjustesCampo, type PestanaAjustes } from "@/components/app/base/ajustes-campo"
 import { FormularioBase, type ValoresFormulario } from "@/components/app/base/formulario-base"
 import { ListaMovil } from "@/components/app/base/lista-movil"
 import { KanbanBase } from "@/components/app/base/kanban-base"
@@ -32,7 +33,11 @@ export type { CambioCelda }
 
 const sinAcentos = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "")
 
-type EditorAbierto = { ancla: HTMLElement; campo?: CampoPropio; lugar?: { antesDe?: string; despuesDe?: string } }
+/** El editor de un campo nuevo, junto a la cabecera desde la que se pidió («Insertar a la izquierda»…). */
+type EditorAbierto = { ancla: HTMLElement; lugar?: { antesDe?: string; despuesDe?: string } }
+
+/** Los ajustes de un campo que ya existe (doble clic en su cabecera). */
+type AjustesAbiertos = { ancla: HTMLElement; campoId: string; pestana: PestanaAjustes }
 
 /**
  * Una base de datos con la colocación de Airtable y el aspecto del design system, entera: la barra
@@ -47,7 +52,7 @@ type EditorAbierto = { ancla: HTMLElement; campo?: CampoPropio; lugar?: { antesD
 export function BaseDatos<T>({
   clave,
   base,
-  campos,
+  campos: camposPagina,
   filas,
   getId,
   hoy,
@@ -135,11 +140,14 @@ export function BaseDatos<T>({
   const [menu, setMenu] = React.useState<MenuDeBarra | null>(null)
   const [nuevo, setNuevo] = React.useState(nuevoInicial)
   const [editor, setEditor] = React.useState<EditorAbierto | null>(null)
+  const [ajustes, setAjustes] = React.useState<AjustesAbiertos | null>(null)
   const [borrandoCampo, setBorrandoCampo] = React.useState<DefCampo<T> | null>(null)
   const movil = useIsMobile()
   const fichaPropia = usePanelFicha(`base:${clave}`)
   const ficha = fichaPagina ?? fichaPropia
   const tipo = vista.tipo ?? "cuadricula"
+  // Los campos con lo que cada persona ajusta de los de serie (el orden y el color de sus opciones).
+  const campos = React.useMemo(() => aplicarAjustes(camposPagina, base.ajustes), [camposPagina, base.ajustes])
 
   const filtrables = React.useMemo(() => campos.map(aFiltrable), [campos])
   const camposMenu = React.useMemo(() => camposMenuDeBase(campos), [campos])
@@ -168,15 +176,20 @@ export function BaseDatos<T>({
 
   const cabeceraDe = (id: string) => document.querySelector<HTMLElement>(`[data-campo="${CSS.escape(id)}"]`)
 
+  const abrirAjustes = (campoId: string, pestana: PestanaAjustes, ancla = cabeceraDe(campoId)) => {
+    if (ancla) setAjustes({ ancla, campoId, pestana })
+  }
+
   const accionesCampo = (campo: DefCampo<T>): AccionesCampo => {
     const propio = propios?.find((p) => p.id === campo.id)
-    const abrirEditor = (lugar?: EditorAbierto["lugar"], editar?: CampoPropio) => {
+    const abrirEditor = (lugar?: EditorAbierto["lugar"]) => {
       const ancla = cabeceraDe(campo.id)
-      if (ancla) setEditor({ ancla, campo: editar, lugar })
+      if (ancla) setEditor({ ancla, lugar })
     }
     return {
       tipo: TIPOS_CAMPO[campo.tipo].filtro,
-      editar: propio && onGuardarCampo ? () => abrirEditor(undefined, propio) : undefined,
+      editar: () => abrirAjustes(campo.id, "campo"),
+      colorear: () => abrirAjustes(campo.id, "colores"),
       insertarIzquierda: onGuardarCampo && !campo.principal ? () => abrirEditor({ antesDe: campo.id }) : undefined,
       insertarDerecha: onGuardarCampo ? () => abrirEditor({ despuesDe: campo.id }) : undefined,
       ordenar: (dir) => base.cambiar({ orden: [{ campo: campo.id, dir }] }),
@@ -193,12 +206,16 @@ export function BaseDatos<T>({
     }
   }
 
-  const guardarCampo = (campo: CampoPropio) => {
+  const guardarEditado = (campo: CampoPropio) => {
+    onGuardarCampo?.(campo)
+    setAjustes(null)
+    toast.success("Campo guardado")
+  }
+
+  const crearCampo = (campo: CampoPropio) => {
     const lugar = editor?.lugar
-    const esNuevo = !propios?.some((p) => p.id === campo.id)
     onGuardarCampo?.(campo)
     setEditor(null)
-    if (!esNuevo) return toast.success("Campo guardado")
     // Como en Airtable, el campo nuevo sale donde se pidió («a la izquierda de…») y visible.
     const junto = lugar?.antesDe ?? lugar?.despuesDe
     base.cambiar((v) => {
@@ -219,6 +236,27 @@ export function BaseDatos<T>({
     return nueva
   }
 
+  const pintarAjustes = ({ campoId, pestana }: AjustesAbiertos) => {
+    const campo = campos.find((c) => c.id === campoId)
+    const campoMenu = camposMenu.find((c) => c.id === campoId)
+    if (!campo || !campoMenu) return null
+    return (
+      <AjustesCampo
+        key={campoId}
+        campo={campo}
+        campoMenu={campoMenu}
+        propio={propios?.find((p) => p.id === campoId)}
+        nombresUsados={nombres.filter((n) => n !== campo.nombre)}
+        color={vista.color}
+        pestana={pestana}
+        onGuardarPropio={onGuardarCampo ? guardarEditado : undefined}
+        onAjustar={(ajuste) => base.ajustarCampo(campoId, ajuste)}
+        onColor={(color) => base.cambiar({ color })}
+        onCerrar={() => setAjustes(null)}
+      />
+    )
+  }
+
   const borrarVista = (id: string) => {
     const posicion = base.vistas.findIndex((v) => v.id === id)
     const vistaBorrada = base.vistas[posicion]
@@ -236,7 +274,8 @@ export function BaseDatos<T>({
     </Button>
   ) : undefined
 
-  const colorDe = (f: T) => colorDeFila(f, vista.color, campos, ref)
+  const coloresDe = (f: T) => coloresDeRegistro(f, vista.color, campos, filtrables, ref)
+  const colorDe = (f: T) => coloresDe(f).marca
   const escribirUno = onEscribir ? (fila: T, campo: DefCampo<T>, valor: ValorCampo) => onEscribir([{ fila, campo, valor }]) : undefined
   const tarjetas = { campos: columnas.map((c) => c.campo), colorDe, celdas, onAbrirVinculo, portada }
   const textoVacio = registros.length === 0 ? vacio?.(hayFiltro, limpiar) : undefined
@@ -258,7 +297,7 @@ export function BaseDatos<T>({
             columnas={columnas}
             vista={vista}
             getId={getId}
-            colorDe={colorDe}
+            coloresDe={coloresDe}
             celdas={celdas}
             objeto={objeto}
             marcadas={marcadas}
@@ -270,10 +309,7 @@ export function BaseDatos<T>({
             onCambiarVista={base.cambiar}
             accionesCampo={accionesCampo}
             onAnadirCampo={onGuardarCampo ? (ancla) => setEditor({ ancla }) : undefined}
-            onEditarCampo={(id, ancla) => {
-              const propio = propios?.find((p) => p.id === id)
-              if (propio && onGuardarCampo) setEditor({ ancla, campo: propio })
-            }}
+            onEditarCampo={(id, ancla) => abrirAjustes(id, "campo", ancla)}
             onCrearOpcion={onGuardarCampo ? crearOpcion : undefined}
             onDuplicar={onDuplicar}
             onBorrar={
@@ -345,15 +381,14 @@ export function BaseDatos<T>({
         <PopoverAnchor virtualRef={{ current: editor?.ancla ?? null }} />
         {/* Se abre desde un menú que, al cerrarse, devuelve el foco a la cabecera: eso no lo cierra. */}
         <PopoverContent align="start" className="w-auto p-0" onFocusOutside={(e) => e.preventDefault()}>
-          {editor && (
-            <EditorCampo
-              key={editor.campo?.id ?? "nuevo"}
-              campo={editor.campo}
-              nombresUsados={nombres.filter((n) => n !== editor.campo?.nombre)}
-              onGuardar={guardarCampo}
-              onCancelar={() => setEditor(null)}
-            />
-          )}
+          {editor && <EditorCampo nombresUsados={nombres} onGuardar={crearCampo} onCancelar={() => setEditor(null)} />}
+        </PopoverContent>
+      </Popover>
+
+      <Popover open={!!ajustes} onOpenChange={(abierto) => !abierto && setAjustes(null)}>
+        <PopoverAnchor virtualRef={{ current: ajustes?.ancla ?? null }} />
+        <PopoverContent align="start" className="w-auto p-0" onFocusOutside={(e) => e.preventDefault()}>
+          {ajustes && pintarAjustes(ajustes)}
         </PopoverContent>
       </Popover>
 
@@ -384,6 +419,7 @@ export function BaseDatos<T>({
           onConfigurar={base.cambiarFormulario}
           iniciales={iniciales}
           onCrear={onCrear}
+          onCrearOpcion={onGuardarCampo ? crearOpcion : undefined}
           textoCrear={formulario?.textoCrear}
         />
       )}

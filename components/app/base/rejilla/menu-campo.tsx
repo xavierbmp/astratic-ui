@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowDownIcon, ArrowLeftToLineIcon, ArrowRightToLineIcon, ArrowUpIcon, EyeOffIcon, PencilIcon, Rows3Icon, SlidersHorizontalIcon, Trash2Icon } from "lucide-react"
+import { ArrowDownIcon, ArrowLeftToLineIcon, ArrowRightToLineIcon, ArrowUpIcon, EyeOffIcon, PaletteIcon, PencilIcon, Rows3Icon, SlidersHorizontalIcon, Trash2Icon } from "lucide-react"
 import { ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu"
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import type { TipoFiltro } from "@/lib/filtros/core"
@@ -9,7 +9,10 @@ import { sentidos } from "@/components/app/base/menu-orden"
 
 export type AccionesCampo = {
   tipo: TipoFiltro
+  /** Abre sus ajustes (también con doble clic en la cabecera). */
   editar?: () => void
+  /** Abre sus ajustes en «Colores»: pintar la fila o la celda según su valor. */
+  colorear?: () => void
   insertarIzquierda?: () => void
   insertarDerecha?: () => void
   ordenar: (dir: "asc" | "desc") => void
@@ -20,7 +23,7 @@ export type AccionesCampo = {
 }
 
 /**
- * Lo que ofrece la cabecera de un campo, como en Airtable: editarlo, insertar uno al lado, ordenar,
+ * Lo que ofrece la cabecera de un campo, como en Airtable: editarlo, colorear según su valor, insertar uno al lado, ordenar,
  * filtrar y agrupar por él, ocultarlo y eliminarlo (solo los propios). Sale igual en su flecha y
  * con el clic derecho.
  */
@@ -33,6 +36,11 @@ export function ItemsCampo({ acciones: a, contexto }: { acciones: AccionesCampo;
       {a.editar && (
         <Item onSelect={a.editar}>
           <PencilIcon /> Editar el campo
+        </Item>
+      )}
+      {a.colorear && (
+        <Item onSelect={a.colorear}>
+          <PaletteIcon /> Colorear según su valor
         </Item>
       )}
       {(a.insertarIzquierda || a.insertarDerecha) && (

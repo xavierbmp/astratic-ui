@@ -6,7 +6,7 @@ import { cn } from "cn"
 import { Checkbox } from "@/components/ui/checkbox"
 import { opcionDe, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
 import type { NodoGrupo } from "@/lib/base/vistas"
-import { CLASE_FUERTE, FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
+import { CLASE_FONDO, CLASE_FUERTE, FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
 import { ANCHO_IZQUIERDA, type Columna } from "@/components/app/base/rejilla/medidas"
 
 /** El fondo de las celdas: opaco siempre, para que las columnas fijas tapen lo que pasa por debajo. */
@@ -15,13 +15,19 @@ export const FONDO = {
   marcada: "bg-[color-mix(in_oklch,var(--card),var(--brand)_9%)]",
 } as const
 
+/** El velo de una regla de color: entero en la celda que pinta, más suave en la fila entera. */
+export function VeloColor({ color, fila }: { color: ColorOpcion; fila?: boolean }) {
+  return <span aria-hidden className={cn("pointer-events-none absolute inset-0", CLASE_FONDO[color], fila && "opacity-60")} />
+}
+
 /**
  * La columna de la izquierda de un registro: el número de fila (y la marca de su color); al pasar
- * el ratón o marcada, la casilla y el botón que abre su ficha.
+ * el ratón o marcada, la casilla y el botón que abre su ficha. Con `fondo`, la fila va pintada.
  */
-export function CeldaIzquierda({ indice, numero, color, alta, marcada, abierta, onMarcar, onExpandir }: { indice: number; numero: number; color?: ColorOpcion; alta: boolean; marcada: boolean; abierta: boolean; onMarcar: (m: boolean) => void; onExpandir: () => void }) {
+export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, abierta, onMarcar, onExpandir }: { indice: number; numero: number; color?: ColorOpcion; fondo?: ColorOpcion; alta: boolean; marcada: boolean; abierta: boolean; onMarcar: (m: boolean) => void; onExpandir: () => void }) {
   return (
     <div data-fila={indice} className={cn("sticky left-0 z-[6] flex flex-none gap-1 border-r border-b pr-1 pl-2 text-xs text-muted-foreground", alta ? "items-start pt-1.5" : "items-center", marcada || abierta ? FONDO.marcada : FONDO.normal)} style={{ width: ANCHO_IZQUIERDA }}>
+      {fondo && !marcada && !abierta && <VeloColor color={fondo} fila />}
       {color && <span className={cn("absolute inset-y-1 left-0.5 w-1 rounded-full", CLASE_FUERTE[color])} aria-hidden />}
       <span className="flex w-7 flex-none items-center">
         <span className={cn("tabular-nums group-hover/fila:hidden", marcada && "hidden")}>{numero}</span>

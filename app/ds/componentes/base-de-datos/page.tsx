@@ -95,7 +95,17 @@ export default function BaseDeDatosPage() {
               <strong>Estados</strong>: con <code>opcionesDeEstados(ESTADOS_…)</code> llevan su tono y se ven como <code>StatusBadge</code>. Las demás opciones,
               con los colores <code>opcion-*</code>.
             </>,
-            <>El formulario de alta (<code>onCrear</code>) sale de los mismos campos y se configura desde su engranaje: qué campos salen y en qué orden. Si la página tiene su diálogo, <code>onNuevo</code>.</>,
+            <>
+              <strong>Ajustes de un campo</strong>: doble clic en su cabecera (o «Editar el campo» de su menú). Uno propio se edita entero (nombre, tipo,
+              opciones con su color y su orden, formato y descripción); de uno de serie, cada persona ordena y colorea sus opciones (<code>AjusteCampo</code>,
+              en <code>ConfigBase.ajustes</code>; los estados conservan su tono). En «Colores», reglas que pintan la celda o la fila según su valor. Dos campos
+              no se llaman igual: el editor lo avisa al escribir y no deja crearlo.
+            </>,
+            <>
+              El formulario de alta (<code>onCrear</code>) sale de los mismos campos y se configura desde su engranaje: qué campos salen y en qué orden. En los
+              campos propios de selección, escribir una opción que no existe la crea, igual que en la celda. Si la página tiene su diálogo, <code>onNuevo</code>.
+            </>,
+            <>El «+» para crear un campo se queda pegado a la derecha cuando faltan columnas por ver, con lo de debajo difuminado: no hace falta ir al final.</>,
           ]}
         />
       </DocSection>
@@ -112,8 +122,9 @@ export default function BaseDeDatosPage() {
               relativas a hoy) y grupos dentro de grupos hasta tres niveles. Un solo juego de operadores en todo el kit (<code>lib/filtros/core.ts</code>).
             </>,
             <>
-              <strong>Agrupar</strong> hasta tres niveles, <strong>ordenar</strong> por varios campos, <strong>color</strong> por un campo de selección o por
-              condiciones, <strong>altura</strong> de fila y encabezados con ajuste. Lo activo se marca en el tono de la marca.
+              <strong>Agrupar</strong> hasta tres niveles, <strong>ordenar</strong> por varios campos, <strong>color</strong> (la marca de la fila por un campo
+              de selección y reglas que pintan la fila entera o solo la celda de su campo; manda la primera que se cumple), <strong>altura</strong> de fila y
+              encabezados con ajuste. Lo activo se marca en el tono de la marca.
             </>,
             <>
               <strong>Kanban</strong>: columnas de una selección o de un vínculo; arrastrar cambia el valor (la página puede pasarlo por sus acciones, como

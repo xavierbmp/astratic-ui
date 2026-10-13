@@ -98,7 +98,8 @@ export function BarraBase<T>({
   const ocultos = camposOcultos(vista)
   const filtrado = textoFiltro(vista.filtro, campos)
   const nombreDe = (id: string | undefined) => campos.find((c) => c.id === id)?.nombre
-  const coloreado = vista.color?.modo === "campo" ? `Coloreado por ${nombreDe(vista.color.campo) ?? "un campo"}` : vista.color ? "Coloreado por condiciones" : null
+  const reglasColor = vista.color?.reglas?.length ?? 0
+  const coloreado = !vista.color ? null : reglasColor ? `Coloreado por ${reglasColor} ${reglasColor === 1 ? "regla" : "reglas"}` : `Coloreado por ${nombreDe(vista.color.campo) ?? "un campo"}`
 
   return (
     <div className="@container/barra flex h-11 flex-none items-center gap-1 border-b px-2">

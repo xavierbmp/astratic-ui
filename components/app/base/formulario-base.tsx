@@ -10,7 +10,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { ESTRELLAS_POR_DEFECTO, esValorVacio, valorDeTexto, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { ESTRELLAS_POR_DEFECTO, esValorVacio, valorDeTexto, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
 import type { CampoFormulario } from "@/lib/base/vistas"
 import { ConfigButton } from "@/components/app/config-button"
 import { ICONO_TIPO, IconoCampo } from "@/components/app/base/apariencia"
@@ -33,6 +33,7 @@ export function FormularioBase<T>({
   onConfigurar,
   iniciales,
   onCrear,
+  onCrearOpcion,
   textoCrear = "Crear",
 }: {
   open: boolean
@@ -46,13 +47,15 @@ export function FormularioBase<T>({
   iniciales?: ValoresFormulario
   /** Crea el registro; si devuelve un texto, es el error y el formulario sigue abierto. */
   onCrear: (valores: ValoresFormulario) => string | void
+  /** Crear una opción escribiéndola en el desplegable de un campo propio, como en la rejilla. */
+  onCrearOpcion?: (campoId: string, label: string) => OpcionCampo | null
   textoCrear?: string
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[520px]">
         {/* Se monta al abrir: arranca vacío (o con lo inicial), sin efectos que lo rellenen. */}
-        {open && <Cuerpo titulo={titulo} descripcion={descripcion} campos={campos} onConfigurar={onConfigurar} iniciales={iniciales} onCrear={onCrear} textoCrear={textoCrear} onCerrar={() => onOpenChange(false)} />}
+        {open && <Cuerpo titulo={titulo} descripcion={descripcion} campos={campos} onConfigurar={onConfigurar} iniciales={iniciales} onCrear={onCrear} onCrearOpcion={onCrearOpcion} textoCrear={textoCrear} onCerrar={() => onOpenChange(false)} />}
       </DialogContent>
     </Dialog>
   )
@@ -65,6 +68,7 @@ function Cuerpo<T>({
   onConfigurar,
   iniciales,
   onCrear,
+  onCrearOpcion,
   textoCrear,
   onCerrar,
 }: {
@@ -74,6 +78,7 @@ function Cuerpo<T>({
   onConfigurar: (lista: CampoFormulario[]) => void
   iniciales?: ValoresFormulario
   onCrear: (valores: ValoresFormulario) => string | void
+  onCrearOpcion?: (campoId: string, label: string) => OpcionCampo | null
   textoCrear: string
   onCerrar: () => void
 }) {
@@ -153,6 +158,7 @@ function Cuerpo<T>({
                   autoFocus={i === 0}
                   valor={valores[campo.id] ?? null}
                   texto={textos[campo.id]}
+                  onCrearOpcion={campo.propio && onCrearOpcion ? (label) => onCrearOpcion(campo.id, label)?.id ?? null : undefined}
                   onValor={(v) => {
                     setValores((x) => ({ ...x, [campo.id]: v }))
                     setErrores((x) => ({ ...x, [campo.id]: "" }))
@@ -178,7 +184,23 @@ function Cuerpo<T>({
 }
 
 /** El control de un campo según su tipo. Lo que se escribe a mano se lee al crear (`valorDeTexto`), como en la rejilla. */
-function Control<T>({ campo, autoFocus, valor, texto, onValor, onTexto }: { campo: DefCampo<T>; autoFocus: boolean; valor: ValorCampo; texto: string | undefined; onValor: (v: ValorCampo) => void; onTexto: (t: string) => void }) {
+function Control<T>({
+  campo,
+  autoFocus,
+  valor,
+  texto,
+  onCrearOpcion,
+  onValor,
+  onTexto,
+}: {
+  campo: DefCampo<T>
+  autoFocus: boolean
+  valor: ValorCampo
+  texto: string | undefined
+  onCrearOpcion?: (label: string) => string | null
+  onValor: (v: ValorCampo) => void
+  onTexto: (t: string) => void
+}) {
   const id = `fb-${campo.id}`
   const opciones = (campo.opciones ?? []).map((o) => ({ value: o.id, label: o.label, color: o.color }))
   switch (campo.tipo) {
@@ -191,9 +213,9 @@ function Control<T>({ campo, autoFocus, valor, texto, onValor, onTexto }: { camp
       )
     case "select":
     case "vinculo":
-      return <ElegirOpcion opciones={opciones} valor={typeof valor === "string" ? valor : undefined} onChange={(v) => onValor(v ?? null)} vinculo={campo.vinculo?.objeto} className="h-9 w-full rounded-md border border-input bg-background" />
+      return <ElegirOpcion opciones={opciones} valor={typeof valor === "string" ? valor : undefined} onChange={(v) => onValor(v ?? null)} vinculo={campo.vinculo?.objeto} onCrear={onCrearOpcion} className="h-9 w-full rounded-md border border-input bg-background" />
     case "multiselect":
-      return <ElegirOpciones opciones={opciones} valores={Array.isArray(valor) ? valor : []} onChange={onValor} className="rounded-md border border-input bg-background" />
+      return <ElegirOpciones opciones={opciones} valores={Array.isArray(valor) ? valor : []} onChange={onValor} onCrear={onCrearOpcion} className="rounded-md border border-input bg-background" />
     case "calificacion": {
       const maximo = campo.formato?.maximo ?? ESTRELLAS_POR_DEFECTO
       const n = typeof valor === "number" ? valor : 0

@@ -78,6 +78,19 @@ export const CLASE_OPCION: Record<ColorOpcion, string> = {
   gris: "bg-opcion-gris text-opcion-gris-foreground",
 }
 
+/** El fondo suave de cada color: la fila o la celda que pinta una regla de color. */
+export const CLASE_FONDO: Record<ColorOpcion, string> = {
+  azul: "bg-opcion-azul",
+  cian: "bg-opcion-cian",
+  verde: "bg-opcion-verde",
+  amarillo: "bg-opcion-amarillo",
+  naranja: "bg-opcion-naranja",
+  rojo: "bg-opcion-rojo",
+  rosa: "bg-opcion-rosa",
+  morado: "bg-opcion-morado",
+  gris: "bg-opcion-gris",
+}
+
 /** El color fuerte: la marca de color de la fila y la muestra del selector de colores. */
 export const CLASE_FUERTE: Record<ColorOpcion, string> = {
   azul: "bg-opcion-azul-fuerte",

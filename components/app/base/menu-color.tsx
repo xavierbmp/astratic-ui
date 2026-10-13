@@ -6,58 +6,38 @@ import { cn } from "cn"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { GRUPO_VACIO, type GrupoCondiciones } from "@/lib/filtros/core"
 import { COLORES_OPCION, NOMBRES_COLOR, colorPorDefecto, type ColorOpcion } from "@/lib/base/campos"
-import { idBase, type ColorVista, type ReglaColor } from "@/lib/base/vistas"
+import { ALCANCES_COLOR, colorAlDia, idBase, type AlcanceColor, type ColorVista, type ReglaColor } from "@/lib/base/vistas"
 import { SelectorCampo, type CampoMenu } from "@/components/app/base/selector-campo"
 import { CLASE_FUERTE } from "@/components/app/base/apariencia"
 import { CabeceraMenu } from "@/components/app/base/menu-comun"
 import { FilaCondicion, condicionNueva } from "@/components/app/base/panel-filtro"
 
 /**
- * «Configurar color», como en Airtable: las filas toman el color de la opción de un campo de
- * selección, o el de la primera regla que cumplen (cada regla, su color y sus condiciones).
+ * «Color», como en Airtable y algo más: la marca de cada fila puede salir de la opción de un campo
+ * de selección, y cada regla pinta la fila entera o solo la celda de su campo (cada regla, su
+ * color, a qué pinta y sus condiciones). Manda la primera regla que se cumple.
  */
 export function MenuColor({ campos, color, onCambiar }: { campos: CampoMenu[]; color: ColorVista | undefined; onCambiar: (c: ColorVista | undefined) => void }) {
   const selecciones = campos.filter((c) => c.tipo === "select")
-  const modo = color?.modo
-  const elegirCampo = () => selecciones[0] && onCambiar({ modo: "campo", campo: selecciones[0].id })
-  const elegirCondiciones = () => {
-    const c = condicionNueva(campos)
-    onCambiar({ modo: "condiciones", reglas: [{ id: idBase("r"), color: colorPorDefecto(0), filtro: c ? { union: "y", condiciones: [c] } : GRUPO_VACIO }] })
-  }
-
+  const cambiar = (cambio: ColorVista) => onCambiar(colorAlDia({ ...color, ...cambio }, () => true))
   return (
     <div className="flex w-[min(94vw,720px)] flex-col text-[13px]">
-      <CabeceraMenu titulo="Color de las filas" ayuda="Cada fila lleva una marca de color a la izquierda. Con reglas, manda la primera que cumple.">
+      <CabeceraMenu titulo="Color de filas y celdas" ayuda="La marca de cada fila puede salir de un campo de selección. Cada regla pinta la fila entera o solo la celda de su campo; manda la primera que se cumple.">
         {color && <button type="button" className="hover:text-foreground" onClick={() => onCambiar(undefined)}>Quitar color</button>}
       </CabeceraMenu>
-      <div className="grid grid-cols-2 gap-2 px-4 pb-3">
-        <OpcionModo activo={modo === "campo"} titulo="Usar un campo de selección" detalle="Cada fila, del color de su opción." disabled={!selecciones.length} onClick={elegirCampo} />
-        <OpcionModo activo={modo === "condiciones"} titulo="Usar condiciones" detalle="Un color para cada regla, como un filtro." onClick={elegirCondiciones} />
-      </div>
-      {color?.modo === "campo" && (
-        <div className="flex items-center gap-2 border-t px-4 py-3">
-          <span className="text-muted-foreground">Colorear por</span>
+      <div className="flex items-center gap-2 px-4 pb-3">
+        <span className="text-muted-foreground">Marca de la fila por</span>
+        {selecciones.length ? (
           <div className="rounded-md border">
-            <SelectorCampo campos={selecciones} value={color.campo} onChange={(id) => onCambiar({ modo: "campo", campo: id })} className="border-0" />
+            <SelectorCampo campos={selecciones} value={color?.campo ?? ""} onChange={(id) => cambiar({ campo: id })} className="border-0" />
           </div>
-        </div>
-      )}
-      {color?.modo === "condiciones" && <ReglasColor campos={campos} reglas={color.reglas} onCambiar={(reglas) => onCambiar(reglas.length ? { modo: "condiciones", reglas } : undefined)} />}
+        ) : (
+          <span className="text-muted-foreground">ningún campo (no hay de selección única)</span>
+        )}
+        {color?.campo && <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => cambiar({ campo: undefined })}>Quitar</button>}
+      </div>
+      <ReglasColor campos={campos} reglas={color?.reglas ?? []} onCambiar={(reglas) => cambiar({ reglas })} />
     </div>
-  )
-}
-
-function OpcionModo({ activo, titulo, detalle, disabled, onClick }: { activo: boolean; titulo: string; detalle: string; disabled?: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={cn("flex flex-col items-start gap-0.5 rounded-md border px-3 py-2 text-left hover:bg-muted/60 disabled:opacity-50", activo && "border-brand bg-brand-soft")}
-    >
-      <span className="font-medium">{titulo}</span>
-      <span className="text-xs text-muted-foreground">{disabled ? "No hay campos de selección única." : detalle}</span>
-    </button>
   )
 }
 
@@ -69,6 +49,7 @@ function ReglasColor({ campos, reglas, onCambiar }: { campos: CampoMenu[]; regla
         <div key={r.id} className="flex items-start gap-2">
           <SelectorColor value={r.color} onChange={(color) => cambiar(r.id, { color })} />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <SelectorAlcance value={r.alcance ?? "fila"} onChange={(alcance) => cambiar(r.id, { alcance })} />
             <CondicionesRegla campos={campos} filtro={r.filtro} onCambiar={(filtro) => cambiar(r.id, { filtro })} />
           </div>
           <button type="button" aria-label="Quitar este color" className="flex size-8 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => onCambiar(reglas.filter((x) => x.id !== r.id))}>
@@ -84,8 +65,28 @@ function ReglasColor({ campos, reglas, onCambiar }: { campos: CampoMenu[]; regla
           onCambiar([...reglas, { id: idBase("r"), color: colorPorDefecto(reglas.length), filtro: c ? { union: "y", condiciones: [c] } : GRUPO_VACIO }])
         }}
       >
-        <PlusIcon className="size-3.5" /> Añadir color
+        <PlusIcon className="size-3.5" /> Añadir regla de color
       </button>
+    </div>
+  )
+}
+
+/** A qué pinta una regla: la fila entera o solo la celda de su campo. */
+export function SelectorAlcance({ value, onChange }: { value: AlcanceColor; onChange: (a: AlcanceColor) => void }) {
+  return (
+    <div role="radiogroup" aria-label="Qué pinta" className="inline-flex self-start rounded-md border p-0.5 text-xs">
+      {(Object.keys(ALCANCES_COLOR) as AlcanceColor[]).map((a) => (
+        <button
+          key={a}
+          type="button"
+          role="radio"
+          aria-checked={value === a}
+          className={cn("rounded-[5px] px-2 py-1 text-muted-foreground hover:text-foreground", value === a && "bg-brand-soft text-foreground")}
+          onClick={() => onChange(a)}
+        >
+          {ALCANCES_COLOR[a]}
+        </button>
+      ))}
     </div>
   )
 }

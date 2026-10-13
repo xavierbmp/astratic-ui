@@ -190,6 +190,7 @@ export function FilaCondicion({
   onChange,
   onQuitar,
   asa,
+  campoFijo,
 }: {
   indice: number
   union: "y" | "o"
@@ -199,6 +200,8 @@ export function FilaCondicion({
   onChange: (cambio: Partial<Condicion>) => void
   onQuitar: () => void
   asa?: React.ReactNode
+  /** Sin elegir campo ni «y/o»: la condición de un solo campo (los colores de su cabecera). */
+  campoFijo?: boolean
 }) {
   const campo = campos.find((c) => c.id === condicion.campo)
   const def = campo ? defOperador(campo.tipo, condicion.op) : undefined
@@ -212,9 +215,9 @@ export function FilaCondicion({
 
   return (
     <div className="flex items-start gap-2">
-      <Union indice={indice} union={union} onChange={onUnion} />
+      {!campoFijo && <Union indice={indice} union={union} onChange={onUnion} />}
       <div className="flex min-w-0 flex-1 items-stretch divide-x rounded-md border bg-background">
-        <SelectorCampo campos={campos} value={condicion.campo} onChange={cambiarCampo} className="rounded-none rounded-l-md border-0" />
+        {!campoFijo && <SelectorCampo campos={campos} value={condicion.campo} onChange={cambiarCampo} className="rounded-none rounded-l-md border-0" />}
         {campo?.tipo === "booleano" ? (
           <span className="flex h-8 w-40 flex-none items-center px-2 text-muted-foreground">es</span>
         ) : (

@@ -6,17 +6,17 @@ import { toast } from "sonner"
 import { CopyIcon, CopyPlusIcon, PanelRightOpenIcon, Trash2Icon } from "lucide-react"
 import { cn } from "cn"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from "@/components/ui/context-menu"
-import { esValorVacio, textoParaCopiar, valorDeTexto, type ColorOpcion, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
+import { esValorVacio, textoParaCopiar, valorDeTexto, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
 import { aHtml, aTsv, deTsv, repartirPegado } from "@/lib/base/portapapeles"
 import { ajustarRango, caja, celdasDeRelleno, enCaja, esMultiple, moverSeleccion, tabular, unaCelda, type Celda, type Direccion, type Rango } from "@/lib/base/seleccion"
-import { ALTO_CABECERA, ALTO_GRUPO, ALTURAS_FILA, type LineaRejilla, type VistaBase } from "@/lib/base/vistas"
+import { ALTO_CABECERA, ALTO_GRUPO, ALTURAS_FILA, type ColoresRegistro, type LineaRejilla, type VistaBase } from "@/lib/base/vistas"
 import { Cabecera } from "@/components/app/base/rejilla/cabecera"
 import { LineaGrupo, anchoDeFijas } from "@/components/app/base/rejilla/lineas"
 import type { Salida } from "@/components/app/base/rejilla/editor-celda"
 import { FilaRegistro, tintesDeColumnas } from "@/components/app/base/rejilla/fila"
 import { Pie } from "@/components/app/base/rejilla/pie"
 import type { AccionesCampo } from "@/components/app/base/rejilla/menu-campo"
-import { ALTO_PIE, ALTO_SUBGRUPO, anchoTotal, colocarColumnas, type Columna } from "@/components/app/base/rejilla/medidas"
+import { ALTO_PIE, ALTO_SUBGRUPO, ANCHO_ANADIR, anchoTotal, colocarColumnas, type Columna } from "@/components/app/base/rejilla/medidas"
 
 export type CambioCelda<T> = { fila: T; campo: DefCampo<T>; valor: ValorCampo }
 
@@ -34,7 +34,8 @@ export type PropsRejilla<T> = {
   columnas: { campo: DefCampo<T>; ancho: number }[]
   vista: VistaBase
   getId: (fila: T) => string
-  colorDe: (fila: T) => ColorOpcion | undefined
+  /** La marca, el fondo de la fila y el de cada celda, según el color de la vista. */
+  coloresDe: (fila: T) => ColoresRegistro
   /** Cómo se pinta en reposo un campo de serie a medida (la marca con su logo). */
   celdas?: Partial<Record<string, (fila: T) => React.ReactNode>>
   objeto: { singular: string; plural: string }
@@ -74,6 +75,8 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
   const [rellenoHasta, setRellenoHasta] = React.useState<number | null>(null)
   const [objetivo, setObjetivo] = React.useState<number | null>(null)
   const [altoVisible, setAltoVisible] = React.useState(600)
+  /** Quedan columnas a la derecha: el «+» de añadir campo se queda a la vista y lo de debajo se difumina. */
+  const [masALaDerecha, setMasALaDerecha] = React.useState(false)
   const arrastre = React.useRef<"seleccion" | "relleno" | null>(null)
   /** Se guarda lo que se escribía porque se pulsó otra celda: la selección va a la nueva, no se queda en la editada. */
   const saliendoPorClic = React.useRef(false)
@@ -127,15 +130,26 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
   })
   React.useEffect(() => virtual.measure(), [virtual, alto, p.lineas])
 
+  const medirDerecha = React.useCallback(() => {
+    const el = contenedor.current
+    if (el) setMasALaDerecha(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
+  }, [])
+
   React.useEffect(() => {
     const el = contenedor.current
     if (!el) return
-    const medir = () => setAltoVisible(el.clientHeight)
+    const medir = () => {
+      setAltoVisible(el.clientHeight)
+      medirDerecha()
+    }
     medir()
     const observador = new ResizeObserver(medir)
     observador.observe(el)
     return () => observador.disconnect()
-  }, [])
+  }, [medirDerecha])
+
+  // Al ensanchar, mover, mostrar u ocultar columnas cambia lo que queda a la derecha.
+  React.useEffect(medirDerecha, [medirDerecha, total])
 
   // Tras guardar, la celda activa sigue al registro aunque el orden lo cambie de sitio.
   React.useLayoutEffect(() => {
@@ -450,6 +464,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
       onCopy={alCopiar}
       onCut={alCortar}
       onPaste={alPegar}
+      onScroll={medirDerecha}
     >
       <div className="flex min-h-full flex-col" style={{ width: total }}>
         <Cabecera
@@ -466,8 +481,10 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
           onMover={moverColumna}
           onAnadirCampo={p.onAnadirCampo}
           onEditarCampo={p.onEditarCampo}
+          anadirFijo={masALaDerecha}
         />
         <AsaFijas finFijas={finFijas} alto={altoVisible} columnas={columnas} onCongelar={(n) => p.onCambiarVista({ congelar: n })} />
+        {masALaDerecha && p.onAnadirCampo && <DifuminadoDerecha arriba={altoCabecera} alto={altoVisible - altoCabecera} />}
 
         <ContextMenu onOpenChange={(abierto) => !abierto && setObjetivo(null)}>
           <ContextMenuTrigger asChild>
@@ -517,7 +534,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
                     columnas={columnas}
                     congelar={congelar}
                     altura={p.vista.altura}
-                    color={p.colorDe(linea.fila)}
+                    colores={p.coloresDe(linea.fila)}
                     marcada={p.marcadas.has(id)}
                     abierta={p.abiertoId === id}
                     sel={sel}
@@ -582,6 +599,18 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
         <div className="flex-1" />
         <Pie columnas={columnas} filas={p.registros} calculos={p.vista.calculos} objeto={p.objeto} onNuevo={p.onNuevo} onCalculo={(id, calculo) => p.onCambiarVista({ calculos: calculo ? { ...p.vista.calculos, [id]: calculo } : Object.fromEntries(Object.entries(p.vista.calculos).filter(([k]) => k !== id)) })} />
       </div>
+    </div>
+  )
+}
+
+/**
+ * Con columnas a la derecha fuera de la vista, lo último que se ve se difumina bajo el «+» de
+ * añadir campo, que se queda pegado a la derecha: siempre se puede crear un campo sin ir al final.
+ */
+function DifuminadoDerecha({ arriba, alto }: { arriba: number; alto: number }) {
+  return (
+    <div aria-hidden className="pointer-events-none sticky right-0 z-[15] h-0 self-end" style={{ top: arriba, width: ANCHO_ANADIR }}>
+      <span className="absolute top-0 right-0 w-full bg-linear-to-l from-background via-background/70 to-transparent" style={{ height: Math.max(0, alto) }} />
     </div>
   )
 }

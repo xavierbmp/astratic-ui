@@ -46,11 +46,26 @@ export const MAX_NIVELES_GRUPO = 3
 /** Un campo dentro de la vista: dónde va, si se ve y su ancho. */
 export type CampoVista = { id: string; visible: boolean; ancho?: number }
 
-/** Una regla de color: las filas que cumplen el filtro se pintan del color. Manda la primera que se cumple. */
-export type ReglaColor = { id: string; color: ColorOpcion; filtro: GrupoCondiciones }
+/** Lo que pinta una regla de color: la fila entera o solo las celdas de los campos de sus condiciones. */
+export type AlcanceColor = "fila" | "celda"
 
-/** Pintar las filas por el color de la opción de un campo de selección, o por condiciones. */
-export type ColorVista = { modo: "campo"; campo: string } | { modo: "condiciones"; reglas: ReglaColor[] }
+export const ALCANCES_COLOR: Record<AlcanceColor, string> = { fila: "Toda la fila", celda: "Solo la celda" }
+
+/**
+ * Una regla de color: lo que cumple el filtro se pinta del color, la fila entera (de serie) o solo
+ * la celda de cada campo de la regla («Notas contiene urgente» pinta la celda de Notas). Manda la
+ * primera que se cumple.
+ */
+export type ReglaColor = { id: string; color: ColorOpcion; filtro: GrupoCondiciones; alcance?: AlcanceColor }
+
+/**
+ * El color de la vista: la marca de cada fila, del color de la opción de un campo de selección
+ * (`campo`), y las reglas, que pintan filas o celdas. Una regla de fila manda sobre el campo.
+ */
+export type ColorVista = { campo?: string; reglas?: ReglaColor[] }
+
+/** Cómo se guardaba antes el color (un modo u otro): se lee y se pasa a la forma de ahora. */
+export type ColorVistaAntiguo = { modo: "campo"; campo: string } | { modo: "condiciones"; reglas: ReglaColor[] }
 
 export type VistaBase = {
   id: string
@@ -81,8 +96,33 @@ export type VistaBase = {
 /** Un campo del formulario de alta: su orden y si sale. Los obligatorios salen siempre. */
 export type CampoFormulario = { id: string; visible: boolean }
 
-/** Todo lo que guarda cada persona de una base: sus vistas, la que tiene abierta y su formulario. */
-export type ConfigBase = { vistas: VistaBase[]; activa?: string; formulario?: CampoFormulario[] }
+/**
+ * Lo que cada persona ajusta de un campo de serie en todas sus vistas: el orden y el color de sus
+ * opciones (las opciones en sí las pone la página).
+ */
+export type AjusteCampo = { opciones?: { id: string; color?: ColorOpcion }[] }
+
+/** Todo lo que guarda cada persona de una base: sus vistas, la que tiene abierta, su formulario y sus ajustes de los campos de serie. */
+export type ConfigBase = { vistas: VistaBase[]; activa?: string; formulario?: CampoFormulario[]; ajustes?: Record<string, AjusteCampo> }
+
+/**
+ * Los campos con los ajustes de cada persona: las opciones de un campo de serie en su orden (las
+ * que no estén en el ajuste, al final) y con su color. Los estados (opciones con `tono`) conservan
+ * el suyo: es el de `StatusBadge` en todo el portal.
+ */
+export function aplicarAjustes<T>(campos: DefCampo<T>[], ajustes: Record<string, AjusteCampo> | undefined): DefCampo<T>[] {
+  if (!ajustes || !Object.keys(ajustes).length) return campos
+  return campos.map((campo) => {
+    const ajuste = ajustes[campo.id]?.opciones
+    if (!ajuste || !campo.opciones) return campo
+    const posicion = new Map(ajuste.map((o, i) => [o.id, i]))
+    const colores = new Map(ajuste.map((o) => [o.id, o.color]))
+    const opciones = [...campo.opciones]
+      .sort((a, b) => (posicion.get(a.id) ?? ajuste.length) - (posicion.get(b.id) ?? ajuste.length))
+      .map((o) => (o.tono || !colores.get(o.id) ? o : { ...o, color: colores.get(o.id) }))
+    return { ...campo, opciones }
+  })
+}
 
 let contador = 0
 /** Un id nuevo para vistas, reglas y opciones. */
@@ -158,7 +198,7 @@ export function normalizarVista<T>(vista: VistaBase, campos: DefCampo<T>[]): Vis
     orden: vista.orden.filter((o) => sigue(o.campo)),
     grupos: vista.grupos.filter((g) => sigue(g.campo)).slice(0, MAX_NIVELES_GRUPO),
     calculos: Object.fromEntries(Object.entries(vista.calculos).filter(([id]) => sigue(id))),
-    color: vista.color?.modo === "campo" && !sigue(vista.color.campo) ? undefined : vista.color,
+    color: colorAlDia(vista.color, sigue),
     congelar: Math.max(1, vista.congelar),
   }
 }
@@ -167,7 +207,7 @@ export function normalizarVista<T>(vista: VistaBase, campos: DefCampo<T>[]): Vis
 export function normalizarConfig<T>(config: ConfigBase | null | undefined, campos: DefCampo<T>[], deSerie: VistaBase[]): ConfigBase {
   const vistas = (config?.vistas?.length ? config.vistas : deSerie).map((v) => normalizarVista(v, campos))
   const activa = vistas.some((v) => v.id === config?.activa) ? config?.activa : vistas[0]?.id
-  return { vistas, activa, formulario: config?.formulario }
+  return { vistas, activa, formulario: config?.formulario, ...(config?.ajustes ? { ajustes: config.ajustes } : {}) }
 }
 
 /** Los campos que se ven, en el orden de la vista y con su ancho. */
@@ -186,14 +226,9 @@ export const camposOcultos = (vista: VistaBase) => vista.campos.filter((c) => !c
 /** El texto del botón de filtro: «Filtrado por Marca» con un campo, «Filtrado por 3 campos» con varios. */
 export function textoFiltro<T>(filtro: GrupoCondiciones, campos: DefCampo<T>[]): string | null {
   if (grupoVacio(filtro)) return null
-  const ids = new Set<string>()
-  const recorrer = (g: GrupoCondiciones) => {
-    g.condiciones.forEach((c) => ids.add(c.campo))
-    g.grupos?.forEach(recorrer)
-  }
-  recorrer(filtro)
-  if (ids.size === 1) return `Filtrado por ${campos.find((c) => c.id === [...ids][0])?.nombre ?? "1 campo"}`
-  return `Filtrado por ${ids.size} campos`
+  const ids = camposDeFiltro(filtro)
+  if (ids.length === 1) return `Filtrado por ${campos.find((c) => c.id === ids[0])?.nombre ?? "1 campo"}`
+  return `Filtrado por ${ids.length} campos`
 }
 
 export const textoCampos = (n: number, accion: string) => `${accion} por ${n} ${n === 1 ? "campo" : "campos"}`
@@ -281,19 +316,63 @@ export function clavesDeGrupos<T>(nodos: NodoGrupo<T>[]): string[] {
   return nodos.flatMap((n) => [n.clave, ...clavesDeGrupos(n.hijos)])
 }
 
-// ---------- Color de las filas ----------
+// ---------- Color de filas y celdas ----------
 
-/** El color de una fila según la vista: el de su opción o el de la primera regla que cumple. */
-export function colorDeFila<T>(fila: T, color: ColorVista | undefined, campos: DefCampo<T>[], ref: { hoy: string }): ColorOpcion | undefined {
+/** El color en la forma de ahora (o el de antes, traducido), sin el campo si ya no existe y sin nada si queda vacío. */
+export function colorAlDia(color: ColorVista | ColorVistaAntiguo | undefined, existe: (id: string) => boolean): ColorVista | undefined {
   if (!color) return undefined
-  if (color.modo === "campo") {
-    const campo = campos.find((c) => c.id === color.campo)
-    const v = campo?.valor(fila)
-    if (!campo || typeof v !== "string") return undefined
-    return opcionDe(campo, v)?.color
+  const actual: ColorVista = "modo" in color ? (color.modo === "campo" ? { campo: color.campo } : { reglas: color.reglas }) : color
+  const campo = actual.campo && existe(actual.campo) ? actual.campo : undefined
+  const reglas = actual.reglas?.length ? actual.reglas : undefined
+  if (!campo && !reglas) return undefined
+  return { ...(campo ? { campo } : {}), ...(reglas ? { reglas } : {}) }
+}
+
+/** Los campos que nombra un filtro, en todos sus niveles. */
+export function camposDeFiltro(filtro: GrupoCondiciones): string[] {
+  const ids = new Set<string>()
+  const recorrer = (g: GrupoCondiciones) => {
+    g.condiciones.forEach((c) => ids.add(c.campo))
+    g.grupos?.forEach(recorrer)
   }
-  const filtrables = campos.map(aFiltrable)
-  return color.reglas.find((r) => !grupoVacio(r.filtro) && cumpleGrupo(fila, r.filtro, filtrables, ref))?.color
+  recorrer(filtro)
+  return [...ids]
+}
+
+/** Las reglas que son solo de un campo (todas sus condiciones van sobre él): las que se editan desde su cabecera. */
+export const reglasDeCampo = (color: ColorVista | undefined, campoId: string): ReglaColor[] =>
+  (color?.reglas ?? []).filter((r) => !r.filtro.grupos?.length && r.filtro.condiciones.length > 0 && r.filtro.condiciones.every((c) => c.campo === campoId))
+
+/** Cómo se pinta un registro: la marca de color (izquierda o punto de la tarjeta), el fondo de la fila entera y el de cada celda. */
+export type ColoresRegistro = { marca?: ColorOpcion; fondo?: ColorOpcion; celdas: Map<string, ColorOpcion> }
+
+/**
+ * Los colores de un registro según la vista. La primera regla de fila que cumple pinta la fila
+ * entera y su marca; si no hay, la marca es la de su opción del campo elegido. Cada celda toma la
+ * primera regla de celda que cumple y nombra su campo.
+ */
+export function coloresDeRegistro<T>(fila: T, color: ColorVista | undefined, campos: DefCampo<T>[], filtrables: CampoFiltrable<T>[], ref: { hoy: string }): ColoresRegistro {
+  const celdas = new Map<string, ColorOpcion>()
+  if (!color) return { celdas }
+  const cumple = (r: ReglaColor) => !grupoVacio(r.filtro) && cumpleGrupo(fila, r.filtro, filtrables, ref)
+  const reglas = color.reglas ?? []
+  const deFila = reglas.find((r) => (r.alcance ?? "fila") === "fila" && cumple(r))?.color
+  for (const r of reglas) {
+    if (r.alcance !== "celda" || !cumple(r)) continue
+    for (const id of camposDeFiltro(r.filtro)) if (!celdas.has(id)) celdas.set(id, r.color)
+  }
+  return { marca: deFila ?? colorDeOpcion(fila, color.campo, campos), fondo: deFila, celdas }
+}
+
+function colorDeOpcion<T>(fila: T, campoId: string | undefined, campos: DefCampo<T>[]): ColorOpcion | undefined {
+  const campo = campoId ? campos.find((c) => c.id === campoId) : undefined
+  const v = campo?.valor(fila)
+  return campo && typeof v === "string" ? opcionDe(campo, v)?.color : undefined
+}
+
+/** La marca de color de un registro (la de las tarjetas y el calendario). */
+export function colorDeFila<T>(fila: T, color: ColorVista | undefined, campos: DefCampo<T>[], ref: { hoy: string }): ColorOpcion | undefined {
+  return coloresDeRegistro(fila, color, campos, campos.map(aFiltrable), ref).marca
 }
 
 /** Mover un elemento de una lista de `desde` a `hasta` (arrastrar columnas, vistas, condiciones). */
