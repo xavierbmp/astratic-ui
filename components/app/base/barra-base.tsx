@@ -69,7 +69,8 @@ function MenuBarra({ icono, texto, tinte, children, align = "start", abierto, on
       <PopoverTrigger asChild>
         <BotonBarra icono={icono} texto={texto} tinte={tinte} />
       </PopoverTrigger>
-      <PopoverContent align={align} className="w-auto p-0">
+      {/* Se abre también desde el menú de una cabecera («Filtrar por este campo»), que al cerrarse devuelve el foco: eso no lo cierra. */}
+      <PopoverContent align={align} className="w-auto p-0" onFocusOutside={(e) => e.preventDefault()}>
         {children}
       </PopoverContent>
     </Popover>
