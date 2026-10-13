@@ -1,14 +1,15 @@
-// Motor de filtros avanzados (estilo Airtable): un campo, un operador y un valor.
+// Motor de filtros al estilo Airtable: un campo, un operador y un valor.
 //
 // Es un módulo puro (sin Prisma ni React) para que lo usen igual el servidor —que filtra
-// las filas antes de mandarlas— y el cliente —que pinta el constructor y los chips—.
-// Cada objeto del CRM declara sus campos filtrables en `lib/filtros/crm.ts` con una función
-// `valor(fila)`: filtramos en memoria sobre las filas ya cargadas, así funcionan también los
-// campos calculados (nº de contactos, valor abierto, campañas) que no son columnas de la BD.
+// las filas antes de mandarlas— y el cliente —que pinta el editor de filtros—.
+// Cada objeto declara sus campos filtrables con una función `valor(fila)`: filtramos en memoria
+// sobre las filas ya cargadas, así funcionan también los campos calculados (nº de contactos,
+// valor abierto, campañas) que no son columnas de la BD.
 //
-// Las condiciones se agrupan como en Notion: un grupo une sus condiciones con Y o con O y puede
-// llevar grupos dentro (hasta tres niveles), para filtros como «(Lumea o Nuura) y sin hacer».
-// Las fechas se comparan también contra hoy («es esta semana», «en los próximos 7 días»).
+// Los operadores son los de Airtable, con sus nombres: «contiene», «=», «es cualquiera de»,
+// «tiene todos los», «es exactamente», y en las fechas un día relativo a hoy («hoy», «hace 3 días»)
+// o un tramo («está dentro de la semana pasada»). Las condiciones se agrupan como en Airtable: un
+// grupo une las suyas con Y o con O y puede llevar grupos dentro, hasta tres niveles.
 
 import { domingoDe, hoyLocal, lunesDe, sumarDias } from "@/lib/filtros/fechas"
 
@@ -35,8 +36,6 @@ export type Operador =
   | "no_contiene"
   | "es"
   | "no_es"
-  | "empieza"
-  | "termina"
   | "mayor"
   | "mayor_igual"
   | "menor"
@@ -45,27 +44,20 @@ export type Operador =
   | "despues"
   | "en_o_antes"
   | "en_o_despues"
+  | "dentro_de"
   | "alguno"
   | "ninguno"
   | "todos"
+  | "exactamente"
   | "vacio"
   | "no_vacio"
   | "verdadero"
   | "falso"
-  | "es_hoy"
-  | "es_manana"
-  | "es_ayer"
-  | "esta_semana"
-  | "semana_que_viene"
-  | "este_mes"
-  | "pasada"
-  | "proximos_dias"
-  | "ultimos_dias"
 
 export type Condicion = {
   campo: string
   op: Operador
-  /** Ausente en los operadores sin valor (vacío, no vacío, sí, no). */
+  /** Ausente en los operadores sin valor (vacío, no vacío, marcada, sin marcar). */
   valor?: string | string[]
   /** Id del filtro rápido que puso esta condición, para poder quitarla al apagarlo. */
   de?: string
@@ -80,7 +72,7 @@ export type GrupoCondiciones = {
 
 export const GRUPO_VACIO: GrupoCondiciones = { union: "y", condiciones: [] }
 
-/** Niveles de grupos, contando el de fuera: como en Notion, hasta tres. */
+/** Niveles de grupos, contando el de fuera: como en Airtable, hasta tres. */
 export const NIVELES_GRUPO = 3
 
 /** Lo que hace falta para comparar fechas con hoy. Sin `hoy`, se toma el día del reloj. */
@@ -93,10 +85,8 @@ export type DefOperador = {
   sinValor?: boolean
   /** Pide varias opciones en vez de una. */
   multiple?: boolean
-  /** Pide un número (de días) en vez de un valor del campo. */
-  numerico?: boolean
-  /** Lo que va detrás del número: «en los próximos 7 días». */
-  sufijo?: string
+  /** En las fechas, el valor es un día («hoy», «hace 3 días», uno exacto) o un tramo («la semana pasada»). */
+  fecha?: "dia" | "tramo"
 }
 
 const OPS_VACIO: DefOperador[] = [
@@ -105,55 +95,44 @@ const OPS_VACIO: DefOperador[] = [
 ]
 
 const OPERADORES: Record<TipoFiltro, DefOperador[]> = {
-  texto: [
-    { value: "contiene", label: "contiene" },
-    { value: "no_contiene", label: "no contiene" },
-    { value: "es", label: "es" },
-    { value: "no_es", label: "no es" },
-    { value: "empieza", label: "empieza por" },
-    { value: "termina", label: "termina en" },
-    ...OPS_VACIO,
-  ],
+  texto: [{ value: "contiene", label: "contiene" }, { value: "no_contiene", label: "no contiene" }, { value: "es", label: "es" }, { value: "no_es", label: "no es" }, ...OPS_VACIO],
   numero: [
-    { value: "es", label: "es igual a" },
-    { value: "no_es", label: "no es igual a" },
-    { value: "mayor", label: "es mayor que" },
-    { value: "mayor_igual", label: "es mayor o igual que" },
-    { value: "menor", label: "es menor que" },
-    { value: "menor_igual", label: "es menor o igual que" },
+    { value: "es", label: "=" },
+    { value: "no_es", label: "≠" },
+    { value: "menor", label: "<" },
+    { value: "mayor", label: ">" },
+    { value: "menor_igual", label: "≤" },
+    { value: "mayor_igual", label: "≥" },
     ...OPS_VACIO,
   ],
   fecha: [
-    { value: "es", label: "es el día" },
-    { value: "antes", label: "es anterior a" },
-    { value: "despues", label: "es posterior a" },
-    { value: "en_o_antes", label: "es ese día o antes" },
-    { value: "en_o_despues", label: "es ese día o después" },
-    { value: "es_hoy", label: "es hoy", sinValor: true },
-    { value: "es_manana", label: "es mañana", sinValor: true },
-    { value: "es_ayer", label: "fue ayer", sinValor: true },
-    { value: "esta_semana", label: "es esta semana", sinValor: true },
-    { value: "semana_que_viene", label: "es la semana que viene", sinValor: true },
-    { value: "este_mes", label: "es este mes", sinValor: true },
-    { value: "pasada", label: "ya pasó", sinValor: true },
-    { value: "proximos_dias", label: "está en los próximos", numerico: true, sufijo: "días" },
-    { value: "ultimos_dias", label: "está en los últimos", numerico: true, sufijo: "días" },
+    { value: "es", label: "es", fecha: "dia" },
+    { value: "dentro_de", label: "está dentro de", fecha: "tramo" },
+    { value: "antes", label: "es antes de", fecha: "dia" },
+    { value: "despues", label: "es después de", fecha: "dia" },
+    { value: "en_o_antes", label: "es el mismo día o antes de", fecha: "dia" },
+    { value: "en_o_despues", label: "es el mismo día o después de", fecha: "dia" },
+    { value: "no_es", label: "no es", fecha: "dia" },
     ...OPS_VACIO,
   ],
   select: [
-    { value: "alguno", label: "es alguno de", multiple: true },
+    { value: "es", label: "es" },
+    { value: "no_es", label: "no es" },
+    { value: "alguno", label: "es cualquiera de", multiple: true },
     { value: "ninguno", label: "no es ninguno de", multiple: true },
     ...OPS_VACIO,
   ],
   multiselect: [
-    { value: "alguno", label: "incluye alguno de", multiple: true },
-    { value: "todos", label: "incluye todos", multiple: true },
-    { value: "ninguno", label: "no incluye ninguno de", multiple: true },
+    { value: "alguno", label: "tiene cualquiera de", multiple: true },
+    { value: "todos", label: "tiene todos los", multiple: true },
+    { value: "exactamente", label: "es exactamente", multiple: true },
+    { value: "ninguno", label: "no tiene ninguno de", multiple: true },
     ...OPS_VACIO,
   ],
+  // Como en Airtable, una casilla no tiene desplegable de operador: «es» y la casilla marcada o no.
   booleano: [
-    { value: "verdadero", label: "es sí", sinValor: true },
-    { value: "falso", label: "es no", sinValor: true },
+    { value: "verdadero", label: "está marcada", sinValor: true },
+    { value: "falso", label: "no está marcada", sinValor: true },
   ],
 }
 
@@ -168,6 +147,104 @@ export function defOperador(tipo: TipoFiltro, op: Operador): DefOperador | undef
 /** Primer operador del tipo: el que se pone al elegir campo o al cambiar de tipo. */
 export function operadorPorDefecto(tipo: TipoFiltro): Operador {
   return OPERADORES[tipo][0].value
+}
+
+// ---------- Fechas relativas a hoy ----------
+
+/**
+ * Los días que se eligen en una condición de fecha, como en Airtable: relativos a hoy o uno exacto.
+ * Los que llevan número se guardan como «hace_dias:3»; un día exacto, como «2026-10-13».
+ */
+export const DIAS_RELATIVOS = [
+  { value: "hoy", label: "hoy" },
+  { value: "manana", label: "mañana" },
+  { value: "ayer", label: "ayer" },
+  { value: "hace_semana", label: "hace una semana" },
+  { value: "dentro_semana", label: "dentro de una semana" },
+  { value: "hace_mes", label: "hace un mes" },
+  { value: "dentro_mes", label: "dentro de un mes" },
+  { value: "hace_dias", label: "hace…", numero: true, sufijo: "días" },
+  { value: "dentro_dias", label: "dentro de…", numero: true, sufijo: "días" },
+  { value: "exacta", label: "fecha exacta" },
+] as const
+
+/** Los tramos de «está dentro de», como en Airtable. Los de número se guardan como «ultimos_dias:7». */
+export const TRAMOS_RELATIVOS = [
+  { value: "semana_pasada", label: "la semana pasada" },
+  { value: "mes_pasado", label: "el mes pasado" },
+  { value: "ano_pasado", label: "el año pasado" },
+  { value: "semana_proxima", label: "la próxima semana" },
+  { value: "mes_proximo", label: "el próximo mes" },
+  { value: "ano_proximo", label: "el próximo año" },
+  { value: "esta_semana", label: "esta semana" },
+  { value: "este_mes", label: "este mes" },
+  { value: "este_ano", label: "este año" },
+  { value: "ultimos_dias", label: "los últimos…", numero: true, sufijo: "días" },
+  { value: "proximos_dias", label: "los próximos…", numero: true, sufijo: "días" },
+] as const
+
+const ES_DIA_ISO = /^\d{4}-\d{2}-\d{2}/
+
+/** «hace_dias:3» → { modo: "hace_dias", n: 3 }; un día exacto → { modo: "exacta", dia }. Sin valor, «hoy». */
+export function leerValorFecha(valor: string | undefined): { modo: string; n?: number; dia?: string } {
+  if (!valor) return { modo: "hoy" }
+  if (ES_DIA_ISO.test(valor)) return { modo: "exacta", dia: valor.slice(0, 10) }
+  const [modo, n] = valor.split(":")
+  return n === undefined ? { modo } : { modo, n: num(n) ?? undefined }
+}
+
+function sumarMeses(diaIso: string, meses: number) {
+  const d = new Date(`${diaIso}T12:00:00`)
+  d.setMonth(d.getMonth() + meses)
+  return d.toISOString().slice(0, 10)
+}
+
+/** El día al que apunta el valor de una condición de fecha. Con un número a medio escribir, ninguno. */
+export function fechaDeValor(valor: string | undefined, hoy: string): string | null {
+  const { modo, n, dia: exacta } = leerValorFecha(valor)
+  switch (modo) {
+    case "exacta": return exacta ?? null
+    case "hoy": return hoy
+    case "manana": return sumarDias(hoy, 1)
+    case "ayer": return sumarDias(hoy, -1)
+    case "hace_semana": return sumarDias(hoy, -7)
+    case "dentro_semana": return sumarDias(hoy, 7)
+    case "hace_mes": return sumarMeses(hoy, -1)
+    case "dentro_mes": return sumarMeses(hoy, 1)
+    case "hace_dias": return n === undefined ? null : sumarDias(hoy, -n)
+    case "dentro_dias": return n === undefined ? null : sumarDias(hoy, n)
+    default: return null
+  }
+}
+
+/** Los días, incluidos, de un tramo de «está dentro de». La semana pasada son los últimos 7 días, como en Airtable. */
+export function tramoDeValor(valor: string | undefined, hoy: string): [string, string] | null {
+  const { modo, n } = leerValorFecha(valor ?? "semana_pasada")
+  const mes = hoy.slice(0, 7)
+  switch (modo) {
+    case "semana_pasada": return [sumarDias(hoy, -7), hoy]
+    case "mes_pasado": return [sumarMeses(hoy, -1), hoy]
+    case "ano_pasado": return [sumarMeses(hoy, -12), hoy]
+    case "semana_proxima": return [hoy, sumarDias(hoy, 7)]
+    case "mes_proximo": return [hoy, sumarMeses(hoy, 1)]
+    case "ano_proximo": return [hoy, sumarMeses(hoy, 12)]
+    case "esta_semana": return [lunesDe(hoy), domingoDe(hoy)]
+    case "este_mes": return [`${mes}-01`, sumarDias(sumarMeses(`${mes}-01`, 1), -1)]
+    case "este_ano": return [`${hoy.slice(0, 4)}-01-01`, `${hoy.slice(0, 4)}-12-31`]
+    case "ultimos_dias": return n === undefined ? null : [sumarDias(hoy, -n), hoy]
+    case "proximos_dias": return n === undefined ? null : [hoy, sumarDias(hoy, n)]
+    default: return null
+  }
+}
+
+/** «hoy», «hace 3 días», «la semana pasada», «2026-10-13»: el valor de una condición de fecha, en texto. */
+export function describirValorFecha(valor: string | undefined, tramo: boolean): string {
+  const { modo, n, dia: exacta } = leerValorFecha(valor ?? (tramo ? "semana_pasada" : undefined))
+  if (modo === "exacta") return exacta ?? ""
+  const lista: readonly { value: string; label: string; sufijo?: string }[] = tramo ? TRAMOS_RELATIVOS : DIAS_RELATIVOS
+  const def = lista.find((d) => d.value === modo)
+  if (!def) return valor ?? ""
+  return def.sufijo ? `${def.label.replace("…", "")} ${n ?? "N"} ${def.sufijo}` : def.label
 }
 
 // ---------- Comparación ----------
@@ -191,7 +268,7 @@ function num(v: unknown): number | null {
 function dia(v: unknown): string | null {
   if (v == null || v === "") return null
   const s = String(v)
-  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10)
+  if (ES_DIA_ISO.test(s)) return s.slice(0, 10)
   const d = new Date(s)
   return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10)
 }
@@ -214,34 +291,71 @@ function comoLista(valor: string | string[] | undefined): string[] {
   return Array.isArray(valor) ? valor : [valor]
 }
 
-/** Fechas contra hoy: «es esta semana», «en los próximos 7 días». Un número a medio escribir no filtra. */
-function cumpleFechaRelativa(v: ValorFila, c: Condicion, ref: RefFiltro | undefined): boolean {
-  const pideNumero = c.op === "proximos_dias" || c.op === "ultimos_dias"
-  if (pideNumero && num(comoLista(c.valor)[0]) === null) return true
-  const a = dia(v)
-  if (a === null) return false
+function cumpleFecha(v: ValorFila, op: Operador, objetivo: string | undefined, ref: RefFiltro | undefined): boolean {
   const hoy = ref?.hoy?.slice(0, 10) ?? hoyLocal()
-  const lunes = lunesDe(hoy)
-  switch (c.op) {
-    case "es_hoy": return a === hoy
-    case "es_manana": return a === sumarDias(hoy, 1)
-    case "es_ayer": return a === sumarDias(hoy, -1)
-    case "esta_semana": return a >= lunes && a <= domingoDe(hoy)
-    case "semana_que_viene": return a >= sumarDias(lunes, 7) && a <= sumarDias(lunes, 13)
-    case "este_mes": return a.slice(0, 7) === hoy.slice(0, 7)
-    case "pasada": return a < hoy
-    case "proximos_dias":
-    case "ultimos_dias": {
-      const n = num(comoLista(c.valor)[0]) ?? 0
-      return c.op === "proximos_dias" ? a >= hoy && a <= sumarDias(hoy, n) : a >= sumarDias(hoy, -n) && a <= hoy
-    }
+  const a = dia(v)
+  if (op === "dentro_de") {
+    const tramo = tramoDeValor(objetivo, hoy)
+    if (tramo === null) return true
+    return a !== null && a >= tramo[0] && a <= tramo[1]
+  }
+  const b = fechaDeValor(objetivo, hoy)
+  if (b === null) return true // un número a medio escribir no filtra
+  if (op === "no_es") return a !== b
+  if (a === null) return false
+  switch (op) {
+    case "es": return a === b
+    case "antes": return a < b
+    case "despues": return a > b
+    case "en_o_antes": return a <= b
+    case "en_o_despues": return a >= b
     default: return true
   }
 }
 
-const OPS_FECHA_RELATIVA = new Set<Operador>(["es_hoy", "es_manana", "es_ayer", "esta_semana", "semana_que_viene", "este_mes", "pasada", "proximos_dias", "ultimos_dias"])
+function cumpleLista(v: ValorFila, op: Operador, objetivos: string[]): boolean {
+  const actuales = lista(v)
+  switch (op) {
+    case "es": return actuales.includes(objetivos[0])
+    case "no_es": return !actuales.includes(objetivos[0])
+    case "alguno": return objetivos.some((o) => actuales.includes(o))
+    case "todos": return objetivos.every((o) => actuales.includes(o))
+    case "ninguno": return !objetivos.some((o) => actuales.includes(o))
+    case "exactamente": return actuales.length === new Set(objetivos).size && objetivos.every((o) => actuales.includes(o))
+    default: return true
+  }
+}
 
-/** ¿Cumple la fila esta condición? Una condición mal formada no filtra (deja pasar). */
+function cumpleNumero(v: ValorFila, op: Operador, objetivo: string): boolean {
+  const a = num(v)
+  const b = num(objetivo)
+  if (b === null) return true
+  if (a === null) return op === "no_es"
+  switch (op) {
+    case "es": return a === b
+    case "no_es": return a !== b
+    case "mayor": return a > b
+    case "mayor_igual": return a >= b
+    case "menor": return a < b
+    case "menor_igual": return a <= b
+    default: return true
+  }
+}
+
+function cumpleTexto(v: ValorFila, op: Operador, objetivo: string): boolean {
+  // El valor de la fila puede ser una lista (nombres de etiquetas, por ejemplo).
+  const partes = lista(v).map(txt)
+  const b = txt(objetivo)
+  switch (op) {
+    case "contiene": return partes.some((p) => p.includes(b))
+    case "no_contiene": return !partes.some((p) => p.includes(b))
+    case "es": return partes.some((p) => p === b)
+    case "no_es": return !partes.some((p) => p === b)
+    default: return true
+  }
+}
+
+/** ¿Cumple la fila esta condición? Una condición mal formada o a medio escribir no filtra (deja pasar). */
 export function cumpleCondicion<T>(row: T, c: Condicion, campos: CampoFiltrable<T>[], ref?: RefFiltro): boolean {
   const campo = campos.find((f) => f.id === c.campo)
   if (!campo) return true
@@ -253,67 +367,13 @@ export function cumpleCondicion<T>(row: T, c: Condicion, campos: CampoFiltrable<
   if (c.op === "no_vacio") return !esVacio(v)
   if (c.op === "verdadero") return v === true
   if (c.op === "falso") return v !== true
-  if (OPS_FECHA_RELATIVA.has(c.op)) return cumpleFechaRelativa(v, c, ref)
+  if (campo.tipo === "fecha") return cumpleFecha(v, c.op, comoLista(c.valor)[0], ref)
 
   const objetivos = comoLista(c.valor).filter((x) => x !== "")
-  if (objetivos.length === 0) return true // condición a medio escribir: no filtra
-
-  switch (campo.tipo) {
-    case "numero": {
-      const a = num(v)
-      const b = num(objetivos[0])
-      if (b === null) return true
-      if (a === null) return false
-      switch (c.op) {
-        case "es": return a === b
-        case "no_es": return a !== b
-        case "mayor": return a > b
-        case "mayor_igual": return a >= b
-        case "menor": return a < b
-        case "menor_igual": return a <= b
-        default: return true
-      }
-    }
-    case "fecha": {
-      const a = dia(v)
-      const b = dia(objetivos[0])
-      if (b === null) return true
-      if (a === null) return false
-      switch (c.op) {
-        case "es": return a === b
-        case "antes": return a < b
-        case "despues": return a > b
-        case "en_o_antes": return a <= b
-        case "en_o_despues": return a >= b
-        default: return true
-      }
-    }
-    case "select":
-    case "multiselect": {
-      const actuales = lista(v)
-      switch (c.op) {
-        case "alguno": return objetivos.some((o) => actuales.includes(o))
-        case "todos": return objetivos.every((o) => actuales.includes(o))
-        case "ninguno": return !objetivos.some((o) => actuales.includes(o))
-        default: return true
-      }
-    }
-    default: {
-      // Texto: el valor de la fila puede ser una lista (nombres de etiquetas, por ejemplo).
-      const partes = lista(v).map(txt)
-      const b = txt(objetivos[0])
-      const alguna = (fn: (p: string) => boolean) => partes.some(fn)
-      switch (c.op) {
-        case "contiene": return alguna((p) => p.includes(b))
-        case "no_contiene": return !alguna((p) => p.includes(b))
-        case "es": return alguna((p) => p === b)
-        case "no_es": return !alguna((p) => p === b)
-        case "empieza": return alguna((p) => p.startsWith(b))
-        case "termina": return alguna((p) => p.endsWith(b))
-        default: return true
-      }
-    }
-  }
+  if (objetivos.length === 0) return true
+  if (campo.tipo === "select" || campo.tipo === "multiselect") return cumpleLista(v, c.op, objetivos)
+  if (campo.tipo === "numero") return cumpleNumero(v, c.op, objetivos[0])
+  return cumpleTexto(v, c.op, objetivos[0])
 }
 
 /** Un grupo sin condiciones en ningún nivel: no filtra nada. */
@@ -321,7 +381,7 @@ export function grupoVacio(grupo: GrupoCondiciones): boolean {
   return grupo.condiciones.length === 0 && (grupo.grupos ?? []).every(grupoVacio)
 }
 
-/** Condiciones de un grupo y de los de dentro: el número del botón «Filtros». */
+/** Condiciones de un grupo y de los de dentro: el número del botón de filtro. */
 export function contarCondiciones(grupo: GrupoCondiciones): number {
   return grupo.condiciones.length + (grupo.grupos ?? []).reduce((n, g) => n + contarCondiciones(g), 0)
 }
@@ -349,11 +409,12 @@ export function describirCondicion<T>(c: Condicion, campos: CampoFiltrable<T>[])
   const def = campo ? defOperador(campo.tipo, c.op) : undefined
   const op = def?.label ?? c.op
   if (def?.sinValor) return `${etiqueta} ${op}`
+  if (def?.fecha) return `${etiqueta} ${op} ${describirValorFecha(comoLista(c.valor)[0], def.fecha === "tramo")}`
   const valores = comoLista(c.valor).map((v) => campo?.opciones?.find((o) => o.value === v)?.label ?? v)
-  return `${etiqueta} ${op} ${valores.join(", ")} ${def?.sufijo ?? ""}`.trim()
+  return `${etiqueta} ${op} ${valores.join(", ")}`.trim()
 }
 
-/** «(Campaña es alguno de Lumea o Prioridad es alguno de Urgente)»: un grupo de dentro, en un chip. */
+/** «(Campaña es cualquiera de Lumea o Prioridad es Urgente)»: un grupo de dentro, en un chip. */
 export function describirGrupo<T>(grupo: GrupoCondiciones, campos: CampoFiltrable<T>[]): string {
   const union = grupo.union === "o" ? " o " : " y "
   const partes = [...grupo.condiciones.map((c) => describirCondicion(c, campos)), ...(grupo.grupos ?? []).filter((g) => !grupoVacio(g)).map((g) => describirGrupo(g, campos))]

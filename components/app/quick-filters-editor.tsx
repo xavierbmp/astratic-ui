@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import type { FiltroRapido, QuickFiltersApi } from "@/components/app/quick-filters"
-import { FilaCondicion, condicionNueva } from "@/components/app/filter-builder"
+import { FilaCondicion, condicionNueva } from "@/components/app/base/panel-filtro"
+import { camposMenuDeFiltrables } from "@/components/app/base/selector-campo"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
 import { describirCondicion, type CampoFiltrable, type Condicion, type GrupoCondiciones } from "@/lib/filtros/core"
 
@@ -151,6 +152,7 @@ function EditarRapido<T>({
 }) {
   const [nombre, setNombre] = React.useState(nombreCampo)
   const [grupo, setGrupo] = React.useState<GrupoCondiciones>(rapido.clase === "guardado" ? { union: rapido.union, condiciones: rapido.condiciones } : { union: "y", condiciones: [] })
+  const camposMenu = React.useMemo(() => camposMenuDeFiltrables(campos), [campos])
   const campoOriginal = rapido.clase === "campo" ? (campos.find((c) => c.id === rapido.campo)?.label ?? rapido.campo) : ""
   const valido = rapido.clase === "campo" || (nombre.trim() !== "" && grupo.condiciones.length > 0)
 
@@ -196,11 +198,12 @@ function EditarRapido<T>({
               <FilaCondicion
                 key={`${i}-${c.campo}-${c.op}`}
                 union={grupo.union}
+                onUnion={(union) => setGrupo((g) => ({ ...g, union }))}
                 indice={i}
                 condicion={c}
-                campos={campos}
+                campos={camposMenu}
                 onChange={(cambio) => setCondiciones((cs) => cs.map((x, j) => (j === i ? { ...x, ...cambio } : x)))}
-                onRemove={() => setCondiciones((cs) => cs.filter((_, j) => j !== i))}
+                onQuitar={() => setCondiciones((cs) => cs.filter((_, j) => j !== i))}
               />
             ))}
           </div>
@@ -209,7 +212,7 @@ function EditarRapido<T>({
             size="sm"
             className="self-start"
             onClick={() => {
-              const nueva = condicionNueva(campos)
+              const nueva = condicionNueva(camposMenu)
               if (nueva) setCondiciones((cs) => [...cs, nueva])
             }}
           >

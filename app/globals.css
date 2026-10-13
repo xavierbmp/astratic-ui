@@ -84,6 +84,35 @@
   --color-tint-sky-foreground: var(--tint-sky-foreground);
   --color-tint-peach: var(--tint-peach);
   --color-tint-peach-foreground: var(--tint-peach-foreground);
+
+  /* Colores de las opciones de un campo y de las filas de una base (`lib/base/campos.ts`). */
+  --color-opcion-azul: var(--opcion-azul);
+  --color-opcion-azul-foreground: var(--opcion-azul-foreground);
+  --color-opcion-azul-fuerte: var(--opcion-azul-fuerte);
+  --color-opcion-cian: var(--opcion-cian);
+  --color-opcion-cian-foreground: var(--opcion-cian-foreground);
+  --color-opcion-cian-fuerte: var(--opcion-cian-fuerte);
+  --color-opcion-verde: var(--opcion-verde);
+  --color-opcion-verde-foreground: var(--opcion-verde-foreground);
+  --color-opcion-verde-fuerte: var(--opcion-verde-fuerte);
+  --color-opcion-amarillo: var(--opcion-amarillo);
+  --color-opcion-amarillo-foreground: var(--opcion-amarillo-foreground);
+  --color-opcion-amarillo-fuerte: var(--opcion-amarillo-fuerte);
+  --color-opcion-naranja: var(--opcion-naranja);
+  --color-opcion-naranja-foreground: var(--opcion-naranja-foreground);
+  --color-opcion-naranja-fuerte: var(--opcion-naranja-fuerte);
+  --color-opcion-rojo: var(--opcion-rojo);
+  --color-opcion-rojo-foreground: var(--opcion-rojo-foreground);
+  --color-opcion-rojo-fuerte: var(--opcion-rojo-fuerte);
+  --color-opcion-rosa: var(--opcion-rosa);
+  --color-opcion-rosa-foreground: var(--opcion-rosa-foreground);
+  --color-opcion-rosa-fuerte: var(--opcion-rosa-fuerte);
+  --color-opcion-morado: var(--opcion-morado);
+  --color-opcion-morado-foreground: var(--opcion-morado-foreground);
+  --color-opcion-morado-fuerte: var(--opcion-morado-fuerte);
+  --color-opcion-gris: var(--opcion-gris);
+  --color-opcion-gris-foreground: var(--opcion-gris-foreground);
+  --color-opcion-gris-fuerte: var(--opcion-gris-fuerte);
 }
 
 /* `.theme-light` fuerza el tema claro en un subárbol (documentos A4 y PDF). */
@@ -142,6 +171,36 @@
   --sidebar-ring: oklch(0.62 0 0);
 
   --card-shadow: var(--shadow-xs);
+
+  /* Colores de las opciones de un campo y de las filas de una base (como los de Airtable):
+     fondo claro, texto del mismo tono y uno fuerte para la marca de color de la fila. */
+  --opcion-azul: oklch(0.935 0.045 255);
+  --opcion-azul-foreground: oklch(0.42 0.14 255);
+  --opcion-azul-fuerte: oklch(0.66 0.17 255);
+  --opcion-cian: oklch(0.935 0.045 215);
+  --opcion-cian-foreground: oklch(0.42 0.09 215);
+  --opcion-cian-fuerte: oklch(0.66 0.12 215);
+  --opcion-verde: oklch(0.935 0.06 150);
+  --opcion-verde-foreground: oklch(0.42 0.11 150);
+  --opcion-verde-fuerte: oklch(0.66 0.15 150);
+  --opcion-amarillo: oklch(0.95 0.08 90);
+  --opcion-amarillo-foreground: oklch(0.45 0.1 90);
+  --opcion-amarillo-fuerte: oklch(0.8 0.16 90);
+  --opcion-naranja: oklch(0.935 0.06 55);
+  --opcion-naranja-foreground: oklch(0.45 0.13 55);
+  --opcion-naranja-fuerte: oklch(0.66 0.17 55);
+  --opcion-rojo: oklch(0.935 0.045 25);
+  --opcion-rojo-foreground: oklch(0.42 0.17 25);
+  --opcion-rojo-fuerte: oklch(0.66 0.2 25);
+  --opcion-rosa: oklch(0.935 0.05 350);
+  --opcion-rosa-foreground: oklch(0.42 0.15 350);
+  --opcion-rosa-fuerte: oklch(0.66 0.19 350);
+  --opcion-morado: oklch(0.935 0.05 300);
+  --opcion-morado-foreground: oklch(0.42 0.15 300);
+  --opcion-morado-fuerte: oklch(0.66 0.19 300);
+  --opcion-gris: oklch(0.935 0.006 265);
+  --opcion-gris-foreground: oklch(0.42 0.012 265);
+  --opcion-gris-fuerte: oklch(0.66 0.012 265);
 }
 
 .dark {
@@ -191,6 +250,35 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Colores de las opciones y las filas en oscuro. */
+  --opcion-azul: oklch(0.7 0.17 255 / 22%);
+  --opcion-azul-foreground: oklch(0.88 0.09 255);
+  --opcion-azul-fuerte: oklch(0.72 0.17 255);
+  --opcion-cian: oklch(0.7 0.12 215 / 22%);
+  --opcion-cian-foreground: oklch(0.88 0.09 215);
+  --opcion-cian-fuerte: oklch(0.72 0.12 215);
+  --opcion-verde: oklch(0.7 0.15 150 / 22%);
+  --opcion-verde-foreground: oklch(0.88 0.09 150);
+  --opcion-verde-fuerte: oklch(0.72 0.15 150);
+  --opcion-amarillo: oklch(0.7 0.16 90 / 22%);
+  --opcion-amarillo-foreground: oklch(0.88 0.09 90);
+  --opcion-amarillo-fuerte: oklch(0.72 0.16 90);
+  --opcion-naranja: oklch(0.7 0.17 55 / 22%);
+  --opcion-naranja-foreground: oklch(0.88 0.09 55);
+  --opcion-naranja-fuerte: oklch(0.72 0.17 55);
+  --opcion-rojo: oklch(0.7 0.2 25 / 22%);
+  --opcion-rojo-foreground: oklch(0.88 0.09 25);
+  --opcion-rojo-fuerte: oklch(0.72 0.2 25);
+  --opcion-rosa: oklch(0.7 0.19 350 / 22%);
+  --opcion-rosa-foreground: oklch(0.88 0.09 350);
+  --opcion-rosa-fuerte: oklch(0.72 0.19 350);
+  --opcion-morado: oklch(0.7 0.19 300 / 22%);
+  --opcion-morado-foreground: oklch(0.88 0.09 300);
+  --opcion-morado-fuerte: oklch(0.72 0.19 300);
+  --opcion-gris: oklch(0.7 0.012 265 / 22%);
+  --opcion-gris-foreground: oklch(0.88 0.012 265);
+  --opcion-gris-fuerte: oklch(0.72 0.012 265);
 }
 
 /* Design system hijo «Influencer Workspace». Hereda todo lo de arriba (botones, formularios,
