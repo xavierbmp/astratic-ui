@@ -53,7 +53,7 @@ export function LineaGrupo<T>({ nodo, campo, alto, anchoFijas, total, plegado, o
           {opcion && campo?.tipo === "vinculo" ? (
             <FichaVinculo label={opcion.label} className="self-start" />
           ) : opcion ? (
-            <FichaOpcion label={opcion.label} color={opcion.color} className="self-start" />
+            <FichaOpcion label={opcion.label} color={opcion.color} tono={opcion.tono} className="self-start" />
           ) : (
             <span className="truncate font-semibold">{nodo.label || (campo?.vinculo ? `Sin ${campo.vinculo.objeto}` : "(Vacío)")}</span>
           )}

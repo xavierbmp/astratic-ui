@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { cn } from "cn"
 import { AvatarInitials } from "@/components/app/avatar-initials"
+import { statusToneClass, type StatusTone } from "@/lib/status"
 import type { TipoFiltro } from "@/lib/filtros/core"
 import type { ColorOpcion, TipoCampo } from "@/lib/base/campos"
 import type { TipoVista } from "@/lib/base/vistas"
@@ -90,10 +91,13 @@ export const CLASE_FUERTE: Record<ColorOpcion, string> = {
   gris: "bg-opcion-gris-fuerte",
 }
 
-/** La ficha de una opción, redondeada y con su color, como en Airtable. Sin color, gris. */
-export function FichaOpcion({ label, color, className, children }: { label: string; color?: ColorOpcion; className?: string; children?: React.ReactNode }) {
+/**
+ * La ficha de una opción, redondeada y con su color. Sin color, gris. Con `tono` (un estado), con
+ * los colores de `StatusBadge`.
+ */
+export function FichaOpcion({ label, color, tono, className, children }: { label: string; color?: ColorOpcion; tono?: StatusTone; className?: string; children?: React.ReactNode }) {
   return (
-    <span className={cn("inline-flex max-w-full min-w-0 items-center gap-1 rounded-full px-2 py-px text-xs leading-[18px] whitespace-nowrap", CLASE_OPCION[color ?? "gris"], className)}>
+    <span className={cn("inline-flex max-w-full min-w-0 items-center gap-1 rounded-full px-2 py-px text-xs leading-[18px] whitespace-nowrap", tono ? statusToneClass[tono] : CLASE_OPCION[color ?? "gris"], tono && "rounded-md font-medium", className)}>
       <span className="truncate">{label}</span>
       {children}
     </span>

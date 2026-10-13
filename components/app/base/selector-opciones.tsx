@@ -6,9 +6,10 @@ import { cn } from "cn"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { ColorOpcion } from "@/lib/base/campos"
+import type { StatusTone } from "@/lib/status"
 import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
 
-export type OpcionElegible = { value: string; label: string; color?: ColorOpcion }
+export type OpcionElegible = { value: string; label: string; color?: ColorOpcion; tono?: StatusTone }
 
 // Los desplegables son modales: dentro de un diálogo (el formulario de alta), el diálogo no les quita el foco.
 
@@ -21,7 +22,7 @@ function Lista({ opciones, marcadas, onElegir, vinculo }: { opciones: OpcionEleg
         <CommandGroup>
           {opciones.map((o) => (
             <CommandItem key={o.value} value={`${o.label} ${o.value}`} onSelect={() => onElegir(o.value)}>
-              {vinculo ? <FichaVinculo label={o.label} /> : <FichaOpcion label={o.label} color={o.color} />}
+              {vinculo ? <FichaVinculo label={o.label} /> : <FichaOpcion label={o.label} color={o.color} tono={o.tono} />}
               {marcadas.includes(o.value) && <CheckIcon className="ml-auto size-3.5" />}
             </CommandItem>
           ))}
@@ -42,7 +43,7 @@ export function ElegirOpcion({ opciones, valor, onChange, placeholder, vinculo, 
     <Popover open={abierto} onOpenChange={setAbierto} modal>
       <PopoverTrigger asChild>
         <button type="button" className={cn("flex h-8 min-w-0 items-center justify-between gap-1 px-2 text-left text-[13px] hover:bg-muted/60", className)}>
-          {opcion && vinculo ? <FichaVinculo label={opcion.label} /> : opcion ? <FichaOpcion label={opcion.label} color={opcion.color} /> : <span className="truncate text-muted-foreground">{placeholder ?? (vinculo ? `Elige una ${vinculo}` : "Selecciona una opción")}</span>}
+          {opcion && vinculo ? <FichaVinculo label={opcion.label} /> : opcion ? <FichaOpcion label={opcion.label} color={opcion.color} tono={opcion.tono} /> : <span className="truncate text-muted-foreground">{placeholder ?? (vinculo ? `Elige una ${vinculo}` : "Selecciona una opción")}</span>}
           <ChevronDownIcon className="size-3.5 flex-none text-muted-foreground" />
         </button>
       </PopoverTrigger>
@@ -70,7 +71,7 @@ export function ElegirOpciones({ opciones, valores, onChange, placeholder = "Sel
       {valores.map((id) => {
         const o = opciones.find((x) => x.value === id)
         return (
-          <FichaOpcion key={id} label={o?.label ?? id} color={o?.color}>
+          <FichaOpcion key={id} label={o?.label ?? id} color={o?.color} tono={o?.tono}>
             <button type="button" aria-label={`Quitar ${o?.label ?? id}`} className="-mr-1 rounded-full opacity-60 hover:opacity-100" onClick={() => alternar(id)}>
               <XIcon className="size-3" />
             </button>

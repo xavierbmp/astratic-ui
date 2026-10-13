@@ -57,6 +57,7 @@ export function BarraBase<T>({
   objeto,
   lateralAbierto,
   onLateral,
+  nombreLateral = "las vistas",
   onCambiar,
   acciones,
   onContraer,
@@ -76,6 +77,8 @@ export function BarraBase<T>({
   objeto: string
   lateralAbierto: boolean
   onLateral: () => void
+  /** El texto del botón del lateral («las vistas», «las carpetas»). */
+  nombreLateral?: string
   onCambiar: (parcial: Partial<VistaBase>) => void
   acciones: AccionesVista
   onContraer: () => void
@@ -99,10 +102,10 @@ export function BarraBase<T>({
 
   return (
     <div className="@container/barra flex h-11 flex-none items-center gap-1 border-b px-2">
-      <button type="button" aria-label={lateralAbierto ? "Ocultar las vistas" : "Ver las vistas"} aria-pressed={lateralAbierto} onClick={onLateral} className="hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
+      <button type="button" aria-label={lateralAbierto ? `Ocultar ${nombreLateral}` : `Ver ${nombreLateral}`} title={lateralAbierto ? `Ocultar ${nombreLateral}` : `Ver ${nombreLateral}`} aria-pressed={lateralAbierto} onClick={onLateral} className="hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
         <PanelLeftIcon className="size-4" />
       </button>
-      <MenuNombreVista vista={vista} acciones={acciones} />
+      <MenuNombreVista vista={vista} vistas={vistas} acciones={acciones} />
 
       <div className="ml-auto flex min-w-0 items-center gap-0.5 overflow-x-auto">
         {tipo === "kanban" && (

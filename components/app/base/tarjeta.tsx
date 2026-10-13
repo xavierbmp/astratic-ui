@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { cn } from "cn"
 import { esValorVacio, textoDeValor, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
 import { CLASE_FUERTE } from "@/components/app/base/apariencia"
@@ -13,19 +14,27 @@ export type PropsTarjetas<T> = {
   colorDe: (fila: T) => ColorOpcion | undefined
   celdas?: Partial<Record<string, (fila: T) => React.ReactNode>>
   onAbrirVinculo?: (campoId: string, id: string) => void
+  /** La imagen de la tarjeta (la portada de una campaña, la miniatura de una idea). */
+  portada?: (fila: T) => string | null | undefined
 }
 
 /**
  * Un registro en tarjeta: su título (el campo principal, con la marca de su color si la vista
  * colorea) y los campos que enseña la vista, cada uno con su nombre en pequeño. Los vacíos no
- * ocupan sitio.
+ * ocupan sitio. Con `portada`, la imagen arriba.
  */
-export function TarjetaRegistro<T>({ fila, campos, colorDe, celdas, onAbrirVinculo }: PropsTarjetas<T> & { fila: T }) {
+export function TarjetaRegistro<T>({ fila, campos, colorDe, celdas, onAbrirVinculo, portada }: PropsTarjetas<T> & { fila: T }) {
   const principal = campos.find((c) => c.principal)
   const resto = campos.filter((c) => !c.principal && !esValorVacio(c.valor(fila)))
   const color = colorDe(fila)
+  const imagen = portada?.(fila)
   return (
     <div className="flex min-w-0 flex-col gap-2">
+      {portada && (
+        <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-muted">
+          {imagen && <Image src={imagen} alt="" fill sizes="320px" unoptimized={!imagen.startsWith("https://")} className="object-cover" />}
+        </div>
+      )}
       <p className="flex min-w-0 items-center gap-1.5 text-[13px] font-semibold">
         {color && <span aria-hidden className={cn("size-2 flex-none rounded-full", CLASE_FUERTE[color])} />}
         <span className="truncate">{principal ? textoDeValor(principal, principal.valor(fila)) || "Sin nombre" : "Sin nombre"}</span>

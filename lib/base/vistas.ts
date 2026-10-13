@@ -92,8 +92,13 @@ export const idBase = (prefijo: string) => `${prefijo}-${Date.now().toString(36)
  * Una vista nueva, sin filtro, orden ni grupos. La cuadrícula enseña todo salvo lo que nace oculto;
  * las tarjetas (kanban y galería), el principal y unos pocos más, como Airtable.
  */
-export function vistaNueva<T>(nombre: string, campos: DefCampo<T>[], { id = idBase("v"), tipo = "cuadricula" }: { id?: string; tipo?: TipoVista } = {}): VistaBase {
-  const apilar = tipo === "kanban" ? camposApilables(campos)[0]?.id : undefined
+export function vistaNueva<T>(
+  nombre: string,
+  campos: DefCampo<T>[],
+  { id = idBase("v"), tipo = "cuadricula", apilar: apilarPedido, fecha: fechaPedida }: { id?: string; tipo?: TipoVista; apilar?: string; fecha?: string } = {},
+): VistaBase {
+  const apilar = tipo === "kanban" ? (apilarPedido ?? camposApilables(campos)[0]?.id) : undefined
+  const fecha = tipo === "calendario" ? (fechaPedida ?? camposDeFecha(campos)[0]?.id) : undefined
   let enTarjeta = 0
   const visible = (c: DefCampo<T>) => {
     if (c.principal) return true
@@ -108,7 +113,7 @@ export function vistaNueva<T>(nombre: string, campos: DefCampo<T>[], { id = idBa
     nombre,
     ...(tipo === "cuadricula" ? {} : { tipo }),
     ...(apilar ? { apilar } : {}),
-    ...(tipo === "calendario" && camposDeFecha(campos)[0] ? { fecha: camposDeFecha(campos)[0].id } : {}),
+    ...(fecha ? { fecha } : {}),
     filtro: GRUPO_VACIO,
     orden: [],
     grupos: [],

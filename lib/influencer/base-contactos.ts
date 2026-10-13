@@ -2,7 +2,7 @@
 // sus campos propios, su vista de serie y cómo se escribe un valor en un contacto. Puro: lo usan
 // la página y las pruebas.
 
-import { campoDePropio, type CampoPropio, type ColorOpcion, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { campoDePropio, conValorPropio, textoLimpio, type CampoPropio, type ColorOpcion, type DefCampo, type ValorCampo } from "@/lib/base/campos"
 import { vistaNueva, type VistaBase } from "@/lib/base/vistas"
 import { soloFecha } from "@/lib/influencer/fechas"
 import { ultimoContactoDe } from "@/lib/influencer/crm"
@@ -13,12 +13,15 @@ import type { Tint } from "@/lib/influencer/tints"
 export const BASE_CONTACTOS = "contactos"
 
 /** Cada marca sale con el color de su tinte. */
-const COLOR_DE_TINTE: Record<Tint, ColorOpcion> = { lime: "verde", mint: "cian", rose: "rosa", lavender: "morado", sky: "azul", peach: "naranja" }
+export const COLOR_DE_TINTE: Record<Tint, ColorOpcion> = { lime: "verde", mint: "cian", rose: "rosa", lavender: "morado", sky: "azul", peach: "naranja" }
+
+/** Las marcas como registros de un campo vínculo, por orden alfabético y con el color de su tinte. */
+export const opcionesDeMarcas = (marcas: Marca[]) => [...marcas].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).map((m) => ({ id: m.id, label: m.nombre, color: COLOR_DE_TINTE[m.tint] }))
 
 const texto = (v: string | undefined) => v ?? null
 
 export function camposBaseContactos({ marcas, interacciones, propios }: { marcas: Marca[]; interacciones: Interaccion[]; propios: CampoPropio[] }): DefCampo<Contacto>[] {
-  const opcionesMarca = [...marcas].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).map((m) => ({ id: m.id, label: m.nombre, color: COLOR_DE_TINTE[m.tint] }))
+  const opcionesMarca = opcionesDeMarcas(marcas)
   return [
     { id: "nombre", nombre: "Nombre", tipo: "texto", principal: true, obligatorio: true, grupo: "Datos", valor: (c) => c.nombre },
     { id: "marca", nombre: "Marca", tipo: "vinculo", vinculo: { objeto: "marca" }, opciones: opcionesMarca, grupo: "Datos", valor: (c) => c.marcaId ?? null },
@@ -48,35 +51,28 @@ export function camposBaseContactos({ marcas, interacciones, propios }: { marcas
 /** La vista con la que empieza cada una, como la «Cuadrícula» de una base nueva de Airtable. */
 export const vistasDeSerieContactos = (campos: DefCampo<Contacto>[]): VistaBase[] => [vistaNueva("Todos los contactos", campos, { id: "contactos-todos" })]
 
-const textoOVacio = (v: ValorCampo): string | undefined => (typeof v === "string" && v.trim() ? v.trim() : undefined)
-
 /**
  * Un contacto con el valor de un campo cambiado. Los de serie van a su sitio (la marca, a `marcaId`;
  * el Instagram, sin «@»); los propios, a `valores`. Lo calculado no se escribe.
  */
 export function escribirEnContacto(contacto: Contacto, campo: DefCampo<Contacto>, valor: ValorCampo): Contacto {
   if (campo.soloLectura) return contacto
-  if (campo.propio) {
-    const valores = { ...contacto.valores }
-    if (valor === null || valor === "" || (Array.isArray(valor) && valor.length === 0)) delete valores[campo.id]
-    else valores[campo.id] = valor
-    return { ...contacto, valores }
-  }
+  if (campo.propio) return conValorPropio(contacto, campo.id, valor)
   switch (campo.id) {
     case "nombre":
-      return textoOVacio(valor) ? { ...contacto, nombre: textoOVacio(valor) ?? contacto.nombre } : contacto
+      return textoLimpio(valor) ? { ...contacto, nombre: textoLimpio(valor) ?? contacto.nombre } : contacto
     case "marca":
       // Sin marca deja de ser el principal de ninguna.
       return typeof valor === "string" && valor ? { ...contacto, marcaId: valor } : { ...contacto, marcaId: undefined, principal: false }
     case "principal":
       return { ...contacto, principal: valor === true }
     case "instagram":
-      return { ...contacto, instagram: textoOVacio(valor)?.replace(/^@/, "") }
+      return { ...contacto, instagram: textoLimpio(valor)?.replace(/^@/, "") }
     case "cargo":
     case "email":
     case "telefono":
     case "notas":
-      return { ...contacto, [campo.id]: textoOVacio(valor) }
+      return { ...contacto, [campo.id]: textoLimpio(valor) }
     default:
       return contacto
   }
@@ -102,7 +98,7 @@ export function aplicarCambiosContactos(contactos: Contacto[], cambios: { id: st
 
 /** Un contacto nuevo con lo que se rellenó en el formulario. La marca es opcional; el primero de una marca es su principal. */
 export function contactoDeFormulario(valores: Record<string, ValorCampo>, campos: DefCampo<Contacto>[], datos: { id: string; hoy: string; contactos: Contacto[] }): Contacto | string {
-  const nombre = textoOVacio(valores.nombre ?? null)
+  const nombre = textoLimpio(valores.nombre ?? null)
   const marcaId = typeof valores.marca === "string" ? valores.marca : undefined
   if (!nombre) return "Escribe el nombre"
   let contacto: Contacto = { id: datos.id, nombre, ...(marcaId ? { marcaId } : {}), creadoEl: datos.hoy }

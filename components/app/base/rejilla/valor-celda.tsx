@@ -57,7 +57,7 @@ export function ValorCelda<T>({
         <span className={cn("flex min-w-0 gap-1", varias ? "flex-wrap content-start" : "overflow-hidden")}>
           {ids.map((id) => {
             const o = opcionDe(campo, id)
-            return <FichaOpcion key={id} label={o?.label ?? id} color={o?.color} className="flex-none" />
+            return <FichaOpcion key={id} label={o?.label ?? id} color={o?.color} tono={o?.tono} className="flex-none" />
           })}
         </span>
       )

@@ -231,7 +231,7 @@ function EditorOpciones<T>({ campo, valor, inicial, onGuardar, onAplicar, onCanc
             {elegidas.map((id) => {
               const o = opcionDe(campo, id)
               return (
-                <FichaOpcion key={id} label={o?.label ?? id} color={o?.color}>
+                <FichaOpcion key={id} label={o?.label ?? id} color={o?.color} tono={o?.tono}>
                   <button type="button" aria-label={`Quitar ${o?.label ?? id}`} className="-mr-1 rounded-full opacity-60 hover:opacity-100" onClick={() => elegir(id)}>
                     <XIcon className="size-3" />
                   </button>
@@ -247,7 +247,7 @@ function EditorOpciones<T>({ campo, valor, inicial, onGuardar, onAplicar, onCanc
             <CommandGroup>
               {(campo.opciones ?? []).map((o) => (
                 <CommandItem key={o.id} value={`${o.label} ${o.id}`} onSelect={() => elegir(o.id)}>
-                  {objeto ? <FichaVinculo label={o.label} /> : <FichaOpcion label={o.label} color={o.color} />}
+                  {objeto ? <FichaVinculo label={o.label} /> : <FichaOpcion label={o.label} color={o.color} tono={o.tono} />}
                   {elegidas.includes(o.id) && <CheckIcon className="ml-auto size-3.5" />}
                 </CommandItem>
               ))}

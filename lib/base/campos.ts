@@ -6,6 +6,7 @@
 // y campos propios (los crea cada persona desde la tabla; sus valores van en `valores` de la fila).
 
 import type { CampoFiltrable, TipoFiltro } from "@/lib/filtros/core"
+import type { StatusTone } from "@/lib/status"
 
 export type TipoCampo =
   | "texto"
@@ -72,7 +73,18 @@ export const NOMBRES_COLOR: Record<ColorOpcion, string> = {
 /** El color de la opción número `i` al crearla: van rotando, como en Airtable. */
 export const colorPorDefecto = (i: number): ColorOpcion => COLORES_OPCION[i % COLORES_OPCION.length]
 
-export type OpcionCampo = { id: string; label: string; color?: ColorOpcion }
+/**
+ * Una opción de una lista. Las de un estado (propuesta, collab, factura) llevan su `tono` y se ven
+ * como `StatusBadge`, igual que en el resto del design system; su `color` es el del tono.
+ */
+export type OpcionCampo = { id: string; label: string; color?: ColorOpcion; tono?: StatusTone }
+
+/** El color de cada tono de estado, para la marca de la fila y el punto de la columna del kanban. */
+export const COLOR_DE_TONO: Record<StatusTone, ColorOpcion> = { success: "verde", info: "azul", warning: "amarillo", danger: "rojo", neutral: "gris" }
+
+/** Las opciones de un campo de estado a partir de su lista `{ id, label, tone }` del modelo. */
+export const opcionesDeEstados = (estados: readonly { id: string; label: string; tone: StatusTone }[]): OpcionCampo[] =>
+  estados.map((e) => ({ id: e.id, label: e.label, tono: e.tone, color: COLOR_DE_TONO[e.tone] }))
 
 /** Lo que se puede ajustar de un tipo: decimales, el máximo de estrellas. */
 export type FormatoCampo = { decimales?: number; maximo?: number }
@@ -129,6 +141,27 @@ const GRUPO_PROPIOS = "Mis campos"
 export function campoDePropio<T>(propio: CampoPropio, valores: (fila: T) => Record<string, ValorCampo> | undefined): DefCampo<T> {
   return { ...propio, propio: true, grupo: GRUPO_PROPIOS, valor: (fila) => valores(fila)?.[propio.id] ?? null }
 }
+
+/** Un registro con el valor de uno de sus campos propios, en `valores`; vacío, se quita. */
+export function conValorPropio<T extends { valores?: Record<string, ValorCampo> }>(fila: T, id: string, valor: ValorCampo): T {
+  const valores = { ...fila.valores }
+  if (esValorVacio(valor)) delete valores[id]
+  else valores[id] = valor
+  return { ...fila, valores }
+}
+
+/**
+ * La lista con lo escrito en las celdas: cada cambio va a su registro (por id) con la función de
+ * escribir de esa base. Varios cambios del mismo registro se aplican en orden.
+ */
+export function aplicarCambios<T extends { id: string }>(filas: T[], cambios: { fila: T; campo: DefCampo<T>; valor: ValorCampo }[], escribir: (fila: T, campo: DefCampo<T>, valor: ValorCampo) => T): T[] {
+  const porId = new Map<string, typeof cambios>()
+  for (const c of cambios) porId.set(c.fila.id, [...(porId.get(c.fila.id) ?? []), c])
+  return filas.map((f) => (porId.get(f.id) ?? []).reduce((x, c) => escribir(x, c.campo, c.valor), f))
+}
+
+/** Un texto escrito en una celda: sin espacios de más y, si queda vacío, nada. */
+export const textoLimpio = (v: ValorCampo): string | undefined => (typeof v === "string" && v.trim() ? v.trim() : undefined)
 
 /** El campo con la forma que usan el filtro, el orden y la agrupación (`lib/filtros`, `lib/vistas`). */
 export function aFiltrable<T>(campo: DefCampo<T>): CampoFiltrable<T> {

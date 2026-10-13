@@ -63,6 +63,11 @@ export function BaseDatos<T>({
   onGuardarCampo,
   onBorrarCampo,
   onAbrirVinculo,
+  onNuevo,
+  portada,
+  lateral: lateralPropio,
+  ficha: fichaPagina,
+  kanban,
   accionesSeleccion,
   formulario,
   nuevoInicial = false,
@@ -91,6 +96,22 @@ export function BaseDatos<T>({
   onBorrarCampo?: (id: string) => void
   /** Pulsar un registro vinculado (la marca de un contacto) abre su ficha. */
   onAbrirVinculo?: (campoId: string, id: string) => void
+  /** «Nuevo …» abre el alta de la página (un diálogo propio) en vez del formulario de la base. */
+  onNuevo?: () => void
+  /** La imagen de cada registro en las tarjetas del kanban y la galería. */
+  portada?: (fila: T) => string | null | undefined
+  /**
+   * Un lateral propio en lugar del de las vistas (las carpetas de las ideas). Las vistas siguen en
+   * el menú del nombre de la vista. `nombre` es para el botón que lo abre y lo cierra.
+   */
+  lateral?: { nombre: string; contenido: React.ReactNode }
+  /**
+   * La ficha integrada de la página (`usePanelFicha`) cuando la base va dentro de un `WorkGrid` con
+   * panel: entonces la ficha ocupa la columna del panel y la base no pinta la suya.
+   */
+  ficha?: PanelFicha
+  /** Del kanban: el resumen de cada columna y las que empiezan plegadas. */
+  kanban?: { resumen?: (filas: T[]) => React.ReactNode; plegadas?: string[] }
   /** Botones de más en la barra de la selección (copiar emails, exportar…). */
   accionesSeleccion?: (ids: string[]) => React.ReactNode
   formulario?: { titulo?: string; descripcion?: string; textoCrear?: string }
@@ -104,7 +125,8 @@ export function BaseDatos<T>({
   children?: (registros: T[], ficha: PanelFicha) => React.ReactNode
 }) {
   const { vista } = base
-  const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, true)
+  // Con el panel de la página al lado, el lateral de vistas empieza cerrado para dejar sitio a la base.
+  const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, !fichaPagina)
   const [busqueda, setBusqueda] = React.useState("")
   const [marcadas, setMarcadas] = React.useState<Set<string>>(new Set())
   const [menu, setMenu] = React.useState<MenuDeBarra | null>(null)
@@ -112,7 +134,8 @@ export function BaseDatos<T>({
   const [editor, setEditor] = React.useState<EditorAbierto | null>(null)
   const [borrandoCampo, setBorrandoCampo] = React.useState<DefCampo<T> | null>(null)
   const movil = useIsMobile()
-  const ficha = usePanelFicha(`base:${clave}`)
+  const fichaPropia = usePanelFicha(`base:${clave}`)
+  const ficha = fichaPagina ?? fichaPropia
   const tipo = vista.tipo ?? "cuadricula"
 
   const filtrables = React.useMemo(() => campos.map(aFiltrable), [campos])
@@ -203,22 +226,23 @@ export function BaseDatos<T>({
 
   const iniciales = React.useMemo(() => inicialesDeFiltro(vista, campos), [vista, campos])
   const marcadasVisibles = [...marcadas].filter((id) => registros.some((f) => getId(f) === id))
-  const accionNueva = onCrear ? (
-    <Button size="sm" onClick={() => setNuevo(true)} aria-label={objeto.nuevo}>
+  const abrirNuevo = onNuevo ?? (onCrear ? () => setNuevo(true) : undefined)
+  const accionNueva = abrirNuevo ? (
+    <Button size="sm" onClick={abrirNuevo} aria-label={objeto.nuevo}>
       <PlusIcon /> <span className="hidden sm:inline">{objeto.nuevo}</span>
     </Button>
   ) : undefined
 
   const colorDe = (f: T) => colorDeFila(f, vista.color, campos, ref)
   const escribirUno = onEscribir ? (fila: T, campo: DefCampo<T>, valor: ValorCampo) => onEscribir([{ fila, campo, valor }]) : undefined
-  const tarjetas = { campos: columnas.map((c) => c.campo), colorDe, celdas, onAbrirVinculo }
+  const tarjetas = { campos: columnas.map((c) => c.campo), colorDe, celdas, onAbrirVinculo, portada }
   const textoVacio = registros.length === 0 ? vacio?.(hayFiltro, limpiar) : undefined
 
   const cuerpo = () => {
     if (movil) return <ListaMovil registros={registros} columnas={columnas} getId={getId} celdas={celdas} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
     switch (tipo) {
       case "kanban":
-        return <KanbanBase {...tarjetas} campo={campos.find((c) => c.id === vista.apilar)} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} onEscribir={escribirUno} clave={`${clave}:${vista.id}`} />
+        return <KanbanBase {...tarjetas} campo={campos.find((c) => c.id === vista.apilar)} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} onEscribir={escribirUno} clave={`${clave}:${vista.id}`} resumen={kanban?.resumen} plegadas={kanban?.plegadas} />
       case "galeria":
         return <GaleriaBase {...tarjetas} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
       case "calendario":
@@ -239,7 +263,7 @@ export function BaseDatos<T>({
             abiertoId={abiertoId}
             onAbrir={onAbrir}
             onEscribir={onEscribir}
-            onNuevo={onCrear ? () => setNuevo(true) : undefined}
+            onNuevo={abrirNuevo}
             onCambiarVista={base.cambiar}
             accionesCampo={accionesCampo}
             onAnadirCampo={onGuardarCampo ? (ancla) => setEditor({ ancla }) : undefined}
@@ -276,19 +300,28 @@ export function BaseDatos<T>({
         objeto={objeto.plural}
         lateralAbierto={lateral && !movil}
         onLateral={() => setLateral(!lateral)}
+        nombreLateral={lateralPropio?.nombre}
         onCambiar={base.cambiar}
-        acciones={{ renombrar: (n) => base.renombrar(vista.id, n), duplicar: () => base.duplicar(vista.id), borrar: base.vistas.length > 1 ? () => borrarVista(vista.id) : undefined }}
+        acciones={{
+          renombrar: (n) => base.renombrar(vista.id, n),
+          duplicar: () => base.duplicar(vista.id),
+          borrar: base.vistas.length > 1 ? () => borrarVista(vista.id) : undefined,
+          activar: base.activar,
+          crear: base.crear,
+        }}
         onContraer={() => base.cambiar({ plegados: clavesDeGrupos(nodos) })}
         onExpandir={() => base.cambiar({ plegados: [] })}
         busqueda={busqueda}
         onBuscar={setBusqueda}
         accion={accionNueva}
-        panelFicha={{ activo: ficha.preferida, onAlternar: () => ficha.alternar(!ficha.preferida) }}
+        // Sin ficha (cada registro se abre en su página) no hay ficha que integrar.
+        panelFicha={children ? { activo: ficha.preferida, onAlternar: () => ficha.alternar(!ficha.preferida) } : undefined}
         menu={menu}
         onMenu={setMenu}
       />
       <div data-slot="base-datos" className="flex min-h-0 flex-1" style={{ "--ficha-w": `${ficha.ancho}px` } as React.CSSProperties}>
-        {lateral && !movil && (
+        {lateral && !movil && lateralPropio && lateralPropio.contenido}
+        {lateral && !movil && !lateralPropio && (
           <LateralVistas
             clave={clave}
             vistas={base.vistas}
@@ -302,7 +335,7 @@ export function BaseDatos<T>({
           />
         )}
         <div className="flex min-w-0 flex-1 flex-col">{cuerpo()}</div>
-        {ficha.activa && <PanelFichaBase ficha={ficha} objeto={objeto.singular} />}
+        {ficha.activa && !fichaPagina && children && <PanelFichaBase ficha={ficha} objeto={objeto.singular} />}
       </div>
 
       <Popover open={!!editor} onOpenChange={(abierto) => !abierto && setEditor(null)}>

@@ -68,6 +68,8 @@ export type Marca = {
   /** Notas privadas: «pagan tarde», «piden muchas rondas». */
   notas?: string
   creadaEl: string
+  /** Los valores de los campos que ha creado ella en esta base, por id de campo. */
+  valores?: Record<string, ValorCampo>
 }
 
 /** Cómo va la relación con una marca: sale de sus propuestas y collabs, no se escribe a mano. */
@@ -197,6 +199,8 @@ export type Propuesta = {
   /** La collab que nació al ganarla. */
   collabId?: string
   creadaEl: string
+  /** Los valores de los campos que ha creado ella en esta base, por id de campo. */
+  valores?: Record<string, ValorCampo>
 }
 
 // ───────────────────────── Collabs ─────────────────────────
@@ -298,6 +302,8 @@ export type Collab = {
   facturacion?: DatosFacturacion
   propuestaId?: string
   creadaEl: string
+  /** Los valores de los campos que ha creado ella en esta base, por id de campo. */
+  valores?: Record<string, ValorCampo>
 }
 
 // ───────────────────────── Piezas, versiones y notas ─────────────────────────
@@ -989,6 +995,8 @@ export type Plantilla = {
   ultimoUso?: string
   creadaEl: string
   actualizadaEl: string
+  /** Los valores de los campos que ha creado ella en esta base, por id de campo. */
+  valores?: Record<string, ValorCampo>
 }
 
 // ───────────────────────── Media kit ─────────────────────────

@@ -8,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { CampoFiltrable, TipoFiltro } from "@/lib/filtros/core"
 import { TIPOS_CAMPO, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
+import type { StatusTone } from "@/lib/status"
 import { ICONO_FILTRO, ICONO_TIPO, IconoCampo } from "@/components/app/base/apariencia"
 
 /** Un campo tal como lo enseñan los menús de la base: su nombre, su icono y, en las listas, sus opciones con color. */
@@ -17,7 +18,7 @@ export type CampoMenu = {
   tipo: TipoFiltro
   icono: LucideIcon
   grupo?: string
-  opciones?: { value: string; label: string; color?: ColorOpcion }[]
+  opciones?: { value: string; label: string; color?: ColorOpcion; tono?: StatusTone }[]
 }
 
 /** Los campos de una base para sus menús. */
@@ -28,7 +29,7 @@ export function camposMenuDeBase<T>(campos: DefCampo<T>[]): CampoMenu[] {
     tipo: TIPOS_CAMPO[c.tipo].filtro,
     icono: ICONO_TIPO[c.tipo],
     grupo: c.grupo,
-    opciones: c.opciones?.map((o) => ({ value: o.id, label: o.label, color: o.color })),
+    opciones: c.opciones?.map((o) => ({ value: o.id, label: o.label, color: o.color, tono: o.tono })),
   }))
 }
 

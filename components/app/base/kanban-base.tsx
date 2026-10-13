@@ -27,6 +27,8 @@ export function KanbanBase<T>({
   onAbrir,
   onEscribir,
   clave,
+  resumen,
+  plegadas,
   ...tarjeta
 }: PropsTarjetas<T> & {
   /** El campo que reparte las columnas. Sin él, se explica cómo elegir uno. */
@@ -38,6 +40,10 @@ export function KanbanBase<T>({
   onEscribir?: (fila: T, campo: DefCampo<T>, valor: ValorCampo) => void
   /** Para recordar las columnas plegadas. */
   clave: string
+  /** Lo que se dice de cada columna bajo su título (el importe que suma). */
+  resumen?: (filas: T[]) => React.ReactNode
+  /** Las columnas que empiezan plegadas (las de los extremos: ganadas, perdidas). */
+  plegadas?: string[]
 }) {
   const derivados = React.useMemo<Item<T>[]>(
     () =>
@@ -55,8 +61,13 @@ export function KanbanBase<T>({
 
   const columnas = React.useMemo<KanbanColumn[]>(() => {
     if (!campo) return []
-    return [{ id: SIN, title: `Sin ${campo.vinculo?.objeto ?? campo.nombre.toLowerCase()}` }, ...(campo.opciones ?? []).map((o) => ({ id: o.id, title: o.label, dotClassName: CLASE_FUERTE[o.color ?? "gris"] }))]
-  }, [campo])
+    // Un campo obligatorio no tiene registros sin valor: sin columna «Sin …».
+    const sin = campo.obligatorio ? [] : [{ id: SIN, title: `Sin ${campo.vinculo?.objeto ?? campo.nombre.toLowerCase()}` }]
+    return [...sin, ...(campo.opciones ?? []).map((o) => ({ id: o.id, title: o.label, dotClassName: CLASE_FUERTE[o.color ?? "gris"] }))].map((c) => ({
+      ...c,
+      meta: resumen?.(derivados.filter((i) => i.columnId === c.id).map((i) => i.fila)),
+    }))
+  }, [campo, derivados, resumen])
 
   if (!campo)
     return (
@@ -81,6 +92,7 @@ export function KanbanBase<T>({
         onCardClick={(item) => onAbrir(item.id)}
         openId={abiertoId}
         storageKey={clave}
+        defaultCollapsed={plegadas}
         density="compact"
       />
     </div>

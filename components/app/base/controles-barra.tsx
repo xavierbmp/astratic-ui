@@ -4,13 +4,23 @@
 // menú, el campo que manda en el kanban o el calendario, la altura de las filas y el buscador.
 
 import * as React from "react"
-import { CheckIcon, ChevronDownIcon, CopyIcon, PencilIcon, SearchIcon, Trash2Icon, UnfoldVerticalIcon, WrapTextIcon, XIcon, type LucideIcon } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { CheckIcon, ChevronDownIcon, CopyIcon, PencilIcon, PlusIcon, SearchIcon, Trash2Icon, UnfoldVerticalIcon, WrapTextIcon, XIcon, type LucideIcon } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
 import type { DefCampo } from "@/lib/base/campos"
-import { ALTURAS_FILA, type AlturaFila, type VistaBase } from "@/lib/base/vistas"
+import { ALTURAS_FILA, LISTA_TIPOS_VISTA, TIPOS_VISTA, type AlturaFila, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 import { ICONO_TIPO, ICONO_VISTA, IconoCampo } from "@/components/app/base/apariencia"
 import { BotonBarra } from "@/components/app/base/boton-barra"
 
@@ -18,10 +28,16 @@ export type AccionesVista = {
   renombrar: (nombre: string) => void
   duplicar: () => void
   borrar?: () => void
+  /** Pasar a otra vista y crear una: el menú las ofrece también (con el lateral cerrado o sustituido). */
+  activar: (id: string) => void
+  crear: (tipo: TipoVista) => void
 }
 
-/** El nombre de la vista abierta con el icono de su tipo; su menú la renombra, la duplica o la borra. */
-export function MenuNombreVista({ vista, acciones }: { vista: VistaBase; acciones: AccionesVista }) {
+/**
+ * El nombre de la vista abierta con el icono de su tipo. Su menú lleva las demás vistas (para pasar
+ * a otra sin abrir el lateral), «Crear vista» y lo de esta: renombrarla, duplicarla o borrarla.
+ */
+export function MenuNombreVista({ vista, vistas, acciones }: { vista: VistaBase; vistas: VistaBase[]; acciones: AccionesVista }) {
   const [renombrando, setRenombrando] = React.useState(false)
   const [nombre, setNombre] = React.useState(vista.nombre)
   const Icono = ICONO_VISTA[vista.tipo ?? "cuadricula"]
@@ -37,7 +53,36 @@ export function MenuNombreVista({ vista, acciones }: { vista: VistaBase; accione
             </button>
           </DropdownMenuTrigger>
         </PopoverAnchor>
-        <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuContent align="start" className="w-60">
+          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Vistas</DropdownMenuLabel>
+          <div className="max-h-64 overflow-y-auto">
+            {vistas.map((v) => {
+              const IconoVista = ICONO_VISTA[v.tipo ?? "cuadricula"]
+              return (
+                <DropdownMenuItem key={v.id} onSelect={() => acciones.activar(v.id)}>
+                  <IconoVista className="text-brand" />
+                  <span className="flex-1 truncate">{v.nombre}</span>
+                  {v.id === vista.id && <CheckIcon />}
+                </DropdownMenuItem>
+              )
+            })}
+          </div>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <PlusIcon /> Crear vista
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-48">
+              {LISTA_TIPOS_VISTA.map((tipo) => {
+                const IconoTipo = ICONO_VISTA[tipo]
+                return (
+                  <DropdownMenuItem key={tipo} onSelect={() => acciones.crear(tipo)}>
+                    <IconoTipo className="text-brand" /> {TIPOS_VISTA[tipo].label}
+                  </DropdownMenuItem>
+                )
+              })}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
               setNombre(vista.nombre)
