@@ -1,10 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { es } from "react-day-picker/locale"
 import { CheckIcon, PlusIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
-import { Calendar } from "@/components/ui/calendar"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { opcionDe, valorDeTexto, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
@@ -147,31 +145,50 @@ function EditorTextoLargo<T>({ campo, valor, inicial, onGuardar, onCancelar }: P
   )
 }
 
-function EditorFecha<T>({ campo, valor, onGuardar, onCancelar }: PropsEditor<T>) {
-  const dia = typeof valor === "string" && valor ? new Date(`${valor.slice(0, 10)}T12:00:00`) : undefined
+/**
+ * La fecha se escribe en la celda con el selector de fecha del navegador, que se abre solo al
+ * empezar. Enter o salir guarda; Escape deja la que había; borrarla la quita.
+ */
+function EditorFecha<T>({ campo, valor, onGuardar, onCancelar, error }: PropsEditor<T>) {
+  const [dia, setDia] = React.useState(typeof valor === "string" ? valor.slice(0, 10) : "")
+  const hecho = React.useRef(false)
+  const entrada = React.useRef<HTMLInputElement>(null)
+  // El calendario del navegador se abre al empezar a editar, como el de Airtable.
+  React.useEffect(() => {
+    try {
+      entrada.current?.showPicker()
+    } catch {
+      // Sin un clic directo algunos navegadores no lo abren: la fecha se escribe a mano.
+    }
+  }, [])
+  const guardar = (salida: Salida) => {
+    if (hecho.current) return
+    if (!dia && campo.obligatorio) return error("Este campo no puede quedarse vacío")
+    hecho.current = true
+    onGuardar(dia || null, salida)
+  }
   return (
-    <Popover open onOpenChange={(abierto) => !abierto && onCancelar()}>
-      <Ancla />
-      <PopoverContent align="start" className="w-auto p-0" onKeyDown={(e) => e.key !== "Escape" && e.stopPropagation()}>
-        <Calendar
-          mode="single"
-          locale={es}
-          weekStartsOn={1}
-          selected={dia}
-          defaultMonth={dia}
-          onSelect={(d) => {
-            if (!d) return onGuardar(null, "quedarse")
-            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
-            onGuardar(iso, "quedarse")
-          }}
-        />
-        {!campo.obligatorio && dia && (
-          <button type="button" className="flex w-full items-center gap-1.5 border-t px-3 py-2 text-[13px] text-muted-foreground hover:bg-muted" onClick={() => onGuardar(null, "quedarse")}>
-            <XIcon className="size-3.5" /> Quitar la fecha
-          </button>
-        )}
-      </PopoverContent>
-    </Popover>
+    <input
+      type="date"
+      autoFocus
+      aria-label={campo.nombre}
+      className="absolute inset-0 z-10 h-full w-full rounded-[2px] bg-background px-1.5 text-[13px] ring-2 ring-brand outline-none"
+      value={dia}
+      ref={entrada}
+      onChange={(e) => setDia(e.target.value)}
+      onKeyDown={(e) => {
+        e.stopPropagation()
+        const salida = SALIDA_TECLA(e)
+        if (salida) {
+          e.preventDefault()
+          guardar(salida)
+        } else if (e.key === "Escape") {
+          hecho.current = true
+          onCancelar()
+        }
+      }}
+      onBlur={() => guardar("quedarse")}
+    />
   )
 }
 
