@@ -267,7 +267,8 @@ export function BaseDatos<T>({
 
       <Popover open={!!editor} onOpenChange={(abierto) => !abierto && setEditor(null)}>
         <PopoverAnchor virtualRef={{ current: editor?.ancla ?? null }} />
-        <PopoverContent align="start" className="w-auto p-0">
+        {/* Se abre desde un menú que, al cerrarse, devuelve el foco a la cabecera: eso no lo cierra. */}
+        <PopoverContent align="start" className="w-auto p-0" onFocusOutside={(e) => e.preventDefault()}>
           {editor && (
             <EditorCampo
               key={editor.campo?.id ?? "nuevo"}
