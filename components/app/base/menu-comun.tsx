@@ -53,12 +53,14 @@ export function CopiarDeVista<V extends { id: string; nombre: string }>({ vistas
 /** Una lista que se reordena arrastrando el asa de cada fila. */
 export function ListaOrdenable<X>({ items, clave, onReordenar, children, className }: { items: X[]; clave: (x: X) => string; onReordenar: (items: X[]) => void; children: (x: X, asa: React.ReactNode) => React.ReactNode; className?: string }) {
   const sensores = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }))
+  // Un id estable: sin él, dnd-kit numera sus textos de ayuda distinto en el servidor y en el navegador.
+  const idContexto = React.useId()
   const ids = items.map(clave)
   const alSoltar = (e: DragEndEvent) => {
     if (e.over) onReordenar(mover(items, ids.indexOf(String(e.active.id)), ids.indexOf(String(e.over.id))))
   }
   return (
-    <DndContext sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
+    <DndContext id={idContexto} sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <div className={className}>
           {items.map((x) => (
