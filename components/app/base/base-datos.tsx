@@ -187,8 +187,8 @@ export function BaseDatos<T>({
   const iniciales = React.useMemo(() => inicialesDeFiltro(vista, campos), [vista, campos])
   const marcadasVisibles = [...marcadas].filter((id) => registros.some((f) => getId(f) === id))
   const accionNueva = onCrear ? (
-    <Button size="sm" onClick={() => setNuevo(true)}>
-      <PlusIcon /> {objeto.nuevo}
+    <Button size="sm" onClick={() => setNuevo(true)} aria-label={objeto.nuevo}>
+      <PlusIcon /> <span className="hidden sm:inline">{objeto.nuevo}</span>
     </Button>
   ) : undefined
 

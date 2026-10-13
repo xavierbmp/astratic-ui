@@ -55,7 +55,7 @@ const BotonBarra = React.forwardRef<HTMLButtonElement, React.ComponentProps<"but
     >
       <Icono className="size-4 flex-none" />
       {/* Si no cabe todo, los botones apagados se quedan en icono; los activos siguen diciendo qué hacen. */}
-      <span className={tinte ? "max-w-44 truncate" : "hidden @6xl/barra:inline"}>{texto}</span>
+      <span className={tinte ? "hidden max-w-44 truncate @3xl/barra:inline" : "hidden @6xl/barra:inline"}>{texto}</span>
     </button>
   )
 })
@@ -133,7 +133,7 @@ export function BarraBase<T>({
 
   return (
     <div className="@container/barra flex h-11 flex-none items-center gap-1 border-b px-2">
-      <button type="button" aria-label={lateralAbierto ? "Ocultar las vistas" : "Ver las vistas"} aria-pressed={lateralAbierto} onClick={onLateral} className="inline-flex size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+      <button type="button" aria-label={lateralAbierto ? "Ocultar las vistas" : "Ver las vistas"} aria-pressed={lateralAbierto} onClick={onLateral} className="hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
         <PanelLeftIcon className="size-4" />
       </button>
       <MenuNombreVista vista={vista} acciones={acciones} />
