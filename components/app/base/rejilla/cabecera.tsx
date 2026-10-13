@@ -54,6 +54,8 @@ export function Cabecera<T>({
   onEditarCampo?: (id: string, ancla: HTMLElement) => void
 }) {
   const [arrastre, setArrastre] = React.useState<Arrastre | null>(null)
+  /** El clic que llega al soltar un arrastre (ancho o mover) no elige la columna. */
+  const ignorarClic = React.useRef(false)
 
   // El índice del hueco más cercano a una x de la rejilla (0 = antes de la primera columna).
   const huecoMasCercano = React.useCallback(
@@ -86,6 +88,7 @@ export function Cabecera<T>({
       setArrastre({ ...arrastre, activo: arrastre.activo || Math.abs(dx) > UMBRAL, destino })
     }
     const soltar = (e: PointerEvent) => {
+      ignorarClic.current = arrastre.tipo === "ancho" || arrastre.activo
       if (arrastre.tipo === "ancho") {
         onAncho(arrastre.id, Math.max(ANCHO_MINIMO, Math.min(ANCHO_MAXIMO, arrastre.ancho0 + e.clientX - arrastre.x0)), true)
       } else if (arrastre.activo) {
@@ -132,6 +135,10 @@ export function Cabecera<T>({
                   setArrastre({ tipo: "mover", id: c.campo.id, x0: e.clientX, activo: false, destino: i })
                 }}
                 onClick={(e) => {
+                  if (ignorarClic.current) {
+                    ignorarClic.current = false
+                    return
+                  }
                   if ((e.target as HTMLElement).closest("[data-no-arrastre]")) return
                   if (!c.campo.principal) onElegirColumna(i, e.shiftKey)
                 }}
