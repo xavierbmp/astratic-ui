@@ -3,6 +3,7 @@ import { ArrowUpRightIcon, MapPinIcon } from "lucide-react"
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { SocialIcon, socialLabel, type SocialNetwork } from "@/components/app/social-icons"
+import { AvatarInitials } from "@/components/app/avatar-initials"
 
 export type ProfileAccount = {
   network: SocialNetwork
@@ -13,7 +14,7 @@ export type ProfileAccount = {
 }
 
 /**
- * Mini panel del perfil: foto grande, nombre, nicho y tramo, y una fila por red con sus seguidores,
+ * Mini panel del perfil: foto grande (sus iniciales si aún no tiene), nombre, nicho y tramo, y una fila por red con sus seguidores,
  * sus visualizaciones medias y el enlace a su perfil. Las acciones (media kit, ver perfil) van en `actions`,
  * siempre al pie aunque el panel se estire. Con sitio (768 px o más de panel), las redes van en columnas; desde 448 px los botones dejan de estirarse.
  */
@@ -30,7 +31,7 @@ export function ProfilePanel({
 }: {
   name: string
   handle: string
-  photoUrl: string
+  photoUrl?: string | null
   niche: string
   tier: string
   city?: string
@@ -41,9 +42,13 @@ export function ProfilePanel({
   return (
     <section data-slot="ws-profile" className={cn("@container flex flex-col rounded-2xl bg-card p-5 shadow-card", className)}>
       <div className="flex items-center gap-4">
-        <span className="relative size-20 flex-none overflow-hidden rounded-2xl bg-muted">
-          <Image src={photoUrl} alt={name} fill sizes="80px" className="object-cover" />
-        </span>
+        {photoUrl ? (
+          <span className="relative size-20 flex-none overflow-hidden rounded-2xl bg-muted">
+            <Image src={photoUrl} alt={name} fill sizes="80px" className="object-cover" />
+          </span>
+        ) : (
+          <AvatarInitials name={name} size="xl" className="size-20 flex-none text-2xl" />
+        )}
         <div className="min-w-0">
           <p className="truncate text-lg leading-tight font-semibold tracking-tight">{name}</p>
           <p className="truncate text-sm text-muted-foreground">{handle}</p>

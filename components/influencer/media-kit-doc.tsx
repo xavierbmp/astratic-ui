@@ -7,6 +7,7 @@ import { nombreMes, soloFecha } from "@/lib/influencer/fechas"
 import { SocialIcon, socialLabel } from "@/components/app/social-icons"
 import { DocKeyFacts, DocNotice, DocSimpleSection, DocTable, DocText } from "@/components/document/simple"
 import { DocInfluencerSheet } from "@/components/influencer/doc-sheet"
+import { AvatarInitials } from "@/components/app/avatar-initials"
 
 type Props = {
   perfil: Perfil
@@ -47,9 +48,13 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
     case "portada":
       return (
         <div className="mt-[30px] flex items-start gap-6">
-          <span className="relative size-[132px] flex-none overflow-hidden rounded-2xl bg-muted">
-            <Image src={perfil.fotoUrl} alt={perfil.nombre} fill sizes="132px" className="object-cover" />
-          </span>
+          {perfil.fotoUrl ? (
+            <span className="relative size-[132px] flex-none overflow-hidden rounded-2xl bg-muted">
+              <Image src={perfil.fotoUrl} alt={perfil.nombre} fill sizes="132px" className="object-cover" />
+            </span>
+          ) : (
+            <AvatarInitials name={perfil.nombre} size="xl" className="size-[132px] flex-none text-4xl" />
+          )}
           <div className="min-w-0 pt-1">
             <h1 className="text-[28px] leading-[1.15] font-semibold tracking-[-0.02em]">{perfil.nombre}</h1>
             <p className="mt-1 text-[12.5px] text-muted-foreground">

@@ -5,6 +5,7 @@ import { cn } from "cn"
 import type { Perfil } from "@/lib/influencer/modelo"
 import { ThemeToggle } from "@/components/app/theme-toggle"
 import { ThemeBody } from "@/components/influencer/theme-body"
+import { AvatarInitials } from "@/components/app/avatar-initials"
 
 /**
  * Lo que ve la marca sin cuenta (revisar, rellenar el brief, firmar, ver resultados): cabecera con
@@ -24,9 +25,13 @@ export function PaginaMarca({ seccion, marca, perfil, pie, ancho = "normal", chi
           <span className="hidden text-muted-foreground sm:inline"> · para {marca}</span>
         </span>
         <span className="ml-auto flex flex-none items-center gap-2 text-sm">
-          <span className="relative size-7 overflow-hidden rounded-full bg-muted">
-            <Image src={perfil.fotoUrl} alt="" fill sizes="28px" className="object-cover" />
-          </span>
+          {perfil.fotoUrl ? (
+            <span className="relative size-7 overflow-hidden rounded-full bg-muted">
+              <Image src={perfil.fotoUrl} alt="" fill sizes="28px" className="object-cover" />
+            </span>
+          ) : (
+            <AvatarInitials name={perfil.nombre} size="sm" className="size-7 rounded-full" />
+          )}
           <span className="hidden sm:inline">{perfil.nombre}</span>
           <ThemeToggle />
         </span>
