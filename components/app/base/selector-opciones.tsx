@@ -10,6 +10,8 @@ import { FichaOpcion } from "@/components/app/base/apariencia"
 
 export type OpcionElegible = { value: string; label: string; color?: ColorOpcion }
 
+// Los desplegables son modales: dentro de un diálogo (el formulario de alta), el diálogo no les quita el foco.
+
 function Lista({ opciones, marcadas, onElegir }: { opciones: OpcionElegible[]; marcadas: string[]; onElegir: (id: string) => void }) {
   return (
     <Command>
@@ -34,7 +36,7 @@ export function ElegirOpcion({ opciones, valor, onChange, placeholder = "Selecci
   const [abierto, setAbierto] = React.useState(false)
   const opcion = opciones.find((o) => o.value === valor)
   return (
-    <Popover open={abierto} onOpenChange={setAbierto}>
+    <Popover open={abierto} onOpenChange={setAbierto} modal>
       <PopoverTrigger asChild>
         <button type="button" className={cn("flex h-8 min-w-0 items-center justify-between gap-1 px-2 text-left text-[13px] hover:bg-muted/60", className)}>
           {opcion ? <FichaOpcion label={opcion.label} color={opcion.color} /> : <span className="truncate text-muted-foreground">{placeholder}</span>}
@@ -71,7 +73,7 @@ export function ElegirOpciones({ opciones, valores, onChange, placeholder = "Sel
           </FichaOpcion>
         )
       })}
-      <Popover open={abierto} onOpenChange={setAbierto}>
+      <Popover open={abierto} onOpenChange={setAbierto} modal>
         <PopoverTrigger asChild>
           <button type="button" aria-label="Añadir una opción" className="inline-flex size-5 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
             <PlusIcon className="size-3.5" />
