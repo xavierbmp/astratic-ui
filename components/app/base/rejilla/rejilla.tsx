@@ -154,8 +154,13 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
 
   // ---------- Escribir, con deshacer ----------
 
-  const escribir = (cambios: CambioCelda<T>[], registrar = true) => {
+  const escribir = (pedidos: CambioCelda<T>[], registrar = true) => {
     if (!p.onEscribir) return
+    // Cada cambio, sobre la versión actual de su fila (los de deshacer guardan la de antes).
+    const cambios = pedidos.map((c) => {
+      const i = porId.get(getId(c.fila))
+      return i === undefined ? c : { ...c, fila: registros[i] }
+    })
     const validos = cambios.filter((c) => !c.campo.soloLectura)
     const sinObligatorio = validos.filter((c) => !(c.campo.obligatorio && esValorVacio(c.valor)))
     if (sinObligatorio.length < validos.length) toast.error("Hay campos que no pueden quedarse vacíos")
