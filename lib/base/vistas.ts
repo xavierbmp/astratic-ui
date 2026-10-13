@@ -6,7 +6,7 @@
 // orden y grupos que el resto del design system (`lib/filtros`, `lib/vistas/core.ts`).
 
 import { GRUPO_VACIO, contarCondiciones, cumpleGrupo, grupoVacio, type CampoFiltrable, type GrupoCondiciones } from "@/lib/filtros/core"
-import { agruparFilas, type Agrupacion, type Calculo, type Orden } from "@/lib/vistas/core"
+import { SIN_VALOR, agruparFilas, type Agrupacion, type Calculo, type Orden } from "@/lib/vistas/core"
 import { aFiltrable, opcionDe, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
 
 export type AlturaFila = "corta" | "media" | "alta" | "extra"
@@ -167,7 +167,13 @@ export type NodoGrupo<T> = {
 export function agruparEnNiveles<T>(filas: T[], niveles: Agrupacion[], campos: CampoFiltrable<T>[], ref: { hoy: string }, padre = "", nivel = 0): NodoGrupo<T>[] {
   const agrupacion = niveles[nivel]
   if (!agrupacion) return []
-  return agruparFilas(filas, { ...agrupacion, ocultarVacios: true }, campos.map(porCombinacion), ref).map((g) => {
+  const campo = campos.find((c) => c.id === agrupacion.campo)
+  // Los textos se ordenan por el abecedario; las listas por sus opciones, y fechas y números de menor
+  // a mayor: en esos, «Z → A» o «9 → 1» es el mismo orden al revés (lo vacío sigue al final).
+  const natural = campo !== undefined && campo.tipo !== "texto" && campo.tipo !== "multiselect"
+  const repartidos = agruparFilas(filas, { ...agrupacion, ordenGrupos: natural ? "opciones" : agrupacion.ordenGrupos, ocultarVacios: true }, campos.map(porCombinacion), ref)
+  const enOrden = natural && agrupacion.ordenGrupos === "desc" ? [...repartidos.filter((g) => g.id !== SIN_VALOR).reverse(), ...repartidos.filter((g) => g.id === SIN_VALOR)] : repartidos
+  return enOrden.map((g) => {
     const clave = `${padre}${padre ? "/" : ""}${nivel}:${g.id}`
     return { clave, nivel, campo: agrupacion.campo, id: g.id, label: g.label, filas: g.filas, hijos: agruparEnNiveles(g.filas, niveles, campos, ref, clave, nivel + 1) }
   })

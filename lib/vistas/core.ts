@@ -5,7 +5,7 @@
 // mismos campos que declara cada objeto para filtrar (`CampoFiltrable`), así que lo que se puede
 // filtrar se puede también ordenar y agrupar.
 import { GRUPO_VACIO, type CampoFiltrable, type GrupoCondiciones, type TipoFiltro, type ValorFila } from "@/lib/filtros/core"
-import { TRAMOS_FECHA, lunesDe, soloFecha, tramoDeFecha } from "@/lib/filtros/fechas"
+import { TRAMOS_FECHA, diasEntre, lunesDe, soloFecha, tramoDeFecha } from "@/lib/filtros/fechas"
 
 export type DisenoVista = "lista" | "tabla" | "tablero" | "galeria" | "calendario" | "cronograma"
 
@@ -43,38 +43,57 @@ export type Agrupacion = {
 
 export type Calculo =
   | "contar"
-  | "con_valor"
   | "vacios"
-  | "pct_con_valor"
+  | "con_valor"
+  | "unicos"
   | "pct_vacios"
+  | "pct_con_valor"
+  | "pct_unicos"
+  | "marcadas"
+  | "sin_marcar"
   | "pct_si"
   | "suma"
   | "media"
+  | "mediana"
   | "minimo"
   | "maximo"
+  | "rango"
   | "mas_temprana"
   | "mas_tardia"
+  | "rango_fechas"
 
+/** Los totales del pie, con los nombres de Airtable. */
 export const CALCULOS: Record<Calculo, { label: string; tipos?: TipoFiltro[] }> = {
   contar: { label: "Contar todas" },
-  con_valor: { label: "Con valor" },
-  vacios: { label: "Vacías" },
-  pct_con_valor: { label: "% con valor" },
-  pct_vacios: { label: "% vacías" },
-  pct_si: { label: "% marcadas", tipos: ["booleano"] },
+  vacios: { label: "Vacío" },
+  con_valor: { label: "Completo" },
+  unicos: { label: "Único" },
+  pct_vacios: { label: "Porcentaje vacío" },
+  pct_con_valor: { label: "Porcentaje lleno" },
+  pct_unicos: { label: "Porcentaje único" },
+  marcadas: { label: "Marcadas", tipos: ["booleano"] },
+  sin_marcar: { label: "Sin marcar", tipos: ["booleano"] },
+  pct_si: { label: "Porcentaje marcado", tipos: ["booleano"] },
   suma: { label: "Suma", tipos: ["numero"] },
-  media: { label: "Media", tipos: ["numero"] },
-  minimo: { label: "Mínimo", tipos: ["numero"] },
-  maximo: { label: "Máximo", tipos: ["numero"] },
-  mas_temprana: { label: "Más temprana", tipos: ["fecha"] },
-  mas_tardia: { label: "Más tardía", tipos: ["fecha"] },
+  media: { label: "Promedio", tipos: ["numero"] },
+  mediana: { label: "Mediana", tipos: ["numero"] },
+  minimo: { label: "Mín.", tipos: ["numero"] },
+  maximo: { label: "Máx.", tipos: ["numero"] },
+  rango: { label: "Rango", tipos: ["numero"] },
+  mas_temprana: { label: "Fecha más antigua", tipos: ["fecha"] },
+  mas_tardia: { label: "Fecha más reciente", tipos: ["fecha"] },
+  rango_fechas: { label: "Rango de fechas", tipos: ["fecha"] },
 }
+
+/** Los que tienen sentido en las casillas: contar vacías o únicas en un sí/no no dice nada. */
+const SOLO_CASILLAS: Calculo[] = ["contar", "marcadas", "sin_marcar", "pct_si"]
 
 /** Los cálculos que tienen sentido para un tipo de campo (sin campo, solo contar). */
 export function calculosDe(tipo: TipoFiltro | undefined): Calculo[] {
+  if (!tipo) return ["contar"]
+  if (tipo === "booleano") return SOLO_CASILLAS
   return (Object.keys(CALCULOS) as Calculo[]).filter((c) => {
     const tipos = CALCULOS[c].tipos
-    if (!tipo) return c === "contar"
     return !tipos || tipos.includes(tipo)
   })
 }
@@ -295,31 +314,44 @@ export function calcular<T>(filas: T[], campo: CampoFiltrable<T> | undefined, ca
   const valores = filas.map((f) => campo.valor(f))
   const conValor = valores.filter((v) => !esVacio(v))
   const pct = (x: number) => (n === 0 ? "0 %" : `${Math.round((x / n) * 100)} %`)
+  const unicos = () => new Set(conValor.map((v) => (Array.isArray(v) ? [...v].sort().join("\u0000") : String(v)))).size
+  const marcadas = valores.filter((v) => v === true).length
   switch (calculo) {
-    case "con_valor":
-      return String(conValor.length)
-    case "vacios":
-      return String(n - conValor.length)
-    case "pct_con_valor":
-      return pct(conValor.length)
-    case "pct_vacios":
-      return pct(n - conValor.length)
-    case "pct_si":
-      return pct(valores.filter((v) => v === true).length)
+    case "con_valor": return String(conValor.length)
+    case "vacios": return String(n - conValor.length)
+    case "unicos": return String(unicos())
+    case "pct_con_valor": return pct(conValor.length)
+    case "pct_vacios": return pct(n - conValor.length)
+    case "pct_unicos": return pct(unicos())
+    case "marcadas": return String(marcadas)
+    case "sin_marcar": return String(n - marcadas)
+    case "pct_si": return pct(marcadas)
     case "suma":
     case "media":
+    case "mediana":
     case "minimo":
-    case "maximo": {
-      const nums = conValor.map(Number).filter((x) => Number.isFinite(x))
+    case "maximo":
+    case "rango": {
+      const nums = conValor.map(Number).filter((x) => Number.isFinite(x)).sort((a, b) => a - b)
       if (nums.length === 0) return "—"
-      const r =
-        calculo === "suma" ? nums.reduce((a, b) => a + b, 0) : calculo === "media" ? nums.reduce((a, b) => a + b, 0) / nums.length : calculo === "minimo" ? Math.min(...nums) : Math.max(...nums)
+      const suma = nums.reduce((a, b) => a + b, 0)
+      const mitad = Math.floor(nums.length / 2)
+      const r = {
+        suma,
+        media: suma / nums.length,
+        mediana: nums.length % 2 ? nums[mitad] : (nums[mitad - 1] + nums[mitad]) / 2,
+        minimo: nums[0],
+        maximo: nums[nums.length - 1],
+        rango: nums[nums.length - 1] - nums[0],
+      }[calculo]
       return numeroEs.format(r)
     }
     case "mas_temprana":
-    case "mas_tardia": {
+    case "mas_tardia":
+    case "rango_fechas": {
       const dias = conValor.map((v) => soloFecha(String(v))).sort()
       if (dias.length === 0) return "—"
+      if (calculo === "rango_fechas") return `${diasEntre(dias[0], dias[dias.length - 1])} días`
       const d = calculo === "mas_temprana" ? dias[0] : dias[dias.length - 1]
       return diaMes.format(enFecha(d)).replace(".", "")
     }

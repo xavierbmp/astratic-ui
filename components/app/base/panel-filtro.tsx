@@ -1,18 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core"
-import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { CheckIcon, ChevronDownIcon, CircleHelpIcon, GripVerticalIcon, PlusIcon, Trash2Icon } from "lucide-react"
-import { cn } from "cn"
+import { CheckIcon, ChevronDownIcon, CircleHelpIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { NIVELES_GRUPO, contarCondiciones, defOperador, grupoVacio, operadorPorDefecto, operadoresDe, type Condicion, type GrupoCondiciones } from "@/lib/filtros/core"
-import { mover } from "@/lib/base/vistas"
+import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { SelectorCampo, type CampoMenu } from "@/components/app/base/selector-campo"
 import { ValorFiltro } from "@/components/app/base/valor-filtro"
 
@@ -116,39 +112,31 @@ function Union({ indice, union, onChange }: { indice: number; union: "y" | "o"; 
 
 function ItemsGrupo({ grupo, nivel, campos, onChange }: { grupo: GrupoCondiciones; nivel: number; campos: CampoMenu[]; onChange: (next: GrupoCondiciones) => void }) {
   const grupos = grupo.grupos ?? []
-  const sensores = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }))
-  const ids = grupo.condiciones.map((_, i) => `c${nivel}-${i}`)
   const setCondiciones = (condiciones: Condicion[]) => onChange({ ...grupo, condiciones })
   const setGrupos = (gs: GrupoCondiciones[]) => onChange({ ...grupo, grupos: gs })
   const setUnion = (union: "y" | "o") => onChange({ ...grupo, union })
-
-  const alSoltar = (e: DragEndEvent) => {
-    if (!e.over) return
-    setCondiciones(mover(grupo.condiciones, ids.indexOf(String(e.active.id)), ids.indexOf(String(e.over.id))))
-  }
+  // Las condiciones no tienen id: se ordenan por su posición, que es lo que se arrastra.
+  const conPosicion = grupo.condiciones.map((condicion, i) => ({ condicion, clave: `c${nivel}-${i}` }))
 
   return (
     <>
-      <DndContext sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
-        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-          {grupo.condiciones.map((c, i) => (
-            <FilaOrdenable key={ids[i]} id={ids[i]}>
-              {(asa) => (
-                <FilaCondicion
-                  indice={i}
-                  union={grupo.union}
-                  onUnion={setUnion}
-                  condicion={c}
-                  campos={campos}
-                  onChange={(cambio) => setCondiciones(grupo.condiciones.map((x, j) => (j === i ? { ...x, ...cambio } : x)))}
-                  onQuitar={() => setCondiciones(grupo.condiciones.filter((_, j) => j !== i))}
-                  asa={asa}
-                />
-              )}
-            </FilaOrdenable>
-          ))}
-        </SortableContext>
-      </DndContext>
+      <ListaOrdenable items={conPosicion} clave={(x) => x.clave} onReordenar={(xs) => setCondiciones(xs.map((x) => x.condicion))} className="flex flex-col gap-2">
+        {({ condicion: c }, asa) => {
+          const i = grupo.condiciones.indexOf(c)
+          return (
+            <FilaCondicion
+              indice={i}
+              union={grupo.union}
+              onUnion={setUnion}
+              condicion={c}
+              campos={campos}
+              onChange={(cambio) => setCondiciones(grupo.condiciones.map((x, j) => (j === i ? { ...x, ...cambio } : x)))}
+              onQuitar={() => setCondiciones(grupo.condiciones.filter((_, j) => j !== i))}
+              asa={asa}
+            />
+          )
+        }}
+      </ListaOrdenable>
       {grupos.map((g, i) => {
         const indice = grupo.condiciones.length + i
         const cambiar = (next: GrupoCondiciones) => setGrupos(grupos.map((x, j) => (j === i ? next : x)))
@@ -186,20 +174,6 @@ function ItemsGrupo({ grupo, nivel, campos, onChange }: { grupo: GrupoCondicione
         )
       })}
     </>
-  )
-}
-
-function FilaOrdenable({ id, children }: { id: string; children: (asa: React.ReactNode) => React.ReactNode }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
-  const asa = (
-    <button type="button" aria-label="Arrastrar para ordenar" className="flex w-7 flex-none cursor-grab items-center justify-center text-muted-foreground hover:bg-muted active:cursor-grabbing" {...attributes} {...listeners}>
-      <GripVerticalIcon className="size-3.5" />
-    </button>
-  )
-  return (
-    <div ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }} className={cn(isDragging && "relative z-10 opacity-80")}>
-      {children(asa)}
-    </div>
   )
 }
 

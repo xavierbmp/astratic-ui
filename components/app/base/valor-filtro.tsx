@@ -1,13 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronDownIcon, PlusIcon, XIcon } from "lucide-react"
+import { CheckIcon, ChevronDownIcon } from "lucide-react"
 import { cn } from "cn"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { DIAS_RELATIVOS, TRAMOS_RELATIVOS, leerValorFecha, type Condicion, type DefOperador } from "@/lib/filtros/core"
-import { FichaOpcion } from "@/components/app/base/apariencia"
+import { ElegirOpcion, ElegirOpciones } from "@/components/app/base/selector-opciones"
 import type { CampoMenu } from "@/components/app/base/selector-campo"
 
 const CAJA = "h-8 min-w-0 bg-transparent px-2 text-[13px] outline-none placeholder:text-muted-foreground"
@@ -29,10 +28,11 @@ export function ValorFiltro({ campo, def, condicion, onChange }: { campo: CampoM
   if (def.fecha) return <ValorFecha tramo={def.fecha === "tramo"} valor={typeof condicion.valor === "string" ? condicion.valor : undefined} onChange={(valor) => onChange({ valor })} />
   if (campo.tipo === "select" || campo.tipo === "multiselect") {
     const valores = Array.isArray(condicion.valor) ? condicion.valor : condicion.valor ? [condicion.valor] : []
+    const opciones = campo.opciones ?? []
     return def.multiple ? (
-      <ValorOpciones campo={campo} valores={valores} onChange={(v) => onChange({ valor: v.length ? v : undefined })} />
+      <ElegirOpciones opciones={opciones} valores={valores} onChange={(v) => onChange({ valor: v.length ? v : undefined })} className="flex-1" />
     ) : (
-      <ValorOpcion campo={campo} valor={valores[0]} onChange={(v) => onChange({ valor: v })} />
+      <ElegirOpcion opciones={opciones} valor={valores[0]} onChange={(v) => onChange({ valor: v })} className="flex-1" />
     )
   }
   return <ValorTexto numero={campo.tipo === "numero"} valor={typeof condicion.valor === "string" ? condicion.valor : ""} onChange={(v) => onChange({ valor: v === "" ? undefined : v })} />
@@ -58,80 +58,6 @@ function ValorTexto({ numero, valor, onChange }: { numero: boolean; valor: strin
       value={texto}
       onChange={(e) => setTexto(numero ? e.target.value.replace(/[^\d.,-]/g, "") : e.target.value)}
     />
-  )
-}
-
-function ListaOpciones({ campo, marcadas, onElegir }: { campo: CampoMenu; marcadas: string[]; onElegir: (id: string) => void }) {
-  return (
-    <Command>
-      <CommandInput placeholder="Encuentra una opción" autoFocus />
-      <CommandList className="max-h-64">
-        <CommandEmpty>Ninguna opción se llama así</CommandEmpty>
-        <CommandGroup>
-          {(campo.opciones ?? []).map((o) => (
-            <CommandItem key={o.value} value={`${o.label} ${o.value}`} onSelect={() => onElegir(o.value)}>
-              <FichaOpcion label={o.label} color={o.color} />
-              {marcadas.includes(o.value) && <CheckIcon className="ml-auto size-3.5" />}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </Command>
-  )
-}
-
-function ValorOpcion({ campo, valor, onChange }: { campo: CampoMenu; valor: string | undefined; onChange: (v: string | undefined) => void }) {
-  const [abierto, setAbierto] = React.useState(false)
-  const opcion = campo.opciones?.find((o) => o.value === valor)
-  return (
-    <Popover open={abierto} onOpenChange={setAbierto}>
-      <PopoverTrigger asChild>
-        <button type="button" className={cn(CAJA, "flex flex-1 items-center justify-between gap-1 text-left hover:bg-muted/60")}>
-          {opcion ? <FichaOpcion label={opcion.label} color={opcion.color} /> : <span className="text-muted-foreground">Selecciona una opción</span>}
-          <ChevronDownIcon className="size-3.5 flex-none text-muted-foreground" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-64 p-0">
-        <ListaOpciones
-          campo={campo}
-          marcadas={valor ? [valor] : []}
-          onElegir={(id) => {
-            onChange(id)
-            setAbierto(false)
-          }}
-        />
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-function ValorOpciones({ campo, valores, onChange }: { campo: CampoMenu; valores: string[]; onChange: (v: string[]) => void }) {
-  const [abierto, setAbierto] = React.useState(false)
-  const alternar = (id: string) => onChange(valores.includes(id) ? valores.filter((v) => v !== id) : [...valores, id])
-  return (
-    <div className="flex min-h-8 min-w-0 flex-1 flex-wrap items-center gap-1 px-1.5 py-1">
-      {valores.map((id) => {
-        const o = campo.opciones?.find((x) => x.value === id)
-        return (
-          <FichaOpcion key={id} label={o?.label ?? id} color={o?.color}>
-            <button type="button" aria-label={`Quitar ${o?.label ?? id}`} className="-mr-1 rounded-full opacity-60 hover:opacity-100" onClick={() => alternar(id)}>
-              <XIcon className="size-3" />
-            </button>
-          </FichaOpcion>
-        )
-      })}
-      <Popover open={abierto} onOpenChange={setAbierto}>
-        <PopoverTrigger asChild>
-          <button type="button" aria-label="Añadir una opción" className="inline-flex size-5 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
-            <PlusIcon className="size-3.5" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-64 p-0">
-          <ListaOpciones campo={campo} marcadas={valores} onElegir={alternar} />
-        </PopoverContent>
-      </Popover>
-      {valores.length === 0 && <span className="text-[13px] text-muted-foreground">Selecciona opciones</span>}
-    </div>
   )
 }
 
