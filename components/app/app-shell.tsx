@@ -66,6 +66,7 @@ export function useBreadcrumb(extra: Crumb[]) {
 
 export function AppShell({
   brand,
+  logo,
   user,
   nav,
   children,
@@ -75,6 +76,8 @@ export function AppShell({
   notifications,
 }: {
   brand: Brand
+  /** Logotipo de la marca: con la sidebar abierta sustituye al monograma y el nombre; plegada, sigue el monograma. */
+  logo?: React.ReactNode
   user: CurrentUser
   nav: NavGroup[]
   children: React.ReactNode
@@ -160,18 +163,27 @@ export function AppShell({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton size="lg" className="group-data-[collapsible=icon]:p-0!" asChild>
-                  <Link href={nav[0]?.items[0]?.href ?? "/"}>
-                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-foreground text-sm font-semibold text-background">
-                      {brand.monogram}
-                    </span>
-                    <span className="grid flex-1 leading-tight">
-                      <span className="truncate text-sm font-semibold">{brand.name}</span>
-                      {brand.tagline && (
-                        <span className="truncate text-xs text-muted-foreground">{brand.tagline}</span>
-                      )}
-                    </span>
-                    <ChevronsUpDownIcon className="text-muted-foreground" />
-                  </Link>
+                  {logo ? (
+                    <Link href={nav[0]?.items[0]?.href ?? "/"} aria-label={brand.name}>
+                      <span className="hidden size-8 shrink-0 place-items-center rounded-lg bg-foreground text-sm font-semibold text-background group-data-[collapsible=icon]:grid">
+                        {brand.monogram}
+                      </span>
+                      <span className="flex min-w-0 flex-1 items-center px-1 group-data-[collapsible=icon]:hidden">{logo}</span>
+                    </Link>
+                  ) : (
+                    <Link href={nav[0]?.items[0]?.href ?? "/"}>
+                      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-foreground text-sm font-semibold text-background">
+                        {brand.monogram}
+                      </span>
+                      <span className="grid flex-1 leading-tight">
+                        <span className="truncate text-sm font-semibold">{brand.name}</span>
+                        {brand.tagline && (
+                          <span className="truncate text-xs text-muted-foreground">{brand.tagline}</span>
+                        )}
+                      </span>
+                      <ChevronsUpDownIcon className="text-muted-foreground" />
+                    </Link>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
