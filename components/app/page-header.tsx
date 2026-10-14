@@ -20,7 +20,8 @@ export function PageHeader({
   return (
     <div data-slot="page-header" className={cn("flex flex-col gap-2", className)} {...props}>
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div className="min-w-0">
+        {/* Cede el ancho a las acciones (la descripción se corta) para que no salten de línea y empujen las pestañas. */}
+        <div className="min-w-48 flex-1 basis-0">
           <h1 className="text-[27px] leading-tight font-semibold tracking-tight">{title}</h1>
           {description && <p className="mt-1 truncate text-sm text-muted-foreground">{description}</p>}
         </div>

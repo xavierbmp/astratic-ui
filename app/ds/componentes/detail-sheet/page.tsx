@@ -23,7 +23,7 @@ const record = i >= 0 ? rows[i] : null
         actions={<>{/* outline sm + menú «…» con eliminar al final */}</>}
       />
       <Tabs key={record.id} defaultValue="resumen" className="flex min-h-0 flex-1 flex-col gap-0">
-        <TabsList variant="line" className="px-4">…</TabsList>
+        <TabsList variant="line" compact className="px-1">…</TabsList>
         <DetailBody>
           <TabsContent value="resumen">
             <DetailSection title="Gestión" icon={UserCogIcon} collapsible storageKey="registro.gestion" summary={resumen}>

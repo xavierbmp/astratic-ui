@@ -170,7 +170,8 @@ export const nav: NavGroup[] = [
           <p>
             <strong>Navegar o elegir.</strong> Todo lo que cambia de página, o de «página» dentro de una ficha, un
             diálogo o un bloque (las partes de una ficha, Nuevo y Enviados en un diálogo), usa las pestañas de
-            navegación: <code>PageTabs</code> o <code>TabsList variant=&quot;line&quot;</code>, con el mismo aspecto. Lo
+            navegación: <code>PageTabs</code> o <code>TabsList variant=&quot;line&quot;</code>, con el mismo aspecto (en una
+            ficha o un diálogo estrecho, con <code>compact</code>: juntas y con 12 px de aire). Lo
             que elige un valor o recorta lo que se ve (el periodo de un dashboard, Email o Llamadas en un formulario, Todo
             o Notas) es un control segmentado: <code>TabsList</code> por defecto. Un solo segmentado por cabecera: con
             subpáginas, el periodo pasa a un botón outline con desplegable y los segmentos, a una condición del filtro de

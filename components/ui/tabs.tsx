@@ -57,21 +57,29 @@ const tabsListVariants = cva("group/tabs-list", {
 type TabsVariant = NonNullable<VariantProps<typeof tabsListVariants>["variant"]>
 
 /** Cada pestaña se pinta según la variante de su lista. */
-const TabsVariantContext = React.createContext<TabsVariant>("default")
+const TabsVariantContext = React.createContext<{ variant: TabsVariant; compact: boolean }>({
+  variant: "default",
+  compact: false,
+})
 
 function TabsList({
   className,
   variant = "default",
+  compact = false,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> &
-  VariantProps<typeof tabsListVariants>) {
+  VariantProps<typeof tabsListVariants> & {
+    /** Navegación en una ficha o un diálogo estrecho: las pestañas juntas y con 12 px de aire, para que quepan. */
+    compact?: boolean
+  }) {
   const variante = variant ?? "default"
+  const contexto = React.useMemo(() => ({ variant: variante, compact }), [variante, compact])
   return (
-    <TabsVariantContext.Provider value={variante}>
+    <TabsVariantContext.Provider value={contexto}>
       <TabsPrimitive.List
         data-slot="tabs-list"
         data-variant={variante}
-        className={cn(tabsListVariants({ variant: variante }), className)}
+        className={cn(tabsListVariants({ variant: variante }), variante === "line" && compact && "gap-0", className)}
         {...props}
       />
     </TabsVariantContext.Provider>
@@ -82,11 +90,11 @@ function TabsTrigger({
   className,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
-  const variant = React.useContext(TabsVariantContext)
+  const { variant, compact } = React.useContext(TabsVariantContext)
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
-      className={cn(variant === "line" ? navTabClass : segmentedTabClass, className)}
+      className={cn(variant === "line" ? cn(navTabClass, compact && "px-3") : segmentedTabClass, className)}
       {...props}
     />
   )
