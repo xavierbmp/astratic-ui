@@ -91,12 +91,32 @@ export function nombreDeParte(p: Pieza, parte: TipoVersion) {
   return TIPOS_PIEZA[p.tipo].media === "video" ? "Vídeo" : p.tipo === "carrusel" ? "Carrusel" : "Foto"
 }
 
-/** El primer hito pendiente de la collab, el más cercano (aunque ya haya pasado). */
-export function siguienteHito(c: Collab): { label: string; fecha: string; piezaId: string } | null {
-  const pendientes = c.piezas
+export type HitoPendiente = { label: string; fecha: string; piezaId: string }
+
+/** Los hitos sin hacer de todas sus piezas, del más cercano al más lejano (los ya pasados, primero). */
+export function hitosPendientes(c: Collab): HitoPendiente[] {
+  return c.piezas
     .flatMap((p) => hitosDePieza(p).filter((h) => !h.hecho).map((h) => ({ label: `${h.verbo} · ${tituloCorto(p)}`, fecha: h.fecha, piezaId: p.id })))
     .sort((a, b) => a.fecha.localeCompare(b.fecha))
-  return pendientes[0] ?? null
+}
+
+/** El primer hito pendiente de la collab, el más cercano (aunque ya haya pasado). */
+export function siguienteHito(c: Collab): HitoPendiente | null {
+  return hitosPendientes(c)[0] ?? null
+}
+
+/** Los días que una collab recién creada sale como nueva en el Inicio. */
+export const DIAS_COLLAB_NUEVA = 7
+
+/** Si la collab se creó hace menos de `DIAS_COLLAB_NUEVA` días (`hoy`, AAAA-MM-DD o con hora). */
+export function esCollabNueva(c: Collab, hoy: string) {
+  return diasEntre(c.creadaEl, hoy) < DIAS_COLLAB_NUEVA
+}
+
+/** Las nuevas primero y después por su siguiente hito, del más cercano al más lejano (sin hitos, al final). */
+export function collabsPorUrgencia(collabs: Collab[], hoy: string) {
+  const siguiente = (c: Collab) => siguienteHito(c)?.fecha ?? "9999-12-31"
+  return [...collabs].sort((a, b) => Number(esCollabNueva(b, hoy)) - Number(esCollabNueva(a, hoy)) || siguiente(a).localeCompare(siguiente(b)))
 }
 
 /** Las piezas en el orden en que se publican. */

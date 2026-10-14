@@ -8,7 +8,7 @@ export type TaskTone = "vencida" | "hoy" | "normal"
 
 /**
  * Tarea en tarjeta: un círculo para marcarla (al hacerla se tacha), el título, a qué collab
- * pertenece y la fecha, en rojo si venció y en naranja si es hoy.
+ * pertenece y la fecha, en rojo si venció y en naranja si es hoy. Con `onOpen`, el título abre su ficha.
  */
 export function TaskCard({
   title,
@@ -17,6 +17,7 @@ export function TaskCard({
   tone = "normal",
   done,
   onToggle,
+  onOpen,
   className,
 }: {
   title: string
@@ -25,6 +26,7 @@ export function TaskCard({
   tone?: TaskTone
   done: boolean
   onToggle: () => void
+  onOpen?: () => void
   className?: string
 }) {
   return (
@@ -50,7 +52,13 @@ export function TaskCard({
         {done && <CheckIcon className="size-3" strokeWidth={3} aria-hidden />}
       </button>
       <div className="min-w-0 flex-1">
-        <p className={cn("text-sm font-medium leading-snug", done && "line-through")}>{title}</p>
+        {onOpen ? (
+          <button type="button" onClick={onOpen} className={cn("block text-left text-sm font-medium leading-snug outline-none hover:underline focus-visible:underline", done && "line-through")}>
+            {title}
+          </button>
+        ) : (
+          <p className={cn("text-sm font-medium leading-snug", done && "line-through")}>{title}</p>
+        )}
         {context && <p className="mt-0.5 truncate text-xs text-muted-foreground">{context}</p>}
       </div>
       <span

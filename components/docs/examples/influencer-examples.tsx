@@ -1,13 +1,15 @@
 "use client"
 
 import * as React from "react"
+import { FileTextIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Block, BlockHeader } from "@/components/influencer/block"
 import { TaskCard } from "@/components/influencer/task-card"
 import { LinkGrid, LinkRow, type QuickLink } from "@/components/influencer/link-grid"
+import { ProfilePanel, ProfileTile } from "@/components/influencer/profile-panel"
 import { TaskTable } from "@/components/influencer/task-table"
-import { HOY, demoContactos, demoEnlaces, demoEtiquetasTarea, demoMarcas, demoPropuestas, demoTareas } from "@/lib/influencer/demo-data"
+import { HOY, demoContactos, demoEnlaces, demoPerfil, demoEtiquetasTarea, demoMarcas, demoPropuestas, demoTareas } from "@/lib/influencer/demo-data"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
 import { cuandoDe, textoDonde, type CuandoTarea } from "@/lib/influencer/tareas"
 import { alternarHecha, borrarTareas, crearTareas, conSubtareas, guardarTarea } from "@/lib/influencer/tareas-cambios"
@@ -108,4 +110,29 @@ export function LinkRowExample() {
   const [links, setLinks] = React.useState<QuickLink[]>(demoEnlaces.map((e) => ({ id: e.id, label: e.etiqueta, url: e.url })))
   const [editing, setEditing] = React.useState(false)
   return <LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} className="justify-start" />
+}
+
+/** La tarjeta del perfil del Inicio, con sus enlaces arriba a la derecha y el media kit junto a las cifras. */
+export function ProfilePanelExample() {
+  const [links, setLinks] = React.useState<QuickLink[]>(demoEnlaces.map((e) => ({ id: e.id, label: e.etiqueta, url: e.url })))
+  const [editing, setEditing] = React.useState(false)
+  return (
+    <ProfilePanel
+      className="max-w-xl"
+      name={demoPerfil.nombre}
+      handle={demoPerfil.handle}
+      photoUrl={demoPerfil.fotoUrl}
+      niche={demoPerfil.nicho}
+      tier={demoPerfil.tramo}
+      city={demoPerfil.ciudad}
+      accounts={demoPerfil.cuentas.map((c) => ({ network: c.red, handle: c.handle, url: c.url, followers: c.seguidores, avgViews: c.visualizacionesMedias, engagement: c.interaccion }))}
+      href="#"
+      links={<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} max={4} />}
+      actions={
+        <ProfileTile icon={<FileTextIcon />} label="Media kit" detail="Ver el PDF" asChild>
+          <a href="#" />
+        </ProfileTile>
+      }
+    />
+  )
 }

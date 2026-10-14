@@ -9,14 +9,16 @@ import { MediaKitHojas } from "@/components/influencer/media-kit-doc"
 import { marcasTrabajadas, obtenerMediaKit } from "@/lib/influencer/consultas"
 import { bloquesVisibles } from "@/lib/influencer/media-kit"
 import { PiezaCard } from "@/components/influencer/pieza-card"
-import { describirEntregables, siguienteHito, unidadesHechas, unidadesTotales } from "@/lib/influencer/collabs"
+import { DIAS_COLLAB_NUEVA, describirEntregables, hitosPendientes, marcaDe, siguienteHito, unidadesHechas, unidadesTotales } from "@/lib/influencer/collabs"
+import type { Collab } from "@/lib/influencer/modelo"
 import { Button } from "@/components/ui/button"
 import { Block, BlockHeader } from "@/components/influencer/block"
 import { StatRow, StatTile } from "@/components/influencer/stat-tile"
 import { CollabCard, CollabCardRow } from "@/components/influencer/collab-card"
-import { ProfilePanel } from "@/components/influencer/profile-panel"
+import { FranjaCollabs, type CollabEnFranja } from "@/components/influencer/franja-collabs"
+import { MiniCalendario } from "@/components/influencer/mini-calendario"
 import { NoticeHighlight, NoticeItem } from "@/components/influencer/notice-card"
-import { LinkGridExample, LinkRowExample, TaskBlockExample, TaskTableExample } from "@/components/docs/examples/influencer-examples"
+import { LinkGridExample, LinkRowExample, ProfilePanelExample, TaskBlockExample, TaskTableExample } from "@/components/docs/examples/influencer-examples"
 import { EditorGuionExample, FotosExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
 import { AgendaContenidosExample, CalendarioContenidosExample, CapturaIdeaExample, CaptionExample, GaleriaIdeasExample } from "@/components/docs/examples/contenidos-examples"
 import { DocPage, DocSection, Example, NextLinks, Prose, Rules } from "@/components/docs/doc"
@@ -36,6 +38,10 @@ export default function InfluencerComponentesPage() {
     nextDate: siguienteHito(c)?.fecha ?? c.hasta,
     tint: c.tint,
   })
+  const panel = (c: Collab, nueva: boolean): CollabEnFranja => {
+    const [ahora, despues] = hitosPendientes(c)
+    return { id: c.id, marca: marcaDe(c, demoMarcas).nombre, campana: c.campana, portadaUrl: c.coverUrl, tint: c.tint, hechas: unidadesHechas(c), totales: unidadesTotales(c), ahora, despues, tareas: nueva ? 0 : 2, nueva, href: "#" }
+  }
   return (
     <DocPage
       eyebrow="Influencer Workspace · Componentes"
@@ -109,34 +115,63 @@ export default function InfluencerComponentesPage() {
         </Example>
       </DocSection>
 
-      <DocSection id="profile" title="Mini panel del perfil" lead="Foto, nombre, nicho y tramo, y una fila por red con seguidores, visualizaciones medias y el enlace a su perfil.">
+      <DocSection id="franja" title="Collabs en diagonal" lead="Las collabs en marcha como paneles que llenan todo su hueco y se pisan en diagonal, la más urgente encima de la siguiente: la imagen de la campaña, lo que toca ahora y lo que viene después, las piezas hechas y sus tareas. La recién creada va en el acento.">
+        <Example className={EXAMPLE} code={`<FranjaCollabs
+  collabs={[
+    { id, marca: "Lumea Skin", campana: "Rutina de noche", portadaUrl, tint: "rose", hechas: 2, totales: 4,
+      ahora: { label: "Entregar la V1 · Reel", fecha: "2026-10-09" },
+      despues: { label: "Publicar · Reel", fecha: "2026-10-14" },
+      tareas: 2, nueva: false, href: "/workspace/collabs/lumea" },
+    …
+  ]}
+/>`}>
+          <FranjaCollabs className="h-80 w-full" collabs={demoCollabs.slice(0, 4).map((c, i) => panel(c, i === 1))} />
+        </Example>
+        <Rules
+          items={[
+            <>Hasta cuatro paneles: los nuevos primero y luego por lo que toca antes. Uno solo ocupa todo el bloque sin cortes.</>,
+            <>Nueva es la creada hace menos de {DIAS_COLLAB_NUEVA} días (<code>esCollabNueva</code>): fondo o degradado del acento, la etiqueta «Nueva» y un poco más ancha.</>,
+            <>Al pasar el ratón (o con el foco del teclado), el panel sube encima de todos, pierde el corte y se queda casi todo el bloque; los demás se quedan en una tira de su imagen, sin texto. En el móvil, los paneles se deslizan conservando el corte.</>,
+            <>«Ahora» y «Después» son los dos primeros hitos sin hacer (<code>hitosPendientes</code>); sin ninguno, «Todo entregado».</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="mini-calendario" title="Calendario pequeño" lead="El mes de un vistazo para un resumen, como Google Calendar: cada día es un bloque con lo que tiene escrito en pequeño (hitos, cobros, tareas) en el tinte de su collab, y crece hasta llenar su bloque.">
+        <Example className={EXAMPLE} code={`<Block>
+  <BlockHeader title="Calendario" href="/workspace/contenidos/planificacion" />
+  <MiniCalendario eventos={eventos} hoy={hoy} hrefDia={(dia) => "/workspace/contenidos/planificacion?dia=" + dia} />
+</Block>`}>
+          <Block className="h-[30rem] w-full max-w-md">
+            <BlockHeader title="Calendario" href="#" />
+            <MiniCalendario className="flex-1" eventos={eventosDeCollabs(demoCollabs, demoMarcas)} hoy={HOY} />
+          </Block>
+        </Example>
+        <Rules
+          items={[
+            <>Dos cosas escritas por día y «+N», que lleva a ese día en el calendario completo; el nombre entero, al pasar el ratón. Las hechas, tachadas y atenuadas. Cinco o seis semanas, las que pida el mes.</>,
+            <>Para operar (mover, crear) está el calendario completo: este solo enseña y lleva a su sitio.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="profile" title="Tarjeta del perfil" lead="Foto, nombre, nicho y tramo; arriba a la derecha sus enlaces y, debajo, las views medias y la interacción de la red elegida. Al pie, una ficha por red con sus seguidores (al pulsarla, las cifras pasan a ser las suyas) y el media kit.">
         <Example className={EXAMPLE} code={`<ProfilePanel
   name={profile.name} handle={profile.handle} photoUrl={profile.photoUrl}
   niche="Skincare y maquillaje" tier="50K–100K" city="Valencia"
-  accounts={profile.accounts}
-  actions={<><Button variant="outline" size="sm">Media kit</Button><Button variant="ghost" size="sm">Ver perfil</Button></>}
+  accounts={profile.accounts} href="/workspace/perfil"
+  links={<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} />}
+  actions={<ProfileTile icon={<FileTextIcon />} label="Media kit" detail="Ver el PDF" asChild><a href="/media-kit" /></ProfileTile>}
 />`}>
-          <ProfilePanel
-            className="max-w-sm"
-            name={demoPerfil.nombre}
-            handle={demoPerfil.handle}
-            photoUrl={demoPerfil.fotoUrl}
-            niche={demoPerfil.nicho}
-            tier={demoPerfil.tramo}
-            city={demoPerfil.ciudad}
-            accounts={demoPerfil.cuentas.map((c) => ({ network: c.red, handle: c.handle, url: c.url, followers: c.seguidores, avgViews: c.visualizacionesMedias }))}
-            actions={
-              <>
-                <Button variant="outline" size="sm">
-                  Media kit
-                </Button>
-                <Button variant="ghost" size="sm">
-                  Ver perfil
-                </Button>
-              </>
-            }
-          />
+          <ProfilePanelExample />
         </Example>
+        <Rules
+          items={[
+            <>Abre en la red con más seguidores. La interacción solo sale si la red la tiene.</>,
+            <>Las fichas del pie (cada red y el media kit, con <code>ProfileTile</code>) crecen hasta llenar la tarjeta: junto a las cifras, a la misma altura, no queda hueco.</>,
+            <>Por debajo de 448 px de tarjeta, los enlaces y las cifras bajan bajo el nombre. En la tarjeta caben cuatro enlaces a la vista (<code>LinkRow max={4}</code>).</>,
+          ]}
+        />
       </DocSection>
 
       <DocSection id="notice" title="Avisos" lead="El que más importa va en una tarjeta del acento con su acción; los demás, en lista, con el punto y la negrita si no están leídos.">
