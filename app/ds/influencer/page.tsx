@@ -32,7 +32,7 @@ export default function InfluencerIntroPage() {
         <SpecTable
           columns={["Pieza", "Hereda de Astratic UI", "Cambia aquí"]}
           rows={[
-            ["Sidebar y cabecera", "El shell entero: sidebar, migas, buscador ⌘K, bicho, campana y tema", "Fondo blanco sobre el gris de la página; en el móvil se añade una barra inferior con las cinco páginas"],
+            ["Sidebar y cabecera", "El shell entero: sidebar, migas, buscador ⌘K, bombilla de sugerencias, campana y tema", "Fondo blanco sobre el gris de la página; en el móvil se añade una barra inferior con las cinco páginas"],
             ["Botones, formularios, diálogos", "Tal cual: mismas variantes, tamaños y copy", "Nada"],
             ["Tipografía e iconos", "Geist y lucide, mismos tamaños", "Nada"],
             ["Estados y feedback", "StatusBadge, EmptyState, skeletons, toasts, ConfirmDialog", "Nada"],

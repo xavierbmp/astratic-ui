@@ -133,7 +133,7 @@ export function DetailHeader({
             <Descripcion className="sr-only">Detalle</Descripcion>
           )}
         </div>
-        {/* El bicho de la cabecera del shell queda tapado por la ficha: aquí, a mano para reportar algo de ella. */}
+        {/* La bombilla de la cabecera del shell queda tapado por la ficha: aquí, a mano para reportar algo de ella. */}
         <div className="flex flex-none items-center gap-0.5">
           {nav}
           <ReportTrigger />

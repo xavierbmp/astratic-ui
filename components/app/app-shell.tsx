@@ -84,7 +84,7 @@ export function AppShell({
   headerEnd?: React.ReactNode
   /** Contenido del menú desplegable del usuario (pie de la sidebar): «Ir a…», tema, cerrar sesión. */
   userMenu?: React.ReactNode
-  /** Botón «Reportar un problema» (`ReportButton`) ya montado; va entre el buscador y la campana. */
+  /** Botón «Sugerencias y problemas» (`ReportButton`) ya montado; va entre el buscador y la campana. */
   report?: React.ReactNode
   /** Botón de notificaciones ya montado; si no se pasa, se muestra el icono sin punto. */
   notifications?: React.ReactNode

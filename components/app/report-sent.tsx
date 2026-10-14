@@ -3,7 +3,7 @@
 // Pestaña «Enviados» de `ReportButton`: los reportes que ha mandado quien la abre, con su estado y la respuesta.
 
 import * as React from "react"
-import { BugIcon } from "lucide-react"
+import { LightbulbIcon } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyState, ErrorState } from "@/components/app/states"
 import { StatusBadge } from "@/components/app/status-badge"
@@ -62,7 +62,7 @@ export function SentReports({ load }: { load: () => Promise<ReportItem[]> }) {
     return (
       <ErrorState
         className="py-8"
-        title="No se han podido cargar los reportes"
+        title="No se han podido cargar tus envíos"
         onRetry={() => {
           setState({ status: "loading" })
           setAttempt((a) => a + 1)
@@ -73,9 +73,9 @@ export function SentReports({ load }: { load: () => Promise<ReportItem[]> }) {
     return (
       <EmptyState
         className="py-8"
-        icon={BugIcon}
-        title="Aún no hay reportes"
-        description="Cuando envíes uno, aquí verás si está pendiente, en curso o resuelto."
+        icon={LightbulbIcon}
+        title="Aún no has enviado nada"
+        description="Cuando envíes una sugerencia o un problema, aquí verás si está pendiente, en curso o resuelto."
       />
     )
   return (

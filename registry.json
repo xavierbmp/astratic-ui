@@ -100,8 +100,8 @@
     {
       "name": "report-button",
       "type": "registry:component",
-      "title": "Reportar un problema",
-      "description": "Botón del bicho para la cabecera del shell: diálogo para contar qué falla o qué cambiar, selector para señalar el elemento en la página (también dentro de fichas y diálogos), imágenes (botón, pegar o arrastrar), lienzo para mover, estirar o quitar bloques de la pantalla y dibujar encima, contexto automático (ruta, pantalla, tema, errores recientes) y pestaña con los reportes enviados y su estado. Se abre con ⇧⌘X.",
+      "title": "Sugerencias y problemas",
+      "description": "Botón de la bombilla para la cabecera del shell: diálogo para proponer un cambio o contar qué falla, selector para señalar el elemento en la página (también dentro de fichas y diálogos), imágenes (botón, pegar o arrastrar), lienzo para mover, estirar o quitar bloques de la pantalla y dibujar encima, contexto automático (ruta, pantalla, tema, errores recientes) y pestaña con los reportes enviados y su estado. Se abre con ⇧⌘X.",
       "dependencies": ["lucide-react", "sonner", "modern-screenshot"],
       "registryDependencies": ["button", "dialog", "kbd", "label", "skeleton", "tabs", "textarea", "tooltip", "badge"],
       "files": [

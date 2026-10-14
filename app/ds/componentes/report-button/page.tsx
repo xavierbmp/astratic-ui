@@ -3,7 +3,7 @@ import { CodeBlock } from "@/components/docs/code-block"
 import { ReportExample } from "@/components/docs/examples/report-demo"
 import { StatusBadge } from "@/components/app/status-badge"
 
-export const metadata = { title: "Reportar un problema" }
+export const metadata = { title: "Sugerencias y problemas" }
 
 const shellCode = `"use client"
 
@@ -44,8 +44,8 @@ export default function ReportButtonPage() {
   return (
     <DocPage
       eyebrow="Componentes"
-      title="Reportar un problema"
-      lead="El bicho de la cabecera. Quien usa el portal cuenta qué falla o qué quiere cambiar y, si quiere, lo señala en la página, adjunta imágenes o lo marca en un lienzo; el reporte llega con todo lo necesario para resolverlo sin tener que preguntar."
+      title="Sugerencias y problemas"
+      lead="La bombilla de la cabecera. Quien usa el portal propone un cambio o cuenta qué falla y, si quiere, lo señala en la página, adjunta imágenes o lo marca en un lienzo; el reporte llega con todo lo necesario para resolverlo sin tener que preguntar."
     >
       <DocSection id="uso" title="Cuándo se usa">
         <Prose>
@@ -58,7 +58,7 @@ export default function ReportButtonPage() {
         <Rules
           items={[
             <>
-              <strong>Diálogo de 480 px con dos pestañas.</strong> «Nuevo» pide qué pasa y, opcionalmente, el elemento y
+              <strong>Diálogo de 480 px con dos pestañas.</strong> «Nuevo» pide la sugerencia o lo que falla y, opcionalmente, el elemento y
               las imágenes; «Enviados» enseña los reportes con su estado, sus miniaturas y la respuesta de quien los cerró.
             </>,
             <>
@@ -80,7 +80,7 @@ export default function ReportButtonPage() {
             <>
               <strong>⇧⌘X lo abre desde cualquier sitio</strong>, también con una ficha o un diálogo abiertos, que tapan
               la cabecera. Así se puede señalar algo dentro de un <code>DetailSheet</code>. Por eso cada ficha lleva
-              además el bicho en pequeño junto a sus flechas (<code>ReportTrigger</code>, ya incluido en{" "}
+              además la bombilla en pequeño junto a sus flechas (<code>ReportTrigger</code>, ya incluido en{" "}
               <code>DetailHeader</code>), que abre el mismo diálogo.
             </>,
             <>
@@ -100,7 +100,7 @@ export default function ReportButtonPage() {
         title="Ejemplo"
         lead="La cabecera del shell en pequeño. Prueba a señalar algo de esta página y a mirar la pestaña «Enviados»: en la demo los reportes se quedan en memoria."
       >
-        <Example title="Bicho entre el buscador y la campana" description="Pulsa el bicho. ⇧⌘X abre el de la cabecera de esta página: solo uno por pantalla lleva el atajo.">
+        <Example title="Bombilla entre el buscador y la campana" description="Pulsa la bombilla. ⇧⌘X abre el de la cabecera de esta página: solo uno por pantalla lleva el atajo.">
           <ReportExample />
         </Example>
         <CodeBlock title="shell.tsx" code={shellCode} />

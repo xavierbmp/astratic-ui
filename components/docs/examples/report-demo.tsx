@@ -55,7 +55,7 @@ export function ReportExample() {
           <span className="flex-1">Buscar en el portal…</span>
           <Kbd>⌘K</Kbd>
         </span>
-        {/* Sin atajo: ⇧⌘X ya lo atiende el bicho de la cabecera de esta página. */}
+        {/* Sin atajo: ⇧⌘X ya lo atiende la bombilla de la cabecera de esta página. */}
         <DemoReportButton shortcut={false} />
         <Button variant="ghost" size="icon" aria-label="Notificaciones">
           <BellIcon />

@@ -50,7 +50,7 @@ export default async function ShellPage() {
             </>,
             <>
               <strong>Cabecera de 48 px</strong> con <code>SidebarTrigger</code>, migas automáticas «Grupo › Página», y a la
-              derecha el buscador, el bicho de reportar un problema (prop <code>report</code>), la campana, el{" "}
+              derecha el buscador, la bombilla de sugerencias y problemas (prop <code>report</code>), la campana, el{" "}
               <code>ThemeToggle</code> y lo que pases en <code>headerEnd</code>.
             </>,
             <>
@@ -58,10 +58,10 @@ export default async function ShellPage() {
               shell las añade detrás de la página y las quita al desmontar.
             </>,
             <>
-              <strong>Reportar un problema</strong>: <code>ReportButton</code> en la prop <code>report</code>, entre el
+              <strong>Sugerencias y problemas</strong>: <code>ReportButton</code> en la prop <code>report</code>, entre el
               buscador y la campana. Se abre también con ⇧⌘X, con una ficha abierta. Ver{" "}
               <Link href="/ds/componentes/report-button" className="underline underline-offset-4">
-                Reportar un problema
+                Sugerencias y problemas
               </Link>
               .
             </>,

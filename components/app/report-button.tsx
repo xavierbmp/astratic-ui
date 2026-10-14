@@ -1,14 +1,14 @@
 "use client"
 
-// «Reportar un problema», el botón del bicho en la cabecera del shell.
-// Quien usa el portal cuenta qué falla y, si quiere, señala el elemento en la página. El reporte
+// «Sugerencias y problemas», el botón de la bombilla en la cabecera del shell.
+// Quien usa el portal propone un cambio o cuenta qué falla y, si quiere, señala el elemento en la página. El reporte
 // sale con su contexto (ruta, pantalla, tema, errores recientes y, si lo hay, el elemento con sus
 // contenedores del kit) para que quien lo arregle lo encuentre sin tener que preguntar.
 // Se abre también con ⇧⌘X, que funciona con una ficha o un diálogo abiertos (tapan la cabecera), y
-// con `ReportTrigger`, el mismo bicho en pequeño en la cabecera de cada ficha.
+// con `ReportTrigger`, la misma bombilla en pequeño en la cabecera de cada ficha.
 
 import * as React from "react"
-import { BugIcon, InfoIcon, SendIcon, SquareDashedMousePointerIcon, XIcon } from "lucide-react"
+import { InfoIcon, LightbulbIcon, SendIcon, SquareDashedMousePointerIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
@@ -32,6 +32,9 @@ const ReportCanvas = React.lazy(() => import("@/components/app/report-canvas"))
 
 export type ReportDraft = { description: string; element: ReportElement | null; context: ReportContext; attachments: ReportAttachment[] }
 
+/** Nombre del botón: sirve igual para proponer un cambio que para contar un fallo. */
+const LABEL = "Sugerencias y problemas"
+
 // ---------- Abrirlo desde una ficha ----------
 
 // El `ReportButton` principal (el que lleva el atajo) se apunta aquí al montarse, para que
@@ -46,7 +49,7 @@ const subscribe = (l: () => void) => {
 const hasOpener = () => openers.size > 0
 
 /**
- * El bicho en pequeño para la cabecera de una ficha (`DetailHeader` ya lo lleva): abre el diálogo
+ * La bombilla en pequeño para la cabecera de una ficha (`DetailHeader` ya lo lleva): abre el diálogo
  * del `ReportButton` del shell, que la ficha tapa. Sin un `ReportButton` montado no se pinta.
  */
 export function ReportTrigger({ className }: { className?: string }) {
@@ -55,12 +58,12 @@ export function ReportTrigger({ className }: { className?: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label="Reportar un problema" className={cn("text-muted-foreground", className)} onClick={() => openers.values().next().value?.()}>
-          <BugIcon />
+        <Button variant="ghost" size="icon-sm" aria-label={LABEL} className={cn("text-muted-foreground", className)} onClick={() => openers.values().next().value?.()}>
+          <LightbulbIcon />
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        Reportar un problema <Kbd>⇧⌘X</Kbd>
+        {LABEL} <Kbd>⇧⌘X</Kbd>
       </TooltipContent>
     </Tooltip>
   )
@@ -71,7 +74,7 @@ export function ReportTrigger({ className }: { className?: string }) {
 export function ReportButton({
   onSubmit,
   loadReports,
-  description = "Cuenta qué falla y, si quieres, señálalo en la página. Lo revisamos y aquí verás cuándo está resuelto.",
+  description = "Cuéntanos qué cambiarías o qué falla y, si quieres, señálalo en la página. Lo revisamos y aquí verás cuándo está resuelto.",
   shortcut = true,
 }: {
   /** Guarda el reporte. Devuelve el mensaje de error, o nada si ha ido bien. */
@@ -172,14 +175,14 @@ export function ReportButton({
       context: readContext(),
       attachments: attachments.drafts(),
     }).catch((e: unknown) =>
-      e instanceof Error ? e.message : "No se ha podido enviar el reporte.",
+      e instanceof Error ? e.message : "No se ha podido enviar.",
     )
     setSending(false)
     if (error) {
       toast.error(error)
       return
     }
-    toast.success("Reporte enviado", {
+    toast.success("Enviado, ¡gracias!", {
       description: loadReports ? "En «Enviados» verás cuándo está resuelto." : undefined,
     })
     setText("")
@@ -194,7 +197,7 @@ export function ReportButton({
   const form = (
     <div className="grid min-w-0 gap-4">
       <div className="grid min-w-0 gap-2">
-        <Label htmlFor="report-text">Qué pasa</Label>
+        <Label htmlFor="report-text">Tu sugerencia o lo que falla</Label>
         <Textarea
           ref={textRef}
           id="report-text"
@@ -207,7 +210,7 @@ export function ReportButton({
               void send()
             }
           }}
-          placeholder="Qué estabas haciendo, qué esperabas y qué ha pasado. O qué quieres cambiar y cómo."
+          placeholder="Qué cambiarías o añadirías y cómo. O qué estabas haciendo, qué esperabas y qué ha pasado."
           className="min-h-28"
         />
       </div>
@@ -255,18 +258,18 @@ export function ReportButton({
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Reportar un problema"
+            aria-label={LABEL}
             aria-keyshortcuts={shortcut ? "Shift+Meta+X" : undefined}
             onClick={() => {
               setTab("new")
               show()
             }}
           >
-            <BugIcon />
+            <LightbulbIcon />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          Reportar un problema {shortcut && <Kbd>⇧⌘X</Kbd>}
+          {LABEL} {shortcut && <Kbd>⇧⌘X</Kbd>}
         </TooltipContent>
       </Tooltip>
 
@@ -303,7 +306,7 @@ export function ReportButton({
           }}
         >
           <DialogHeader>
-            <DialogTitle>Reportar un problema</DialogTitle>
+            <DialogTitle>¿Tienes alguna sugerencia o algo no funciona bien?</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
           {loadReports ? (
@@ -326,7 +329,7 @@ export function ReportButton({
             </Button>
             {tab === "new" && (
               <Button type="button" onClick={() => void send()} disabled={!text.trim() || sending}>
-                <SendIcon /> {sending ? "Enviando…" : "Enviar reporte"}
+                <SendIcon /> {sending ? "Enviando…" : "Enviar"}
               </Button>
             )}
           </DialogFooter>
