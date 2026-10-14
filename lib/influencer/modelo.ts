@@ -1091,7 +1091,7 @@ export type Plantilla = {
 export type BloqueMediaKit = "portada" | "cifras" | "redes" | "audiencia" | "destacados" | "marcas" | "tarifas" | "contacto"
 
 export const BLOQUES_MEDIA_KIT: Record<BloqueMediaKit, { label: string; descripcion: string }> = {
-  portada: { label: "Portada", descripcion: "Foto, nombre, titular y bio" },
+  portada: { label: "Portada", descripcion: "Imagen de portada, foto, nombre, titular y bio" },
   cifras: { label: "Cifras clave", descripcion: "Seguidores, visualizaciones, interacción y España" },
   redes: { label: "Mis redes", descripcion: "Cada cuenta con sus números" },
   audiencia: { label: "Audiencia", descripcion: "Género, edades y países" },
@@ -1114,6 +1114,10 @@ export type Destacado = {
 
 export type MediaKit = {
   bloques: { id: BloqueMediaKit; visible: boolean }[]
+  /** La imagen ancha de arriba, como la de LinkedIn; sin ella, un fondo de color. */
+  portadaUrl?: string
+  /** Lo que se esconde dentro de los bloques visibles, por clave «bloque.dato» (`datosDelBloque`). Xavier, 2026-10-14. */
+  ocultos?: string[]
   /** La frase de la portada: qué haces y para quién. */
   titular: string
   bio: string

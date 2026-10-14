@@ -1,8 +1,9 @@
 import Image from "next/image"
-import { MailIcon, ShieldCheckIcon } from "lucide-react"
+import { BadgeCheckIcon, MailIcon, MapPinIcon, ShieldCheckIcon } from "lucide-react"
+import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { FORMATOS, type BloqueMediaKit, type MediaKit, type Perfil } from "@/lib/influencer/modelo"
-import { cifrasDelPerfil, hojasDelMediaKit } from "@/lib/influencer/media-kit"
+import { cifrasDelPerfil, hojasDelMediaKit, seVe } from "@/lib/influencer/media-kit"
 import { nombreMes, soloFecha } from "@/lib/influencer/fechas"
 import { SocialIcon, socialLabel } from "@/components/app/social-icons"
 import { DocKeyFacts, DocNotice, DocSimpleSection, DocTable, DocText } from "@/components/document/simple"
@@ -20,8 +21,10 @@ type Props = {
 }
 
 /**
- * El media kit en hojas A4: cada bloque visible en el orden elegido, repartido en hojas sin partir
- * ninguno. Lo usan el editor (vista previa), `/media-kit` y el documento de cada propuesta.
+ * El media kit en hojas A4, como un documento de diseño (Xavier, 2026-10-14): la portada con su imagen ancha y la
+ * foto encima, como en LinkedIn; cada red en su tarjeta; y en cada bloque solo lo que no se ha escondido (`ocultos`).
+ * Cada bloque visible va en el orden elegido, repartido en hojas sin partir ninguno. Lo usan el editor (vista previa),
+ * `/media-kit` y el documento de cada propuesta.
  */
 export function MediaKitHojas({ perfil, kit, bloques, marcasTrabajadas, pie }: Props) {
   return (
@@ -44,74 +47,126 @@ export function hojasMediaKit(bloques: BloqueMediaKit[]) {
 
 function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMediaKit; perfil: Perfil; kit: MediaKit; marcasTrabajadas: string[] }) {
   const cifras = cifrasDelPerfil(perfil)
+  const ver = (clave: string) => seVe(kit, clave)
   switch (bloque) {
-    case "portada":
+    case "portada": {
+      const conImagen = ver("portada.imagen")
+      const linea = [ver("portada.usuario") && perfil.handle, ver("portada.nicho") && perfil.nicho].filter(Boolean).join(" · ")
       return (
-        <div className="mt-[30px] flex items-start gap-6">
-          {perfil.fotoUrl ? (
-            <span className="relative size-[132px] flex-none overflow-hidden rounded-2xl bg-muted">
-              <Image src={perfil.fotoUrl} alt={perfil.nombre} fill sizes="132px" className="object-cover" />
-            </span>
-          ) : (
-            <AvatarInitials name={perfil.nombre} size="xl" className="size-[132px] flex-none text-4xl" />
+        <div className="mt-[22px]">
+          {conImagen && (
+            <div className="relative h-[150px] overflow-hidden rounded-2xl bg-tint-lavender">
+              {kit.portadaUrl ? (
+                <Image src={kit.portadaUrl} alt="" fill sizes="680px" className="object-cover" />
+              ) : (
+                <span aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,var(--tint-sky),transparent_55%),radial-gradient(circle_at_85%_80%,var(--tint-rose),transparent_55%)]" />
+              )}
+            </div>
           )}
-          <div className="min-w-0 pt-1">
-            <h1 className="text-[28px] leading-[1.15] font-semibold tracking-[-0.02em]">{perfil.nombre}</h1>
-            <p className="mt-1 text-[12.5px] text-muted-foreground">
-              {perfil.handle} · {perfil.nicho} · {perfil.ciudad}
-            </p>
-            <p className="mt-3 max-w-[470px] text-[14px] leading-[1.45] font-semibold">{kit.titular}</p>
-            <p className="mt-1.5 max-w-[470px] text-[12px] leading-[1.6] text-muted-foreground">{kit.bio}</p>
+          <div className={cn("flex items-end gap-5", conImagen ? "-mt-[48px] px-5" : "")}>
+            {ver("portada.foto") &&
+              (perfil.fotoUrl ? (
+                <span className="relative size-[112px] flex-none overflow-hidden rounded-full bg-muted ring-[5px] ring-card">
+                  <Image src={perfil.fotoUrl} alt={perfil.nombre} fill sizes="112px" className="object-cover" />
+                </span>
+              ) : (
+                <AvatarInitials name={perfil.nombre} size="xl" className="size-[112px] flex-none rounded-full text-4xl ring-[5px] ring-card" />
+              ))}
+            <div className="min-w-0 pb-1.5">
+              <h1 className="flex items-center gap-2 text-[26px] leading-[1.15] font-semibold tracking-[-0.02em]">
+                {perfil.nombre}
+                {ver("contacto.sello") && <BadgeCheckIcon className="size-5 flex-none text-brand" aria-label="Perfil auditado por Astratic" />}
+              </h1>
+              {(linea || ver("portada.ciudad")) && (
+                <p className="mt-1 flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                  {linea}
+                  {ver("portada.ciudad") && perfil.ciudad && (
+                    <span className="inline-flex items-center gap-1">
+                      {linea && "·"} <MapPinIcon className="size-3" /> {perfil.ciudad}
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className={cn(conImagen && "px-5")}>
+            {ver("portada.titular") && kit.titular && <p className="mt-4 max-w-[540px] text-[15px] leading-[1.45] font-semibold">{kit.titular}</p>}
+            {ver("portada.bio") && kit.bio && <p className="mt-1.5 max-w-[560px] text-[12px] leading-[1.6] text-muted-foreground">{kit.bio}</p>}
           </div>
         </div>
       )
-    case "cifras":
-      return (
-        <DocKeyFacts
-          className="mt-[22px]"
-          items={[
-            { label: "Seguidores", value: fmt.compact(cifras.seguidores) },
-            { label: "Visualizaciones medias", value: fmt.compact(cifras.visualizaciones) },
-            { label: "Interacción media", value: fmt.pct(cifras.interaccion) },
-            { label: "Audiencia en España", value: fmt.pct(perfil.audiencia.espana) },
-          ]}
-        />
-      )
-    case "redes":
+    }
+    case "cifras": {
+      const items = [
+        ver("cifras.seguidores") && { label: "Seguidores", value: fmt.compact(cifras.seguidores) },
+        ver("cifras.visualizaciones") && { label: "Visualizaciones medias", value: fmt.compact(cifras.visualizaciones) },
+        ver("cifras.interaccion") && { label: "Interacción media", value: fmt.pct(cifras.interaccion) },
+        ver("cifras.espana") && { label: "Audiencia en España", value: fmt.pct(perfil.audiencia.espana) },
+      ].filter((x) => x !== false)
+      return items.length ? <DocKeyFacts className="mt-[22px]" items={items} /> : null
+    }
+    case "redes": {
+      const cuentas = perfil.cuentas.filter((c) => ver(`redes.${c.red}`))
+      if (!cuentas.length) return null
       return (
         <DocSimpleSection title="Mis redes">
-          <DocTable
-            columns={[{ label: "Red" }, { label: "Seguidores", className: "w-[100px] text-right" }, { label: "Visualizaciones medias", className: "w-[150px] text-right" }, { label: "Interacción", className: "w-[90px] text-right" }]}
-            rows={perfil.cuentas.map((c) => [
-              <span key="r" className="inline-flex items-center gap-1.5 font-medium">
-                <SocialIcon network={c.red} className="size-3" /> {socialLabel[c.red]} <span className="font-normal text-muted-foreground">{c.handle}</span>
-              </span>,
-              <span key="s" className="block text-right tabular-nums">{fmt.num(c.seguidores)}</span>,
-              <span key="v" className="block text-right tabular-nums">{fmt.num(c.visualizacionesMedias)}</span>,
-              <span key="i" className="block text-right tabular-nums">{fmt.pct(c.interaccion)}</span>,
-            ])}
-          />
-          <DocText muted className="mt-2">Visualizaciones medias de las últimas publicaciones, sin contar las promocionadas.</DocText>
+          <div className="mt-2.5 grid grid-cols-3 gap-3">
+            {cuentas.map((c) => (
+              <div key={c.red} className="rounded-xl border p-3.5">
+                <p className="flex items-center gap-1.5 text-[12px] font-semibold">
+                  <SocialIcon network={c.red} className="size-3.5" /> {socialLabel[c.red]}
+                </p>
+                <p className="truncate text-[10.5px] text-muted-foreground">{c.handle}</p>
+                <p className="mt-2.5 text-[24px] leading-none font-semibold tracking-[-0.02em] tabular-nums">{fmt.compact(c.seguidores)}</p>
+                <p className="mt-1 text-[10.5px] text-muted-foreground">{c.red === "youtube" ? "suscriptores" : "seguidores"}</p>
+                {(ver("redes.visualizaciones") || ver("redes.interaccion")) && (
+                  <dl className="mt-3 grid grid-cols-2 gap-2 border-t pt-2.5">
+                    {ver("redes.visualizaciones") && (
+                      <div>
+                        <dt className="text-[10px] text-muted-foreground">Views medias</dt>
+                        <dd className="text-[13px] font-semibold tabular-nums">{c.visualizacionesMedias ? fmt.compact(c.visualizacionesMedias) : "—"}</dd>
+                      </div>
+                    )}
+                    {ver("redes.interaccion") && (
+                      <div>
+                        <dt className="text-[10px] text-muted-foreground">Interacción</dt>
+                        <dd className="text-[13px] font-semibold tabular-nums">{c.interaccion ? fmt.pct(c.interaccion) : "—"}</dd>
+                      </div>
+                    )}
+                  </dl>
+                )}
+              </div>
+            ))}
+          </div>
+          {ver("redes.visualizaciones") && <DocText muted className="mt-2">Visualizaciones medias de las últimas publicaciones, sin contar las promocionadas.</DocText>}
         </DocSimpleSection>
       )
-    case "audiencia":
+    }
+    case "audiencia": {
+      const partes = [
+        ver("audiencia.mujeres") && <Barra key="m" label="Mujeres" valor={perfil.audiencia.mujeres} />,
+        ver("audiencia.espana") && <Barra key="e" label="En España" valor={perfil.audiencia.espana} />,
+        ver("audiencia.edades") && (
+          <div key="a">
+            <p className="text-[11px] text-muted-foreground">Edad principal</p>
+            <p className="mt-0.5 text-[15px] font-semibold tracking-[-0.01em]">{perfil.audiencia.edades}</p>
+          </div>
+        ),
+      ].filter(Boolean)
+      if (!partes.length) return null
       return (
         <DocSimpleSection title="Audiencia">
-          <div className="mt-2.5 grid grid-cols-3 gap-6">
-            <Barra label="Mujeres" valor={perfil.audiencia.mujeres} />
-            <Barra label="En España" valor={perfil.audiencia.espana} />
-            <div>
-              <p className="text-[11px] text-muted-foreground">Edad principal</p>
-              <p className="mt-0.5 text-[15px] font-semibold tracking-[-0.01em]">{perfil.audiencia.edades}</p>
-            </div>
-          </div>
+          <div className="mt-2.5 grid grid-cols-3 gap-6">{partes}</div>
         </DocSimpleSection>
       )
-    case "destacados":
+    }
+    case "destacados": {
+      const destacados = kit.destacados.slice(0, 3).filter((d) => ver(`destacados.${d.id}`))
+      if (!destacados.length) return null
       return (
         <DocSimpleSection title="Contenidos destacados">
           <div className="mt-2.5 grid grid-cols-3 gap-4">
-            {kit.destacados.slice(0, 3).map((d) => (
+            {destacados.map((d) => (
               <figure key={d.id} className="min-w-0">
                 <span className="relative block aspect-[4/5] overflow-hidden rounded-xl bg-muted">
                   <Image src={d.imagenUrl} alt="" fill sizes="190px" className="object-cover" />
@@ -127,11 +182,14 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
           </div>
         </DocSimpleSection>
       )
-    case "marcas":
+    }
+    case "marcas": {
+      const marcas = marcasTrabajadas.filter((m) => ver(`marcas.${m}`))
+      if (!marcas.length) return null
       return (
         <DocSimpleSection title="Marcas con las que he trabajado">
           <div className="mt-2.5 flex flex-wrap gap-1.5">
-            {marcasTrabajadas.map((m) => (
+            {marcas.map((m) => (
               <span key={m} className="rounded-md border px-2 py-0.5 text-[11.5px] font-medium">
                 {m}
               </span>
@@ -139,25 +197,34 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
           </div>
         </DocSimpleSection>
       )
-    case "tarifas":
+    }
+    case "tarifas": {
+      const tarifas = perfil.tarifas.filter((t) => ver(`tarifas.${t.formato}`))
+      if (!tarifas.length) return null
       return (
         <DocSimpleSection title="Tarifas de salida">
           <DocTable
             columns={[{ label: "Formato" }, { label: "Precio", className: "w-[110px] text-right" }]}
-            rows={perfil.tarifas.map((t) => [FORMATOS[t.formato].label, <span key="p" className="block text-right tabular-nums">{fmt.eur(t.precio)}</span>])}
+            rows={tarifas.map((t) => [FORMATOS[t.formato].label, <span key="p" className="block text-right tabular-nums">{fmt.eur(t.precio)}</span>])}
           />
-          <DocText muted className="mt-2">IVA aparte. Packs, derechos de uso, exclusividad y paid se presupuestan según la campaña.</DocText>
+          {ver("tarifas.nota") && <DocText muted className="mt-2">IVA aparte. Packs, derechos de uso, exclusividad y paid se presupuestan según la campaña.</DocText>}
         </DocSimpleSection>
       )
+    }
     case "contacto":
+      if (!ver("contacto.email") && !ver("contacto.sello")) return null
       return (
         <DocSimpleSection title="Hablamos">
-          <p className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-semibold">
-            <MailIcon className="size-3.5" /> {perfil.email}
-          </p>
-          <DocNotice tone="info" icon={ShieldCheckIcon} className="mt-3">
-            Perfil auditado por Astratic Network: tramo {perfil.tramo}, cifras verificadas en {nombreMes(soloFecha(kit.actualizadoEl))}. Todo el contenido patrocinado se marca como publicidad según el código de Autocontrol.
-          </DocNotice>
+          {ver("contacto.email") && (
+            <p className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-semibold">
+              <MailIcon className="size-3.5" /> {perfil.email}
+            </p>
+          )}
+          {ver("contacto.sello") && (
+            <DocNotice tone="info" icon={ShieldCheckIcon} className="mt-3">
+              Perfil auditado por Astratic Network: tramo {perfil.tramo}, cifras verificadas en {nombreMes(soloFecha(kit.actualizadoEl))}. Todo el contenido patrocinado se marca como publicidad según el código de Autocontrol.
+            </DocNotice>
+          )}
         </DocSimpleSection>
       )
   }
