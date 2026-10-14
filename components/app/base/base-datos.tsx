@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { toast } from "sonner"
-import { PlusIcon, Trash2Icon } from "lucide-react"
+import { PlusIcon, Trash2Icon, UploadIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { BulkBar } from "@/components/app/bulk-bar"
@@ -21,6 +21,7 @@ import { LateralVistas } from "@/components/app/base/lateral-vistas"
 import { EditorCampo } from "@/components/app/base/editor-campo"
 import { AjustesCampo, type PestanaAjustes } from "@/components/app/base/ajustes-campo"
 import { FormularioBase, type ValoresFormulario } from "@/components/app/base/formulario-base"
+import { ImportarDialog } from "@/components/app/base/importar-dialog"
 import { ListaMovil } from "@/components/app/base/lista-movil"
 import { KanbanBase } from "@/components/app/base/kanban-base"
 import { GaleriaBase } from "@/components/app/base/galeria-base"
@@ -70,6 +71,7 @@ export function BaseDatos<T>({
   onBorrarCampo,
   onAbrirVinculo,
   onNuevo,
+  onImportar,
   ajustesTabla,
   portada,
   lateral: lateralPropio,
@@ -106,6 +108,11 @@ export function BaseDatos<T>({
   onAbrirVinculo?: (campoId: string, id: string) => void
   /** «Nuevo …» abre el alta de la página (un diálogo propio) en vez del formulario de la base. */
   onNuevo?: () => void
+  /**
+   * Importar desde un Excel o un CSV (o lo pegado de una hoja de cálculo), con qué columna va a qué campo: «Importar»
+   * junto a la acción principal. La página crea un registro por fila con los valores de sus campos (por id).
+   */
+  onImportar?: (filas: ValoresFormulario[]) => void
   /** Los ajustes de la tabla (valores por defecto, opciones y su orden): un engranaje junto a la acción principal. */
   ajustesTabla?: { label: string; onAbrir: () => void }
   /** La imagen de cada registro en las tarjetas del kanban y la galería. */
@@ -143,6 +150,7 @@ export function BaseDatos<T>({
   const [marcadas, setMarcadas] = React.useState<Set<string>>(new Set())
   const [menu, setMenu] = React.useState<MenuDeBarra | null>(null)
   const [nuevo, setNuevo] = React.useState(nuevoInicial)
+  const [importando, setImportando] = React.useState(false)
   const [editor, setEditor] = React.useState<EditorAbierto | null>(null)
   const [ajustes, setAjustes] = React.useState<AjustesAbiertos | null>(null)
   const [borrandoCampo, setBorrandoCampo] = React.useState<DefCampo<T> | null>(null)
@@ -273,8 +281,13 @@ export function BaseDatos<T>({
   const marcadasVisibles = [...marcadas].filter((id) => registros.some((f) => getId(f) === id))
   const abrirNuevo = onNuevo ?? (onCrear ? () => setNuevo(true) : undefined)
   const accionNueva =
-    abrirNuevo || ajustesTabla ? (
+    abrirNuevo || ajustesTabla || onImportar ? (
       <>
+        {onImportar && (
+          <Button variant="ghost" size="sm" onClick={() => setImportando(true)} aria-label={`Importar ${objeto.plural}`} title="Importar desde un Excel o un CSV">
+            <UploadIcon /> <span className="hidden lg:inline">Importar</span>
+          </Button>
+        )}
         {ajustesTabla && <ConfigButton label={ajustesTabla.label} onClick={ajustesTabla.onAbrir} className="size-7" />}
         {abrirNuevo && (
           <Button size="sm" onClick={abrirNuevo} aria-label={objeto.nuevo}>
@@ -433,6 +446,8 @@ export function BaseDatos<T>({
           textoCrear={formulario?.textoCrear}
         />
       )}
+
+      {onImportar && <ImportarDialog open={importando} onOpenChange={setImportando} campos={campos} objeto={objeto} onImportar={onImportar} />}
 
       {children?.(registros, ficha)}
 

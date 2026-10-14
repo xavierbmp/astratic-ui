@@ -105,6 +105,11 @@ export default function BaseDeDatosPage() {
               El formulario de alta (<code>onCrear</code>) sale de los mismos campos y se configura desde su engranaje: qué campos salen y en qué orden. En los
               campos propios de selección, escribir una opción que no existe la crea, igual que en la celda. Si la página tiene su diálogo, <code>onNuevo</code>.
             </>,
+            <>
+              <strong>Importar</strong> (<code>onImportar</code>): «Importar» junto a la acción principal abre un Excel, un CSV o lo pegado de una hoja de
+              cálculo; cada columna va al campo que se le parece por su nombre (se cambia a mano, con un ejemplo de cada una) y cada celda se lee como al
+              pegarla. Lo que no se puede leer se queda vacío y se avisa. La página crea un registro por fila.
+            </>,
             <>El «+» para crear un campo se queda pegado a la derecha cuando faltan columnas por ver, con lo de debajo difuminado: no hace falta ir al final.</>,
           ]}
         />
