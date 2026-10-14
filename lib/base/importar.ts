@@ -131,3 +131,16 @@ export function filasParaImportar<T>(tabla: Tabla, mapeo: (string | null)[], cam
   })
   return { filas, avisos }
 }
+
+/**
+ * Un registro por fila: el vacío de la página (`vacio`, con su id nuevo) con cada valor escrito con las reglas de su
+ * base (`escribirEn…`), igual que si se escribiera en la celda.
+ */
+export function registrosDeFilas<T>(filas: Record<string, ValorCampo>[], campos: DefCampo<T>[], vacio: () => T, escribir: (registro: T, campo: DefCampo<T>, valor: ValorCampo) => T): T[] {
+  return filas.map((valores) =>
+    Object.entries(valores).reduce((registro, [id, valor]) => {
+      const campo = campos.find((c) => c.id === id)
+      return campo ? escribir(registro, campo, valor) : registro
+    }, vacio()),
+  )
+}

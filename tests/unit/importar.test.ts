@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { filasParaImportar, leerCsv, sugerirMapeo } from "@/lib/base/importar"
+import { filasParaImportar, leerCsv, registrosDeFilas, sugerirMapeo } from "@/lib/base/importar"
 import type { DefCampo } from "@/lib/base/campos"
 
 type Fila = { id: string }
@@ -40,5 +40,18 @@ describe("importar un CSV", () => {
     const { filas, avisos } = filasParaImportar(tabla, ["nombre", "estado", "importe"], campos, true)
     expect(filas).toEqual([{ nombre: "Ana", estado: "ganada", importe: 1200.5 }, { nombre: "Luis", importe: 300 }])
     expect(avisos).toEqual([{ fila: 3, campo: "Estado", error: "«perdida» no es una de sus opciones" }])
+  })
+})
+
+describe("registros de las filas", () => {
+  it("parte del vacío de la página y escribe cada valor con sus reglas", () => {
+    let n = 0
+    const r = registrosDeFilas<{ id: string; nombre: string; email?: string }>(
+      [{ nombre: "Ana", email: "ana@x.com" }, { nombre: "Luis", otro: "x" }],
+      [campos[0], campos[1]] as unknown as DefCampo<{ id: string; nombre: string; email?: string }>[],
+      () => ({ id: `n${++n}`, nombre: "" }),
+      (fila, campo, valor) => ({ ...fila, [campo.id]: valor }),
+    )
+    expect(r).toEqual([{ id: "n1", nombre: "Ana", email: "ana@x.com" }, { id: "n2", nombre: "Luis" }])
   })
 })
