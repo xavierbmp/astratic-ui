@@ -3,7 +3,7 @@
 // que se rellena solo en el alta a partir de ellos (el nombre de cada pieza, la fecha del guion, las
 // fechas de la collab). El mismo esquema valida en el formulario y en la acción que los guarda.
 import { z } from "zod"
-import { LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, PLATAFORMAS, type AjustesCollabs, type CampoBrief, type Condicion, type FormatoPieza, type TipoCondicion } from "@/lib/influencer/modelo"
+import { LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, PLATAFORMAS, type AjustesCollabs, type CampoBrief, type Condicion, type FormatoPieza, type PackContenido, type TipoCondicion } from "@/lib/influencer/modelo"
 import { REDES_PIEZA, numeroDeImporte, type PiezaPedidaForm } from "@/lib/influencer/formularios"
 import { sumarDias } from "@/lib/influencer/fechas"
 import { idNuevo } from "@/lib/influencer/tareas"
@@ -86,11 +86,19 @@ export const CONDICIONES_DE_SERIE: TipoCondicion[] = [
   { id: "destacada", nombre: "Story destacada", conDias: true, icono: "estrella", dias: 30 },
 ]
 
+/** Los packs que trae de serie: los encargos más habituales. Ella los cambia, quita o crea los suyos. */
+export const PACKS_DE_SERIE: PackContenido[] = [
+  { id: "pack-reel-stories", nombre: "Reel + 3 stories", formatos: ["reel", "story", "story", "story"] },
+  { id: "pack-lanzamiento", nombre: "Lanzamiento", formatos: ["reel", "carrusel", "story", "story"] },
+  { id: "pack-tiktok-reel", nombre: "TikTok + reel", formatos: ["tiktok", "reel"] },
+]
+
 export const AJUSTES_COLLABS_DE_SERIE: AjustesCollabs = {
   formatos: FORMATOS_PIEZA_DE_SERIE,
   condiciones: CONDICIONES_DE_SERIE,
   diasGuion: 7,
   camposBrief: ["contacto", "campana", "fechas", "piezas", "materiales"],
+  packs: PACKS_DE_SERIE,
 }
 
 /** Cuántos formatos o condiciones caben en la lista de una influencer. */
@@ -110,11 +118,18 @@ export const esquemaFormatoPieza = z.object({
 
 export const esquemaTipoCondicion = z.object({ id: z.string().min(1).max(60), nombre, conDias: z.boolean(), icono: z.string().max(40).optional(), dias: z.number().int().min(1, "Pon 1 día o más").max(3650).optional() })
 
+export const esquemaPackContenido = z.object({
+  id: z.string().min(1).max(60),
+  nombre,
+  formatos: z.array(z.string().min(1).max(60)).min(1, "Un pack lleva algún entregable").max(20, "Caben 20 entregables en un pack"),
+})
+
 export const esquemaAjustesCollabs = z.object({
   formatos: z.array(esquemaFormatoPieza).max(MAXIMO_EN_LISTA, `Caben ${MAXIMO_EN_LISTA} formatos`).refine(sinRepetidos, "Hay dos formatos que se llaman igual"),
   condiciones: z.array(esquemaTipoCondicion).max(MAXIMO_EN_LISTA, `Caben ${MAXIMO_EN_LISTA} condiciones`).refine(sinRepetidos, "Hay dos condiciones que se llaman igual"),
   diasGuion: z.number().int().min(0, "Pon 0 o más días").max(90, "Como mucho, 90 días"),
   camposBrief: z.array(z.enum(LISTA_CAMPOS_BRIEF)).max(LISTA_CAMPOS_BRIEF.length),
+  packs: z.array(esquemaPackContenido).max(MAXIMO_EN_LISTA, `Caben ${MAXIMO_EN_LISTA} packs`).refine(sinRepetidos, "Hay dos packs que se llaman igual"),
 })
 
 /** Los de una influencer: lo que ha cambiado ella y, en lo que no ha tocado (`null`), lo de serie. */
@@ -181,6 +196,26 @@ export function piezaDeFormato(formato: FormatoPieza, publicacion: string, ctx: 
     fechaGuion: requiereGuion ? fechaGuionPorDefecto(publicacion, ctx.diasGuion, ctx.hoy) : "",
     condiciones: [],
   }
+}
+
+/** Las piezas de un pack, en su orden; los formatos que ya no existen se saltan. */
+export function piezasDePack(pack: PackContenido, formatos: FormatoPieza[], publicacion: string, ctx: Contexto): PiezaPedidaForm[] {
+  return pack.formatos.flatMap((id) => {
+    const formato = formatos.find((f) => f.id === id)
+    return formato ? [piezaDeFormato(formato, publicacion, ctx)] : []
+  })
+}
+
+/** «1 reel · 3 stories»: lo que lleva un pack, contado por formato. */
+export function describirPack(pack: PackContenido, formatos: FormatoPieza[]): string {
+  const cuenta = new Map<string, number>()
+  for (const id of pack.formatos) cuenta.set(id, (cuenta.get(id) ?? 0) + 1)
+  return [...cuenta]
+    .flatMap(([id, n]) => {
+      const f = formatos.find((x) => x.id === id)
+      return f ? [`${n} ${f.nombre.toLocaleLowerCase("es")}`] : []
+    })
+    .join(" · ")
 }
 
 /** Cambiar el formato de una pieza ya añadida: toma su tipo, su red y si pide guion; el nombre, solo si no lo escribió ella. */

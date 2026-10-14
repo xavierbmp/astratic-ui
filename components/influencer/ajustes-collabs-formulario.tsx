@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDownIcon, PlusIcon, Settings2Icon, Trash2Icon } from "lucide-react"
+import { ChevronDownIcon, PackageIcon, PlusIcon, Settings2Icon, Trash2Icon, XIcon } from "lucide-react"
 import { cn } from "cn"
-import { CAMPOS_BRIEF, LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, TIPOS_PIEZA, type AjustesCollabs, type FormatoPieza, type TipoCondicion } from "@/lib/influencer/modelo"
+import { CAMPOS_BRIEF, LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, TIPOS_PIEZA, type AjustesCollabs, type FormatoPieza, type PackContenido, type TipoCondicion } from "@/lib/influencer/modelo"
 import { ICONO_CONDICION_DE_SERIE, esquemaAjustesCollabs } from "@/lib/influencer/ajustes-collabs"
 import { idNuevo } from "@/lib/influencer/tareas"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { CampoFormulario, Formulario, FormularioCabecera, FormularioCuerpo, FormularioPie } from "@/components/app/formulario/formulario-dialog"
 import { CasillasOpcion, IconosOpcion } from "@/components/app/formulario/opciones-visuales"
+import { SelectorBuscable } from "@/components/app/formulario/selector-buscable"
 import { ICONOS_PIEZA, IconoTipoPieza } from "@/components/influencer/piezas-editor"
 import { SelectorPlataforma } from "@/components/influencer/plataformas"
 import { SelectorIconoCondicion } from "@/components/influencer/condiciones-editor"
@@ -57,11 +58,57 @@ function FilaFormato({ formato, asa, onCambiar, onQuitar }: { formato: FormatoPi
   )
 }
 
+/** Un pack: su nombre y sus entregables como fichas (la × quita uno); «+» añade otro formato. */
+function FilaPack({ pack, formatos, asa, onCambiar, onQuitar }: { pack: PackContenido; formatos: FormatoPieza[]; asa: React.ReactNode; onCambiar: (p: PackContenido) => void; onQuitar: () => void }) {
+  return (
+    <div className="rounded-lg border bg-card p-1.5">
+      <div className="flex items-center gap-2">
+        {asa}
+        <span className="grid size-6 flex-none place-items-center rounded-md bg-brand-soft text-brand">
+          <PackageIcon className="size-3.5" />
+        </span>
+        <Input value={pack.nombre} onChange={(e) => onCambiar({ ...pack, nombre: e.target.value })} aria-label="Nombre del pack" placeholder="Lanzamiento" className="h-8 min-w-0 flex-1" />
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={`Quitar ${pack.nombre || "el pack"}`} onClick={onQuitar}>
+          <Trash2Icon />
+        </Button>
+      </div>
+      <div className="mt-1.5 flex flex-wrap items-center gap-1 pl-7">
+        {pack.formatos.map((id, i) => {
+          const f = formatos.find((x) => x.id === id)
+          if (!f) return null
+          return (
+            <span key={`${id}-${i}`} className="inline-flex h-7 items-center gap-1 rounded-md bg-muted pr-0.5 pl-1 text-xs">
+              <IconoTipoPieza tipo={f.tipo} className="size-5 bg-card" />
+              {f.nombre}
+              <button type="button" aria-label={`Quitar ${f.nombre} del pack`} onClick={() => onCambiar({ ...pack, formatos: pack.formatos.filter((_, j) => j !== i) })} className="grid size-5 place-items-center rounded-sm text-muted-foreground hover:bg-card hover:text-foreground">
+                <XIcon className="size-3" />
+              </button>
+            </span>
+          )
+        })}
+        <SelectorBuscable
+          aspecto="boton"
+          aria-label={`Añadir un entregable a ${pack.nombre || "el pack"}`}
+          disparador={
+            <span className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-xs font-medium text-brand hover:bg-brand-soft">
+              <PlusIcon className="size-3.5" /> Entregable
+            </span>
+          }
+          opciones={formatos.map((f) => ({ value: f.id, label: f.nombre, icono: <IconoTipoPieza tipo={f.tipo} /> }))}
+          valor={undefined}
+          placeholder="Busca un formato"
+          onChange={(id) => id && onCambiar({ ...pack, formatos: [...pack.formatos, id] })}
+        />
+      </div>
+    </div>
+  )
+}
+
 /**
  * Los ajustes de la tabla de collabs: los valores de serie del alta que cambia cada influencer. Los
  * días del guion antes de publicar, sus formatos de pieza y sus condiciones (con su icono y sus días
- * de serie; ordenar arrastrando, cambiar en el sitio, añadir y quitar) y los apartados que le pide a
- * la marca de serie. Pantalla
+ * de serie; ordenar arrastrando, cambiar en el sitio, añadir y quitar), sus packs de contenido (varios
+ * entregables de un clic) y los apartados que le pide a la marca de serie. Pantalla
  * de un `FormularioDialog`: sola, desde el engranaje de la tabla, o encima del alta.
  */
 export function AjustesCollabsFormulario({ ajustes, migas, onVolver, onCancelar, onGuardar }: { ajustes: AjustesCollabs; migas?: string; onVolver?: () => void; onCancelar: () => void; onGuardar: (ajustes: AjustesCollabs) => void }) {
@@ -73,6 +120,7 @@ export function AjustesCollabsFormulario({ ajustes, migas, onVolver, onCancelar,
   }
   const cambiarFormato = (f: FormatoPieza) => cambiar({ formatos: a.formatos.map((x) => (x.id === f.id ? f : x)) })
   const cambiarCondicion = (c: TipoCondicion) => cambiar({ condiciones: a.condiciones.map((x) => (x.id === c.id ? c : x)) })
+  const cambiarPack = (p: PackContenido) => cambiar({ packs: a.packs.map((x) => (x.id === p.id ? p : x)) })
 
   return (
     <>
@@ -80,7 +128,12 @@ export function AjustesCollabsFormulario({ ajustes, migas, onVolver, onCancelar,
       <Formulario
         onSubmit={(e) => {
           e.preventDefault()
-          const limpios = { ...a, formatos: a.formatos.map((f) => ({ ...f, nombre: f.nombre.trim() || TIPOS_PIEZA[f.tipo].label })), condiciones: a.condiciones.filter((c) => c.nombre.trim()) }
+          // Un pack sin nombre toma el de lo que lleva; uno vacío (o con formatos ya quitados) no se guarda.
+          const packs = a.packs
+            .map((p) => ({ ...p, formatos: p.formatos.filter((id) => a.formatos.some((f) => f.id === id)) }))
+            .filter((p) => p.formatos.length)
+            .map((p) => ({ ...p, nombre: p.nombre.trim() || `Pack de ${p.formatos.length}` }))
+          const limpios = { ...a, formatos: a.formatos.map((f) => ({ ...f, nombre: f.nombre.trim() || TIPOS_PIEZA[f.tipo].label })), condiciones: a.condiciones.filter((c) => c.nombre.trim()), packs }
           const r = esquemaAjustesCollabs.safeParse(limpios)
           if (!r.success) return setError(r.error.issues[0]?.message ?? "Revisa los ajustes")
           onGuardar(r.data)
@@ -136,6 +189,15 @@ export function AjustesCollabsFormulario({ ajustes, migas, onVolver, onCancelar,
             </ListaOrdenable>
             <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => cambiar({ condiciones: [...a.condiciones, { id: idNuevo("cd"), nombre: "", conDias: true, icono: ICONO_CONDICION_DE_SERIE }] })}>
               <PlusIcon /> Añadir condición
+            </Button>
+          </CampoFormulario>
+
+          <CampoFormulario etiqueta="Packs de contenido" ayuda="Varios entregables que se añaden de un clic al crear la collab o al añadir piezas. También se guardan desde ahí, con «Guardar como pack».">
+            <ListaOrdenable items={a.packs} clave={(p) => p.id} onReordenar={(packs) => cambiar({ packs })} className="flex flex-col gap-1.5">
+              {(p, asa) => <FilaPack pack={p} formatos={a.formatos} asa={asa} onCambiar={cambiarPack} onQuitar={() => cambiar({ packs: a.packs.filter((x) => x.id !== p.id) })} />}
+            </ListaOrdenable>
+            <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => cambiar({ packs: [...a.packs, { id: idNuevo("pk"), nombre: "", formatos: [] }] })}>
+              <PlusIcon /> Añadir pack
             </Button>
           </CampoFormulario>
 

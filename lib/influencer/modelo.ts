@@ -389,7 +389,13 @@ export const LISTA_CAMPOS_BRIEF = Object.keys(CAMPOS_BRIEF) as CampoBrief[]
  * (`lib/influencer/ajustes-collabs.ts`): sus formatos de pieza, sus condiciones, cuántos días antes de
  * publicar va el guion y qué apartados le pide a la marca.
  */
-export type AjustesCollabs = { formatos: FormatoPieza[]; condiciones: TipoCondicion[]; diasGuion: number; camposBrief: CampoBrief[] }
+/**
+ * Un pack de contenido: varios entregables que se añaden de un clic («Lanzamiento»: un reel y tres stories). Lleva un
+ * formato por entregable (se repiten: tres stories son tres «story»). Xavier, 2026-10-14.
+ */
+export type PackContenido = { id: string; nombre: string; formatos: string[] }
+
+export type AjustesCollabs = { formatos: FormatoPieza[]; condiciones: TipoCondicion[]; diasGuion: number; camposBrief: CampoBrief[]; packs: PackContenido[] }
 
 export type EstadoPieza = "borrador" | "en-revision" | "cambios" | "aprobado" | "programado" | "publicado" | "resultados"
 

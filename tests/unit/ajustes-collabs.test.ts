@@ -6,6 +6,7 @@ import {
   ajustesDe,
   cambiarFormatoDePieza,
   cambiarPublicacion,
+  describirPack,
   conCampana,
   condicionDeTipo,
   condicionesDeLasPiezas,
@@ -19,6 +20,7 @@ import {
   nombreDePieza,
   nombreRepetido,
   piezaDeFormato,
+  piezasDePack,
 } from "@/lib/influencer/ajustes-collabs"
 import { aplicarFormulario, numeroDeImporte, piezaDeFormulario, type FormularioBrief } from "@/lib/influencer/formularios"
 import { hitosDePieza, partesDePieza, siguientePasoDePieza } from "@/lib/influencer/collabs"
@@ -216,5 +218,25 @@ describe("lo que sale solo de los entregables", () => {
     expect(importeDeLasPiezas(piezas)).toBe(399.5)
     expect(importeDeLasPiezas([piezaDeFormato(story, "", ctx)])).toBeUndefined()
     expect(numeroDeImporte("abc")).toBeUndefined()
+  })
+})
+
+describe("packs de contenido", () => {
+  const ctx = { campana: "Otoño", diasGuion: 7, hoy: "2026-10-14" }
+  const pack = { id: "p", nombre: "Lanzamiento", formatos: ["reel", "story", "story", "ya-no-existe"] }
+
+  it("un pack añade una pieza por formato, en su orden, y se salta los que ya no existen", () => {
+    const piezas = piezasDePack(pack, FORMATOS_PIEZA_DE_SERIE, "", ctx)
+    expect(piezas.map((p) => p.formato)).toEqual(["reel", "story", "story"])
+    expect(piezas[0].titulo).toBe("Reel · Otoño")
+  })
+
+  it("se describe contando cada formato", () => {
+    expect(describirPack(pack, FORMATOS_PIEZA_DE_SERIE)).toBe("1 reel · 2 story")
+  })
+
+  it("los ajustes guardados antes de los packs traen los de serie, y un pack vacío no vale", () => {
+    expect(ajustesDe({ diasGuion: 3 }).packs.length).toBeGreaterThan(0)
+    expect(esquemaAjustesCollabs.safeParse({ ...AJUSTES_COLLABS_DE_SERIE, packs: [{ id: "x", nombre: "Vacío", formatos: [] }] }).success).toBe(false)
   })
 })

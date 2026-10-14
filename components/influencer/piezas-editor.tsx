@@ -1,12 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { ClapperboardIcon, ImageIcon, ImagesIcon, MessageSquareTextIcon, PlusIcon, ScrollTextIcon, Trash2Icon, TypeIcon, type LucideIcon } from "lucide-react"
+import { BookmarkPlusIcon, ClapperboardIcon, ImageIcon, ImagesIcon, MessageSquareTextIcon, PackageIcon, PlusIcon, ScrollTextIcon, Trash2Icon, TypeIcon, type LucideIcon } from "lucide-react"
 import { cn } from "cn"
-import { TIPOS_PIEZA, nombrePlataforma, type FormatoPieza, type TipoCondicion, type TipoPieza } from "@/lib/influencer/modelo"
+import { TIPOS_PIEZA, nombrePlataforma, type FormatoPieza, type PackContenido, type TipoCondicion, type TipoPieza } from "@/lib/influencer/modelo"
 import type { PiezaPedidaForm } from "@/lib/influencer/formularios"
-import { AJUSTES_COLLABS_DE_SERIE, cambiarFormatoDePieza, cambiarPublicacion, formatosDePlataformas, piezaDeFormato } from "@/lib/influencer/ajustes-collabs"
+import { AJUSTES_COLLABS_DE_SERIE, cambiarFormatoDePieza, cambiarPublicacion, describirPack, formatosDePlataformas, piezaDeFormato, piezasDePack } from "@/lib/influencer/ajustes-collabs"
+import { idNuevo } from "@/lib/influencer/tareas"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
 import { SelectorBuscable, type OpcionSelector } from "@/components/app/formulario/selector-buscable"
 import { CampoFecha } from "@/components/app/formulario/campo-fecha"
@@ -46,6 +49,10 @@ type Props = {
   onNuevaCondicion?: (nombre: string, usar: (tipo: TipoCondicion) => void) => void
   /** Cada entregable lleva su importe (en el alta de una collab; la marca no lo ve). */
   conImporte?: boolean
+  /** Sus packs de contenido: cada uno añade varios entregables de un clic. */
+  packs?: PackContenido[]
+  /** Guardar los entregables que hay como un pack nuevo (sin ella, no se ofrece). */
+  onGuardarPack?: (pack: PackContenido) => void
   className?: string
 }
 
@@ -55,9 +62,11 @@ type Props = {
  * a la izquierda (se pulsa para cambiarlo), su nombre de serie con la campaña («Reel · Otoño», se
  * cambia al momento), su importe si `conImporte` y, en la franja de abajo, el día de publicación, el
  * del script (de serie, `diasGuion` antes si da tiempo; «Sin script» en su calendario lo quita), sus
- * condiciones (icono y días, en línea) y sus indicaciones. Lo usan el alta de una collab, «Nueva pieza» y el formulario de la marca.
+ * condiciones (icono y días, en línea) y sus indicaciones. Con `packs`, debajo de los atajos van sus packs de contenido
+ * (varios entregables de un clic) y, con `onGuardarPack`, «Guardar como pack» los que hay. Lo usan el alta de una collab,
+ * «Nueva pieza» y el formulario de la marca.
  */
-export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLLABS_DE_SERIE.formatos, plataformas = [], condiciones, hoy, campana = "", diasGuion = AJUSTES_COLLABS_DE_SERIE.diasGuion, onNuevoFormato, onEditarFormato, onNuevaCondicion, conImporte, className }: Props) {
+export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLLABS_DE_SERIE.formatos, plataformas = [], condiciones, hoy, campana = "", diasGuion = AJUSTES_COLLABS_DE_SERIE.diasGuion, onNuevoFormato, onEditarFormato, onNuevaCondicion, conImporte, packs = [], onGuardarPack, className }: Props) {
   const ctx = { campana, diasGuion, hoy }
   const cambiar = (i: number, pieza: PiezaPedidaForm) => onChange(value.map((p, j) => (j === i ? pieza : p)))
   const anadir = (formato: FormatoPieza) => onChange([...value, piezaDeFormato(formato, "", ctx)])
@@ -92,7 +101,28 @@ export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLL
         />
       </div>
 
-      {value.length === 0 && <p className="rounded-lg border border-dashed px-3 py-5 text-center text-sm text-muted-foreground">Pulsa un formato para añadir el primer entregable.</p>}
+      {(packs.length > 0 || onGuardarPack) && (
+        <div className="-ml-1 flex flex-wrap items-center gap-x-0.5 gap-y-1">
+          {packs.map((pack) => (
+            <button
+              key={pack.id}
+              type="button"
+              title={describirPack(pack, formatos)}
+              onClick={() => onChange([...value, ...piezasDePack(pack, formatos, "", ctx)])}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md pr-2 pl-1 text-[13px] transition-colors hover:bg-muted"
+            >
+              <span className="grid size-6 flex-none place-items-center rounded-sm bg-brand-soft text-brand">
+                <PackageIcon className="size-3.5" />
+              </span>
+              {pack.nombre}
+              <span className="text-xs text-muted-foreground tabular-nums">{pack.formatos.length}</span>
+            </button>
+          ))}
+          {onGuardarPack && value.some((p) => p.formato) && <GuardarPack piezas={value} packs={packs} onGuardar={onGuardarPack} />}
+        </div>
+      )}
+
+      {value.length === 0 && <p className="rounded-lg border border-dashed px-3 py-5 text-center text-sm text-muted-foreground">Pulsa un formato o un pack para añadir los entregables.</p>}
 
       {value.map((p, i) => (
         <TarjetaEntregable
@@ -113,6 +143,51 @@ export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLL
         />
       ))}
     </div>
+  )
+}
+
+/** «Guardar como pack»: los formatos de los entregables que hay, con el nombre que le dé. */
+function GuardarPack({ piezas, packs, onGuardar }: { piezas: PiezaPedidaForm[]; packs: PackContenido[]; onGuardar: (pack: PackContenido) => void }) {
+  const [abierto, setAbierto] = React.useState(false)
+  const [nombre, setNombre] = React.useState("")
+  const limpio = nombre.trim()
+  const repetido = packs.some((p) => p.nombre.trim().toLocaleLowerCase("es") === limpio.toLocaleLowerCase("es"))
+  const guardar = () => {
+    if (!limpio || repetido) return
+    onGuardar({ id: idNuevo("pk"), nombre: limpio.slice(0, 40), formatos: piezas.flatMap((p) => (p.formato ? [p.formato] : [])) })
+    setNombre("")
+    setAbierto(false)
+  }
+  return (
+    <Popover open={abierto} onOpenChange={setAbierto}>
+      <PopoverTrigger asChild>
+        <button type="button" className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+          <BookmarkPlusIcon className="size-4" /> Guardar como pack
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 gap-2 p-3">
+        <p className="text-sm font-medium">Nuevo pack con estos {piezas.length} entregables</p>
+        <Input
+          autoFocus
+          value={nombre}
+          maxLength={40}
+          placeholder="Lanzamiento de producto"
+          aria-label="Nombre del pack"
+          aria-invalid={repetido}
+          onChange={(e) => setNombre(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault()
+              guardar()
+            }
+          }}
+        />
+        {repetido && <p className="text-xs text-danger">Ya tienes un pack que se llama así</p>}
+        <Button type="button" size="sm" className="w-fit" disabled={!limpio || repetido} onClick={guardar}>
+          Guardar pack
+        </Button>
+      </PopoverContent>
+    </Popover>
   )
 }
 
