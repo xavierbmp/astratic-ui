@@ -26,8 +26,8 @@ const esquema = z.object({
 type Valores = z.infer<typeof esquema>
 
 const QUE_SE_REVISA: Record<TipoPieza, string> = {
-  video: "La marca revisa el guion y el vídeo",
-  foto: "El guion o el texto y la foto",
+  video: "La marca revisa el script y el vídeo",
+  foto: "El script o el texto y la foto",
   carrusel: "El texto y las fotos del carrusel",
   texto: "Solo el texto: una mención, una newsletter",
 }
@@ -70,13 +70,13 @@ export function FormatoPiezaFormulario({ formato, nombreInicial = "", formatos, 
             <Controller control={control} name="plataforma" render={({ field }) => <SelectorPlataforma aria-label="Dónde se publica" value={field.value} onChange={field.onChange} />} />
           </CampoFormulario>
           {tipo !== "texto" && (
-            <CampoFormulario etiqueta="Guion" ayuda="Si se manda el guion a la marca antes de grabar. Se cambia en cada pieza.">
+            <CampoFormulario etiqueta="Script" ayuda="Si se manda el script a la marca antes de grabar. Se cambia en cada entregable.">
               <Controller
                 control={control}
                 name="conGuion"
                 render={({ field }) => (
                   <label className="flex items-center gap-2.5 text-sm">
-                    <Switch checked={field.value} onCheckedChange={field.onChange} /> Pide guion de serie
+                    <Switch checked={field.value} onCheckedChange={field.onChange} /> Pide script de serie
                   </label>
                 )}
               />

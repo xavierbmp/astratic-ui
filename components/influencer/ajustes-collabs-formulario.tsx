@@ -33,7 +33,7 @@ function FilaFormato({ formato, asa, onCambiar, onQuitar }: { formato: FormatoPi
         <Input value={formato.nombre} onChange={(e) => onCambiar({ ...formato, nombre: e.target.value })} aria-label="Nombre del formato" className="h-8 min-w-0 flex-1" />
         {formato.tipo !== "texto" && (
           <label className="flex flex-none items-center gap-1.5 text-xs text-muted-foreground">
-            <Switch size="sm" checked={formato.conGuion} onCheckedChange={(c) => onCambiar({ ...formato, conGuion: c })} aria-label={`${formato.nombre} pide guion`} /> Guion
+            <Switch size="sm" checked={formato.conGuion} onCheckedChange={(c) => onCambiar({ ...formato, conGuion: c })} aria-label={`${formato.nombre} pide script`} /> Script
           </label>
         )}
         <Button type="button" variant="ghost" size="icon-sm" aria-label={`Más de ${formato.nombre}`} aria-expanded={abierta} onClick={() => setAbierta((a) => !a)}>
@@ -87,7 +87,7 @@ export function AjustesCollabsFormulario({ ajustes, migas, onVolver, onCancelar,
         }}
       >
         <FormularioCuerpo>
-          <CampoFormulario etiqueta="Guion" htmlFor="aj-dias" ayuda="Cuántos días antes de publicar va el guion, de serie. Si ya no da tiempo, la pieza sale sin fecha de guion y la pones tú.">
+          <CampoFormulario etiqueta="Script" htmlFor="aj-dias" ayuda="Cuántos días antes de publicar va el script, de serie. Si ya no da tiempo, el entregable sale sin fecha de script y la pones tú.">
             <div className="flex items-center gap-2 text-sm">
               <Input id="aj-dias" type="number" min={0} max={90} inputMode="numeric" value={a.diasGuion} onChange={(e) => cambiar({ diasGuion: Math.max(0, Math.round(Number(e.target.value) || 0)) })} className="h-10 w-24" />
               días antes de publicar

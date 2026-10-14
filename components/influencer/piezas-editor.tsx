@@ -1,13 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { ClapperboardIcon, ImageIcon, ImagesIcon, MessageSquareTextIcon, PlusIcon, Trash2Icon, TypeIcon, type LucideIcon } from "lucide-react"
+import { ClapperboardIcon, ImageIcon, ImagesIcon, MessageSquareTextIcon, PlusIcon, ScrollTextIcon, Trash2Icon, TypeIcon, type LucideIcon } from "lucide-react"
 import { cn } from "cn"
 import { TIPOS_PIEZA, nombrePlataforma, type FormatoPieza, type TipoCondicion, type TipoPieza } from "@/lib/influencer/modelo"
 import type { PiezaPedidaForm } from "@/lib/influencer/formularios"
-import { AJUSTES_COLLABS_DE_SERIE, cambiarFormatoDePieza, cambiarPublicacion, fechaGuionPorDefecto, formatosDePlataformas, piezaDeFormato } from "@/lib/influencer/ajustes-collabs"
+import { AJUSTES_COLLABS_DE_SERIE, cambiarFormatoDePieza, cambiarPublicacion, formatosDePlataformas, piezaDeFormato } from "@/lib/influencer/ajustes-collabs"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { SelectorBuscable, type OpcionSelector } from "@/components/app/formulario/selector-buscable"
 import { CampoFecha } from "@/components/app/formulario/campo-fecha"
@@ -54,9 +53,9 @@ type Props = {
  * Los entregables de una collab. Arriba, un atajo por cada formato de sus plataformas (y «Más
  * formatos»: todos, o uno nuevo escribiéndolo). Cada entregable es una tarjeta: el icono de su formato
  * a la izquierda (se pulsa para cambiarlo), su nombre de serie con la campaña («Reel · Otoño», se
- * cambia al momento), su importe si `conImporte` y, en la franja de abajo, el día de publicación, si
- * lleva guion y su día (de serie, `diasGuion` antes si da tiempo), sus condiciones (icono y días, en
- * línea) y sus indicaciones. Lo usan el alta de una collab, «Nueva pieza» y el formulario de la marca.
+ * cambia al momento), su importe si `conImporte` y, en la franja de abajo, el día de publicación, el
+ * del script (de serie, `diasGuion` antes si da tiempo; «Sin script» en su calendario lo quita), sus
+ * condiciones (icono y días, en línea) y sus indicaciones. Lo usan el alta de una collab, «Nueva pieza» y el formulario de la marca.
  */
 export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLLABS_DE_SERIE.formatos, plataformas = [], condiciones, hoy, campana = "", diasGuion = AJUSTES_COLLABS_DE_SERIE.diasGuion, onNuevoFormato, onEditarFormato, onNuevaCondicion, conImporte, className }: Props) {
   const ctx = { campana, diasGuion, hoy }
@@ -199,17 +198,18 @@ function TarjetaEntregable({ numero, pieza: p, error, formatos, opciones, condic
       <div className="flex flex-wrap items-center gap-0.5 border-t bg-muted/30 px-1.5 py-1">
         <CampoFecha aspecto="texto" prefijo="Publica el" valor={p.publicacion} onChange={(dia) => onCambiar(cambiarPublicacion(p, dia, ctx))} hoy={ctx.hoy} placeholder="¿Cuándo se publica?" aria-label={`Día de publicación del entregable ${numero}`} />
         {conGuion && (
-          <span className="flex items-center">
-            <label className="flex h-8 cursor-pointer items-center gap-2 rounded-md px-2 text-[13px] hover:bg-muted">
-              <Checkbox
-                checked={p.requiereGuion !== false}
-                onCheckedChange={(c) => onCambiar({ ...p, requiereGuion: c === true, fechaGuion: c === true ? p.fechaGuion || fechaGuionPorDefecto(p.publicacion, ctx.diasGuion, ctx.hoy) : "" })}
-                aria-label={`El entregable ${numero} lleva guion`}
-              />
-              Guion
-            </label>
-            {p.requiereGuion !== false && <CampoFecha aspecto="texto" prefijo="el" valor={p.fechaGuion ?? ""} onChange={(dia) => onCambiar({ ...p, fechaGuion: dia })} hoy={ctx.hoy} max={p.publicacion || undefined} placeholder="¿qué día?" aria-label={`Día del guion del entregable ${numero}`} className="-ml-1.5" />}
-          </span>
+          <CampoFecha
+            aspecto="texto"
+            icono={ScrollTextIcon}
+            prefijo="Script el"
+            valor={p.requiereGuion === false ? "" : (p.fechaGuion ?? "")}
+            onChange={(dia) => onCambiar({ ...p, requiereGuion: true, fechaGuion: dia })}
+            vaciar={p.requiereGuion === false ? undefined : { texto: "Sin script", onVaciar: () => onCambiar({ ...p, requiereGuion: false, fechaGuion: "" }) }}
+            hoy={ctx.hoy}
+            max={p.publicacion || undefined}
+            placeholder={p.requiereGuion === false ? "Sin script" : "Script: ¿qué día?"}
+            aria-label={`Día del script del entregable ${numero}`}
+          />
         )}
         {/* Con base 0 no salta de línea por lo que ocupan las condiciones: si no caben, se desplazan. */}
         <span className="ml-auto flex min-w-40 flex-1 basis-0 items-center justify-end gap-1">

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CalendarDaysIcon } from "lucide-react"
+import { CalendarDaysIcon, XIcon, type LucideIcon } from "lucide-react"
 import { es } from "react-day-picker/locale"
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
@@ -20,7 +20,8 @@ const aPalabra = (fecha: Date) => `${fecha.getFullYear()}-${String(fecha.getMont
 /**
  * Un día, con su calendario: el botón enseña la fecha («14 oct», con el año si no es el de
  * `hoy`) y el icono, y al pulsarlo se elige en el calendario (lunes primero), entre `min` y `max`.
- * Sin fecha, el calendario abre en el mes de `min` o, si no hay, en el de `hoy`.
+ * Sin fecha, el calendario abre en el mes de `min` o, si no hay, en el de `hoy`. Con `vaciar`, debajo
+ * del calendario va un botón para quitarla («Sin script»).
  */
 export function CampoFecha({
   id,
@@ -35,6 +36,8 @@ export function CampoFecha({
   tamano = "md",
   aspecto = "campo",
   prefijo,
+  icono: Icono = CalendarDaysIcon,
+  vaciar,
   className,
   "aria-label": ariaLabel,
 }: {
@@ -53,6 +56,10 @@ export function CampoFecha({
   aspecto?: "campo" | "texto"
   /** Lo que va antes de la fecha en el aspecto `texto` («Publica el»). */
   prefijo?: string
+  /** Otro icono que el calendario, para distinguir dos fechas juntas (la del script). */
+  icono?: LucideIcon
+  /** Un botón bajo el calendario que quita la fecha, con lo que dice. */
+  vaciar?: { texto: string; onVaciar: () => void }
   className?: string
   "aria-label"?: string
 }) {
@@ -82,7 +89,7 @@ export function CampoFecha({
             className,
           )}
         >
-          <CalendarDaysIcon className={cn("size-4 flex-none", fecha ? "text-brand" : "text-muted-foreground")} />
+          <Icono className={cn("size-4 flex-none", fecha ? "text-brand" : "text-muted-foreground")} />
           <span className={cn("truncate tabular-nums", !fecha && "text-muted-foreground")}>{fecha ? `${prefijo ? `${prefijo} ` : ""}${fmt.date(fecha)}${conAno ? ` ${fecha.getFullYear()}` : ""}` : placeholder}</span>
         </button>
       </PopoverTrigger>
@@ -102,6 +109,18 @@ export function CampoFecha({
           }}
           autoFocus
         />
+        {vaciar && (
+          <button
+            type="button"
+            onClick={() => {
+              vaciar.onVaciar()
+              setAbierto(false)
+            }}
+            className="flex w-full items-center justify-center gap-1.5 border-t px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <XIcon className="size-3.5" /> {vaciar.texto}
+          </button>
+        )}
       </PopoverContent>
     </Popover>
   )
