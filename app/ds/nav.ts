@@ -1,6 +1,7 @@
 import {
   BookOpenIcon,
   BookOpenTextIcon,
+  BookTextIcon,
   BoxesIcon,
   BugIcon,
   ChartColumnIcon,
@@ -110,6 +111,7 @@ export const dsNav: NavGroup[] = [
       { id: "documentos", label: "Documentos y PDF", href: "/ds/documentos", icon: FileTextIcon },
       { id: "doc-elaborada", label: "Propuesta elaborada", href: "/ds/documentos/elaborada", icon: BookOpenTextIcon },
       { id: "doc-simple", label: "Propuesta simple", href: "/ds/documentos/simple", icon: ScrollTextIcon },
+      { id: "doc-guia", label: "Guía", href: "/ds/documentos/guia", icon: BookTextIcon },
     ],
   },
 ]

@@ -429,6 +429,52 @@
   }
 }
 
+/* Guía (components/document/guide): contenido corrido que Chrome pagina al exportar (scripts/exportar-pdf.ts).
+   Las páginas con nombre separan la portada y las portadillas (a sangre) del resto (con márgenes). */
+@page guia {
+  size: A4;
+  margin: 20mm 18mm 24mm;
+}
+@page guia-plena {
+  size: A4;
+  margin: 0;
+}
+[data-slot="guide-pages"] {
+  page: guia;
+}
+[data-slot="guide-cover"],
+[data-slot="guide-part"] {
+  page: guia-plena;
+  break-after: page;
+}
+[data-slot="guide-part"],
+[data-slot="guide-chapter"] {
+  break-before: page;
+}
+[data-slot="guide-chapter"] > header,
+[data-slot="guide-h2"],
+[data-slot="guide-h3"] {
+  break-after: avoid;
+}
+[data-slot="guide-callout"],
+[data-slot="guide-checklist"],
+[data-slot="guide-figure"],
+[data-slot="guide-stats"],
+[data-slot="guide-prose"] table,
+[data-slot="guide-prose"] li,
+[data-slot="guide-sources"] li {
+  break-inside: avoid;
+}
+@media print {
+  body:has([data-slot="guide-book"]) > :not([data-slot="guide-book"]) {
+    display: none !important;
+  }
+  [data-slot="guide-book"] *,
+  [data-slot="guide-book"] {
+    box-shadow: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

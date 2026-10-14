@@ -27,6 +27,12 @@ export default function DocumentosPage() {
               "1 a 3 hojas",
               "Propuesta Feel The Diving",
             ],
+            [
+              <Link key="g" href="/ds/documentos/guia">Guía</Link>,
+              "Manuales, guías y documentos largos de contenido corrido, escritos en Markdown y paginados por Chrome.",
+              "20 a 150 páginas",
+              "La Biblia del creador",
+            ],
           ]}
         />
         <Prose>
@@ -59,9 +65,13 @@ export default function DocumentosPage() {
   content.tsx     titulares, índice, bloques, funcionalidades                           (elaborada)
   commercial.tsx  paquetes, importes, plazos, pasos, aceptación                         (elaborada)
   simple.tsx      hoja, cifras clave, tablas, condiciones, aviso, conformidad           (simple)
+  guide.tsx       lienzo corrido, portada, índice, portadillas, capítulos, cajas, fuentes (guía)
+  guide-markdown.tsx  pinta el Markdown de un capítulo con las piezas de la guía        (guía)
 
 app/documentos/propuesta-elaborada/   demo elaborada (14 hojas)
-app/documentos/propuesta-simple/      demo simple (2 hojas)`}
+app/documentos/propuesta-simple/      demo simple (2 hojas)
+app/documentos/guia/                  demo guía (contenido corrido)
+scripts/exportar-pdf.ts               exporta una guía con numeración e índice (playwright-core)`}
         />
         <Prose>
           <p>
@@ -113,6 +123,7 @@ app/documentos/propuesta-simple/      demo simple (2 hojas)`}
           links={[
             { href: "/ds/documentos/elaborada", label: "Propuesta elaborada", text: "Portada, índice, bloques, paquetes, plazos y aceptación." },
             { href: "/ds/documentos/simple", label: "Propuesta simple", text: "Una o dos hojas: cifras, situación, plan, condiciones y firma." },
+            { href: "/ds/documentos/guia", label: "Guía", text: "Contenido corrido en Markdown, paginado por Chrome, con índice numerado y fuentes." },
           ]}
         />
       </DocSection>
