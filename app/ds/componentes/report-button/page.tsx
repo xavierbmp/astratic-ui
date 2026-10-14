@@ -45,7 +45,7 @@ export default function ReportButtonPage() {
     <DocPage
       eyebrow="Componentes"
       title="Reportar un problema"
-      lead="El bicho de la cabecera. Quien usa el portal cuenta qué falla y, si quiere, lo señala en la página; el reporte llega con todo lo necesario para arreglarlo sin tener que preguntar."
+      lead="El bicho de la cabecera. Quien usa el portal cuenta qué falla o qué quiere cambiar y, si quiere, lo señala en la página, adjunta imágenes o lo marca en un lienzo; el reporte llega con todo lo necesario para resolverlo sin tener que preguntar."
     >
       <DocSection id="uso" title="Cuándo se usa">
         <Prose>
@@ -58,13 +58,24 @@ export default function ReportButtonPage() {
         <Rules
           items={[
             <>
-              <strong>Diálogo de 480 px con dos pestañas.</strong> «Nuevo» pide qué pasa y, opcionalmente, el elemento;
-              «Enviados» enseña los reportes con su estado y la respuesta de quien los cerró.
+              <strong>Diálogo de 480 px con dos pestañas.</strong> «Nuevo» pide qué pasa y, opcionalmente, el elemento y
+              las imágenes; «Enviados» enseña los reportes con su estado, sus miniaturas y la respuesta de quien los cerró.
             </>,
             <>
               <strong>Señalar en la página</strong> esconde el diálogo, resalta en <code>brand</code> lo que hay bajo el
               ratón con su nombre del kit y un clic lo elige. Esc cancela. Mientras se señala, la página no reacciona: no
               se abren menús, no se sigue un enlace y no se cierra la ficha. El diálogo vuelve con el borrador intacto.
+            </>,
+            <>
+              <strong>Imágenes</strong>: con el botón, pegando una captura (⌘V) o arrastrándola al diálogo. Hasta seis por
+              reporte; el navegador las reduce a 2.000 px en WebP antes de enviarlas.
+            </>,
+            <>
+              <strong>El lienzo</strong> enseña la pantalla con un recuadro por cada elemento: se mueven, se estiran o se
+              quitan (Supr) sin tocar la página, y en «Dibujar» se ponen flechas, trazos, rectángulos y textos. Clic derecho
+              pulsa de verdad lo que hay debajo (abre un formulario o un menú) y «Usar la página» deja usarla con normalidad
+              para llegar a la pantalla que se quiere marcar. Al guardar, la captura con lo marcado entra como una imagen
+              más y viaja con la lista de cambios. Mientras está abierto, una ficha o un diálogo de debajo no se cierran.
             </>,
             <>
               <strong>⇧⌘X lo abre desde cualquier sitio</strong>, también con una ficha o un diálogo abiertos, que tapan
@@ -78,7 +89,7 @@ export default function ReportButtonPage() {
               usuario algo que la página ya sabe.
             </>,
             <>
-              <strong>⌘↵ envía.</strong> Si el guardado falla, un toast lo dice y el borrador se queda.
+              <strong>⌘↵ envía</strong> (en el lienzo, guarda). Si el guardado falla, un toast lo dice y el borrador se queda.
             </>,
           ]}
         />
@@ -124,6 +135,8 @@ export default function ReportButtonPage() {
             [<code key="e">context.errors</code>, "14:02 TypeError: …", "Los últimos 10 errores de la página (JS, promesas y console.error)."],
             [<code key="p">element.path</code>, <code key="p-e">{"sheet-content «Ana Ruiz» › detail-section «Contacto» › button"}</code>, "Los contenedores del kit por los que pasa, con su título: lleva directo al componente."],
             [<code key="s">element.selector · text · html</code>, "button[data-slot=\"button\"] · «Guardar»", "Para localizar el elemento exacto en la página."],
+            [<code key="a">attachments[].dataUrl</code>, "data:image/webp;base64,…", "Cada imagen, ya reducida. El servidor comprueba que es de verdad una imagen antes de guardarla."],
+            [<code key="c">attachments[].canvas</code>, "mover «Nueva plantilla»: de 129×28 en (639, 603) a 212×84 en (938, 436)", "Solo en los lienzos: cada elemento movido, estirado o quitado con su caja de antes y después, y los textos escritos encima."],
           ]}
         />
       </DocSection>
@@ -163,8 +176,9 @@ export default function ReportButtonPage() {
         />
         <Prose>
           <p>
-            <code>ReportDraft</code>, <code>ReportElement</code>, <code>ReportContext</code>, <code>ReportItem</code> y{" "}
-            <code>reportStatus</code> (etiqueta y tono de cada estado) se exportan desde el mismo archivo.
+            <code>ReportDraft</code>, <code>ReportElement</code>, <code>ReportContext</code>, <code>ReportAttachment</code>,{" "}
+            <code>ReportCanvasData</code>, <code>ReportItem</code> y <code>reportStatus</code> (etiqueta y tono de cada
+            estado) se exportan desde el mismo archivo. El lienzo se descarga solo la primera vez que se abre.
           </p>
         </Prose>
       </DocSection>
@@ -173,9 +187,11 @@ export default function ReportButtonPage() {
         <CodeBlock lang="bash" code="npx shadcn@latest add https://ui.astraticnetwork.com/r/report-button.json" />
         <Prose>
           <p>
-            Instala <code>report-button.tsx</code> con <code>states.tsx</code>, <code>status-badge.tsx</code>,{" "}
-            <code>lib/status.ts</code> y <code>lib/format.ts</code>, y los componentes base que usa (dialog, tabs,
-            textarea, tooltip, kbd). Necesita el <code>Toaster</code> de sonner en el layout raíz.
+            Instala <code>report-button.tsx</code> y sus piezas (<code>report-*.tsx</code>, con el lienzo y{" "}
+            <code>lib/report-canvas.ts</code>), <code>states.tsx</code>, <code>status-badge.tsx</code>,{" "}
+            <code>lib/status.ts</code> y <code>lib/format.ts</code>, los componentes base que usa (dialog, tabs, textarea,
+            tooltip, kbd) y <code>modern-screenshot</code> para la captura. Necesita el <code>Toaster</code> de sonner en
+            el layout raíz. Las imágenes llegan en data URL: el servidor las sube a su almacenamiento y guarda los enlaces.
           </p>
         </Prose>
       </DocSection>

@@ -42,8 +42,8 @@ export default function ColorPage() {
             <>
               <strong>Lo seleccionado se ve siempre:</strong> filas, tarjetas y elementos de lista seleccionados van en{" "}
               <code>bg-brand-soft</code> con un filo <code>brand</code> a la izquierda. El hover es <code>bg-muted</code> y la
-              opción resaltada de un menú, <code>bg-accent</code>. La pestaña activa, blanca con sombra sobre{" "}
-              <code>muted</code>.
+              opción resaltada de un menú, <code>bg-accent</code>. La pestaña de navegación activa, en{" "}
+              <code>foreground</code> con un subrayado de 2 px; la de un segmentado, blanca con sombra sobre <code>muted</code>.
             </>,
             <>
               El texto secundario (<code>muted-foreground</code>) cumple 6:1 sobre blanco: se lee bien en 12 px. La

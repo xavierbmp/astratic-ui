@@ -3,31 +3,26 @@ import { CalendarIcon, DownloadIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PageHeader } from "@/components/app/page-header"
-import { PageTabs } from "@/components/app/page-tabs"
+import { FacturacionTabsDemo } from "@/components/docs/examples/page-tabs-demo"
 import { DocPage, DocSection, DoDont, Example, NextLinks, Prose, Rules, SpecTable } from "@/components/docs/doc"
 import { CodeBlock } from "@/components/docs/code-block"
 
 export const metadata = { title: "Cabecera de página" }
-
-const facturacionTabs = [
-  { href: "/demo/facturacion", label: "Facturas", count: 3 },
-  { href: "/demo/facturacion/cobros", label: "Cobros" },
-]
 
 export default function PageHeaderPage() {
   return (
     <DocPage
       eyebrow="Componentes"
       title="Cabecera de página"
-      lead="Título, una línea de descripción y, a la derecha, las pestañas de subpágina y las acciones de toda la página. Junto con PageBody, el contenedor con el padding del sistema, es lo primero que hay dentro del shell."
+      lead="Título, una línea de descripción y las acciones de toda la página a la derecha; debajo, a todo el ancho, las pestañas de subpágina. Junto con PageBody, el contenedor con el padding del sistema, es lo primero que hay dentro del shell."
     >
       <DocSection id="uso" title="Cuándo se usa">
         <Prose>
           <p>
             En todas las páginas, siempre como primer hijo de <code>PageBody</code>. El título dice qué gestiona la
             página (un sustantivo: «Registros», «Campañas», «Equipo»); la descripción, en una línea, qué hay dentro o
-            cuándo se actualizó. A la derecha van, por este orden, las pestañas de subpágina si el módulo las tiene y
-            las acciones que afectan a toda la página, no a un registro.
+            cuándo se actualizó. A la derecha, las acciones que afectan a toda la página, no a un registro. Debajo, si el
+            módulo las tiene, las pestañas de subpágina.
           </p>
         </Prose>
         <Rules
@@ -45,8 +40,9 @@ export default function PageHeaderPage() {
               Sin icono en el título y sin badge de estado: eso es del sheet de detalle y de la página de registro.
             </>,
             <>
-              En pantallas estrechas las pestañas y las acciones bajan debajo del título (<code>flex-wrap</code>); no se
-              ocultan. Si las pestañas no caben, se desplazan en horizontal.
+              Las pestañas van debajo, a todo el ancho y siempre a la misma altura: la descripción ocupa una línea (se
+              corta con «…» si no cabe). En pantallas estrechas las acciones bajan debajo del título; si las pestañas no
+              caben, se desplazan en horizontal.
             </>,
           ]}
         />
@@ -55,7 +51,7 @@ export default function PageHeaderPage() {
       <DocSection id="ejemplo" title="Ejemplos">
         <Example
           title="Módulo con subpáginas"
-          description="Las pestañas de subpágina van en tabs, antes de las acciones. Cada pestaña es una ruta y el contador ámbar marca pendientes. Pulsa una para verla en la demo."
+          description="Las pestañas de subpágina van en tabs y se pintan debajo del título, con su icono. Cada pestaña es una ruta y el contador ámbar marca pendientes. Pulsa una para verla en la demo."
           code={`<PageHeader
   title="Facturación"
   description="Facturas emitidas, su vencimiento y su cobro."
@@ -70,7 +66,7 @@ export default function PageHeaderPage() {
           <PageHeader
             title="Facturación"
             description="Facturas emitidas, su vencimiento y su cobro."
-            tabs={<PageTabs items={facturacionTabs} current="/demo/facturacion" />}
+            tabs={<FacturacionTabsDemo current="/demo/facturacion" />}
             actions={
               <Button variant="outline">
                 <DownloadIcon /> Exportar
@@ -127,7 +123,7 @@ export default function PageHeaderPage() {
           items={[
             <>
               <strong>En <code>tabs</code> van las pestañas de subpágina</strong> (<code>PageTabs</code>), una ruta por
-              pestaña. Cuándo un módulo tiene subpáginas y cómo se definen está en{" "}
+              pestaña, o las partes de una página de registro (<code>TabsList variant=&quot;line&quot;</code>). Cuándo un módulo tiene subpáginas y cómo se definen está en{" "}
               <Link href="/ds/patrones/navegacion">Navegación y subpáginas</Link>.
             </>,
             <>
@@ -158,7 +154,7 @@ export default function PageHeaderPage() {
         <DoDont
           dos={[
             "«Registros» + «Base de datos de registros y su fase».",
-            "Pestañas Facturas · Cobros a la derecha del título de Facturación, antes de «Exportar».",
+            "Pestañas Facturas · Cobros con su icono debajo del título de Facturación.",
             "Tabs Mes · Trimestre · Año a la derecha del título de un dashboard.",
             "Botón outline «Exportar» con icono.",
           ]}
@@ -182,7 +178,7 @@ export default function PageHeaderPage() {
           rows={[
             [<code key="title">title</code>, <code key="title-t">ReactNode</code>, "El h1 de la página. Obligatoria."],
             [<code key="description">description</code>, <code key="description-t">ReactNode</code>, "Una línea en text-sm muted debajo del título. Opcional."],
-            [<code key="tabs">tabs</code>, <code key="tabs-t">ReactNode</code>, "Las pestañas de subpágina (PageTabs). Se pintan a la derecha, antes de las acciones. Opcional."],
+            [<code key="tabs">tabs</code>, <code key="tabs-t">ReactNode</code>, "Las pestañas de subpágina (PageTabs). Se pintan debajo del título, a todo el ancho. Opcional."],
             [<code key="actions">actions</code>, <code key="actions-t">ReactNode</code>, "Botones outline (y, sin subpáginas, un segmentado) alineados a la derecha, gap 10 px, sin salto de línea interno. Opcional."],
             [<code key="className">className</code>, <code key="className-t">string</code>, "Clases extra para el contenedor."],
           ]}
@@ -196,9 +192,9 @@ export default function PageHeaderPage() {
         <SpecTable
           columns={["Prop", "Tipo", "Descripción"]}
           rows={[
-            [<code key="t-items">items</code>, <code key="t-items-t">PageTab[]</code>, "Las subpáginas: { href, label, count? }. La primera vive en la ruta del módulo. count es el número de pendientes (pill ámbar); con 0 no se pinta."],
+            [<code key="t-items">items</code>, <code key="t-items-t">PageTab[]</code>, "Las subpáginas: { href, label, icon, count? }. La primera vive en la ruta del módulo. icon es un icono de lucide (por eso se definen en un archivo que importa un componente cliente). count es el número de pendientes (pill ámbar); con 0 no se pinta."],
             [<code key="t-current">current</code>, <code key="t-current-t">string</code>, "Ruta que se da por activa. Por defecto, la de la página (usePathname); solo hace falta en documentación y pruebas."],
-            [<code key="t-className">className</code>, <code key="t-className-t">string</code>, "Clases extra del contenedor: segmentado de 32 px con las medidas de TabsList."],
+            [<code key="t-className">className</code>, <code key="t-className-t">string</code>, "Clases extra del contenedor: la fila de 44 px con la línea gris abajo, igual que TabsList variant=\"line\"."],
           ]}
         />
         <Prose>
