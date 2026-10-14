@@ -1,21 +1,26 @@
 import { describe, expect, it } from "vitest"
 import {
   AJUSTES_COLLABS_DE_SERIE,
+  CONDICIONES_DE_SERIE,
   FORMATOS_PIEZA_DE_SERIE,
   ajustesDe,
   cambiarFormatoDePieza,
   cambiarPublicacion,
   conCampana,
+  condicionDeTipo,
+  condicionesDeLasPiezas,
   esquemaAjustesCollabs,
   formatosDePlataformas,
   fechaGuionPorDefecto,
   fechasDeLasPiezas,
   guardarEnLista,
+  iconoSugerido,
+  importeDeLasPiezas,
   nombreDePieza,
   nombreRepetido,
   piezaDeFormato,
 } from "@/lib/influencer/ajustes-collabs"
-import { aplicarFormulario, piezaDeFormulario, type FormularioBrief } from "@/lib/influencer/formularios"
+import { aplicarFormulario, numeroDeImporte, piezaDeFormulario, type FormularioBrief } from "@/lib/influencer/formularios"
 import { hitosDePieza, partesDePieza, siguientePasoDePieza } from "@/lib/influencer/collabs"
 import { collabDeAlta, mensajeParaLaMarca } from "@/lib/influencer/alta-collab"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
@@ -140,7 +145,7 @@ describe("el brief de la marca", () => {
 
 describe("el alta de una collab", () => {
   const marca = { id: "m-1", nombre: "Lumea", sector: "", tint: "rose" as const, atribucion: "propia" as const, creadaEl: HOY }
-  const vacio = { modo: "yo" as const, campana: "", plataformas: [], brief: "", briefAdjunto: null, coverUrl: "", importe: Number.NaN, desde: "", hasta: "", piezas: [], condiciones: [], adjuntos: [], para: { nombre: "", email: "" }, campos: [], mensaje: "" }
+  const vacio = { modo: "yo" as const, campana: "", plataformas: [], brief: "", briefAdjunto: null, coverUrl: "", importe: Number.NaN, desde: "", hasta: "", piezas: [], condiciones: [], para: { nombre: "", email: "" }, campos: [], mensaje: "" }
 
   it("sin nada rellenado, sale con sus valores de serie", () => {
     const { collab, formulario, materiales } = collabDeAlta(vacio, { marca, hoy: HOY })
@@ -149,16 +154,15 @@ describe("el alta de una collab", () => {
     expect(materiales).toEqual([])
   })
 
-  it("con piezas, termina en la última publicación; los adjuntos pasan a materiales", () => {
-    const piezas = [piezaDeFormato(reel, "2026-10-30", ctx), piezaDeFormato(story, "2026-11-04", ctx)]
-    const adjuntos = [{ nombre: "brief.pdf", tamano: 10, tipo: "application/pdf", url: "https://r2/brief.pdf" }]
-    const { collab, materiales } = collabDeAlta({ ...vacio, piezas, adjuntos, condiciones: [{ id: "exclusividad", nombre: "Exclusividad", dias: 30 }] }, { marca, hoy: HOY })
+  it("con piezas, termina en la última publicación y cada una guarda su importe", () => {
+    const piezas = [{ ...piezaDeFormato(reel, "2026-10-30", ctx), importe: "300" }, piezaDeFormato(story, "2026-11-04", ctx)]
+    const { collab } = collabDeAlta({ ...vacio, piezas, condiciones: [{ id: "exclusividad", nombre: "Exclusividad", dias: 30 }] }, { marca, hoy: HOY })
     expect(collab.hasta).toBe("2026-11-04")
     expect(collab.piezas.map((p) => p.titulo)).toEqual(["Reel · Otoño", "Story · Otoño"])
     expect(collab.piezas[1].sinGuion).toBe(true)
     expect(collab.piezas[0]).toMatchObject({ red: "instagram", plataforma: "instagram" })
     expect(collab.brief.condiciones).toEqual([{ id: "exclusividad", nombre: "Exclusividad", dias: 30 }])
-    expect(materiales[0]).toMatchObject({ collabId: collab.id, tipo: "pdf", origen: "mia" })
+    expect(collab.piezas.map((p) => p.importe)).toEqual([300, undefined])
   })
 
   it("el brief escrito va al texto y el del PDF, el primero de los materiales", () => {
@@ -166,12 +170,51 @@ describe("el alta de una collab", () => {
     const { collab, materiales } = collabDeAlta({ ...vacio, brief: "Objetivo: ventas", briefAdjunto: pdf, plataformas: ["instagram", "Mi podcast"] }, { marca, hoy: HOY })
     expect(collab.brief.texto).toContain("Objetivo: ventas")
     expect(collab.brief.plataformas).toEqual(["instagram", "Mi podcast"])
-    expect(materiales[0]).toMatchObject({ nombre: "brief.pdf", descripcion: "El brief de la campaña" })
+    expect(materiales).toHaveLength(1)
+    expect(materiales[0]).toMatchObject({ collabId: collab.id, nombre: "brief.pdf", tipo: "pdf", origen: "mia", descripcion: "El brief de la campaña" })
   })
 
   it("pidiendo el brief, el enlace lleva los apartados en su orden", () => {
     const { formulario } = collabDeAlta({ ...vacio, modo: "marca", campos: ["piezas", "contacto"] }, { marca, hoy: HOY })
     expect(formulario?.campos).toEqual(["contacto", "piezas"])
     expect(mensajeParaLaMarca("Clara Benet", ["contacto", "materiales"])).toContain("Hola Clara: ¿me subes aquí los materiales")
+  })
+})
+
+describe("lo que sale solo de los entregables", () => {
+  const exclusividad = condicionDeTipo(CONDICIONES_DE_SERIE[0])
+
+  it("las condiciones guardadas sin icono toman el suyo y sus días de serie", () => {
+    const viejas = ajustesDe({ condiciones: [{ id: "exclusividad", nombre: "Exclusividad", conDias: true }, { id: "cd-1", nombre: "Código de descuento", conDias: false }] }).condiciones
+    expect(viejas).toEqual([
+      { id: "exclusividad", nombre: "Exclusividad", conDias: true, icono: "candado", dias: 30 },
+      { id: "cd-1", nombre: "Código de descuento", conDias: false, icono: "porcentaje" },
+    ])
+  })
+
+  it("una condición se añade con su icono y sus días de serie", () => {
+    expect(exclusividad).toEqual({ id: "exclusividad", nombre: "Exclusividad", icono: "candado", dias: 30 })
+    expect(condicionDeTipo({ id: "x", nombre: "Mención", conDias: false, dias: 5 }).dias).toBeUndefined()
+    expect(iconoSugerido("Exclusividad en cosmética")).toBe("candado")
+    expect(iconoSugerido("Código de descuento")).toBe("porcentaje")
+    expect(iconoSugerido("Algo raro")).toBe("documento")
+  })
+
+  it("las condiciones generales son las de las piezas, una vez y con los días más largos", () => {
+    const enlace = condicionDeTipo(CONDICIONES_DE_SERIE[3])
+    const piezas = [
+      { ...piezaDeFormato(reel, "2026-10-30", ctx), condiciones: [exclusividad, enlace] },
+      { ...piezaDeFormato(story, "2026-11-04", ctx), condiciones: [{ ...exclusividad, dias: 60 }] },
+      piezaDeFormato(story, "2026-11-05", ctx),
+    ]
+    expect(condicionesDeLasPiezas(piezas)).toEqual([{ ...exclusividad, dias: 60 }, enlace])
+    expect(condicionesDeLasPiezas([])).toEqual([])
+  })
+
+  it("el importe total suma los de las piezas que lo tienen", () => {
+    const piezas = [{ ...piezaDeFormato(reel, "", ctx), importe: "300" }, { ...piezaDeFormato(story, "", ctx), importe: "99,5" }, piezaDeFormato(story, "", ctx)]
+    expect(importeDeLasPiezas(piezas)).toBe(399.5)
+    expect(importeDeLasPiezas([piezaDeFormato(story, "", ctx)])).toBeUndefined()
+    expect(numeroDeImporte("abc")).toBeUndefined()
   })
 })

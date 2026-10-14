@@ -15,7 +15,7 @@ export const DIAS_ENLACE = 30
 export const REDES_PIEZA: SocialNetwork[] = ["instagram", "tiktok", "youtube", "linkedin"]
 
 /** Una pieza nueva con sus valores por defecto: en preparación, sin versiones y en la primera ronda. */
-export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: string; publicacion: string; red?: SocialNetwork; plataforma?: string; formato?: Formato; unidades?: number; indicaciones?: string; sinGuion?: boolean; fechaGuion?: string; condiciones?: Condicion[] }): Pieza {
+export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: string; publicacion: string; red?: SocialNetwork; plataforma?: string; formato?: Formato; unidades?: number; indicaciones?: string; sinGuion?: boolean; fechaGuion?: string; condiciones?: Condicion[]; importe?: number }): Pieza {
   return {
     id: idNuevo("pz"),
     collabId: datos.collabId,
@@ -29,6 +29,7 @@ export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: s
     sinGuion: datos.sinGuion || undefined,
     fechaGuion: datos.fechaGuion || undefined,
     condiciones: datos.condiciones?.length ? datos.condiciones : undefined,
+    importe: datos.importe,
     estado: "borrador",
     guion: [],
     media: [],
@@ -38,7 +39,15 @@ export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: s
 }
 
 /** Una condición pactada (exclusividad, derechos…) con sus días si los tiene. */
-export const esquemaCondicion = z.object({ id: z.string().min(1).max(60), nombre: z.string().trim().min(1).max(60), dias: z.number().int().min(1).max(3650).optional() })
+export const esquemaCondicion = z.object({ id: z.string().min(1).max(60), nombre: z.string().trim().min(1).max(60), dias: z.number().int().min(1).max(3650).optional(), icono: z.string().max(40).optional() })
+
+/** «450», «99,90» o vacío → el número, o nada si no es un importe (como el importe de la collab). */
+export function numeroDeImporte(texto: string | undefined) {
+  const limpio = (texto ?? "").trim().replace(",", ".")
+  if (!limpio) return undefined
+  const n = Number(limpio)
+  return Number.isFinite(n) && n >= 0 ? n : undefined
+}
 
 export const esquemaPiezaPedida = z.object({
   tipo: z.enum(LISTA_TIPOS_PIEZA),
@@ -57,6 +66,8 @@ export const esquemaPiezaPedida = z.object({
   /** Cuándo se manda el guion; vacío, 10 días antes de publicar. */
   fechaGuion: z.string().optional(),
   condiciones: z.array(esquemaCondicion).max(20).optional(),
+  /** Lo que se cobra por ella, tal como se escribe («450», «99,90»); vacío o sin número, sin importe propio. */
+  importe: z.string().max(20).optional(),
   /** El nombre lo ha escrito ella: ya no se rellena solo con el formato y la campaña. */
   nombreManual: z.boolean().optional(),
   /** Solo para la pantalla: distingue cada pieza mientras se rellena (para quitar una sin mover las demás). */
@@ -80,6 +91,7 @@ export function piezaDeFormulario(p: PiezaPedidaForm, collabId: string, porDefec
     sinGuion: p.tipo !== "texto" && p.requiereGuion === false,
     fechaGuion: p.requiereGuion === false ? undefined : p.fechaGuion,
     condiciones: p.condiciones,
+    importe: numeroDeImporte(p.importe),
   })
 }
 

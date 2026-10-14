@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ClapperboardIcon, FileSignatureIcon, ImageIcon, ImagesIcon, MessageSquareTextIcon, PlusIcon, Trash2Icon, TypeIcon, type LucideIcon } from "lucide-react"
+import { ClapperboardIcon, ImageIcon, ImagesIcon, MessageSquareTextIcon, PlusIcon, Trash2Icon, TypeIcon, type LucideIcon } from "lucide-react"
 import { cn } from "cn"
 import { TIPOS_PIEZA, nombrePlataforma, type FormatoPieza, type TipoCondicion, type TipoPieza } from "@/lib/influencer/modelo"
 import type { PiezaPedidaForm } from "@/lib/influencer/formularios"
@@ -43,7 +43,10 @@ type Props = {
   /** Crear un formato que no está; `usar` lo pone donde se pidió (una pieza o una nueva) al crearlo. */
   onNuevoFormato?: (nombre: string, usar: (formato: FormatoPieza) => void) => void
   onEditarFormato?: (id: string) => void
-  onNuevaCondicion?: (nombre: string) => TipoCondicion
+  /** Crear una condición que no está; `usar` la pone en la pieza al crearla. */
+  onNuevaCondicion?: (nombre: string, usar: (tipo: TipoCondicion) => void) => void
+  /** Cada entregable lleva su importe (en el alta de una collab; la marca no lo ve). */
+  conImporte?: boolean
   className?: string
 }
 
@@ -51,11 +54,11 @@ type Props = {
  * Los entregables de una collab. Arriba, un atajo por cada formato de sus plataformas (y «Más
  * formatos»: todos, o uno nuevo escribiéndolo). Cada entregable es una tarjeta: el icono de su formato
  * a la izquierda (se pulsa para cambiarlo), su nombre de serie con la campaña («Reel · Otoño», se
- * cambia al momento) y, en la franja de abajo, el día de publicación, si lleva guion y su día (de
- * serie, `diasGuion` antes si da tiempo), sus condiciones y sus indicaciones. Lo usan el alta de una
- * collab, «Nueva pieza» y el formulario de la marca.
+ * cambia al momento), su importe si `conImporte` y, en la franja de abajo, el día de publicación, si
+ * lleva guion y su día (de serie, `diasGuion` antes si da tiempo), sus condiciones (icono y días, en
+ * línea) y sus indicaciones. Lo usan el alta de una collab, «Nueva pieza» y el formulario de la marca.
  */
-export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLLABS_DE_SERIE.formatos, plataformas = [], condiciones, hoy, campana = "", diasGuion = AJUSTES_COLLABS_DE_SERIE.diasGuion, onNuevoFormato, onEditarFormato, onNuevaCondicion, className }: Props) {
+export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLLABS_DE_SERIE.formatos, plataformas = [], condiciones, hoy, campana = "", diasGuion = AJUSTES_COLLABS_DE_SERIE.diasGuion, onNuevoFormato, onEditarFormato, onNuevaCondicion, conImporte, className }: Props) {
   const ctx = { campana, diasGuion, hoy }
   const cambiar = (i: number, pieza: PiezaPedidaForm) => onChange(value.map((p, j) => (j === i ? pieza : p)))
   const anadir = (formato: FormatoPieza) => onChange([...value, piezaDeFormato(formato, "", ctx)])
@@ -107,6 +110,7 @@ export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLL
           onNuevoFormato={onNuevoFormato}
           onEditarFormato={onEditarFormato}
           onNuevaCondicion={onNuevaCondicion}
+          conImporte={conImporte}
         />
       ))}
     </div>
@@ -125,13 +129,13 @@ type PropsTarjeta = {
   onQuitar: () => void
   onNuevoFormato?: Props["onNuevoFormato"]
   onEditarFormato?: (id: string) => void
-  onNuevaCondicion?: (nombre: string) => TipoCondicion
+  onNuevaCondicion?: Props["onNuevaCondicion"]
+  conImporte?: boolean
 }
 
-/** Un entregable: el icono de su formato y su nombre arriba; su día, su guion, sus condiciones y sus indicaciones en la franja de abajo. */
-function TarjetaEntregable({ numero, pieza: p, error, formatos, opciones, condiciones, ctx, onCambiar, onQuitar, onNuevoFormato, onEditarFormato, onNuevaCondicion }: PropsTarjeta) {
-  const [abiertos, setAbiertos] = React.useState<Set<"condiciones" | "indicaciones">>(() => new Set([...(p.condiciones?.length ? ["condiciones" as const] : []), ...(p.indicaciones ? ["indicaciones" as const] : [])]))
-  const alternar = (parte: "condiciones" | "indicaciones") => setAbiertos((s) => new Set(s.has(parte) ? [...s].filter((x) => x !== parte) : [...s, parte]))
+/** Un entregable: el icono de su formato, su nombre y su importe arriba; su día, su guion, sus condiciones y sus indicaciones en la franja de abajo. */
+function TarjetaEntregable({ numero, pieza: p, error, formatos, opciones, condiciones, ctx, onCambiar, onQuitar, onNuevoFormato, onEditarFormato, onNuevaCondicion, conImporte }: PropsTarjeta) {
+  const [indicaciones, setIndicaciones] = React.useState(!!p.indicaciones)
   const formato = formatos.find((f) => f.id === p.formato)
   const Icono = ICONOS_PIEZA[p.tipo]
   const conGuion = p.tipo !== "texto"
@@ -174,6 +178,19 @@ function TarjetaEntregable({ numero, pieza: p, error, formatos, opciones, condic
           />
           <p className="truncate text-xs text-muted-foreground">{[formato?.nombre ?? TIPOS_PIEZA[p.tipo].label, plataforma ? nombrePlataforma(plataforma) : "Sin plataforma", TIPOS_PIEZA[p.tipo].label].filter((x, j, xs) => xs.indexOf(x) === j).join(" · ")}</p>
         </div>
+        {conImporte && (
+          <label className="flex h-8 w-20 flex-none items-center gap-1 rounded-md border border-input px-2 text-[13px] text-muted-foreground transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 hover:bg-muted/50 sm:w-24">
+            <input
+              value={p.importe ?? ""}
+              onChange={(e) => onCambiar({ ...p, importe: e.target.value.replace(/[^\d.,]/g, "") })}
+              inputMode="decimal"
+              placeholder="Importe"
+              aria-label={`Importe del entregable ${numero}`}
+              className="w-full min-w-0 bg-transparent text-right text-foreground tabular-nums outline-none placeholder:text-muted-foreground"
+            />
+            €
+          </label>
+        )}
         <Button type="button" variant="ghost" size="icon-sm" aria-label={`Quitar el entregable ${numero}`} onClick={onQuitar} className="text-muted-foreground">
           <Trash2Icon />
         </Button>
@@ -194,25 +211,17 @@ function TarjetaEntregable({ numero, pieza: p, error, formatos, opciones, condic
             {p.requiereGuion !== false && <CampoFecha aspecto="texto" prefijo="el" valor={p.fechaGuion ?? ""} onChange={(dia) => onCambiar({ ...p, fechaGuion: dia })} hoy={ctx.hoy} max={p.publicacion || undefined} placeholder="¿qué día?" aria-label={`Día del guion del entregable ${numero}`} className="-ml-1.5" />}
           </span>
         )}
-        <span className="ml-auto flex items-center">
-          {condiciones && (
-            <Button type="button" variant="ghost" size="sm" aria-pressed={abiertos.has("condiciones")} className={cn("text-muted-foreground", abiertos.has("condiciones") && "bg-muted text-foreground")} onClick={() => alternar("condiciones")}>
-              <FileSignatureIcon /> Condiciones{p.condiciones?.length ? ` · ${p.condiciones.length}` : ""}
-            </Button>
-          )}
-          <Button type="button" variant="ghost" size="sm" aria-pressed={abiertos.has("indicaciones")} className={cn("text-muted-foreground", abiertos.has("indicaciones") && "bg-muted text-foreground")} onClick={() => alternar("indicaciones")}>
+        {/* Con base 0 no salta de línea por lo que ocupan las condiciones: si no caben, se desplazan. */}
+        <span className="ml-auto flex min-w-40 flex-1 basis-0 items-center justify-end gap-1">
+          {condiciones && <CondicionesEditor value={p.condiciones ?? []} onChange={(cs) => onCambiar({ ...p, condiciones: cs })} tipos={condiciones} onNuevoTipo={onNuevaCondicion} className="px-1" />}
+          <Button type="button" variant="ghost" size="sm" aria-pressed={indicaciones} className={cn("flex-none text-muted-foreground", indicaciones && "bg-muted text-foreground")} onClick={() => setIndicaciones((x) => !x)}>
             <MessageSquareTextIcon /> Indicaciones
           </Button>
         </span>
       </div>
 
       {error && <p className="border-t px-3 py-1.5 text-xs text-danger">{error}</p>}
-      {abiertos.has("condiciones") && condiciones && (
-        <div className="border-t px-3 py-2.5">
-          <CondicionesEditor tamano="sm" value={p.condiciones ?? []} onChange={(cs) => onCambiar({ ...p, condiciones: cs })} tipos={condiciones} onNuevoTipo={onNuevaCondicion} abrirAlEmpezar={!p.condiciones?.length} />
-        </div>
-      )}
-      {abiertos.has("indicaciones") && (
+      {indicaciones && (
         <div className="border-t px-3 py-2.5">
           <Textarea autoFocus={!p.indicaciones} value={p.indicaciones} onChange={(e) => onCambiar({ ...p, indicaciones: e.target.value })} rows={2} placeholder="Lo que debe tener: duración, qué enseñar, texto en pantalla…" aria-label={`Indicaciones del entregable ${numero}`} className="rounded-md" />
         </div>

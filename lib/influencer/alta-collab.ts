@@ -1,5 +1,5 @@
 // El alta de una collab a mano: de lo que se ha rellenado (nada es obligatorio) sale la collab con
-// sus piezas, el enlace para la marca si se le pide algo y los materiales que se adjuntaron. Lo que
+// sus piezas, el enlace para la marca si se le pide algo y el brief adjunto en sus materiales. Lo que
 // falta se completa con su valor de serie.
 import type { CampoBrief, Collab, Condicion, Contacto, FormularioMarca, Marca, Material } from "@/lib/influencer/modelo"
 import { caducidad, piezaDeFormulario, tokenNuevo, type PiezaPedidaForm } from "@/lib/influencer/formularios"
@@ -28,7 +28,6 @@ export type ValoresAlta = {
   hasta: string
   piezas: PiezaPedidaForm[]
   condiciones: Condicion[]
-  adjuntos: ArchivoAdjunto[]
   para: { nombre: string; email: string }
   campos: CampoBrief[]
   mensaje: string
@@ -48,8 +47,7 @@ export function mensajeParaLaMarca(nombre: string, campos: CampoBrief[]) {
 }
 
 /**
- * La collab, su enlace para la marca (si se le pide el brief) y sus materiales (el brief en archivo
- * y los adjuntos). Sin campaña, «Collab con …»; sin fechas, de hoy a su última publicación; sin
+ * La collab, su enlace para la marca (si se le pide el brief) y sus materiales (el brief en archivo). Sin campaña, «Collab con …»; sin fechas, de hoy a su última publicación; sin
  * importe, 0; sin apartados para la marca, sus datos.
  */
 export function collabDeAlta(v: ValoresAlta, { marca, principal, hoy }: { marca: Marca; principal?: Contacto; hoy: string }): Alta {
@@ -88,6 +86,6 @@ export function collabDeAlta(v: ValoresAlta, { marca, principal, hoy }: { marca:
   const formulario: FormularioMarca | undefined =
     v.modo === "marca" ? { id: idNuevo("fm"), token: tokenNuevo("fm"), collabId: id, campos: camposEnOrden(v.campos.length ? v.campos : ["contacto"]), para: v.para, mensaje: v.mensaje.trim() || undefined, creadoEl: hoy, caduca: caducidad(hoy) } : undefined
   const material = (a: ArchivoAdjunto, descripcion?: string): Material => ({ id: idNuevo("m"), collabId: id, nombre: a.nombre, tipo: tipoDeArchivo(a.tipo), origen: "mia", tamano: a.tamano, url: a.url, previewUrl: a.tipo.startsWith("image/") ? a.url : undefined, subidoEl: hoy, descripcion })
-  const materiales = [...(v.briefAdjunto ? [material(v.briefAdjunto, "El brief de la campaña")] : []), ...v.adjuntos.map((a) => material(a))]
+  const materiales = v.briefAdjunto ? [material(v.briefAdjunto, "El brief de la campaña")] : []
   return { collab, formulario, materiales }
 }

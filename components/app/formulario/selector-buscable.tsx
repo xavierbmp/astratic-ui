@@ -18,7 +18,8 @@ const ALTOS = { md: 40, sm: 32 }
  * donde se escribe y debajo salen las opciones, que se recorren con la rueda o las flechas y se
  * filtran al escribir. Si lo escrito no existe, la última opción es el botón «Crear «…»» (`onCrear`):
  * nunca se queda nadie sin poder poner lo que quiere. Con `onEditar`, las opciones `editable` llevan
- * un lápiz; con `vaciable`, una cruz para quitar lo elegido.
+ * un lápiz; con `vaciable`, una cruz para quitar lo elegido. Con `marcados`, varias llevan la marca de
+ * elegidas (una lista en la que se pone y se quita: las condiciones de una pieza).
  *
  * El panel cubre el campo y es modal a propósito: dentro de un diálogo, uno no modal no deja usar la
  * rueda del ratón en la lista. `tamano="sm"` es el de dentro de una fila. Con `aspecto="boton"`, en
@@ -28,6 +29,7 @@ export function SelectorBuscable({
   id,
   opciones,
   valor,
+  marcados,
   onChange,
   placeholder = "Escribe o elige",
   vacio = "Nada se llama así",
@@ -46,6 +48,8 @@ export function SelectorBuscable({
   id?: string
   opciones: OpcionSelector[]
   valor: string | undefined
+  /** Las que salen marcadas además de `valor`, cuando se eligen varias. */
+  marcados?: string[]
   /** Con `vaciable`, la cruz llama con «». */
   onChange: (valor: string) => void
   placeholder?: string
@@ -214,7 +218,7 @@ export function SelectorBuscable({
                   <PencilIcon className="size-3.5" />
                 </button>
               )}
-              {o.value === valor && <CheckIcon className="size-4 text-brand" />}
+              {(o.value === valor || marcados?.includes(o.value)) && <CheckIcon className="size-4 text-brand" />}
             </div>
           ))}
           {puedeCrear && (

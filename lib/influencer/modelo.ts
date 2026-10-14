@@ -361,10 +361,13 @@ export const nombrePlataforma = (plataforma: string) => PLATAFORMAS.find((p) => 
  * Una condición pactada con su duración si la tiene: exclusividad, derechos de uso, publicidad
  * pagada… Vale para toda la collab (`Brief.condiciones`) o para una pieza (`Pieza.condiciones`).
  */
-export type Condicion = { id: string; nombre: string; dias?: number }
+export type Condicion = { id: string; nombre: string; dias?: number; /** Su icono (`ICONOS_CONDICION`): en una pieza se ve el icono y los días, no el nombre. */ icono?: string }
 
-/** Una condición de la lista de cada influencer: la que se elige en el alta. `conDias`: si pide cuántos días. */
-export type TipoCondicion = { id: string; nombre: string; conDias: boolean }
+/**
+ * Una condición de la lista de cada influencer: la que se elige en el alta. `conDias`: si pide
+ * cuántos días; `dias`, los que salen al añadirla; `icono`, el que la representa.
+ */
+export type TipoCondicion = { id: string; nombre: string; conDias: boolean; icono?: string; dias?: number }
 
 /** Los apartados del formulario que rellena la marca por enlace; ella elige cuáles le pide. */
 export type CampoBrief = "contacto" | "campana" | "fechas" | "piezas" | "materiales" | "publicar" | "facturacion"
@@ -486,6 +489,8 @@ export type Pieza = {
   fechaGuion?: string
   /** Las condiciones solo de esta pieza (además de las de la collab). */
   condiciones?: Condicion[]
+  /** Lo que se cobra por esta pieza, si se pactó por pieza (el total de la collab va en `Collab.importe`). */
+  importe?: number
   estado: EstadoPieza
   guion: Version[]
   /** El vídeo o las fotos, versión a versión. */

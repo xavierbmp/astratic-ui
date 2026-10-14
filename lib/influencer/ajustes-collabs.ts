@@ -3,8 +3,8 @@
 // que se rellena solo en el alta a partir de ellos (el nombre de cada pieza, la fecha del guion, las
 // fechas de la collab). El mismo esquema valida en el formulario y en la acción que los guarda.
 import { z } from "zod"
-import { LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, PLATAFORMAS, type AjustesCollabs, type CampoBrief, type FormatoPieza, type TipoCondicion } from "@/lib/influencer/modelo"
-import { REDES_PIEZA, type PiezaPedidaForm } from "@/lib/influencer/formularios"
+import { LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, PLATAFORMAS, type AjustesCollabs, type CampoBrief, type Condicion, type FormatoPieza, type TipoCondicion } from "@/lib/influencer/modelo"
+import { REDES_PIEZA, numeroDeImporte, type PiezaPedidaForm } from "@/lib/influencer/formularios"
 import { sumarDias } from "@/lib/influencer/fechas"
 import { idNuevo } from "@/lib/influencer/tareas"
 
@@ -27,12 +27,63 @@ export const FORMATOS_PIEZA_DE_SERIE: FormatoPieza[] = [
   { id: "ugc", nombre: "Vídeo UGC", tipo: "video", conGuion: true },
 ]
 
+/**
+ * Los iconos que puede llevar una condición (el componente pone el dibujo de cada uno): en una pieza
+ * la condición se ve como su icono y sus días, así caben todas en una línea.
+ */
+export const ICONOS_CONDICION = [
+  { id: "candado", nombre: "Candado" },
+  { id: "copyright", nombre: "Derechos" },
+  { id: "megafono", nombre: "Megáfono" },
+  { id: "enlace", nombre: "Enlace" },
+  { id: "estrella", nombre: "Estrella" },
+  { id: "chincheta", nombre: "Chincheta" },
+  { id: "reloj", nombre: "Reloj" },
+  { id: "calendario", nombre: "Calendario" },
+  { id: "ojo", nombre: "Ojo" },
+  { id: "aprobado", nombre: "Aprobado" },
+  { id: "escudo", nombre: "Escudo" },
+  { id: "etiqueta", nombre: "Etiqueta" },
+  { id: "porcentaje", nombre: "Porcentaje" },
+  { id: "regalo", nombre: "Regalo" },
+  { id: "personas", nombre: "Personas" },
+  { id: "repetir", nombre: "Repetir" },
+  { id: "arroba", nombre: "Arroba" },
+  { id: "hashtag", nombre: "Hashtag" },
+  { id: "euro", nombre: "Euro" },
+  { id: "documento", nombre: "Documento" },
+] as const
+
+export const ICONO_CONDICION_DE_SERIE = "documento"
+
+/** El icono que mejor le va a una condición nueva por su nombre; si no se adivina, el documento. */
+export function iconoSugerido(nombre: string): string {
+  const n = nombre.toLocaleLowerCase("es").normalize("NFD").replace(/\p{Diacritic}/gu, "")
+  const pistas: [RegExp, string][] = [
+    [/exclusiv/, "candado"],
+    [/derecho|cesion|licencia/, "copyright"],
+    [/pagad|paid|anuncio|ads|whitelist/, "megafono"],
+    [/enlace|link|bio/, "enlace"],
+    [/destacad/, "estrella"],
+    [/fijad|pin/, "chincheta"],
+    [/aprob|revis|visto/, "aprobado"],
+    [/descuento|codigo|cupon/, "porcentaje"],
+    [/regalo|producto|muestra/, "regalo"],
+    [/mencion|@/, "arroba"],
+    [/hashtag|#/, "hashtag"],
+    [/permanen|tiempo|durac/, "reloj"],
+    [/confidencial|privad|nda/, "escudo"],
+    [/republic|reutiliz|repost/, "repetir"],
+  ]
+  return pistas.find(([re]) => re.test(n))?.[1] ?? ICONO_CONDICION_DE_SERIE
+}
+
 export const CONDICIONES_DE_SERIE: TipoCondicion[] = [
-  { id: "exclusividad", nombre: "Exclusividad", conDias: true },
-  { id: "derechos", nombre: "Derechos de uso", conDias: true },
-  { id: "paid", nombre: "Publicidad pagada", conDias: true },
-  { id: "enlace-bio", nombre: "Enlace en la bio", conDias: true },
-  { id: "destacada", nombre: "Story destacada", conDias: true },
+  { id: "exclusividad", nombre: "Exclusividad", conDias: true, icono: "candado", dias: 30 },
+  { id: "derechos", nombre: "Derechos de uso", conDias: true, icono: "copyright", dias: 90 },
+  { id: "paid", nombre: "Publicidad pagada", conDias: true, icono: "megafono", dias: 30 },
+  { id: "enlace-bio", nombre: "Enlace en la bio", conDias: true, icono: "enlace", dias: 7 },
+  { id: "destacada", nombre: "Story destacada", conDias: true, icono: "estrella", dias: 30 },
 ]
 
 export const AJUSTES_COLLABS_DE_SERIE: AjustesCollabs = {
@@ -57,7 +108,7 @@ export const esquemaFormatoPieza = z.object({
   conGuion: z.boolean(),
 })
 
-export const esquemaTipoCondicion = z.object({ id: z.string().min(1).max(60), nombre, conDias: z.boolean() })
+export const esquemaTipoCondicion = z.object({ id: z.string().min(1).max(60), nombre, conDias: z.boolean(), icono: z.string().max(40).optional(), dias: z.number().int().min(1, "Pon 1 día o más").max(3650).optional() })
 
 export const esquemaAjustesCollabs = z.object({
   formatos: z.array(esquemaFormatoPieza).max(MAXIMO_EN_LISTA, `Caben ${MAXIMO_EN_LISTA} formatos`).refine(sinRepetidos, "Hay dos formatos que se llaman igual"),
@@ -68,7 +119,10 @@ export const esquemaAjustesCollabs = z.object({
 
 /** Los de una influencer: lo que ha cambiado ella y, en lo que no ha tocado (`null`), lo de serie. */
 export function ajustesDe(propios: Partial<AjustesCollabs> | null | undefined): AjustesCollabs {
-  return { ...AJUSTES_COLLABS_DE_SERIE, ...propios }
+  const ajustes = { ...AJUSTES_COLLABS_DE_SERIE, ...propios }
+  // Las guardadas antes de que las condiciones tuvieran icono y días de serie los toman de las de serie.
+  const condiciones = ajustes.condiciones.map((c) => (c.icono === undefined ? { ...CONDICIONES_DE_SERIE.find((s) => s.id === c.id), ...c, icono: CONDICIONES_DE_SERIE.find((s) => s.id === c.id)?.icono ?? iconoSugerido(c.nombre) } : c))
+  return { ...ajustes, condiciones }
 }
 
 /** El error si ya hay otro con ese nombre (sin contar `exceptoId`, el que se está cambiando). */
@@ -156,6 +210,31 @@ export function fechasDeLasPiezas(piezas: PiezaPedidaForm[]): { desde: string; h
   const guiones = piezas.flatMap((p) => (p.requiereGuion && p.fechaGuion ? [p.fechaGuion] : []))
   const desde = [...guiones, ...publicaciones].sort()[0]
   return { desde, hasta: publicaciones[publicaciones.length - 1] }
+}
+
+/** La condición que se añade a una pieza o a la collab desde su tipo: con su icono y, si lleva días, los de serie. */
+export function condicionDeTipo(tipo: TipoCondicion): Condicion {
+  return { id: tipo.id, nombre: tipo.nombre, icono: tipo.icono, dias: tipo.conDias ? tipo.dias : undefined }
+}
+
+/**
+ * Las condiciones de toda la collab que salen de las de sus piezas: cada una una vez, en el orden en
+ * que aparecen, y con los días más largos que tenga en alguna pieza.
+ */
+export function condicionesDeLasPiezas(piezas: PiezaPedidaForm[]): Condicion[] {
+  const todas = new Map<string, Condicion>()
+  for (const c of piezas.flatMap((p) => p.condiciones ?? [])) {
+    const ya = todas.get(c.id)
+    const dias = ya?.dias !== undefined || c.dias !== undefined ? Math.max(ya?.dias ?? 0, c.dias ?? 0) || undefined : undefined
+    todas.set(c.id, { ...(ya ?? c), dias })
+  }
+  return [...todas.values()]
+}
+
+/** Lo que suman los importes de las piezas que lo tienen; nada si ninguna lo tiene. */
+export function importeDeLasPiezas(piezas: PiezaPedidaForm[]): number | undefined {
+  const importes = piezas.map((p) => numeroDeImporte(p.importe)).filter((n) => n !== undefined)
+  return importes.length ? Math.round(importes.reduce((a, b) => a + b, 0) * 100) / 100 : undefined
 }
 
 /** Los apartados del brief en su orden, sin repetir. */
