@@ -320,6 +320,13 @@ export const TIPOS_PIEZA: Record<TipoPieza, { label: string; plural: string; /**
 
 export const LISTA_TIPOS_PIEZA = Object.keys(TIPOS_PIEZA) as TipoPieza[]
 
+/**
+ * Con qué se añade una pieza («Reel», «Story», «Mención en la bio»): pone su tipo, que decide qué se
+ * revisa, y dónde se publica, y el nombre de la pieza empieza siendo el suyo. Cada influencer
+ * parte de los de serie y crea, cambia o quita los suyos desde el alta (`lib/influencer/formatos-pieza.ts`).
+ */
+export type FormatoPieza = { id: string; nombre: string; tipo: TipoPieza; red?: SocialNetwork }
+
 export type EstadoPieza = "borrador" | "en-revision" | "cambios" | "aprobado" | "programado" | "publicado" | "resultados"
 
 export const ESTADOS_PIEZA: Estado<EstadoPieza>[] = [

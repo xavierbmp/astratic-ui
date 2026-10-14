@@ -82,7 +82,7 @@ Nada se configura en una página de ajustes aparte: cada cosa se configura **don
 
 - **Engranaje** (`ConfigButton`, mismo icono que el de campos visibles): en la cabecera del bloque o del panel que enseña lo configurable (líneas en «Por línea», remitentes en su bloque) y junto a la etiqueta de un `Select` simple de formulario (pipeline, remitente).
 - **En la ficha, pulsar el nombre de un campo abre su configuración** (`DetailField onConfig`): el valor se edita donde se lee y el campo se configura donde se nombra.
-- **Opciones de un selector**: `MultiSelect` e `InlineField` con `onCreate` (escribir algo que no existe ofrece «Crear «…»») y `onManage` (pie «Gestionar …» que abre su gestor).
+- **Opciones de un selector**: `MultiSelect` e `InlineField` con `onCreate` (escribir algo que no existe ofrece «Crear «…»») y `onManage` (pie «Gestionar …» que abre su gestor). En un formulario de alta, `SelectorBuscable` con `crear` y `onEditar`.
 - **Kanban**: el título de la columna se pulsa para configurarla, sus opciones van en el menú «…» (editar, añadir a la derecha, mover, eliminar) y al final hay una columna «Añadir» (`columnMenu`, `onColumnTitleClick`, `onAddColumn`).
 - **Campos propios en la base**: se crean desde la cabecera de una columna («Insertar a la izquierda/derecha») o el «+» del final, y se editan o borran desde su menú.
 - Los gestores son `Dialog` que cargan sus datos al abrirse (nunca de serie con la página) y cuelgan de un proveedor común. Solo los ve quien puede configurar: sin permiso no hay engranaje.
@@ -99,7 +99,9 @@ Nada se configura en una página de ajustes aparte: cada cosa se configura **don
 - Filtros: ver «Bases de datos». Todo filtro activo se ve en su botón de la barra («Filtrado por Marca») y en el velo de sus columnas.
 - Destructivo → `ConfirmDialog` con nombre de lo que se borra. Reversible → se ejecuta y el `toast` ofrece «Deshacer».
 - Feedback siempre con `toast` (sonner). Prohibido `alert`, `confirm`, avisos de texto en la barra.
-- Formularios: label encima, ayuda debajo, error debajo. `Dialog` de 480 px para crear/editar registros sencillos. Botones del pie: «Cancelar» ghost + acción principal.
+- **Formularios de alta** (`components/app/formulario/`, Xavier 2026-10-14, a partir de dos referencias de Dribbble; documentado en `/ds/componentes/forms`): `FormularioDialog` con `FormularioCabecera` (icono del objeto, título, frase), `FormularioCuerpo` (rejilla de seis columnas: cada `CampoFormulario` a fila entera, mitad o tercio) y `FormularioPie` fijo («* Obligatorio» a la izquierda; «Cancelar» outline y la acción principal a la derecha). 480 px con una columna para lo sencillo; 560 o 680 px con los datos cortos de dos en dos o de tres en tres. Label encima, ayuda y error debajo; con error, solo la etiqueta y el borde en rojo.
+- **Un control por tipo de dato**: registro de otra lista con su cara y buscador (`SelectorBuscable`), día con su calendario (`CampoFecha`), importe con su unidad (`InputGroup`), pocas opciones que hay que explicar en tarjetas (`TarjetasOpcion`) y las que se reconocen por el icono en una fila de botones (`IconosOpcion`). Nada de `Select` pelado en un alta.
+- **Ningún desplegable sin salida**: si lo que se busca no está, se crea desde él («Crear «…»» y, fijo al pie, «+ Nueva marca»). Si crearlo pide más de un dato, su formulario se abre encima en el mismo diálogo (`FormularioDialog sub`, con la miga y la flecha de volver; Escape vuelve) y al guardar se regresa al de debajo, intacto, con lo nuevo ya elegido. Lo que es una lista de opciones de cada persona (formatos de pieza) también se cambia desde ahí (lápiz en la opción).
 
 ## Reportar un problema
 - Todo portal monta `ReportButton` una vez en el shell (prop `report` de `AppShell`): el bicho va en la cabecera, **entre el buscador y la campana**. Nunca un botón flotante ni un enlace de «feedback» por página.

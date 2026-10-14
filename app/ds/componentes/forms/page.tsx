@@ -22,80 +22,35 @@ import { Textarea } from "@/components/ui/textarea"
 
 export const metadata = { title: "Formularios" }
 
-const dialogExample = `const schema = z.object({
-  name: z.string().min(2, "Escribe el nombre del registro"),
-  category: z.enum(["cat-a", "cat-b", "cat-c"], { error: "Elige una categoría" }),
-  value: z.number({ error: "Escribe un importe" }).positive("El importe debe ser mayor que 0"),
-  active: z.boolean(),
-})
-type Values = z.infer<typeof schema>
+const dialogExample = `// Una pantalla encima (sub) cuando falta una opción: el formulario de debajo no pierde nada.
+const [nueva, setNueva] = useState<string | null>(null)
 
-const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { name: "", active: true } })
-const { register, handleSubmit, formState, watch, setValue, reset } = form
-const { errors, isDirty, isSubmitting } = formState
-
-const onSubmit = handleSubmit(async (values) => {
-  await createRecord(values)
-  toast.success(\`Registro «\${values.name}» creado\`)
-  setOpen(false)
-  reset()
-})
-
-<Dialog open={open} onOpenChange={setOpen}>
-  <DialogContent className="sm:max-w-[480px]">
-    <DialogHeader>
-      <DialogTitle>Nuevo registro</DialogTitle>
-      <DialogDescription>Aparece en el listado en cuanto lo crees.</DialogDescription>
-    </DialogHeader>
-    <form onSubmit={onSubmit} noValidate className="grid gap-4">
-      <FieldGroup>
-        <Field data-invalid={!!errors.name || undefined}>
-          <FieldLabel htmlFor="name">Nombre</FieldLabel>
-          <Input id="name" aria-invalid={!!errors.name} {...register("name")} />
-          <FieldError errors={[errors.name]} />
-        </Field>
-
-        <Field data-invalid={!!errors.category || undefined}>
-          <FieldLabel htmlFor="category">Categoría</FieldLabel>
-          <Select value={watch("category") ?? ""} onValueChange={(v) => setValue("category", v as Values["category"], { shouldDirty: true, shouldValidate: true })}>
-            <SelectTrigger id="category" className="w-full" aria-invalid={!!errors.category}>
-              <SelectValue placeholder="Elige una categoría" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <FieldError errors={[errors.category]} />
-        </Field>
-
-        <Field data-invalid={!!errors.value || undefined}>
-          <FieldLabel htmlFor="value">Valor</FieldLabel>
-          <InputGroup>
-            <InputGroupInput id="value" type="number" aria-invalid={!!errors.value} {...register("value", { valueAsNumber: true })} />
-            <InputGroupAddon align="inline-end"><InputGroupText>€</InputGroupText></InputGroupAddon>
-          </InputGroup>
-          <FieldDescription>Importe sin impuestos.</FieldDescription>
-          <FieldError errors={[errors.value]} />
-        </Field>
-
-        <Field orientation="horizontal">
-          <FieldContent>
-            <FieldLabel htmlFor="active">Activo</FieldLabel>
-            <FieldDescription>Visible en el listado desde el primer momento.</FieldDescription>
-          </FieldContent>
-          <Switch id="active" checked={watch("active")} onCheckedChange={(c) => setValue("active", c, { shouldDirty: true })} />
-        </Field>
-      </FieldGroup>
-
-      <DialogFooter>
-        <Button type="button" variant="ghost" disabled={isSubmitting} onClick={() => setOpen(false)}>Cancelar</Button>
-        <Button type="submit" disabled={!isDirty || isSubmitting}>
-          <PlusIcon /> {isSubmitting ? "Creando…" : "Crear registro"}
-        </Button>
-      </DialogFooter>
-    </form>
-  </DialogContent>
-</Dialog>`
+<FormularioDialog open={open} onOpenChange={cerrar} ancho="md"
+  sub={nueva !== null && <NuevaCategoria nombre={nueva} onVolver={() => setNueva(null)} onCrear={elegirLaNueva} />}
+  onVolver={() => setNueva(null)}>
+  <FormularioCabecera icono={FolderPlusIcon} titulo="Nuevo registro" descripcion="Aparece en el listado en cuanto lo crees." />
+  <Formulario onSubmit={handleSubmit(crear)}>
+    <FormularioCuerpo>
+      <CampoFormulario etiqueta="Nombre" htmlFor="name" obligatorio ancho="mitad" error={errors.name?.message}>
+        <Input id="name" aria-invalid={!!errors.name} {...register("name")} />
+      </CampoFormulario>
+      <CampoFormulario etiqueta="Categoría" htmlFor="category" obligatorio ancho="mitad" error={errors.category?.message}>
+        <SelectorBuscable id="category" opciones={categorias} valor={category} onChange={elegir}
+          crear={{ label: "Nueva categoría", onCrear: setNueva }} invalido={!!errors.category} />
+      </CampoFormulario>
+      <CampoFormulario etiqueta="Fecha límite" htmlFor="due" obligatorio ancho="tercio" error={errors.due?.message}>
+        <CampoFecha id="due" valor={due} onChange={setDue} hoy={hoy} min={hoy} />
+      </CampoFormulario>
+      <CampoFormulario etiqueta="Prioridad">
+        <TarjetasOpcion columnas={3} opciones={PRIORIDADES} valor={priority} onChange={setPriority} />
+      </CampoFormulario>
+    </FormularioCuerpo>
+    <FormularioPie izquierda={<AvisoObligatorios />}>
+      <Button type="button" variant="outline" size="lg" onClick={() => cerrar(false)}>Cancelar</Button>
+      <Button type="submit" size="lg">Crear registro</Button>
+    </FormularioPie>
+  </Formulario>
+</FormularioDialog>`
 
 const anatomy = `<Field>
   <FieldLabel htmlFor="email">Email de contacto</FieldLabel>
@@ -153,19 +108,39 @@ export default function FormsPage() {
       <DocSection id="uso" title="Cuándo se usa">
         <Prose>
           <p>
-            Crear un registro se hace en un <code>Dialog</code> de 480 px con los campos en una columna; editarlo, en su
-            ficha, campo a campo. La configuración no tiene página propia: cada cosa se configura donde se usa, en un{" "}
+            Crear un registro se hace en <code>FormularioDialog</code> (<code>components/app/formulario</code>): cabecera
+            con el icono del objeto, cuerpo en rejilla de seis columnas y pie fijo con «Cancelar» y la acción principal.
+            Editarlo, en su ficha, campo a campo. La configuración no tiene página propia: cada cosa se configura donde se usa, en un{" "}
             <code>Dialog</code> gestor que se abre desde su engranaje (ver Convenciones → Configuración in situ).
           </p>
           <p>
             En los tres casos la estructura de cada campo es la misma: <code>Field</code> con{" "}
             <code>FieldLabel</code> encima, el control, <code>FieldDescription</code> debajo si hace falta y{" "}
-            <code>FieldError</code> debajo cuando falla.
+            <code>FieldError</code> debajo cuando falla. En el diálogo de alta lo pone <code>CampoFormulario</code>, con
+            el asterisco de obligatorio y su ancho (fila entera, mitad o tercio).
+          </p>
+          <p>
+            <strong>Cada tipo de dato con su control</strong> (Xavier, 2026-10-14, a partir de dos referencias de
+            Dribbble): un registro de otra lista con su cara y buscador (<code>SelectorBuscable</code>: logo, avatar,
+            icono), un día con su calendario (<code>CampoFecha</code>), un importe con su unidad (<code>InputGroup</code>
+            con «€»), pocas opciones que hay que explicar en tarjetas (<code>TarjetasOpcion</code>) y pocas que se
+            reconocen por el icono en una fila de botones (<code>IconosOpcion</code>).
+          </p>
+          <p>
+            <strong>Nunca sin salida:</strong> si la opción que se busca no está, el desplegable ofrece crearla
+            («Crear «…»» y, fijo al pie, «+ Nueva marca»). Si crearla pide más de un dato, su formulario se abre
+            encima, en el mismo diálogo (<code>FormularioDialog sub</code>), con la miga y la flecha de volver; el de
+            debajo se queda como estaba y, al guardar, se vuelve a él con la nueva ya elegida.
           </p>
         </Prose>
         <Rules
           items={[
             <>Label encima, ayuda debajo, error debajo. Siempre en ese orden y siempre visibles: nada en tooltip.</>,
+            <>
+              Anchos del diálogo: <code>sm</code> 480 px (una columna, registros de tres o cuatro datos), <code>md</code>{" "}
+              560 px y <code>lg</code> 680 px (los datos cortos, como fechas, importes o selectores, de dos en dos o de tres
+              en tres; lo largo, a fila entera).
+            </>,
             <>
               Un <code>Field</code> por dato. Los relacionados se agrupan en <code>FieldGroup</code> (20 px entre
               campos) y los excluyentes en <code>FieldSet</code> con <code>FieldLegend</code>.
@@ -180,8 +155,8 @@ export default function FormsPage() {
 
       <DocSection id="ejemplo" title="Ejemplo">
         <Example
-          title="Nuevo registro en un Dialog de 480 px"
-          description="Nombre requerido, dos selects, importe con addon, notas y un switch. Envía vacío para ver los errores; al crear, toast y cierre."
+          title="Nuevo registro con FormularioDialog"
+          description="Un control por tipo de dato y la categoría que falta, creada encima sin salir. Envía vacío para ver los errores; al crear, toast y cierre."
           code={dialogExample}
         >
           <FormDemo />
@@ -306,9 +281,9 @@ export default function FormsPage() {
               («nombre@empresa.com»), nunca la etiqueta.
             </>,
             <>
-              Botones del pie: «Cancelar» ghost + acción principal («Crear registro», «Guardar cambios»). La principal
-              se deshabilita hasta que el formulario cambie (<code>isDirty</code>) y los dos mientras se envía (
-              <code>isSubmitting</code>).
+              Pie (<code>FormularioPie</code>): a la izquierda «* Obligatorio» o lo secundario («Quitar de la lista»); a la
+              derecha «Cancelar» outline y la acción principal (<code>size=&quot;lg&quot;</code>). En una pantalla de
+              encima, «Volver» en lugar de «Cancelar». Los dos se deshabilitan mientras se envía (<code>isSubmitting</code>).
             </>,
             <>
               El esquema zod se comparte con el servidor: se define una vez en <code>lib/</code> y lo usan el{" "}
@@ -329,8 +304,8 @@ export default function FormsPage() {
               datos.
             </>,
             <>
-              Anchos: inputs al 100 % dentro de diálogos y gestores; <code>w-56</code> para un select suelto fuera de
-              un diálogo. Nunca dos campos por fila en un diálogo de 480 px.
+              Anchos: controles al 100 % de su celda y de 40 px de alto en el diálogo de alta; <code>w-56</code> para un
+              select suelto fuera de un diálogo. Nunca dos campos por fila en un diálogo de 480 px.
             </>,
             <>
               <code>Input</code> y <code>Textarea</code> van con <code>register</code>. Selects, switches, radios y
@@ -342,15 +317,15 @@ export default function FormsPage() {
         <DoDont
           dos={[
             "Label encima, error debajo del control.",
-            "«Cancelar» ghost + «Crear registro».",
+            "«Cancelar» outline + «Crear registro», en el pie fijo.",
             "z.string().min(2, \"Escribe el nombre\")",
-            "Dialog de 480 px con los campos en una columna.",
+            "Una opción que falta se crea desde el propio desplegable.",
           ]}
           donts={[
             "Placeholder como única etiqueta.",
             "Validar mientras se escribe la primera vez.",
             "Mensaje «Campo inválido» o «Error».",
-            "Dos columnas de campos en un diálogo.",
+            "Dos columnas en un diálogo de 480 px, o un select sin salida cuando falta la opción.",
           ]}
         />
       </DocSection>
@@ -358,7 +333,16 @@ export default function FormsPage() {
       <DocSection id="props" title="Props">
         <Prose>
           <p>
-            Todos son componentes de shadcn sin cambios. Referencia:{" "}
+            El diálogo de alta y sus controles son del kit (<code>components/app/formulario/</code>):{" "}
+            <code>FormularioDialog</code> (<code>open</code>, <code>ancho</code>, <code>sub</code>, <code>onVolver</code>),{" "}
+            <code>FormularioCabecera</code> (<code>icono</code>, <code>titulo</code>, <code>descripcion</code>,{" "}
+            <code>migas</code>, <code>onVolver</code>), <code>Formulario</code>, <code>FormularioCuerpo</code>,{" "}
+            <code>FormularioPie</code> (<code>izquierda</code>), <code>CampoFormulario</code> (<code>etiqueta</code>,{" "}
+            <code>obligatorio</code>, <code>ayuda</code>, <code>error</code>, <code>accion</code>, <code>ancho</code>),{" "}
+            <code>SelectorBuscable</code> (<code>opciones</code> con <code>icono</code> y <code>detalle</code>,{" "}
+            <code>crear</code>, <code>onEditar</code>, <code>tamano</code>), <code>CampoFecha</code> (<code>valor</code>{" "}
+            «2026-10-14», <code>hoy</code>, <code>min</code>, <code>max</code>), <code>TarjetasOpcion</code> e{" "}
+            <code>IconosOpcion</code>. El resto son componentes de shadcn sin cambios. Referencia:{" "}
             <a href="https://ui.shadcn.com/docs/components/field" target="_blank" rel="noreferrer">
               field
             </a>
@@ -413,7 +397,7 @@ export default function FormsPage() {
       </DocSection>
 
       <DocSection id="instalar" title="Instalar">
-        <CodeBlock lang="bash" code="npx shadcn@latest add field input input-group select switch checkbox radio-group textarea dialog" />
+        <CodeBlock lang="bash" code="npx shadcn@latest add field input input-group select switch checkbox radio-group textarea dialog calendar popover command tooltip" />
         <CodeBlock lang="bash" code="npm i react-hook-form @hookform/resolvers zod" />
       </DocSection>
 

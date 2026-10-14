@@ -40,11 +40,13 @@ export const esquemaPiezaPedida = z.object({
   publicacion: z.string(),
   red: z.enum(["instagram", "tiktok", "youtube", "linkedin"]).optional(),
   indicaciones: z.string().max(600),
+  /** El formato con el que se añadió (`FormatoPieza.id`): solo ayuda a rellenarla, la pieza no lo guarda. */
+  formato: z.string().max(60).optional(),
 })
 
 export type PiezaPedidaForm = z.infer<typeof esquemaPiezaPedida>
 
-export const PIEZA_VACIA: PiezaPedidaForm = { tipo: "video", titulo: "", publicacion: "", red: "instagram", indicaciones: "" }
+export const PIEZA_VACIA: PiezaPedidaForm = { formato: "reel", tipo: "video", titulo: "", publicacion: "", red: "instagram", indicaciones: "" }
 
 const opcional = z.string().trim().max(200)
 
