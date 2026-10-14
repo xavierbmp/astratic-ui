@@ -12,7 +12,7 @@ import { ESTADOS_COBRO, ESTADOS_COLLAB, TIPOS_COLLAB, type Collab, type EstadoCo
 const esEstadoCollab = (v: ValorCampo): v is EstadoCollab => ESTADOS_COLLAB.some((e) => e.id === v)
 
 /** ¿Le ha pedido el brief a la marca y aún no lo ha mandado? */
-export const esperaBrief = (c: Collab, formularios: FormularioMarca[]) => formularios.some((f) => f.collabId === c.id && f.alcance === "brief" && !f.respondidoEl)
+export const esperaBrief = (c: Collab, formularios: FormularioMarca[]) => formularios.some((f) => f.collabId === c.id && !f.respondidoEl && f.campos.some((campo) => campo !== "contacto" && campo !== "materiales"))
 
 export function camposBaseCollabs({ marcas, formularios, propios }: { marcas: Marca[]; formularios: FormularioMarca[]; propios: CampoPropio[] }): DefCampo<Collab>[] {
   return [

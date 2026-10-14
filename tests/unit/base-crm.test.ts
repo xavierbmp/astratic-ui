@@ -14,12 +14,10 @@ describe("bases del CRM", () => {
   const camposMarca = camposBaseMarcas({ marcas, contactos, resumenes: new Map(), propios: [{ id: "f1", nombre: "Prioridad", tipo: "numero" }] })
   const cm = (id: string) => camposMarca.find((c) => c.id === id)!
 
-  it("marcas: pasar a la red quita el «tuya hasta»; volver a tuya lo pone desde hoy", () => {
-    const red = escribirEnMarca(marcas[0], cm("atribucion"), "red", "2026-10-13T10:00:00")
-    expect(red).toMatchObject({ atribucion: "red", atribucionHasta: undefined })
-    expect(escribirEnMarca(marcas[1], cm("atribucion"), "propia", "2026-10-13T10:00:00")).toMatchObject({ atribucion: "propia", atribucionHasta: "2026-10-13" })
-    expect(escribirEnMarca(marcas[0], cm("relacion"), "cliente", "2026-10-13")).toBe(marcas[0])
-    expect(escribirEnMarca(marcas[0], cm("f1"), 3, "2026-10-13").valores).toEqual({ f1: 3 })
+  it("marcas: lo calculado no se escribe y los campos propios van a sus valores; la atribución no se elige", () => {
+    expect(cm("atribucion")).toBeUndefined()
+    expect(escribirEnMarca(marcas[0], cm("relacion"), "cliente")).toBe(marcas[0])
+    expect(escribirEnMarca(marcas[0], cm("f1"), 3).valores).toEqual({ f1: 3 })
   })
 
   it("propuestas: la marca y el contacto son vínculos, y el pipeline es un kanban por estado", () => {

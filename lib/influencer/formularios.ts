@@ -2,7 +2,7 @@
 // de facturación, o solo los materiales. El mismo esquema valida en la página y, en el portal, en la
 // server action que lo guarda. También crea piezas nuevas con sus valores por defecto.
 import { z } from "zod"
-import { LISTA_TIPOS_PIEZA, type Collab, type Formato, type Pieza, type TipoPieza } from "@/lib/influencer/modelo"
+import { LISTA_TIPOS_PIEZA, type CampoBrief, type Collab, type Condicion, type Formato, type Pieza, type TipoPieza } from "@/lib/influencer/modelo"
 import type { SocialNetwork } from "@/components/app/social-icons"
 import { textoAHtml } from "@/lib/influencer/guion"
 import { sumarDias } from "@/lib/influencer/fechas"
@@ -15,7 +15,7 @@ export const DIAS_ENLACE = 30
 export const REDES_PIEZA: SocialNetwork[] = ["instagram", "tiktok", "youtube", "linkedin"]
 
 /** Una pieza nueva con sus valores por defecto: en preparación, sin versiones y en la primera ronda. */
-export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: string; publicacion: string; red?: SocialNetwork; formato?: Formato; unidades?: number; indicaciones?: string }): Pieza {
+export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: string; publicacion: string; red?: SocialNetwork; formato?: Formato; unidades?: number; indicaciones?: string; sinGuion?: boolean; fechaGuion?: string; condiciones?: Condicion[] }): Pieza {
   return {
     id: idNuevo("pz"),
     collabId: datos.collabId,
@@ -25,6 +25,9 @@ export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: s
     unidades: datos.unidades ?? 1,
     titulo: datos.titulo,
     publicacion: datos.publicacion,
+    sinGuion: datos.sinGuion || undefined,
+    fechaGuion: datos.fechaGuion || undefined,
+    condiciones: datos.condiciones?.length ? datos.condiciones : undefined,
     estado: "borrador",
     guion: [],
     media: [],
@@ -33,33 +36,62 @@ export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: s
   }
 }
 
+/** Una condición pactada (exclusividad, derechos…) con sus días si los tiene. */
+export const esquemaCondicion = z.object({ id: z.string().min(1).max(60), nombre: z.string().trim().min(1).max(60), dias: z.number().int().min(1).max(3650).optional() })
+
 export const esquemaPiezaPedida = z.object({
   tipo: z.enum(LISTA_TIPOS_PIEZA),
-  titulo: z.string().trim().min(1, "Ponle nombre").max(80),
+  /** Vacío, se queda con el nombre de su formato. */
+  titulo: z.string().trim().max(120),
   /** Vacío si la marca aún no lo sabe: se pone la fecha final de la ventana. */
   publicacion: z.string(),
   red: z.enum(["instagram", "tiktok", "youtube", "linkedin"]).optional(),
   indicaciones: z.string().max(600),
   /** El formato con el que se añadió (`FormatoPieza.id`): solo ayuda a rellenarla, la pieza no lo guarda. */
   formato: z.string().max(60).optional(),
+  /** Si se revisa un guion antes; en las de solo texto no aplica (el texto es la pieza). */
+  requiereGuion: z.boolean().optional(),
+  /** Cuándo se manda el guion; vacío, 10 días antes de publicar. */
+  fechaGuion: z.string().optional(),
+  condiciones: z.array(esquemaCondicion).max(20).optional(),
+  /** El nombre lo ha escrito ella: ya no se rellena solo con el formato y la campaña. */
+  nombreManual: z.boolean().optional(),
 })
 
 export type PiezaPedidaForm = z.infer<typeof esquemaPiezaPedida>
 
-export const PIEZA_VACIA: PiezaPedidaForm = { formato: "reel", tipo: "video", titulo: "", publicacion: "", red: "instagram", indicaciones: "" }
+export const PIEZA_VACIA: PiezaPedidaForm = { formato: "reel", tipo: "video", titulo: "", publicacion: "", red: "instagram", indicaciones: "", requiereGuion: true, fechaGuion: "" }
+
+/** La pieza de la collab a partir de la del formulario: sin nombre, el del tipo; sin día, `porDefecto`. */
+export function piezaDeFormulario(p: PiezaPedidaForm, collabId: string, porDefecto: string): Pieza {
+  return piezaNueva({
+    collabId,
+    tipo: p.tipo,
+    titulo: p.titulo.trim() || TITULO_POR_TIPO[p.tipo],
+    publicacion: p.publicacion || porDefecto,
+    red: p.red,
+    indicaciones: p.indicaciones.trim(),
+    sinGuion: p.tipo !== "texto" && p.requiereGuion === false,
+    fechaGuion: p.requiereGuion === false ? undefined : p.fechaGuion,
+    condiciones: p.condiciones,
+  })
+}
+
+const TITULO_POR_TIPO: Record<TipoPieza, string> = { video: "Vídeo", foto: "Foto", carrusel: "Carrusel", texto: "Texto" }
 
 const opcional = z.string().trim().max(200)
 
+/** Lo que manda la marca. Nada es obligatorio: lo que deja vacío se queda como estaba en la collab. */
 export const esquemaFormularioBrief = z.object({
   contacto: z.object({
-    nombre: z.string().trim().min(1, "Dinos tu nombre").max(80),
-    email: z.string().trim().email("Revisa el email"),
+    nombre: z.string().trim().max(80),
+    email: z.string().trim().email("Revisa el email").or(z.literal("")),
   }),
-  campana: z.string().trim().min(1, "Ponle nombre a la campaña").max(80),
+  campana: z.string().trim().max(80),
   texto: z.string().max(6000),
   desde: z.string(),
   hasta: z.string(),
-  piezas: z.array(esquemaPiezaPedida).min(1, "Añade al menos una pieza"),
+  piezas: z.array(esquemaPiezaPedida).max(50),
   menciones: opcional,
   hashtags: opcional,
   enlace: z.string().trim().url("Pon la dirección completa, con https://").or(z.literal("")),
@@ -80,32 +112,37 @@ export function partirEtiquetas(texto: string) {
 }
 
 /**
- * La collab con lo que ha mandado la marca: brief, fechas, piezas y facturación. Las piezas se añaden
- * a las que ya hubiera; sin fecha, se publican al final de la ventana.
+ * La collab con lo que ha mandado la marca, solo de los apartados que se le pidieron (`campos`): lo
+ * que no se le pidió o deja vacío se queda como estaba. Las piezas se añaden a las que ya hubiera;
+ * sin día, se publican al final de la ventana.
  */
-export function aplicarFormulario(collab: Collab, v: FormularioBrief): Collab {
-  const desde = v.desde || collab.desde
-  const hasta = v.hasta || collab.hasta
-  const nuevas = v.piezas.map((p) => piezaNueva({ collabId: collab.id, tipo: p.tipo, titulo: p.titulo, publicacion: p.publicacion || hasta, red: p.red, indicaciones: p.indicaciones }))
+export function aplicarFormulario(collab: Collab, v: FormularioBrief, campos: CampoBrief[]): Collab {
+  const pide = (c: CampoBrief) => campos.includes(c)
+  const desde = (pide("fechas") && v.desde) || collab.desde
+  const hasta = (pide("fechas") && v.hasta) || collab.hasta
+  const nuevas = pide("piezas") ? v.piezas.map((p) => piezaDeFormulario(p, collab.id, hasta)) : []
   const f = v.facturacion
+  const brief = collab.brief
   return {
     ...collab,
-    campana: v.campana,
+    campana: (pide("campana") && v.campana) || collab.campana,
     desde,
     hasta,
     piezas: [...collab.piezas, ...nuevas],
     brief: {
-      ...collab.brief,
-      texto: v.texto.trim() ? textoAHtml(v.texto) : collab.brief.texto,
-      menciones: partirEtiquetas(v.menciones),
-      hashtags: partirEtiquetas(v.hashtags),
-      enlace: v.enlace || undefined,
-      codigo: v.codigo || undefined,
-      derechosUso: v.derechosUso || undefined,
-      exclusividad: v.exclusividad || undefined,
-      contacto: { nombre: v.contacto.nombre, email: v.contacto.email },
+      ...brief,
+      texto: pide("campana") && v.texto.trim() ? textoAHtml(v.texto) : brief.texto,
+      ...(pide("publicar") && {
+        menciones: partirEtiquetas(v.menciones),
+        hashtags: partirEtiquetas(v.hashtags),
+        enlace: v.enlace || undefined,
+        codigo: v.codigo || undefined,
+        derechosUso: v.derechosUso || undefined,
+        exclusividad: v.exclusividad || undefined,
+      }),
+      contacto: pide("contacto") && v.contacto.nombre ? { nombre: v.contacto.nombre, email: v.contacto.email } : brief.contacto,
     },
-    facturacion: f.razonSocial ? { razonSocial: f.razonSocial, nif: f.nif, direccion: f.direccion, email: f.email, pedido: f.pedido || undefined } : collab.facturacion,
+    facturacion: pide("facturacion") && f.razonSocial ? { razonSocial: f.razonSocial, nif: f.nif, direccion: f.direccion, email: f.email, pedido: f.pedido || undefined } : collab.facturacion,
   }
 }
 

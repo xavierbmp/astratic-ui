@@ -212,9 +212,9 @@ export const demoInformes: Informe[] = [
 ]
 
 export const demoFormularios: FormularioMarca[] = [
-  { id: "fm-mirra", token: "fm-mirra", collabId: "mirra", alcance: "brief", para: { nombre: "Teo Valls", email: "teo@example.com" }, mensaje: "Hola Teo: aquí puedes contarme la campaña y las piezas que necesitáis. Así lo tengo todo en un sitio.", creadoEl: "2026-10-04T10:05:00", caduca: "2026-11-03" },
-  { id: "fm-botanica-materiales", token: "fm-botanica-materiales", collabId: "botanica", alcance: "materiales", para: { nombre: "Pau Ribes", email: "pau@example.com" }, mensaje: "¿Me subes aquí el packshot nuevo y el logo en vectorial para el reel 2?", creadoEl: "2026-10-05T11:00:00", caduca: "2026-11-04" },
-  { id: "fm-lumea", token: "fm-lumea", collabId: "lumea", alcance: "brief", para: { nombre: "Clara Benet", email: "clara@example.com" }, creadoEl: "2026-09-18T10:00:00", caduca: "2026-10-18", respondidoEl: "2026-09-18T12:30:00" },
+  { id: "fm-mirra", token: "fm-mirra", collabId: "mirra", campos: ["contacto", "campana", "fechas", "piezas", "materiales"], para: { nombre: "Teo Valls", email: "teo@example.com" }, mensaje: "Hola Teo: aquí puedes contarme la campaña y las piezas que necesitáis. Así lo tengo todo en un sitio.", creadoEl: "2026-10-04T10:05:00", caduca: "2026-11-03" },
+  { id: "fm-botanica-materiales", token: "fm-botanica-materiales", collabId: "botanica", campos: ["contacto", "materiales"], para: { nombre: "Pau Ribes", email: "pau@example.com" }, mensaje: "¿Me subes aquí el packshot nuevo y el logo en vectorial para el reel 2?", creadoEl: "2026-10-05T11:00:00", caduca: "2026-11-04" },
+  { id: "fm-lumea", token: "fm-lumea", collabId: "lumea", campos: ["contacto", "campana", "fechas", "piezas", "materiales"], para: { nombre: "Clara Benet", email: "clara@example.com" }, creadoEl: "2026-09-18T10:00:00", caduca: "2026-10-18", respondidoEl: "2026-09-18T12:30:00" },
 ]
 
 const apartados = (lista: [string, string][]) => lista.map(([titulo, ayuda]) => `<h3>${titulo}</h3><p>${ayuda}</p>`).join("")

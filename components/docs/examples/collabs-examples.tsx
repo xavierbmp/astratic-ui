@@ -70,7 +70,7 @@ export function FotosExample() {
 export function PiezasEditorExample() {
   const [piezas, setPiezas] = React.useState<PiezaPedidaForm[]>([
     { ...PIEZA_VACIA, titulo: "Reel de la rutina de noche", publicacion: "2026-10-15" },
-    { ...PIEZA_VACIA, tipo: "carrusel", titulo: "Carrusel con los tres pasos", publicacion: "2026-10-18" },
+    { ...PIEZA_VACIA, formato: "carrusel", tipo: "carrusel", titulo: "Carrusel con los tres pasos", publicacion: "2026-10-18", requiereGuion: false },
   ])
-  return <PiezasEditor value={piezas} onChange={setPiezas} className="w-full" />
+  return <PiezasEditor value={piezas} onChange={setPiezas} hoy="2026-10-06" campana="Rutina de noche" className="w-full" />
 }

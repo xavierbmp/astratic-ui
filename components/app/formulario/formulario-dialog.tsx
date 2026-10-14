@@ -133,7 +133,7 @@ export function FormularioCuerpo({ className, ...props }: React.ComponentProps<"
 }
 
 /**
- * El pie: a la izquierda lo secundario (un aviso, «Eliminar») y a la derecha «Cancelar» y la acción
+ * El pie: a la izquierda lo secundario («Quitar de la lista», un aviso) y a la derecha «Cancelar» y la acción
  * principal. Siempre a la vista aunque el cuerpo se desplace.
  */
 export function FormularioPie({ izquierda, className, children }: { izquierda?: React.ReactNode; className?: string; children: React.ReactNode }) {
@@ -145,27 +145,18 @@ export function FormularioPie({ izquierda, className, children }: { izquierda?: 
   )
 }
 
-/** «* Obligatorio», para el pie cuando el formulario tiene campos obligatorios. */
-export function AvisoObligatorios() {
-  return (
-    <span>
-      <span className="text-danger">*</span> Obligatorio
-    </span>
-  )
-}
-
 const ANCHO_CAMPO = { completo: "col-span-6", mitad: "col-span-6 sm:col-span-3", tercio: "col-span-6 sm:col-span-2" }
 
 /**
- * Un campo del formulario: la etiqueta encima (con su asterisco si es obligatorio y, a la derecha,
- * `accion`: «+ Nueva marca», un engranaje), el control, la ayuda y el error debajo. Con error, solo
- * la etiqueta y el borde se ponen en rojo, no lo que hay dentro. Los `Input` que lleva dentro toman el
- * alto de los controles del formulario (40 px).
+ * Un campo del formulario: la etiqueta encima (a la derecha, `accion`: un contador, un engranaje), el
+ * control, la ayuda y el error debajo. Ningún campo es obligatorio (Xavier, 2026-10-14): lo que falta
+ * se completa con su valor por defecto al guardar, y el error solo sale cuando lo escrito no vale
+ * (un email mal puesto). Con error, solo la etiqueta y el borde en rojo. Los `Input` que lleva dentro
+ * toman el alto de los controles del formulario (40 px).
  */
 export function CampoFormulario({
   etiqueta,
   htmlFor,
-  obligatorio,
   ayuda,
   error,
   accion,
@@ -175,7 +166,6 @@ export function CampoFormulario({
 }: {
   etiqueta: React.ReactNode
   htmlFor?: string
-  obligatorio?: boolean
   ayuda?: React.ReactNode
   error?: string
   accion?: React.ReactNode
@@ -187,10 +177,7 @@ export function CampoFormulario({
     <Field data-invalid={!!error || undefined} className={cn("gap-2 data-[invalid=true]:text-foreground *:data-[slot=input]:h-10 *:data-[slot=input-group]:h-10", ANCHO_CAMPO[ancho], className)}>
       <div className="flex min-h-5 items-center justify-between gap-2">
         <FieldLabel htmlFor={htmlFor} className="text-[13px] font-medium group-data-[invalid=true]/field:text-destructive">
-          <span>
-            {etiqueta}
-            {obligatorio && <span className="text-danger"> *</span>}
-          </span>
+          {etiqueta}
         </FieldLabel>
         {accion}
       </div>

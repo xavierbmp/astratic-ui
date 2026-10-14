@@ -117,7 +117,7 @@ export default function FormsPage() {
             En los tres casos la estructura de cada campo es la misma: <code>Field</code> con{" "}
             <code>FieldLabel</code> encima, el control, <code>FieldDescription</code> debajo si hace falta y{" "}
             <code>FieldError</code> debajo cuando falla. En el diálogo de alta lo pone <code>CampoFormulario</code>, con
-            el asterisco de obligatorio y su ancho (fila entera, mitad o tercio).
+            su ancho (fila entera, mitad o tercio).
           </p>
           <p>
             <strong>Cada tipo de dato con su control</strong> (Xavier, 2026-10-14, a partir de dos referencias de
@@ -127,10 +127,17 @@ export default function FormsPage() {
             reconocen por el icono en una fila de botones (<code>IconosOpcion</code>).
           </p>
           <p>
-            <strong>Nunca sin salida:</strong> si la opción que se busca no está, el desplegable ofrece crearla
-            («Crear «…»» y, fijo al pie, «+ Nueva marca»). Si crearla pide más de un dato, su formulario se abre
-            encima, en el mismo diálogo (<code>FormularioDialog sub</code>), con la miga y la flecha de volver; el de
-            debajo se queda como estaba y, al guardar, se vuelve a él con la nueva ya elegida.
+            <strong>Ningún campo es obligatorio</strong> (Xavier, 2026-10-14): sin asteriscos; lo que se deja vacío se
+            completa al guardar con su valor de serie y solo se avisa de lo que no vale (un email mal escrito).
+          </p>
+          <p>
+            <strong>Elegir es escribir, y nunca sin salida:</strong> al pulsar un <code>SelectorBuscable</code>, el
+            propio campo pasa a ser donde se escribe y debajo salen las opciones (rueda, flechas o filtrar
+            escribiendo); si lo escrito no existe, la última opción es el botón «Crear «…»». Si crearla pide más de
+            un dato, su formulario se abre encima, en el mismo diálogo (<code>FormularioDialog sub</code>), con la miga
+            y la flecha de volver; el de debajo se queda como estaba y, al guardar, se vuelve a él con la nueva ya
+            elegida. Un registro con imagen y logo empieza por <code>PortadaFormulario</code>, como una tarjeta de
+            perfil.
           </p>
         </Prose>
         <Rules
@@ -281,7 +288,7 @@ export default function FormsPage() {
               («nombre@empresa.com»), nunca la etiqueta.
             </>,
             <>
-              Pie (<code>FormularioPie</code>): a la izquierda «* Obligatorio» o lo secundario («Quitar de la lista»); a la
+              Pie (<code>FormularioPie</code>): a la izquierda lo secundario («Quitar de la lista»); a la
               derecha «Cancelar» outline y la acción principal (<code>size=&quot;lg&quot;</code>). En una pantalla de
               encima, «Volver» en lugar de «Cancelar». Los dos se deshabilitan mientras se envía (<code>isSubmitting</code>).
             </>,
@@ -319,13 +326,13 @@ export default function FormsPage() {
             "Label encima, error debajo del control.",
             "«Cancelar» outline + «Crear registro», en el pie fijo.",
             "z.string().min(2, \"Escribe el nombre\")",
-            "Una opción que falta se crea desde el propio desplegable.",
+            "Una opción que falta se crea escribiéndola en el propio campo.",
           ]}
           donts={[
             "Placeholder como única etiqueta.",
             "Validar mientras se escribe la primera vez.",
             "Mensaje «Campo inválido» o «Error».",
-            "Dos columnas en un diálogo de 480 px, o un select sin salida cuando falta la opción.",
+            "Asteriscos de obligatorio, dos columnas en 480 px o un select sin salida.",
           ]}
         />
       </DocSection>
@@ -340,9 +347,10 @@ export default function FormsPage() {
             <code>FormularioPie</code> (<code>izquierda</code>), <code>CampoFormulario</code> (<code>etiqueta</code>,{" "}
             <code>obligatorio</code>, <code>ayuda</code>, <code>error</code>, <code>accion</code>, <code>ancho</code>),{" "}
             <code>SelectorBuscable</code> (<code>opciones</code> con <code>icono</code> y <code>detalle</code>,{" "}
-            <code>crear</code>, <code>onEditar</code>, <code>tamano</code>), <code>CampoFecha</code> (<code>valor</code>{" "}
-            «2026-10-14», <code>hoy</code>, <code>min</code>, <code>max</code>), <code>TarjetasOpcion</code> e{" "}
-            <code>IconosOpcion</code>. El resto son componentes de shadcn sin cambios. Referencia:{" "}
+            <code>onCrear</code>, <code>onEditar</code>, <code>vaciable</code>, <code>tamano</code>),{" "}
+            <code>CampoFecha</code> (<code>valor</code> «2026-10-14», <code>hoy</code>, <code>min</code>, <code>max</code>),{" "}
+            <code>PortadaFormulario</code> (<code>portada</code>, <code>logo</code>, <code>onPortada</code>,{" "}
+            <code>onLogo</code>), <code>TarjetasOpcion</code>, <code>CasillasOpcion</code> e <code>IconosOpcion</code>. El resto son componentes de shadcn sin cambios. Referencia:{" "}
             <a href="https://ui.shadcn.com/docs/components/field" target="_blank" rel="noreferrer">
               field
             </a>

@@ -62,6 +62,8 @@ export type Marca = {
   web?: string
   instagram?: string
   tint: Tint
+  /** Su logo (una imagen subida). Sin él, sus iniciales sobre su tinte. */
+  logoUrl?: string
   /** Marca que trajo ella (suya durante 12 meses) o de la red de Astratic. */
   atribucion: "propia" | "red"
   atribucionHasta?: string
@@ -259,6 +261,8 @@ export type Brief = {
   exclusividad?: string
   /** «Orgánico · 6 meses» o «Paid · 3 meses». */
   derechosUso?: string
+  /** Las condiciones que valen para todas las piezas (exclusividad 30 días…); cada pieza puede añadir las suyas. */
+  condiciones?: Condicion[]
   rondasIncluidas: number
   producto?: { estado: EstadoProducto; detalle?: string }
   contacto: { nombre: string; email: string }
@@ -325,7 +329,38 @@ export const LISTA_TIPOS_PIEZA = Object.keys(TIPOS_PIEZA) as TipoPieza[]
  * revisa, y dónde se publica, y el nombre de la pieza empieza siendo el suyo. Cada influencer
  * parte de los de serie y crea, cambia o quita los suyos desde el alta (`lib/influencer/formatos-pieza.ts`).
  */
-export type FormatoPieza = { id: string; nombre: string; tipo: TipoPieza; red?: SocialNetwork }
+export type FormatoPieza = { id: string; nombre: string; tipo: TipoPieza; red?: SocialNetwork; /** Si pide guion antes de grabar, de serie. */ conGuion: boolean }
+
+/**
+ * Una condición pactada con su duración si la tiene: exclusividad, derechos de uso, publicidad
+ * pagada… Vale para toda la collab (`Brief.condiciones`) o para una pieza (`Pieza.condiciones`).
+ */
+export type Condicion = { id: string; nombre: string; dias?: number }
+
+/** Una condición de la lista de cada influencer: la que se elige en el alta. `conDias`: si pide cuántos días. */
+export type TipoCondicion = { id: string; nombre: string; conDias: boolean }
+
+/** Los apartados del formulario que rellena la marca por enlace; ella elige cuáles le pide. */
+export type CampoBrief = "contacto" | "campana" | "fechas" | "piezas" | "materiales" | "publicar" | "facturacion"
+
+export const CAMPOS_BRIEF: Record<CampoBrief, { label: string; descripcion: string }> = {
+  contacto: { label: "Sus datos", descripcion: "Quién lo rellena y su email" },
+  campana: { label: "La campaña", descripcion: "El nombre y el brief en un texto" },
+  fechas: { label: "Las fechas", descripcion: "Desde cuándo y hasta cuándo se publica" },
+  piezas: { label: "Las piezas", descripcion: "Qué contenidos quieren, con su día" },
+  materiales: { label: "Los materiales", descripcion: "Logos, fotos del producto, la guía de claims" },
+  publicar: { label: "Al publicar", descripcion: "Menciones, hashtags, enlace, código, derechos" },
+  facturacion: { label: "Datos para la factura", descripcion: "Razón social, NIF, dirección y email" },
+}
+
+export const LISTA_CAMPOS_BRIEF = Object.keys(CAMPOS_BRIEF) as CampoBrief[]
+
+/**
+ * Los valores de serie de las altas de collabs que cambia cada influencer en los ajustes de su tabla
+ * (`lib/influencer/ajustes-collabs.ts`): sus formatos de pieza, sus condiciones, cuántos días antes de
+ * publicar va el guion y qué apartados le pide a la marca.
+ */
+export type AjustesCollabs = { formatos: FormatoPieza[]; condiciones: TipoCondicion[]; diasGuion: number; camposBrief: CampoBrief[] }
 
 export type EstadoPieza = "borrador" | "en-revision" | "cambios" | "aprobado" | "programado" | "publicado" | "resultados"
 
@@ -417,6 +452,12 @@ export type Pieza = {
   titulo: string
   /** Fecha prevista de publicación: de ella salen el resto de fechas. */
   publicacion: string
+  /** No lleva guion: se graba sin revisar el guion antes (las de solo texto, el texto es la pieza). */
+  sinGuion?: boolean
+  /** Cuándo se manda el guion; sin ella, 10 días antes de publicar. */
+  fechaGuion?: string
+  /** Las condiciones solo de esta pieza (además de las de la collab). */
+  condiciones?: Condicion[]
   estado: EstadoPieza
   guion: Version[]
   /** El vídeo o las fotos, versión a versión. */
@@ -588,15 +629,14 @@ export type Informe = {
 
 // ───────────────────────── Formularios para la marca ─────────────────────────
 
-/** Qué se le pide a la marca: el brief entero (con piezas, materiales y facturación) o solo los materiales. */
-export type AlcanceFormulario = "brief" | "materiales"
-
 export type FormularioMarca = {
   id: string
   /** Enlace sin cuenta, imposible de adivinar y con caducidad. */
   token: string
   collabId: string
-  alcance: AlcanceFormulario
+  /** Los apartados que rellena la marca, en su orden (`CAMPOS_BRIEF`). */
+  campos: CampoBrief[]
+  /** A quién se manda (vacío si solo se copia el enlace). */
   para: { nombre: string; email: string }
   mensaje?: string
   creadoEl: string

@@ -22,6 +22,9 @@ const ESTADOS_HECHOS = new Set(["aprobado", "programado", "publicado", "resultad
 /** Una pieza de solo texto no se graba ni tiene V1: se escribe, se aprueba y se publica. */
 const tieneMedia = (p: Pieza) => TIPOS_PIEZA[p.tipo].media !== undefined
 
+/** Si se revisa un guion antes del contenido: no en las que se marcaron sin guion (en las de texto, el texto es la pieza). */
+const llevaGuion = (p: Pieza) => !tieneMedia(p) || !p.sinGuion
+
 function hitoHecho(p: Pieza, tipo: TipoHito) {
   switch (tipo) {
     case "guion":
@@ -43,12 +46,13 @@ function verboDe(p: Pieza, tipo: TipoHito, verbo: string) {
   return verbo
 }
 
+/** Los hitos de la pieza: el guion, si lo lleva, en su fecha o 10 días antes de publicar. */
 export function hitosDePieza(p: Pieza): Hito[] {
-  return HITOS.filter((h) => tieneMedia(p) || (h.tipo !== "grabacion" && h.tipo !== "v1")).map((h) => ({
+  return HITOS.filter((h) => (tieneMedia(p) || (h.tipo !== "grabacion" && h.tipo !== "v1")) && (h.tipo !== "guion" || llevaGuion(p))).map((h) => ({
     tipo: h.tipo,
     label: h.label,
     verbo: verboDe(p, h.tipo, h.verbo),
-    fecha: sumarDias(p.publicacion, h.dias),
+    fecha: h.tipo === "guion" && p.fechaGuion ? p.fechaGuion : sumarDias(p.publicacion, h.dias),
     hecho: hitoHecho(p, h.tipo),
   }))
 }
@@ -68,14 +72,16 @@ export function redDePieza(p: Pieza): SocialNetwork | undefined {
   return p.red ?? (p.formato ? FORMATOS[p.formato].red : undefined)
 }
 
-/** Las partes que se revisan: guion y contenido final, o solo el texto. */
+/** Las partes que se revisan: guion y contenido final, solo el contenido (sin guion) o solo el texto. */
 export function partesDePieza(p: Pieza): TipoVersion[] {
-  return tieneMedia(p) ? ["guion", "media"] : ["guion"]
+  if (!tieneMedia(p)) return ["guion"]
+  return llevaGuion(p) ? ["guion", "media"] : ["media"]
 }
 
 /** La parte que se abre al entrar en una pieza: el contenido si ya hay versiones o el guion está aprobado; si no, el guion. */
 export function parteInicial(p: Pieza): TipoVersion {
   if (!tieneMedia(p)) return "guion"
+  if (!llevaGuion(p)) return "media"
   return p.media.length > 0 || p.guion.some((v) => v.estado === "aprobada") ? "media" : "guion"
 }
 

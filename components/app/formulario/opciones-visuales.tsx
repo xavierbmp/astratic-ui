@@ -3,6 +3,7 @@
 import * as React from "react"
 import type { LucideIcon } from "lucide-react"
 import { cn } from "cn"
+import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -76,6 +77,28 @@ export function IconosOpcion<V extends string>({ opciones, valor, onChange, opci
           </Tooltip>
         )
       })}
+    </div>
+  )
+}
+
+/**
+ * Elegir varias de una lista que hay que explicar (los apartados que se le piden a la marca): una
+ * tarjeta con casilla por opción, en dos columnas. Las marcadas, en `brand-soft` con su borde.
+ */
+export function CasillasOpcion<V extends string>({ opciones, valores, onChange, columnas = 2, className, "aria-label": ariaLabel }: { opciones: OpcionTarjeta<V>[]; valores: V[]; onChange: (valores: V[]) => void; columnas?: 1 | 2 | 3; className?: string; "aria-label"?: string }) {
+  const alternar = (v: V) => onChange(valores.includes(v) ? valores.filter((x) => x !== v) : [...valores, v])
+  return (
+    <div role="group" aria-label={ariaLabel} className={cn("grid gap-2", columnas === 2 && "sm:grid-cols-2", columnas === 3 && "sm:grid-cols-3", className)}>
+      {opciones.map(({ value, label, descripcion, icono: Icono }) => (
+        <label key={value} className="flex cursor-pointer items-start gap-3 rounded-xl border border-input p-3 transition-colors hover:bg-muted/50 has-data-[state=checked]:border-brand has-data-[state=checked]:bg-brand-soft">
+          <Checkbox checked={valores.includes(value)} onCheckedChange={() => alternar(value)} className="mt-0.5" />
+          {Icono && <Icono className="mt-0.5 size-4 flex-none text-muted-foreground" />}
+          <span className="min-w-0 flex-1 text-sm">
+            <span className="block font-medium">{label}</span>
+            {descripcion && <span className="mt-0.5 block text-xs text-muted-foreground">{descripcion}</span>}
+          </span>
+        </label>
+      ))}
     </div>
   )
 }

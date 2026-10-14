@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { BulkBar } from "@/components/app/bulk-bar"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
+import { ConfigButton } from "@/components/app/config-button"
 import { usePanelFicha, type PanelFicha } from "@/components/app/detail-panel"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -69,6 +70,7 @@ export function BaseDatos<T>({
   onBorrarCampo,
   onAbrirVinculo,
   onNuevo,
+  ajustesTabla,
   portada,
   lateral: lateralPropio,
   ficha: fichaPagina,
@@ -104,6 +106,8 @@ export function BaseDatos<T>({
   onAbrirVinculo?: (campoId: string, id: string) => void
   /** «Nuevo …» abre el alta de la página (un diálogo propio) en vez del formulario de la base. */
   onNuevo?: () => void
+  /** Los ajustes de la tabla (valores por defecto, opciones y su orden): un engranaje junto a la acción principal. */
+  ajustesTabla?: { label: string; onAbrir: () => void }
   /** La imagen de cada registro en las tarjetas del kanban y la galería. */
   portada?: (fila: T) => string | null | undefined
   /**
@@ -268,11 +272,17 @@ export function BaseDatos<T>({
   const iniciales = React.useMemo(() => inicialesDeFiltro(vista, campos), [vista, campos])
   const marcadasVisibles = [...marcadas].filter((id) => registros.some((f) => getId(f) === id))
   const abrirNuevo = onNuevo ?? (onCrear ? () => setNuevo(true) : undefined)
-  const accionNueva = abrirNuevo ? (
-    <Button size="sm" onClick={abrirNuevo} aria-label={objeto.nuevo}>
-      <PlusIcon /> <span className="hidden sm:inline">{objeto.nuevo}</span>
-    </Button>
-  ) : undefined
+  const accionNueva =
+    abrirNuevo || ajustesTabla ? (
+      <>
+        {ajustesTabla && <ConfigButton label={ajustesTabla.label} onClick={ajustesTabla.onAbrir} className="size-7" />}
+        {abrirNuevo && (
+          <Button size="sm" onClick={abrirNuevo} aria-label={objeto.nuevo}>
+            <PlusIcon /> <span className="hidden sm:inline">{objeto.nuevo}</span>
+          </Button>
+        )}
+      </>
+    ) : undefined
 
   const coloresDe = (f: T) => coloresDeRegistro(f, vista.color, campos, filtrables, ref)
   const colorDe = (f: T) => coloresDe(f).marca

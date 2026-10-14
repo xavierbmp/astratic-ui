@@ -52,7 +52,7 @@ export function rangoDeFechas(fechas: string[], hoy: string, margen = 3) {
   return { desde, hasta, dias: diasEntre(desde, hasta) + 1 }
 }
 
-/** Mueve la publicación (y con ella todas sus fases) unos días. */
+/** Mueve la publicación (y con ella todas sus fases y la fecha del guion) unos días. */
 export function moverPieza(p: Pieza, dias: number): Pieza {
-  return { ...p, publicacion: sumarDias(p.publicacion, dias) }
+  return { ...p, publicacion: sumarDias(p.publicacion, dias), fechaGuion: p.fechaGuion ? sumarDias(p.fechaGuion, dias) : undefined }
 }

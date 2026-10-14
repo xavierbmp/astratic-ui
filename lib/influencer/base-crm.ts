@@ -30,10 +30,6 @@ const texto = (v: string | undefined) => v ?? null
 /** ¿Es una de las claves de la lista? (lo escrito en una celda de selección). */
 const esDe = <K extends string>(o: Record<K, unknown>, v: ValorCampo): v is K => typeof v === "string" && v in o
 const deLista = (o: Record<string, string>) => Object.entries(o).map(([id, label]) => ({ id, label }))
-const ATRIBUCIONES = [
-  { id: "propia", label: "Tuya" },
-  { id: "red", label: "De la red" },
-]
 
 // ---------- Marcas ----------
 
@@ -47,8 +43,6 @@ export function camposBaseMarcas({ marcas, contactos, resumenes, propios }: { ma
     { id: "principal", nombre: "Contacto principal", tipo: "vinculo", vinculo: { objeto: "persona" }, soloLectura: true, opciones: contactos.map((c) => ({ id: c.id, label: c.nombre })), grupo: "Relación", descripcion: "Se cambia desde Contactos o la ficha de la marca.", valor: (m) => r(m)?.principal?.id ?? null },
     { id: "valorAbierto", nombre: "Valor abierto", tipo: "moneda", formato: { decimales: 0 }, soloLectura: true, grupo: "Dinero", valor: (m) => r(m)?.valorAbierto ?? 0 },
     { id: "ultimoContacto", nombre: "Último contacto", tipo: "fecha", soloLectura: true, grupo: "Seguimiento", valor: (m) => (r(m)?.ultimoContacto ? soloFecha(r(m)?.ultimoContacto ?? "") : null) },
-    { id: "atribucion", nombre: "Atribución", tipo: "select", opciones: ATRIBUCIONES, grupo: "Relación", descripcion: "Tuya: la trajiste tú y es tuya 12 meses. De la red: la trae Astratic.", valor: (m) => m.atribucion },
-    { id: "atribucionHasta", nombre: "Tuya hasta", tipo: "fecha", grupo: "Relación", valor: (m) => texto(m.atribucionHasta) },
     { id: "web", nombre: "Web", tipo: "url", grupo: "Datos", valor: (m) => texto(m.web) },
     { id: "instagram", nombre: "Instagram", tipo: "texto", grupo: "Datos", valor: (m) => texto(m.instagram) },
     { id: "contactos", nombre: "Contactos", tipo: "numero", soloLectura: true, grupo: "Relación", valor: (m) => r(m)?.contactos ?? 0 },
@@ -68,10 +62,10 @@ export const vistasDeSerieMarcas = (campos: DefCampo<Marca>[]): VistaBase[] => [
 ]
 
 /**
- * Una marca con el valor de un campo cambiado. Pasar a «De la red» quita el «tuya hasta»; volver a
- * tuya lo pone desde hoy si no tenía. Lo calculado no se escribe.
+ * Una marca con el valor de un campo cambiado. Lo calculado no se escribe, y de quién es (suya o de
+ * la red) no se elige aquí: lo marca Astratic.
  */
-export function escribirEnMarca(marca: Marca, campo: DefCampo<Marca>, valor: ValorCampo, hoy: string): Marca {
+export function escribirEnMarca(marca: Marca, campo: DefCampo<Marca>, valor: ValorCampo): Marca {
   if (campo.soloLectura) return marca
   if (campo.propio) return conValorPropio(marca, campo.id, valor)
   switch (campo.id) {
@@ -79,11 +73,6 @@ export function escribirEnMarca(marca: Marca, campo: DefCampo<Marca>, valor: Val
       return textoLimpio(valor) ? { ...marca, nombre: textoLimpio(valor) ?? marca.nombre } : marca
     case "sector":
       return { ...marca, sector: textoLimpio(valor) ?? "" }
-    case "atribucion":
-      if (valor === "red") return { ...marca, atribucion: "red", atribucionHasta: undefined }
-      return valor === "propia" ? { ...marca, atribucion: "propia", atribucionHasta: marca.atribucionHasta ?? soloFecha(hoy) } : marca
-    case "atribucionHasta":
-      return { ...marca, atribucionHasta: textoLimpio(valor) }
     case "tint":
       return TINTS.includes(valor as Tint) ? { ...marca, tint: valor as Tint } : marca
     case "instagram":
@@ -99,7 +88,6 @@ export function escribirEnMarca(marca: Marca, campo: DefCampo<Marca>, valor: Val
 // ---------- Propuestas (el pipeline) ----------
 
 export function camposBasePropuestas({ marcas, contactos, tarifas, propios }: { marcas: Marca[]; contactos: Contacto[]; tarifas: Tarifa[]; propios: CampoPropio[] }): DefCampo<Propuesta>[] {
-  const marca = (p: Propuesta) => marcas.find((m) => m.id === p.marcaId)
   const nombreMarca = (id: string | undefined) => marcas.find((m) => m.id === id)?.nombre
   const opcionesContacto = [...contactos]
     .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
@@ -121,7 +109,6 @@ export function camposBasePropuestas({ marcas, contactos, tarifas, propios }: { 
     { id: "desde", nombre: "Publicar desde", tipo: "fecha", grupo: "Fechas", valor: (p) => texto(p.desde) },
     { id: "hasta", nombre: "Publicar hasta", tipo: "fecha", ocultoDeSerie: true, grupo: "Fechas", valor: (p) => texto(p.hasta) },
     { id: "motivoPerdida", nombre: "Motivo de pérdida", tipo: "select", ocultoDeSerie: true, opciones: deLista(MOTIVOS_PERDIDA), grupo: "Estado", valor: (p) => texto(p.motivoPerdida) },
-    { id: "atribucion", nombre: "Atribución", tipo: "select", soloLectura: true, ocultoDeSerie: true, opciones: ATRIBUCIONES, grupo: "Estado", valor: (p) => marca(p)?.atribucion ?? null },
     { id: "notas", nombre: "Notas", tipo: "texto_largo", ocultoDeSerie: true, grupo: "Datos", valor: (p) => texto(p.notas) },
     { id: "creadaEl", nombre: "Creada", tipo: "fecha", soloLectura: true, ocultoDeSerie: true, grupo: "Fechas", valor: (p) => soloFecha(p.creadaEl) },
     ...propios.map((x) => campoDePropio<Propuesta>(x, (p) => p.valores)),

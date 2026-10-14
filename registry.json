@@ -361,13 +361,14 @@
       "name": "formulario",
       "type": "registry:component",
       "title": "Formulario de alta",
-      "description": "Diálogo para crear un registro: cabecera con icono, cuerpo en rejilla, pie fijo y otro formulario encima sin salir (sub). Con un control por tipo de dato: selector con buscador y alta, fecha con calendario, tarjetas y fila de iconos.",
+      "description": "Diálogo para crear un registro: cabecera con icono, cuerpo en rejilla, pie fijo y otro formulario encima sin salir (sub). Con un control por tipo de dato: selector en el que se escribe y que crea lo que falta, fecha con calendario, tarjetas, casillas, fila de iconos y la cabecera de portada y logo.",
       "registryDependencies": ["dialog", "field", "button", "command", "popover", "calendar", "radio-group", "tooltip"],
       "files": [
         { "path": "components/app/formulario/formulario-dialog.tsx", "type": "registry:component" },
         { "path": "components/app/formulario/selector-buscable.tsx", "type": "registry:component" },
         { "path": "components/app/formulario/campo-fecha.tsx", "type": "registry:component" },
-        { "path": "components/app/formulario/opciones-visuales.tsx", "type": "registry:component" }
+        { "path": "components/app/formulario/opciones-visuales.tsx", "type": "registry:component" },
+        { "path": "components/app/formulario/portada-formulario.tsx", "type": "registry:component" }
       ]
     },
     {
@@ -576,6 +577,8 @@
         { "path": "components/influencer/visor-media.tsx", "type": "registry:component" },
         { "path": "components/influencer/piezas-editor.tsx", "type": "registry:component" },
         { "path": "components/influencer/formato-pieza-formulario.tsx", "type": "registry:component" },
+        { "path": "components/influencer/condiciones-editor.tsx", "type": "registry:component" },
+        { "path": "components/influencer/ajustes-collabs-formulario.tsx", "type": "registry:component" },
         { "path": "components/influencer/plantillas-menu.tsx", "type": "registry:component" },
         { "path": "components/influencer/compartir-enlace.tsx", "type": "registry:component" },
         { "path": "components/influencer/zona-subida.tsx", "type": "registry:component" },
@@ -615,7 +618,8 @@
         { "path": "lib/influencer/facturacion.ts", "type": "registry:lib" },
         { "path": "lib/influencer/informe.ts", "type": "registry:lib" },
         { "path": "lib/influencer/formularios.ts", "type": "registry:lib" },
-        { "path": "lib/influencer/formatos-pieza.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/ajustes-collabs.ts", "type": "registry:lib" },
+        { "path": "lib/influencer/alta-collab.ts", "type": "registry:lib" },
         { "path": "lib/influencer/cobros.ts", "type": "registry:lib" },
         { "path": "lib/influencer/perfil.ts", "type": "registry:lib" },
         { "path": "lib/influencer/biblioteca.ts", "type": "registry:lib" },
