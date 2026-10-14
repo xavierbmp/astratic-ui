@@ -28,7 +28,9 @@ const reports: ReportItem[] = [
 
 async function enviar(r: ReportDraft) {
   await new Promise((ok) => setTimeout(ok, 400))
-  reports.unshift({ id: `demo-${Date.now()}`, description: r.description, status: "open", url: r.context.url, createdAt: new Date() })
+  // En la demo las imágenes se quedan en memoria tal cual llegan: la miniatura es su propia data URL.
+  const attachments = r.attachments.map((a) => ({ kind: a.kind, name: a.name, url: a.dataUrl }))
+  reports.unshift({ id: `demo-${Date.now()}`, description: r.description, status: "open", url: r.context.url, createdAt: new Date(), attachments })
 }
 
 async function cargar() {
