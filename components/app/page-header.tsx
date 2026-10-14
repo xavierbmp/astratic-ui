@@ -4,6 +4,7 @@ export function PageHeader({
   title,
   description,
   tabs,
+  stats,
   actions,
   className,
   ...props
@@ -15,6 +16,8 @@ export function PageHeader({
    * título, a todo el ancho; la descripción ocupa siempre una línea para que caigan en el mismo sitio en cada subpágina.
    */
   tabs?: React.ReactNode
+  /** Cifras clave discretas a la derecha del título, antes de las acciones (las del workspace de influencers, `CifrasCabecera`). */
+  stats?: React.ReactNode
   actions?: React.ReactNode
 }) {
   return (
@@ -25,6 +28,7 @@ export function PageHeader({
           <h1 className="text-[27px] leading-tight font-semibold tracking-tight">{title}</h1>
           {description && <p className="mt-1 truncate text-sm text-muted-foreground">{description}</p>}
         </div>
+        {stats && <div className="flex min-w-0 flex-none items-end">{stats}</div>}
         {actions && <div className="flex flex-none flex-wrap items-center gap-2.5 whitespace-nowrap">{actions}</div>}
       </div>
       {tabs}

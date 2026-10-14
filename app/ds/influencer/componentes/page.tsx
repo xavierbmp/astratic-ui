@@ -14,6 +14,7 @@ import type { Collab } from "@/lib/influencer/modelo"
 import { Button } from "@/components/ui/button"
 import { Block, BlockHeader } from "@/components/influencer/block"
 import { StatRow, StatTile } from "@/components/influencer/stat-tile"
+import { CifraCabecera, CifrasCabecera } from "@/components/influencer/cifras-cabecera"
 import { CollabCard, CollabCardRow } from "@/components/influencer/collab-card"
 import { FranjaCollabs, type CollabEnFranja } from "@/components/influencer/franja-collabs"
 import { MiniCalendario } from "@/components/influencer/mini-calendario"
@@ -71,7 +72,7 @@ export default function InfluencerComponentesPage() {
         />
       </DocSection>
 
-      <DocSection id="stat" title="Cifra" lead="Icono en un círculo de tinte, número grande y etiqueta. Con href, la tarjeta entera lleva a su página. Solo en las portadas: el Inicio y el Pipeline del CRM.">
+      <DocSection id="stat" title="Cifra" lead="Icono en un círculo de tinte, número grande y etiqueta. Con href, la tarjeta entera lleva a su página. Solo en el Inicio: en las demás portadas, las cifras van en la cabecera.">
         <Example className={EXAMPLE} code={`<StatRow>
   <StatTile icon={WalletIcon} label="Pendiente de cobro" value={fmt.eur(3240)} tint="peach" href="/workspace/cobros" />
   <StatTile icon={BanknoteIcon} label="Cobrado este año" value={fmt.eur(18650)} tint="mint" href="/workspace/cobros" />
@@ -81,6 +82,26 @@ export default function InfluencerComponentesPage() {
             <StatTile icon={BanknoteIcon} label="Cobrado este año" value={fmt.eur(18650)} tint="mint" href="#" />
             <StatTile icon={SparklesIcon} label="Collabs en curso" value={4} tint="rose" />
           </StatRow>
+        </Example>
+      </DocSection>
+
+      <DocSection id="cifras-cabecera" title="Cifras en la cabecera" lead="Las cifras clave de una portada que no es el Inicio (Pipeline, Collabs, Cobros, Tarifas), a la derecha del título y antes de sus botones, en la prop stats de PageHeader. Sin tarjetas ni iconos: número, nombre y una línea de detalle, separadas por una raya fina. Con onClick filtran la lista de debajo.">
+        <Example className={EXAMPLE} code={`<PageHeader
+  title="Cobros"
+  description="Lo que te deben, lo que toca facturar y lo cobrado."
+  stats={
+    <CifrasCabecera>
+      <CifraCabecera label="Vencido" value={fmt.eur(760)} hint="1 factura" onClick={…} active={…} />
+      <CifraCabecera label="Por cobrar" value={fmt.eur(3240)} hint="4 facturas enviadas" onClick={…} />
+      <CifraCabecera label="Cobrado este año" value={fmt.eur(18650)} />
+    </CifrasCabecera>
+  }
+/>`}>
+          <CifrasCabecera>
+            <CifraCabecera label="Vencido" value={fmt.eur(760)} hint="1 factura" />
+            <CifraCabecera label="Por cobrar" value={fmt.eur(3240)} hint="4 facturas enviadas" />
+            <CifraCabecera label="Cobrado este año" value={fmt.eur(18650)} hint="12 facturas" />
+          </CifrasCabecera>
         </Example>
       </DocSection>
 

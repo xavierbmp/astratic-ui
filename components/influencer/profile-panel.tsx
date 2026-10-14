@@ -18,7 +18,11 @@ export type ProfileAccount = {
   avgViews: number
   /** Interacción en %, si la hay. */
   engagement?: number
+  /** Cómo van sus seguidores, si la red lo da: la serie (de la más antigua a la última) y el cambio en %. */
+  trend?: Tendencia
 }
+
+export type Tendencia = { serie: number[]; cambio?: number }
 
 /** La red con más seguidores: la que se enseña al abrir. */
 function principal(accounts: ProfileAccount[]) {
@@ -28,8 +32,9 @@ function principal(accounts: ProfileAccount[]) {
 /**
  * Tarjeta del perfil: foto (sus iniciales si aún no tiene), nombre, @, nicho y tramo; arriba a la derecha sus enlaces
  * (`links`, una `LinkRow`) y, debajo, las views medias y la interacción de la red elegida. Al pie, una ficha por red con sus
- * seguidores (al pulsarla, las cifras de arriba pasan a ser las suyas) y las acciones (`actions`, el media kit como `ProfileTile`),
- * que crecen hasta llenar la tarjeta.
+ * seguidores (con su tendencia si la red la da; al pulsarla, las cifras de arriba pasan a ser las suyas) y las acciones
+ * (`actions`, el media kit como `ProfileTile`), que crecen hasta llenar la tarjeta. Sin ninguna red, `empty` ocupa su sitio
+ * (lo que hay que hacer para empezar: conectar sus cuentas).
  * Con `href`, la foto y el nombre llevan al perfil completo. Por debajo de 448 px de tarjeta, los enlaces bajan bajo el nombre.
  */
 export function ProfilePanel({
@@ -43,6 +48,7 @@ export function ProfilePanel({
   href,
   links,
   actions,
+  empty,
   className,
 }: {
   name: string
@@ -55,6 +61,8 @@ export function ProfilePanel({
   href?: string
   links?: React.ReactNode
   actions?: React.ReactNode
+  /** Lo que se enseña en lugar de las redes cuando aún no tiene ninguna. */
+  empty?: React.ReactNode
   className?: string
 }) {
   const [red, setRed] = React.useState(() => principal(accounts))
@@ -112,6 +120,7 @@ export function ProfilePanel({
 
       {/* Las fichas crecen hasta el pie: la tarjeta queda llena aunque la fila sea más alta que su contenido. */}
       <div className="flex min-h-0 flex-1 flex-wrap items-stretch gap-2">
+        {accounts.length === 0 && empty && <div className="grid min-w-0 flex-[999_1_20rem] grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-2">{empty}</div>}
         {accounts.length > 0 && (
           <div role="group" aria-label="Redes" className="grid min-w-0 flex-[999_1_20rem] grid-cols-[repeat(auto-fit,minmax(7.5rem,1fr))] gap-2">
             {accounts.map((a) => (
@@ -121,6 +130,7 @@ export function ProfilePanel({
                 label={socialLabel[a.network]}
                 value={fmt.compact(a.followers)}
                 detail={a.network === "youtube" ? "suscriptores" : "seguidores"}
+                trend={a.trend}
                 aria-pressed={a.network === elegida?.network}
                 onClick={() => setRed(a.network)}
                 className={cn(a.network === elegida?.network && "bg-brand-soft ring-1 ring-brand/40 hover:bg-brand-soft")}
@@ -155,11 +165,12 @@ export function ProfileTile({
   label,
   value,
   detail,
+  trend,
   asChild = false,
   className,
   children,
   ...props
-}: React.ComponentProps<"button"> & { icon: React.ReactNode; label: string; value?: string; detail?: string; asChild?: boolean }) {
+}: React.ComponentProps<"button"> & { icon: React.ReactNode; label: string; value?: string; detail?: string; trend?: Tendencia; asChild?: boolean }) {
   const Comp = asChild ? Slot.Root : "button"
   return (
     <Comp
@@ -174,12 +185,46 @@ export function ProfileTile({
       <span className="flex min-w-0 items-center gap-2">
         <span className="grid size-8 flex-none place-items-center rounded-lg bg-card shadow-xs [&_svg]:size-4">{icon}</span>
         <span className="truncate text-xs font-medium text-muted-foreground">{label}</span>
+        {trend?.cambio !== undefined && <Cambio valor={trend.cambio} />}
       </span>
-      <span className="min-w-0">
-        {value && <span className="block text-xl leading-tight font-semibold tracking-tight tabular-nums">{value}</span>}
-        {detail && <span className={cn("block truncate", value ? "text-[11px] text-muted-foreground" : "text-sm font-medium")}>{detail}</span>}
+      <span className="flex min-w-0 items-end justify-between gap-2">
+        <span className="min-w-0">
+          {value && <span className="block text-xl leading-tight font-semibold tracking-tight tabular-nums">{value}</span>}
+          {detail && <span className={cn("block truncate", value ? "text-[11px] text-muted-foreground" : "text-sm font-medium")}>{detail}</span>}
+        </span>
+        {trend && trend.serie.length > 1 && <MiniTendencia serie={trend.serie} sube={(trend.cambio ?? 0) >= 0} />}
       </span>
       <Slot.Slottable>{children}</Slot.Slottable>
     </Comp>
+  )
+}
+
+/** «+3,2 %» en verde o «−1,1 %» en rojo, junto al nombre de la red. */
+function Cambio({ valor }: { valor: number }) {
+  const sube = valor >= 0
+  const texto = `${sube ? "+" : "−"}${Math.abs(valor).toLocaleString("es-ES", { maximumFractionDigits: 1 })} %`
+  return (
+    <span
+      title="Cambio de seguidores en el periodo de la gráfica"
+      className={cn("ml-auto flex-none rounded-full px-1.5 py-px text-[11px] font-semibold tabular-nums", sube ? "bg-success-soft text-success" : "bg-danger-soft text-danger")}
+    >
+      {texto}
+    </span>
+  )
+}
+
+/** La serie en una línea pequeña con su área, sin ejes: solo la forma de cómo va. */
+function MiniTendencia({ serie, sube }: { serie: number[]; sube: boolean }) {
+  const ancho = 64
+  const alto = 26
+  const min = Math.min(...serie)
+  const rango = Math.max(...serie) - min || 1
+  const puntos = serie.map((v, i) => [(i / (serie.length - 1)) * ancho, alto - 2 - ((v - min) / rango) * (alto - 4)] as const)
+  const linea = puntos.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ")
+  return (
+    <svg viewBox={`0 0 ${ancho} ${alto}`} className={cn("h-[26px] w-16 flex-none overflow-visible", sube ? "text-success" : "text-danger")} aria-hidden>
+      <path d={`${linea} L${ancho} ${alto} L0 ${alto} Z`} className="fill-current opacity-10" />
+      <path d={linea} className="fill-none stroke-current" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    </svg>
   )
 }

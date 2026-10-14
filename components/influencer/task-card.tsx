@@ -33,7 +33,7 @@ export function TaskCard({
     <div
       data-slot="ws-task-card"
       className={cn(
-        "flex items-start gap-3 rounded-xl bg-background/70 px-3.5 py-3 transition-colors hover:bg-muted",
+        "flex items-start gap-3 rounded-xl bg-background/70 px-3.5 py-3 transition-[background-color,opacity] duration-300 hover:bg-muted",
         done && "opacity-60",
         className
       )}
@@ -49,7 +49,7 @@ export function TaskCard({
           done ? "border-brand bg-brand text-brand-foreground" : "border-control bg-card hover:border-brand"
         )}
       >
-        {done && <CheckIcon className="size-3" strokeWidth={3} aria-hidden />}
+        {done && <CheckIcon className="size-3 motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:fade-in-0 motion-safe:duration-200" strokeWidth={3} aria-hidden />}
       </button>
       <div className="min-w-0 flex-1">
         {onOpen ? (

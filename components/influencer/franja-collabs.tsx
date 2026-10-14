@@ -37,8 +37,10 @@ const CAPA = ["z-[8]", "z-[7]", "z-[6]", "z-[5]", "z-[4]", "z-[3]", "z-[2]", "z-
 /**
  * Las collabs en marcha como paneles que llenan todo su hueco y se pisan en diagonal, la más urgente encima: la imagen
  * de la campaña (o su tinte), lo que toca ahora y lo que viene después, las piezas hechas y sus tareas. La nueva va en
- * el acento y más ancha. Al pasar el ratón (o con el foco), el panel sube encima de todos, pierde el corte y se queda
- * casi todo el bloque; los demás se quedan en una tira de su imagen. En el móvil se deslizan.
+ * el acento y más ancha. Al pasar el ratón (o con el foco), el panel sube encima de todos, pierde el corte y se ensancha
+ * un poco; los demás se atenúan sin desaparecer. Sutil a propósito (Xavier, 2026-10-14: «que no sea tan agresiva»): poco
+ * recorrido, una curva suave y un instante de espera para que pasar el ratón por encima no lo mueva todo. En el móvil se
+ * deslizan.
  */
 export function FranjaCollabs({ collabs, className }: { collabs: CollabEnFranja[]; className?: string }) {
   return (
@@ -64,32 +66,32 @@ function PanelCollab({ collab: c, capa, primero, ultimo }: { collab: CollabEnFra
     // La sombra va en un envoltorio: con el recorte en el propio panel, se perdería.
     <div
       className={cn(
-        "group/panel relative flex w-[80%] flex-none snap-start transition-[flex-grow] duration-500 ease-out [filter:drop-shadow(8px_0_12px_rgb(0_0_0/0.35))] sm:w-auto sm:min-w-16 sm:flex-1",
+        "group/panel relative flex w-[80%] flex-none snap-start transition-[flex-grow] delay-0 duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:delay-100 motion-reduce:transition-none [filter:drop-shadow(6px_0_10px_rgb(0_0_0/0.25))] sm:w-auto sm:min-w-16 sm:flex-1",
         capa,
         !primero && "-ml-[var(--corte)]",
         c.nueva && "sm:grow-[1.3]",
-        "hover:z-[9] has-[:focus-visible]:z-[9] sm:hover:grow-[6] sm:has-[:focus-visible]:grow-[6]",
+        "hover:z-[9] has-[:focus-visible]:z-[9] sm:hover:grow-[1.6] sm:has-[:focus-visible]:grow-[1.6]",
       )}
     >
       <Link
         href={c.href}
         className={cn(
-          "@container relative isolate flex w-full flex-col justify-between gap-4 overflow-hidden p-4 outline-none transition-[clip-path] duration-500 ease-out group-hover/panel:[clip-path:polygon(0_0,100%_0,100%_100%,0_100%)] group-has-[:focus-visible]/panel:[clip-path:polygon(0_0,100%_0,100%_100%,0_100%)]",
+          "@container relative isolate flex w-full flex-col justify-between gap-4 overflow-hidden p-4 outline-none transition-[clip-path] duration-300 ease-out motion-reduce:transition-none group-hover/panel:[clip-path:polygon(0_0,100%_0,100%_100%,0_100%)] group-has-[:focus-visible]/panel:[clip-path:polygon(0_0,100%_0,100%_100%,0_100%)]",
           ultimo ? RECTO : CORTE,
           conPortada ? (c.nueva ? "text-brand-foreground" : "text-white") : c.nueva ? "bg-brand text-brand-foreground" : tintClass[c.tint],
         )}
       >
         {c.portadaUrl && (
           <>
-            <Image src={c.portadaUrl} alt="" fill sizes="(min-width: 1280px) 40vw, 80vw" className="-z-10 object-cover transition-transform duration-700 group-hover/panel:scale-105" />
+            <Image src={c.portadaUrl} alt="" fill sizes="(min-width: 1280px) 40vw, 80vw" className="-z-10 object-cover transition-transform duration-500 ease-out group-hover/panel:scale-[1.02] motion-reduce:transition-none" />
             <span
               aria-hidden
               className={cn("absolute inset-0 -z-10 bg-gradient-to-t", c.nueva ? "from-brand via-brand/55 to-black/10" : "from-black/80 via-black/35 to-black/5")}
             />
           </>
         )}
-        {/* Mientras se mira otro panel, este solo enseña su imagen. */}
-        <div className="contents [&>*]:transition-opacity [&>*]:duration-300 sm:group-hover/franja:[&>*]:opacity-0 sm:group-hover/panel:[&>*]:opacity-100!">
+        {/* Mientras se mira otro panel, este se atenúa un poco: se sigue leyendo. */}
+        <div className="contents [&>*]:transition-opacity [&>*]:duration-300 sm:group-hover/franja:[&>*]:opacity-60 sm:group-hover/panel:[&>*]:opacity-100!">
           <div className={cn("flex items-start justify-between gap-2", !primero && "ml-[calc(var(--corte)_-_0.75rem)]")}>
             <span className="grid size-10 flex-none place-items-center overflow-hidden rounded-xl bg-card text-xs font-semibold text-card-foreground shadow-xs" aria-hidden>
               {c.logoUrl ? <Image src={c.logoUrl} alt="" width={40} height={40} className="object-cover" /> : initials(c.marca)}

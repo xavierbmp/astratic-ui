@@ -554,6 +554,7 @@
       "files": [
         { "path": "components/influencer/block.tsx", "type": "registry:component" },
         { "path": "components/influencer/stat-tile.tsx", "type": "registry:component" },
+        { "path": "components/influencer/cifras-cabecera.tsx", "type": "registry:component" },
         { "path": "components/influencer/collab-card.tsx", "type": "registry:component" },
         { "path": "components/influencer/franja-collabs.tsx", "type": "registry:component" },
         { "path": "components/influencer/mini-calendario.tsx", "type": "registry:component" },

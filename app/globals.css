@@ -351,6 +351,22 @@
   --tint-peach-foreground: oklch(0.88 0.08 60);
 }
 
+/* Movimiento sutil del workspace (Xavier, 2026-10-14: «animaciones sutiles donde tengan sentido, sin pasarse»): los
+   bloques de mostrar entran con un fundido corto al abrir la página y nada más; al pasar el ratón, lo que lleva a otro
+   sitio se levanta un poco (StatTile) y la franja de collabs se abre poco y despacio. Sin movimiento para quien lo pide
+   en su sistema. El relleno es `backwards`: al acabar no pisa el `transform` de los hover. */
+@keyframes ws-aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .theme-influencer :is([data-slot="ws-block"], [data-slot="ws-stat-tile"], [data-slot="ws-profile"], [data-slot="ws-notice-highlight"], [data-slot="ws-cifras-cabecera"]) {
+    animation: ws-aparecer 0.35s cubic-bezier(0.25, 0.1, 0.25, 1) backwards;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
