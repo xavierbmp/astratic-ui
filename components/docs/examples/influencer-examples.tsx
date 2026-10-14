@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Block, BlockHeader } from "@/components/influencer/block"
 import { TaskCard } from "@/components/influencer/task-card"
 import { LinkGrid, LinkRow, type QuickLink } from "@/components/influencer/link-grid"
-import { ProfilePanel } from "@/components/influencer/profile-panel"
+import { ProfilePanel, ProfileTile } from "@/components/influencer/profile-panel"
 import { TaskTable } from "@/components/influencer/task-table"
 import { HOY, demoContactos, demoEnlaces, demoPerfil, demoEtiquetasTarea, demoMarcas, demoPropuestas, demoTareas } from "@/lib/influencer/demo-data"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
@@ -129,9 +129,9 @@ export function ProfilePanelExample() {
       href="#"
       links={<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} max={4} />}
       actions={
-        <Button variant="outline" size="sm" className="rounded-xl">
-          <FileTextIcon /> Media kit
-        </Button>
+        <ProfileTile icon={<FileTextIcon />} label="Media kit" detail="Ver el PDF" asChild>
+          <a href="#" />
+        </ProfileTile>
       }
     />
   )

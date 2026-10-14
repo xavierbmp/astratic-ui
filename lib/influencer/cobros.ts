@@ -179,6 +179,16 @@ export function cobradoPorTrimestre(facturas: Factura[], ano: string) {
   })
 }
 
+/** Lo cobrado en cada uno de los últimos `meses` (el de `hoy` incluido), por fecha de cobro y del más antiguo al último. `mes` es «2026-10». */
+export function cobradoPorMes(facturas: Factura[], hoy: string, meses = 6) {
+  const [ano, mes] = soloFecha(hoy).split("-").map(Number)
+  return Array.from({ length: meses }, (_, i) => {
+    const d = new Date(Date.UTC(ano, mes - meses + i, 1))
+    const clave = d.toISOString().slice(0, 7)
+    return { mes: clave, cobrado: sumaBases(facturas.filter((f) => f.cobradaEl?.startsWith(clave))) }
+  })
+}
+
 /** Cada línea como evento de la agenda: el día que se cobró o el día en que se espera. */
 export function eventosDeCobros(lineas: LineaCobro[], marcas: Marca[]): Evento[] {
   return lineas.map((l) => ({

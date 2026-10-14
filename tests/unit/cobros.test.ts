@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { Collab, Factura } from "@/lib/influencer/modelo"
-import { cifrasCobros, cobradoPorTrimestre, impuestosDelTrimestre, lineasDeCobro, ordenarLineas, previsionCobros, siguientePasoDe, trimestreDe } from "@/lib/influencer/cobros"
+import { cifrasCobros, cobradoPorMes, cobradoPorTrimestre, impuestosDelTrimestre, lineasDeCobro, ordenarLineas, previsionCobros, siguientePasoDe, trimestreDe } from "@/lib/influencer/cobros"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
 import { demoFacturas } from "@/lib/influencer/demo-documentos"
 
@@ -102,5 +102,14 @@ describe("trimestres e impuestos", () => {
   it("lo cobrado por trimestre va por la fecha de cobro", () => {
     const r = cobradoPorTrimestre([factura({ cobradaEl: "2026-02-10", base: 100 }), factura({ id: "b", cobradaEl: "2026-10-01", base: 300 })], "2026")
     expect(r.map((x) => x.cobrado)).toEqual([100, 0, 0, 300])
+  })
+  it("lo cobrado por mes, los últimos meses hasta el de hoy y cruzando el año", () => {
+    const r = cobradoPorMes([factura({ cobradaEl: "2025-12-20", base: 100 }), factura({ id: "b", cobradaEl: "2026-02-03", base: 250.5 }), factura({ id: "c", cobradaEl: "2026-02-28", base: 49.5 }), factura({ id: "d" })], "2026-02-10", 4)
+    expect(r).toEqual([
+      { mes: "2025-11", cobrado: 0 },
+      { mes: "2025-12", cobrado: 100 },
+      { mes: "2026-01", cobrado: 0 },
+      { mes: "2026-02", cobrado: 300 },
+    ])
   })
 })

@@ -115,7 +115,7 @@ export default function InfluencerComponentesPage() {
         </Example>
       </DocSection>
 
-      <DocSection id="franja" title="Collabs en diagonal" lead="Las collabs en marcha como paneles que llenan todo su hueco, separados por un corte en diagonal: la imagen de la campaña, lo que toca ahora y lo que viene después, las piezas hechas y sus tareas. La recién creada va en el acento.">
+      <DocSection id="franja" title="Collabs en diagonal" lead="Las collabs en marcha como paneles que llenan todo su hueco y se pisan en diagonal, la más urgente encima de la siguiente: la imagen de la campaña, lo que toca ahora y lo que viene después, las piezas hechas y sus tareas. La recién creada va en el acento.">
         <Example className={EXAMPLE} code={`<FranjaCollabs
   collabs={[
     { id, marca: "Lumea Skin", campana: "Rutina de noche", portadaUrl, tint: "rose", hechas: 2, totales: 4,
@@ -131,25 +131,25 @@ export default function InfluencerComponentesPage() {
           items={[
             <>Hasta cuatro paneles: los nuevos primero y luego por lo que toca antes. Uno solo ocupa todo el bloque sin cortes.</>,
             <>Nueva es la creada hace menos de {DIAS_COLLAB_NUEVA} días (<code>esCollabNueva</code>): fondo o degradado del acento, la etiqueta «Nueva» y un poco más ancha.</>,
-            <>Al pasar el ratón (o con el foco del teclado) el panel se ensancha; en el móvil, los paneles se deslizan conservando el corte.</>,
+            <>Al pasar el ratón (o con el foco del teclado), el panel sube encima de todos, pierde el corte y se queda casi todo el bloque; los demás se quedan en una tira de su imagen, sin texto. En el móvil, los paneles se deslizan conservando el corte.</>,
             <>«Ahora» y «Después» son los dos primeros hitos sin hacer (<code>hitosPendientes</code>); sin ninguno, «Todo entregado».</>,
           ]}
         />
       </DocSection>
 
-      <DocSection id="mini-calendario" title="Calendario pequeño" lead="El mes de un vistazo para un resumen: un punto del color de su collab por cada cosa del día (hitos, cobros, tareas) y, debajo, lo del día elegido, que al abrir es hoy.">
+      <DocSection id="mini-calendario" title="Calendario pequeño" lead="El mes de un vistazo para un resumen, como Google Calendar: cada día es un bloque con lo que tiene escrito en pequeño (hitos, cobros, tareas) en el tinte de su collab, y crece hasta llenar su bloque.">
         <Example className={EXAMPLE} code={`<Block>
   <BlockHeader title="Calendario" href="/workspace/contenidos/planificacion" />
-  <MiniCalendario eventos={eventos} hoy={hoy} href="/workspace/contenidos/planificacion" />
+  <MiniCalendario eventos={eventos} hoy={hoy} hrefDia={(dia) => "/workspace/contenidos/planificacion?dia=" + dia} />
 </Block>`}>
-          <Block className="w-full max-w-sm">
+          <Block className="h-[30rem] w-full max-w-md">
             <BlockHeader title="Calendario" href="#" />
-            <MiniCalendario eventos={eventosDeCollabs(demoCollabs, demoMarcas)} hoy={HOY} href="#" />
+            <MiniCalendario className="flex-1" eventos={eventosDeCollabs(demoCollabs, demoMarcas)} hoy={HOY} />
           </Block>
         </Example>
         <Rules
           items={[
-            <>Hasta tres puntos por día; lo demás se ve al elegirlo. Las cosas hechas, con el punto atenuado y tachadas en la lista.</>,
+            <>Dos cosas escritas por día y «+N», que lleva a ese día en el calendario completo; el nombre entero, al pasar el ratón. Las hechas, tachadas y atenuadas. Cinco o seis semanas, las que pida el mes.</>,
             <>Para operar (mover, crear) está el calendario completo: este solo enseña y lleva a su sitio.</>,
           ]}
         />
@@ -161,13 +161,14 @@ export default function InfluencerComponentesPage() {
   niche="Skincare y maquillaje" tier="50K–100K" city="Valencia"
   accounts={profile.accounts} href="/workspace/perfil"
   links={<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} />}
-  actions={<Button variant="outline" size="sm"><FileTextIcon /> Media kit</Button>}
+  actions={<ProfileTile icon={<FileTextIcon />} label="Media kit" detail="Ver el PDF" asChild><a href="/media-kit" /></ProfileTile>}
 />`}>
           <ProfilePanelExample />
         </Example>
         <Rules
           items={[
             <>Abre en la red con más seguidores. La interacción solo sale si la red la tiene.</>,
+            <>Las fichas del pie (cada red y el media kit, con <code>ProfileTile</code>) crecen hasta llenar la tarjeta: junto a las cifras, a la misma altura, no queda hueco.</>,
             <>Por debajo de 448 px de tarjeta, los enlaces y las cifras bajan bajo el nombre. En la tarjeta caben cuatro enlaces a la vista (<code>LinkRow max={4}</code>).</>,
           ]}
         />

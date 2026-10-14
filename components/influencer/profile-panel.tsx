@@ -4,6 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { MapPinIcon } from "lucide-react"
+import { Slot } from "radix-ui"
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { SocialIcon, socialLabel, type SocialNetwork } from "@/components/app/social-icons"
@@ -27,7 +28,8 @@ function principal(accounts: ProfileAccount[]) {
 /**
  * Tarjeta del perfil: foto (sus iniciales si aún no tiene), nombre, @, nicho y tramo; arriba a la derecha sus enlaces
  * (`links`, una `LinkRow`) y, debajo, las views medias y la interacción de la red elegida. Al pie, una ficha por red con sus
- * seguidores (al pulsarla, las cifras de arriba pasan a ser las suyas) y las acciones (`actions`, el media kit).
+ * seguidores (al pulsarla, las cifras de arriba pasan a ser las suyas) y las acciones (`actions`, el media kit como `ProfileTile`),
+ * que crecen hasta llenar la tarjeta.
  * Con `href`, la foto y el nombre llevan al perfil completo. Por debajo de 448 px de tarjeta, los enlaces bajan bajo el nombre.
  */
 export function ProfilePanel({
@@ -108,35 +110,25 @@ export function ProfilePanel({
         </div>
       </div>
 
-      <div className="mt-auto flex flex-wrap items-stretch gap-2">
+      {/* Las fichas crecen hasta el pie: la tarjeta queda llena aunque la fila sea más alta que su contenido. */}
+      <div className="flex min-h-0 flex-1 flex-wrap items-stretch gap-2">
         {accounts.length > 0 && (
           <div role="group" aria-label="Redes" className="grid min-w-0 flex-[999_1_20rem] grid-cols-[repeat(auto-fit,minmax(7.5rem,1fr))] gap-2">
-            {accounts.map((a) => {
-              const activa = a.network === elegida?.network
-              return (
-                <button
-                  key={a.network}
-                  type="button"
-                  aria-pressed={activa}
-                  onClick={() => setRed(a.network)}
-                  className={cn(
-                    "flex min-w-0 items-center gap-2.5 rounded-xl bg-background/70 px-3 py-2.5 text-left outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50",
-                    activa && "bg-brand-soft ring-1 ring-brand/40 hover:bg-brand-soft",
-                  )}
-                >
-                  <span className="grid size-8 flex-none place-items-center rounded-lg bg-card shadow-xs">
-                    <SocialIcon network={a.network} className="size-4" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold tabular-nums">{fmt.compact(a.followers)}</span>
-                    <span className="block truncate text-[11px] text-muted-foreground">{socialLabel[a.network]}</span>
-                  </span>
-                </button>
-              )
-            })}
+            {accounts.map((a) => (
+              <ProfileTile
+                key={a.network}
+                icon={<SocialIcon network={a.network} className="size-4" />}
+                label={socialLabel[a.network]}
+                value={fmt.compact(a.followers)}
+                detail={a.network === "youtube" ? "suscriptores" : "seguidores"}
+                aria-pressed={a.network === elegida?.network}
+                onClick={() => setRed(a.network)}
+                className={cn(a.network === elegida?.network && "bg-brand-soft ring-1 ring-brand/40 hover:bg-brand-soft")}
+              />
+            ))}
           </div>
         )}
-        {actions && <div className="flex flex-auto items-stretch gap-2 [&>*]:h-auto [&>*]:flex-1">{actions}</div>}
+        {actions && <div className="flex flex-auto items-stretch gap-2 [&>*]:flex-1">{actions}</div>}
       </div>
     </section>
   )
@@ -151,5 +143,43 @@ function Cifra({ label, value, network }: { label: string; value: string; networ
       </dt>
       <dd className="text-sm font-semibold tabular-nums">{value}</dd>
     </div>
+  )
+}
+
+/**
+ * Una ficha del pie de la tarjeta del perfil: arriba su icono y su nombre, abajo la cifra (o lo que hace).
+ * Las redes son fichas; una acción como el media kit, también, con `asChild` sobre su enlace.
+ */
+export function ProfileTile({
+  icon,
+  label,
+  value,
+  detail,
+  asChild = false,
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"button"> & { icon: React.ReactNode; label: string; value?: string; detail?: string; asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : "button"
+  return (
+    <Comp
+      data-slot="ws-profile-tile"
+      {...(asChild ? {} : { type: "button" as const })}
+      className={cn(
+        "flex min-h-24 min-w-0 flex-col justify-between gap-3 rounded-xl bg-background/70 p-3 text-left outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50",
+        className,
+      )}
+      {...props}
+    >
+      <span className="flex min-w-0 items-center gap-2">
+        <span className="grid size-8 flex-none place-items-center rounded-lg bg-card shadow-xs [&_svg]:size-4">{icon}</span>
+        <span className="truncate text-xs font-medium text-muted-foreground">{label}</span>
+      </span>
+      <span className="min-w-0">
+        {value && <span className="block text-xl leading-tight font-semibold tracking-tight tabular-nums">{value}</span>}
+        {detail && <span className={cn("block truncate", value ? "text-[11px] text-muted-foreground" : "text-sm font-medium")}>{detail}</span>}
+      </span>
+      <Slot.Slottable>{children}</Slot.Slottable>
+    </Comp>
   )
 }
