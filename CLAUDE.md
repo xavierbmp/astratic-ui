@@ -27,7 +27,7 @@ Design system y kit de arranque de Astratic Network Devs para portales operativo
 - Sin página de Ajustes: cada cosa se configura donde se usa (engranaje en su bloque, nombre del campo pulsable en la ficha, «Crear»/«Gestionar» en los selectores).
 - Contraste en claro: `border` < `input` < `control` (casillas); lo seleccionado en `bg-brand-soft` con filo `brand`. HTML de fuera siempre en `HtmlFrame`.
 - Los controles de una lista van en la barra de su base (`BarraBase`): vista, campos, filtro, grupos, orden, color, buscar y **la acción principal negra, una por página**. Sin toolbar suelta encima.
-- Subpáginas: pestañas `PageTabs` en la cabecera (prop `tabs`), una ruta por pestaña, definidas en `nav.ts`. Ejemplo en `/demo/facturacion`; reglas en `/ds/patrones/navegacion`.
+- Subpáginas: pestañas `PageTabs` en la cabecera (prop `tabs`, debajo del título), una ruta por pestaña con su icono, definidas en `nav.ts`. Ejemplo en `/demo/facturacion`; reglas en `/ds/patrones/navegacion`. Toda navegación por pestañas (fichas, diálogos, bloques) usa el mismo estilo con `TabsList variant="line"`; el segmentado gris queda para elegir un valor o filtrar.
 - Fila clicable abre el sheet; checkbox selecciona; selección → `BulkBar` flotante abajo. Destructivo → `ConfirmDialog`. Feedback → `toast` de sonner.
 - Badges de estado solo con `StatusBadge` y sus cinco tonos. Botones con icono + verbo + objeto.
 - Reportar un problema: `ReportButton` en la prop `report` del shell (bicho entre el buscador y la campana, ⇧⌘X con una ficha abierta). Cada proyecto guarda los reportes en su BD; se cierran con respuesta, nunca se borran.

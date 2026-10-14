@@ -9,7 +9,7 @@
 - Contraste en claro: `border` separa bloques, `input` bordea campos y botones outline, `control` bordea lo que se marca (casillas, radios): tiene que verse sin buscarlo. Lo seleccionado (filas, tarjetas, elementos de lista) va en `bg-brand-soft` con un filo `brand` a la izquierda; el hover, en `bg-muted`.
 
 ## Anatomía de una página de operación (orden fijo)
-1. `PageBody` → `PageHeader` (título 27 px, descripción; a la derecha, `tabs` con las pestañas de subpágina si las hay y `actions` con botones outline).
+1. `PageBody` → `PageHeader` (título 27 px y una línea de descripción, `actions` con botones outline a la derecha y, debajo y a todo el ancho, `tabs` con las pestañas de subpágina si las hay).
 2. `WorkGrid`, que reparte el resto de la página en dos columnas:
    - `stats={<KpiRow>}` con 3 a 5 `KpiCard`. Van **dentro** de la columna izquierda, no a ancho completo: `KpiRow` es `auto-fit minmax(180px,1fr)` y se reordena solo al estrecharse. Cuando las cifras son los tramos de un mismo recorrido (el estado de una base: sin normalizar, listas, en campaña…), van en el orden del trabajo y **cada una filtra la lista** al pulsarla (`KpiCard onClick` + `active`): es una condición más en el filtro de la vista abierta, que se ve en su botón «Filtro». Cuentan toda la base, no solo las filas cargadas.
    - **la base de datos** (`BaseDatos`, ver «Bases de datos») como hijo: lleva dentro su barra (vistas, filtro, grupos, orden, buscar y la acción principal negra y única), así que no hay toolbar suelta encima. Con cifras que filtran, estas cambian el filtro de la vista abierta.
@@ -27,7 +27,9 @@ Una página de operación trabaja, no resume: **un solo bloque de trabajo** y un
 
 ## Subpáginas
 - Un módulo con partes distintas que comparten título (Facturas y Cobros en Facturación) usa subpáginas: una ruta por parte (`/facturacion`, `/facturacion/cobros`) y `PageTabs` en la prop `tabs` de `PageHeader`.
-- Las pestañas se definen una vez en `nav.ts` (campo `tabs` del ítem): la sidebar marca el módulo y las migas y ⌘K incluyen la subpágina.
+- Las pestañas se definen una vez en `nav.ts` (campo `tabs` del ítem, cada una con su icono de lucide): la sidebar marca el módulo y las migas y ⌘K incluyen la subpágina.
+- **Aspecto de las pestañas** (Xavier, 2026-10-14, a partir de una captura de referencia): icono y texto, sin cápsulas; 44 px de alto, 16 px de aire a cada lado y 20 px entre pestañas; las demás en `muted-foreground` y la activa en `foreground` con un subrayado de 2 px que pisa una línea gris a todo el ancho. Siempre en el mismo sitio: debajo del título, y la descripción ocupa una línea para no moverlas.
+- **Navegar o elegir**: lo que cambia de página, o de «página» dentro de una ficha, un diálogo o un bloque (las partes de una ficha o de una página de registro, Nuevo y Enviados), usa las pestañas de navegación: `PageTabs` o `TabsList variant="line"`, que comparten estilo (`navTabClass` en `components/ui/tabs.tsx`). En una ficha o un diálogo estrecho, `compact` (pestañas juntas y con 12 px de aire) para que quepan todas sin desplazarse. Lo que elige un valor o recorta lo que se ve (periodo, Email o Llamadas en un formulario, Todo o Notas, los recortes de una lista) es un control segmentado: `TabsList` por defecto.
 - Mismo título en todas las subpáginas; cada una con su descripción, cifras, base y panel. De 2 a 6; sin anidar.
 - No son subpáginas: otra forma de ver los mismos datos (una vista de la base) ni un recorte de la lista (filtro). Un solo segmentado por cabecera.
 

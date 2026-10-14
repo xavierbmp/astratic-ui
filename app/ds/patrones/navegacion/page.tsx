@@ -1,16 +1,11 @@
 import { DownloadIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/app/page-header"
-import { PageTabs } from "@/components/app/page-tabs"
+import { FacturacionTabsDemo } from "@/components/docs/examples/page-tabs-demo"
 import { DocPage, DocSection, DoDont, Example, NextLinks, Prose, Rules, SpecTable } from "@/components/docs/doc"
 import { CodeBlock } from "@/components/docs/code-block"
 
 export const metadata = { title: "Navegación y subpáginas" }
-
-const facturacionTabs = [
-  { href: "/demo/facturacion", label: "Facturas", count: 3 },
-  { href: "/demo/facturacion/cobros", label: "Cobros" },
-]
 
 export default function NavegacionPage() {
   return (
@@ -24,7 +19,7 @@ export default function NavegacionPage() {
           columns={["Nivel", "Control", "Dónde", "URL"]}
           rows={[
             ["Página", "Sidebar", "Izquierda, en grupos con etiqueta", <code key="a">/facturacion</code>],
-            ["Subpágina", <code key="b">PageTabs</code>, "Cabecera de página, a la derecha del título", <code key="c">/facturacion/cobros</code>],
+            ["Subpágina", <code key="b">PageTabs</code>, "Cabecera de página, debajo del título y a todo el ancho", <code key="c">/facturacion/cobros</code>],
             ["Vista", <code key="d">BarraBase · LateralVistas</code>, "Barra de la base: el nombre de la vista y el lateral", "No cambia: se guarda por persona"],
             ["Filtro", <code key="e">PanelFiltro</code>, "Barra de la base: botón «Filtro» y buscar", "Recorta la vista; no cambia de página"],
             ["Registro", <code key="f">DetailSheet</code>, "Panel lateral derecho, encima de la página", <code key="g">?registro=id</code>],
@@ -60,7 +55,7 @@ export default function NavegacionPage() {
           <PageHeader
             title="Facturación"
             description="Facturas emitidas, su vencimiento y su cobro."
-            tabs={<PageTabs items={facturacionTabs} current="/demo/facturacion" />}
+            tabs={<FacturacionTabsDemo current="/demo/facturacion" />}
             actions={
               <Button variant="outline">
                 <DownloadIcon /> Exportar
@@ -71,13 +66,15 @@ export default function NavegacionPage() {
         <Rules
           items={[
             <>
-              <strong>Dónde:</strong> en la cabecera de página, a la derecha del título y antes de las acciones de página
-              («Exportar»). Las mismas pestañas, en el mismo sitio, en todas las subpáginas del módulo.
+              <strong>Dónde:</strong> en la cabecera de página, debajo del título y la descripción, a todo el ancho. Las
+              mismas pestañas, en el mismo sitio, en todas las subpáginas del módulo: la descripción ocupa siempre una
+              línea para que no las mueva.
             </>,
             <>
-              <strong>Cómo:</strong> un control segmentado de texto, igual que las Tabs del sistema: fondo gris, la
-              pestaña activa en blanco con sombra, 32 px de alto y sin iconos. El contador ámbar solo cuenta pendientes,
-              como en la sidebar; si no hay pendientes, no se pinta.
+              <strong>Cómo:</strong> icono y texto, sin cápsulas: 44 px de alto, 16 px de aire a cada lado y 20 px entre
+              pestañas. Las demás en gris (<code>muted-foreground</code>); la activa en <code>foreground</code> con un
+              subrayado de 2 px que pisa la línea gris de abajo, que cruza todo el ancho. El contador ámbar solo cuenta
+              pendientes, como en la sidebar; si no hay pendientes, no se pinta.
             </>,
             <>
               <strong>Cada pestaña es una ruta.</strong> La primera vive en la URL del módulo (<code>/facturacion</code>)
@@ -113,8 +110,8 @@ export default function NavegacionPage() {
         <CodeBlock
           title="app/(portal)/nav.ts"
           code={`export const facturacionTabs: PageTab[] = [
-  { href: "/facturacion", label: "Facturas", count: facturasVencidas },
-  { href: "/facturacion/cobros", label: "Cobros" },
+  { href: "/facturacion", label: "Facturas", icon: ReceiptTextIcon, count: facturasVencidas },
+  { href: "/facturacion/cobros", label: "Cobros", icon: HandCoinsIcon },
 ]
 
 export const nav: NavGroup[] = [
@@ -166,15 +163,19 @@ export const nav: NavGroup[] = [
             ["Es un recorte de la misma lista", "Filtro de la vista o una vista guardada", "Facturas vencidas"],
             ["Es otro contenido del mismo módulo, con sus propias cifras y columnas", "Subpágina, con PageTabs", "Facturas y Cobros"],
             ["Se usa a diario por separado o lo usa otro equipo", "Página propia en la sidebar", "Registros y Tareas"],
-            ["Es un registro con operación propia", "Página de registro con pestañas de línea", "Una campaña con sus piezas"],
+            ["Es un registro con operación propia", "Página de registro con pestañas de navegación (TabsList variant=\"line\")", "Una campaña con sus piezas"],
           ]}
         />
         <Prose>
           <p>
-            <strong>Un solo segmentado por cabecera.</strong> La cabecera admite un control segmentado de texto: las
-            pestañas de subpágina o, si no hay subpáginas, el periodo de un dashboard o los segmentos de una lista. Si una
-            página con subpáginas necesita también periodo o segmentos, el periodo pasa a un botón outline con
-            desplegable y los segmentos, a una condición del filtro de la base.
+            <strong>Navegar o elegir.</strong> Todo lo que cambia de página, o de «página» dentro de una ficha, un
+            diálogo o un bloque (las partes de una ficha, Nuevo y Enviados en un diálogo), usa las pestañas de
+            navegación: <code>PageTabs</code> o <code>TabsList variant=&quot;line&quot;</code>, con el mismo aspecto (en una
+            ficha o un diálogo estrecho, con <code>compact</code>: juntas y con 12 px de aire). Lo
+            que elige un valor o recorta lo que se ve (el periodo de un dashboard, Email o Llamadas en un formulario, Todo
+            o Notas) es un control segmentado: <code>TabsList</code> por defecto. Un solo segmentado por cabecera: con
+            subpáginas, el periodo pasa a un botón outline con desplegable y los segmentos, a una condición del filtro de
+            la base.
           </p>
         </Prose>
       </DocSection>
@@ -182,14 +183,14 @@ export const nav: NavGroup[] = [
       <DocSection id="si-no" title="Sí y no">
         <DoDont
           dos={[
-            "Pestañas de texto a la derecha del título, antes de «Exportar».",
+            "Pestañas con icono debajo del título, en el mismo sitio en cada subpágina.",
             "Una ruta por subpágina: /facturacion y /facturacion/cobros.",
             "El mismo título en todas las subpáginas del módulo.",
             "Contador ámbar en la pestaña que tiene pendientes.",
           ]}
           donts={[
             "Pestañas para cambiar de vista: eso es el conmutador de iconos de la toolbar.",
-            "Pestañas que solo filtran la misma lista.",
+            "Pestañas que solo filtran la misma lista, o un segmentado gris para cambiar de subpágina.",
             "Subpáginas dentro de subpáginas, o pestañas encima de las cifras o dentro del bloque.",
             "Juntar en un módulo páginas que se usan por separado.",
           ]}

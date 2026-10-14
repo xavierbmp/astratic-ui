@@ -58,12 +58,10 @@ export function AjustesCampo<T>({
         <span className="text-xs text-muted-foreground">{campo.propio ? TIPOS_CAMPO[campo.tipo].label : `${TIPOS_CAMPO[campo.tipo].label} · de serie`}</span>
       </div>
       <Tabs defaultValue={pestana} className="gap-0">
-        <div className="px-3 pt-2.5">
-          <TabsList className="w-full">
-            <TabsTrigger value="campo">Campo</TabsTrigger>
-            <TabsTrigger value="colores">Colores</TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList variant="line" className="px-3">
+          <TabsTrigger value="campo">Campo</TabsTrigger>
+          <TabsTrigger value="colores">Colores</TabsTrigger>
+        </TabsList>
         <TabsContent value="campo">
           {propio && onGuardarPropio ? (
             <EditorCampo campo={propio} nombresUsados={nombresUsados} onGuardar={onGuardarPropio} onCancelar={onCerrar} />

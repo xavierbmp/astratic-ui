@@ -17,7 +17,7 @@ export default function ConvencionesPage() {
             ["Navegación", "Sidebar izquierda, 256 px", "Grupos con etiqueta (por bloque o área), ítems con icono y contador ámbar de pendientes. Se colapsa a iconos."],
             ["Migas y buscador", "Cabecera de 48 px", "Migas «Bloque › Página › Registro» a la izquierda; buscador global ⌘K, campana y tema a la derecha."],
             ["Título y descripción", "Arriba de la página", "Título 27 px semibold y una línea de descripción. Sin icono."],
-            ["Subpáginas", "Derecha del título, antes de las acciones", "Pestañas de texto (PageTabs), una ruta por pestaña. El título del módulo no cambia entre subpáginas. Ver Navegación y subpáginas."],
+            ["Subpáginas", "Debajo del título, a todo el ancho", "Pestañas con icono y subrayado (PageTabs), una ruta por pestaña, siempre en el mismo sitio. El título del módulo no cambia entre subpáginas. Ver Navegación y subpáginas."],
             ["Acciones de página", "Derecha del título", "Acciones secundarias de toda la página (Exportar, Editar fases) y, si no hay subpáginas, un segmentado de toda la página (periodo, segmentos). Nunca la acción principal ni el conmutador de vistas."],
             ["Cifras", "Fila bajo el título", "De 3 a 5 tarjetas, nunca más. Cada una: icono + etiqueta, cifra grande, una línea de apoyo (delta o alerta)."],
             ["Barra de la base", "Dentro de la base de datos, en su borde superior", "Lateral · vista · [espacio] · campos · filtro · grupos · orden · color · altura · buscar · acción principal · ficha integrada. En ese orden y sin excepciones."],

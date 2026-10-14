@@ -1,4 +1,4 @@
-import { KanbanSquareIcon, LayoutDashboardIcon, ListTodoIcon, ReceiptTextIcon, UsersIcon } from "lucide-react"
+import { HandCoinsIcon, KanbanSquareIcon, LayoutDashboardIcon, ListTodoIcon, ReceiptTextIcon, UsersIcon } from "lucide-react"
 import type { Brand, CurrentUser, NavGroup, PageTab } from "@/lib/nav"
 import { demoInvoices } from "@/lib/demo-data"
 
@@ -9,8 +9,8 @@ const overdueInvoices = demoInvoices.filter((f) => f.status === "vencida").lengt
 
 /** Página de ejemplo con subpáginas: se pintan con PageTabs en la cabecera y el shell las usa en migas y ⌘K. */
 export const facturacionTabs: PageTab[] = [
-  { href: "/demo/facturacion", label: "Facturas", count: overdueInvoices },
-  { href: "/demo/facturacion/cobros", label: "Cobros" },
+  { href: "/demo/facturacion", label: "Facturas", icon: ReceiptTextIcon, count: overdueInvoices },
+  { href: "/demo/facturacion/cobros", label: "Cobros", icon: HandCoinsIcon },
 ]
 
 export const demoNav: NavGroup[] = [

@@ -308,7 +308,7 @@ export function ReportButton({
           </DialogHeader>
           {loadReports ? (
             <Tabs value={tab} onValueChange={(v) => setTab(v as "new" | "sent")} className="min-w-0 gap-4">
-              <TabsList className="w-full">
+              <TabsList variant="line">
                 <TabsTrigger value="new">Nuevo</TabsTrigger>
                 <TabsTrigger value="sent">Enviados</TabsTrigger>
               </TabsList>
