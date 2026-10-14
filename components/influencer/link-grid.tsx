@@ -267,7 +267,7 @@ function LinkDialog({
 const EN_FILA = 5
 
 /**
- * Los enlaces en una fila de iconos, para la cabecera de una página: los cinco primeros a la vista y
+ * Los enlaces en una fila de iconos (en la cabecera de una página o en la tarjeta del perfil): los `max` primeros a la vista y
  * «+N» despliega el resto en la misma fila. El lápiz abre el directorio (`LinkGrid` en modo edición)
  * para añadir, ordenar, editar o borrar; `editing` y `onEditingChange` lo abren también desde fuera
  * (un «Nuevo › Enlace»).
@@ -277,16 +277,19 @@ export function LinkRow({
   onChange,
   editing,
   onEditingChange,
+  max = EN_FILA,
   className,
 }: {
   links: QuickLink[]
   onChange: (links: QuickLink[]) => void
   editing: boolean
   onEditingChange: (editing: boolean) => void
+  /** Los que se ven antes de «+N» (cinco, salvo donde hay menos sitio). */
+  max?: number
   className?: string
 }) {
   const [expanded, setExpanded] = React.useState(false)
-  const visibles = expanded ? links : links.slice(0, EN_FILA)
+  const visibles = expanded ? links : links.slice(0, max)
   const ocultos = links.length - visibles.length
 
   return (
@@ -315,7 +318,7 @@ export function LinkRow({
               </Tooltip>
             </li>
           ))}
-          {links.length > EN_FILA && (
+          {links.length > max && (
             <li>
               <button
                 type="button"
@@ -345,7 +348,7 @@ export function LinkRow({
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
             <DialogTitle>Mis enlaces</DialogTitle>
-            <DialogDescription>Arrastra para ordenarlos: los {EN_FILA} primeros son los que se ven siempre.</DialogDescription>
+            <DialogDescription>Arrastra para ordenarlos: los {max} primeros son los que se ven siempre.</DialogDescription>
           </DialogHeader>
           <LinkGrid links={links} onChange={onChange} editing />
           <DialogFooter>
