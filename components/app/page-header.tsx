@@ -10,16 +10,19 @@ export function PageHeader({
 }: Omit<React.ComponentProps<"div">, "title"> & {
   title: React.ReactNode
   description?: React.ReactNode
-  /** Pestañas de subpágina (`PageTabs`) o un segmentado de toda la página. Van antes de las acciones. */
+  /**
+   * Pestañas de subpágina (`PageTabs`) o de las partes de un registro (`TabsList variant="line"`). Van debajo del
+   * título, a todo el ancho; la descripción ocupa siempre una línea para que caigan en el mismo sitio en cada subpágina.
+   */
   tabs?: React.ReactNode
   actions?: React.ReactNode
 }) {
   return (
-    <div data-slot="page-header" className={cn("flex flex-col gap-3", className)} {...props}>
+    <div data-slot="page-header" className={cn("flex flex-col gap-2", className)} {...props}>
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div className="min-w-0">
           <h1 className="text-[27px] leading-tight font-semibold tracking-tight">{title}</h1>
-          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+          {description && <p className="mt-1 truncate text-sm text-muted-foreground">{description}</p>}
         </div>
         {actions && <div className="flex flex-none flex-wrap items-center gap-2.5 whitespace-nowrap">{actions}</div>}
       </div>

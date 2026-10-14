@@ -4,6 +4,8 @@ import type { LucideIcon } from "lucide-react"
 export type PageTab = {
   href: string
   label: string
+  /** Va delante del texto, como en la sidebar. Por eso las pestañas se definen en un archivo que importa un componente cliente. */
+  icon: LucideIcon
   /** Pendientes de esa subpágina (pill ámbar, como los contadores de la sidebar). */
   count?: number
 }

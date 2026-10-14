@@ -31,7 +31,7 @@ export function TaskBlockExample() {
     <Block className="max-w-xl">
       <BlockHeader title="Tareas" count={tareas.filter((t) => t.estado !== "hecha").length} href="#" hrefLabel="Ver todo">
         <Tabs value={pestana} onValueChange={(v) => setPestana(v as Pestana)} className="sm:ml-2">
-          <TabsList variant="line" className="flex-wrap">
+          <TabsList variant="line">
             <TabsTrigger value="hoy">Hoy <span className="ml-1 text-[11px] text-muted-foreground">{pendientes("hoy")}</span></TabsTrigger>
             <TabsTrigger value="semana">Esta semana <span className="ml-1 text-[11px] text-muted-foreground">{pendientes("semana")}</span></TabsTrigger>
             <TabsTrigger value="vencidas">Vencidas <span className="ml-1 text-[11px] text-muted-foreground">{pendientes("vencidas")}</span></TabsTrigger>

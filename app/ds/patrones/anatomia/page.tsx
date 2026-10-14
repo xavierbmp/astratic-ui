@@ -47,7 +47,7 @@ export default function AnatomiaPage() {
           rows={[
             ["1 · Sidebar", "256 px, colapsa a 48 px. Fondo sidebar, borde derecho.", <code key="a">AppShell</code>],
             ["2 · Cabecera", "48 px, borde inferior. Padding 16 px.", <code key="b">AppShell</code>],
-            ["3 · Cabecera de página", "Padding 26 px arriba, 34 px a los lados. Título 27/32 semibold, tracking-tight (-0.025em). A la derecha, pestañas de subpágina y acciones.", <code key="c">PageHeader · PageTabs</code>],
+            ["3 · Cabecera de página", "Padding 26 px arriba, 34 px a los lados. Título 27/32 semibold, tracking-tight (-0.025em). A la derecha, las acciones; debajo, las pestañas de subpágina (44 px, subrayado de 2 px en la activa).", <code key="c">PageHeader · PageTabs</code>],
             ["4 · Cifras", "Grid auto-fit mín. 180 px, gap 12 px. De 3 a 5.", <code key="d">KpiRow · KpiCard</code>],
             ["5 · Barra de la base", "Dentro de la base, 44 px. A la izquierda el lateral y la vista; a la derecha lo que cambia lo que se ve, la acción principal y la ficha integrada.", <code key="e">BarraBase</code>],
             ["6 · Base de datos", "Ocupa el alto restante (mín. 480 px) y hace su propio scroll. Borde, radio 12 px.", <code key="f">BaseDatos</code>],

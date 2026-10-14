@@ -131,7 +131,7 @@ export function DetailSheetDemo() {
             />
 
             <Tabs key={r.id} defaultValue="resumen" className="flex min-h-0 flex-1 flex-col gap-0">
-              <TabsList variant="line" className="w-full justify-start rounded-none border-b px-4">
+              <TabsList variant="line" className="px-4">
                 <TabsTrigger value="resumen" className="flex-none">Resumen</TabsTrigger>
                 <TabsTrigger value="actividad" className="flex-none">Actividad</TabsTrigger>
               </TabsList>

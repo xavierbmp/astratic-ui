@@ -125,9 +125,11 @@
       "name": "page-tabs",
       "type": "registry:component",
       "title": "Pestañas de subpágina",
-      "description": "Pestañas de texto para las subpáginas de un módulo, en la cabecera de página. Una ruta por pestaña, con contador de pendientes.",
+      "description": "Pestañas con icono y subrayado para las subpáginas de un módulo, debajo del título de la página. Una ruta por pestaña, con contador de pendientes. Comparten estilo con las Tabs de navegación (variant=\"line\").",
+      "dependencies": ["lucide-react", "radix-ui", "class-variance-authority"],
       "files": [
         { "path": "components/app/page-tabs.tsx", "type": "registry:component" },
+        { "path": "components/ui/tabs.tsx", "type": "registry:ui" },
         { "path": "lib/nav.ts", "type": "registry:lib" }
       ]
     },
