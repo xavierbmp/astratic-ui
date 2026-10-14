@@ -7,6 +7,7 @@ import {
   cambiarPublicacion,
   conCampana,
   esquemaAjustesCollabs,
+  formatosDePlataformas,
   fechaGuionPorDefecto,
   fechasDeLasPiezas,
   guardarEnLista,
@@ -15,7 +16,7 @@ import {
   piezaDeFormato,
 } from "@/lib/influencer/ajustes-collabs"
 import { aplicarFormulario, piezaDeFormulario, type FormularioBrief } from "@/lib/influencer/formularios"
-import { hitosDePieza, partesDePieza } from "@/lib/influencer/collabs"
+import { hitosDePieza, partesDePieza, siguientePasoDePieza } from "@/lib/influencer/collabs"
 import { collabDeAlta, mensajeParaLaMarca } from "@/lib/influencer/alta-collab"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
 import type { FormatoPieza } from "@/lib/influencer/modelo"
@@ -23,10 +24,17 @@ import type { FormatoPieza } from "@/lib/influencer/modelo"
 const HOY = "2026-10-14T18:30"
 const reel = FORMATOS_PIEZA_DE_SERIE[0]
 const story = FORMATOS_PIEZA_DE_SERIE[1]
-const mencion: FormatoPieza = { id: "fp-1", nombre: "Mención en la bio", tipo: "texto", red: "instagram", conGuion: false }
+const mencion: FormatoPieza = { id: "fp-1", nombre: "Mención en la bio", tipo: "texto", plataforma: "instagram", conGuion: false }
 const ctx = { campana: "Otoño", diasGuion: 7, hoy: HOY }
 
 describe("ajustes de las collabs", () => {
+  it("los atajos son los formatos de las plataformas elegidas y los que valen para todas", () => {
+    const deTwitch = formatosDePlataformas(FORMATOS_PIEZA_DE_SERIE, ["twitch"]).map((f) => f.id)
+    expect(deTwitch).toEqual(["directo", "ugc"])
+    expect(formatosDePlataformas(FORMATOS_PIEZA_DE_SERIE, []).some((f) => f.plataforma === "youtube")).toBe(true)
+    expect(formatosDePlataformas(FORMATOS_PIEZA_DE_SERIE, []).some((f) => f.plataforma === "twitch")).toBe(false)
+  })
+
   it("lo que no ha tocado sale de serie", () => {
     expect(ajustesDe(null)).toEqual(AJUSTES_COLLABS_DE_SERIE)
     expect(ajustesDe({ diasGuion: 3 })).toEqual({ ...AJUSTES_COLLABS_DE_SERIE, diasGuion: 3 })
@@ -93,6 +101,11 @@ describe("piezas sin guion", () => {
     expect(partesDePieza(sinGuion)).toEqual(["media"])
     expect(partesDePieza(conGuion)).toEqual(["guion", "media"])
   })
+
+  it("lo siguiente que toca es grabar, no escribir el guion", () => {
+    expect(siguientePasoDePieza(conGuion)).toBe("Escribir el guion")
+    expect(siguientePasoDePieza(sinGuion)).toBe("Grabar y subir la v1")
+  })
 })
 
 describe("el brief de la marca", () => {
@@ -127,7 +140,7 @@ describe("el brief de la marca", () => {
 
 describe("el alta de una collab", () => {
   const marca = { id: "m-1", nombre: "Lumea", sector: "", tint: "rose" as const, atribucion: "propia" as const, creadaEl: HOY }
-  const vacio = { modo: "yo" as const, campana: "", coverUrl: "", importe: Number.NaN, desde: "", hasta: "", piezas: [], condiciones: [], adjuntos: [], para: { nombre: "", email: "" }, campos: [], mensaje: "" }
+  const vacio = { modo: "yo" as const, campana: "", plataformas: [], brief: "", briefAdjunto: null, coverUrl: "", importe: Number.NaN, desde: "", hasta: "", piezas: [], condiciones: [], adjuntos: [], para: { nombre: "", email: "" }, campos: [], mensaje: "" }
 
   it("sin nada rellenado, sale con sus valores de serie", () => {
     const { collab, formulario, materiales } = collabDeAlta(vacio, { marca, hoy: HOY })
@@ -143,8 +156,17 @@ describe("el alta de una collab", () => {
     expect(collab.hasta).toBe("2026-11-04")
     expect(collab.piezas.map((p) => p.titulo)).toEqual(["Reel · Otoño", "Story · Otoño"])
     expect(collab.piezas[1].sinGuion).toBe(true)
+    expect(collab.piezas[0]).toMatchObject({ red: "instagram", plataforma: "instagram" })
     expect(collab.brief.condiciones).toEqual([{ id: "exclusividad", nombre: "Exclusividad", dias: 30 }])
     expect(materiales[0]).toMatchObject({ collabId: collab.id, tipo: "pdf", origen: "mia" })
+  })
+
+  it("el brief escrito va al texto y el del PDF, el primero de los materiales", () => {
+    const pdf = { nombre: "brief.pdf", tamano: 10, tipo: "application/pdf", url: "https://r2/brief.pdf" }
+    const { collab, materiales } = collabDeAlta({ ...vacio, brief: "Objetivo: ventas", briefAdjunto: pdf, plataformas: ["instagram", "Mi podcast"] }, { marca, hoy: HOY })
+    expect(collab.brief.texto).toContain("Objetivo: ventas")
+    expect(collab.brief.plataformas).toEqual(["instagram", "Mi podcast"])
+    expect(materiales[0]).toMatchObject({ nombre: "brief.pdf", descripcion: "El brief de la campaña" })
   })
 
   it("pidiendo el brief, el enlace lleva los apartados en su orden", () => {

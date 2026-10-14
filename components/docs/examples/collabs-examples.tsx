@@ -11,6 +11,8 @@ import { EditorTexto } from "@/components/influencer/editor-texto"
 import { Conversacion } from "@/components/influencer/conversacion"
 import { VisorMedia } from "@/components/influencer/visor-media"
 import { PiezasEditor } from "@/components/influencer/piezas-editor"
+import { PlataformasEditor } from "@/components/influencer/plataformas"
+import { CONDICIONES_DE_SERIE } from "@/lib/influencer/ajustes-collabs"
 
 const [lumea, , vero, glow] = demoCollabs
 
@@ -72,5 +74,11 @@ export function PiezasEditorExample() {
     { ...PIEZA_VACIA, titulo: "Reel de la rutina de noche", publicacion: "2026-10-15" },
     { ...PIEZA_VACIA, formato: "carrusel", tipo: "carrusel", titulo: "Carrusel con los tres pasos", publicacion: "2026-10-18", requiereGuion: false },
   ])
-  return <PiezasEditor value={piezas} onChange={setPiezas} hoy="2026-10-06" campana="Rutina de noche" className="w-full" />
+  const [plataformas, setPlataformas] = React.useState(["instagram"])
+  return (
+    <div className="flex w-full flex-col gap-4">
+      <PlataformasEditor value={plataformas} onChange={setPlataformas} />
+      <PiezasEditor value={piezas} onChange={setPiezas} plataformas={plataformas} condiciones={CONDICIONES_DE_SERIE} hoy="2026-10-06" campana="Rutina de noche" />
+    </div>
+  )
 }

@@ -7,6 +7,7 @@ import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { ESQUINAS_FORMULARIO } from "@/components/app/formulario/formulario-dialog"
 
 // Los días viajan como «2026-10-14» (de un momento, «2026-10-14T18:30», se toma el día): se leen y se
 // escriben en hora local para que no salten de día.
@@ -32,6 +33,8 @@ export function CampoFecha({
   invalido,
   disabled,
   tamano = "md",
+  aspecto = "campo",
+  prefijo,
   className,
   "aria-label": ariaLabel,
 }: {
@@ -46,6 +49,10 @@ export function CampoFecha({
   invalido?: boolean
   disabled?: boolean
   tamano?: "md" | "sm"
+  /** `texto`: sin caja, como un enlace con su icono («Publica el 30 oct»), para dentro de una tarjeta. */
+  aspecto?: "campo" | "texto"
+  /** Lo que va antes de la fecha en el aspecto `texto` («Publica el»). */
+  prefijo?: string
   className?: string
   "aria-label"?: string
 }) {
@@ -68,16 +75,18 @@ export function CampoFecha({
           disabled={disabled}
           data-slot="campo-fecha"
           className={cn(
-            "flex min-w-0 items-center gap-2 rounded-lg border border-input bg-transparent text-left text-sm transition-colors outline-none hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-invalido:border-destructive data-invalido:ring-3 data-invalido:ring-destructive/20 dark:bg-input/30",
-            tamano === "md" ? "h-10 w-full px-3" : "h-8 px-2 text-[13px]",
+            "flex min-w-0 items-center gap-2 text-left text-sm transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-invalido:text-destructive",
+            aspecto === "texto"
+              ? "h-8 rounded-md px-2 text-[13px] hover:bg-muted"
+              : cn("border border-input bg-transparent hover:bg-muted/50 focus-visible:border-ring data-invalido:border-destructive data-invalido:ring-3 data-invalido:ring-destructive/20 dark:bg-input/30", tamano === "md" ? "h-10 w-full rounded-md px-3" : "h-8 rounded-sm px-2 text-[13px]"),
             className,
           )}
         >
           <CalendarDaysIcon className={cn("size-4 flex-none", fecha ? "text-brand" : "text-muted-foreground")} />
-          <span className={cn("truncate tabular-nums", !fecha && "text-muted-foreground")}>{fecha ? `${fmt.date(fecha)}${conAno ? ` ${fecha.getFullYear()}` : ""}` : placeholder}</span>
+          <span className={cn("truncate tabular-nums", !fecha && "text-muted-foreground")}>{fecha ? `${prefijo ? `${prefijo} ` : ""}${fmt.date(fecha)}${conAno ? ` ${fecha.getFullYear()}` : ""}` : placeholder}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-0">
+      <PopoverContent align="start" className={cn("w-auto p-0", ESQUINAS_FORMULARIO)}>
         <Calendar
           mode="single"
           locale={es}

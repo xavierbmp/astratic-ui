@@ -4,6 +4,7 @@ import * as React from "react"
 import { CheckIcon, ChevronDownIcon, PencilIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { ESQUINAS_FORMULARIO } from "@/components/app/formulario/formulario-dialog"
 
 /** Una opción con su cara: el logo o el avatar de un registro, el icono de un tipo. */
 export type OpcionSelector = { value: string; label: string; detalle?: string; icono?: React.ReactNode; editable?: boolean }
@@ -20,7 +21,8 @@ const ALTOS = { md: 40, sm: 32 }
  * un lápiz; con `vaciable`, una cruz para quitar lo elegido.
  *
  * El panel cubre el campo y es modal a propósito: dentro de un diálogo, uno no modal no deja usar la
- * rueda del ratón en la lista. `tamano="sm"` es el de dentro de una fila (las piezas de una collab).
+ * rueda del ratón en la lista. `tamano="sm"` es el de dentro de una fila. Con `aspecto="boton"`, en
+ * vez del campo se pulsa lo que se pase en `disparador` (el icono de una tarjeta) y la lista sale debajo.
  */
 export function SelectorBuscable({
   id,
@@ -35,6 +37,9 @@ export function SelectorBuscable({
   invalido,
   disabled,
   tamano = "md",
+  aspecto = "campo",
+  disparador,
+  abiertoAlEmpezar = false,
   className,
   "aria-label": ariaLabel,
 }: {
@@ -52,10 +57,15 @@ export function SelectorBuscable({
   invalido?: boolean
   disabled?: boolean
   tamano?: keyof typeof ALTOS
+  aspecto?: "campo" | "boton"
+  /** Con `aspecto="boton"`, lo que se ve y se pulsa. */
+  disparador?: React.ReactNode
+  /** Que salga ya abierto, para escribir sin pulsar (al desplegar las condiciones de una pieza). */
+  abiertoAlEmpezar?: boolean
   className?: string
   "aria-label"?: string
 }) {
-  const [abierto, setAbierto] = React.useState(false)
+  const [abierto, setAbierto] = React.useState(abiertoAlEmpezar)
   const [texto, setTexto] = React.useState("")
   const [activo, setActivo] = React.useState(0)
   const entrada = React.useRef<HTMLInputElement>(null)
@@ -90,7 +100,7 @@ export function SelectorBuscable({
 
   return (
     <Popover open={abierto} onOpenChange={setAbierto} modal>
-      <div data-slot="selector-buscable" className={cn("relative min-w-0", tamano === "md" ? "w-full" : "max-w-full", className)}>
+      <div data-slot="selector-buscable" className={cn("relative min-w-0", aspecto === "boton" ? "flex-none" : tamano === "md" ? "w-full" : "max-w-full", className)}>
         <PopoverTrigger asChild>
           <button
             id={id}
@@ -109,19 +119,29 @@ export function SelectorBuscable({
               e.preventDefault()
               abrir()
             }}
-            className={cn(
-              "flex w-full min-w-0 items-center gap-2 rounded-lg border border-input bg-transparent text-left text-sm transition-colors outline-none hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-invalido:border-destructive data-invalido:ring-3 data-invalido:ring-destructive/20 dark:bg-input/30",
-              tamano === "md" ? "h-10 px-3" : "h-8 px-2 text-[13px]",
-              vaciable && elegida && "pr-8",
-            )}
+            className={
+              aspecto === "boton"
+                ? "rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                : cn(
+                    "flex w-full min-w-0 items-center gap-2 border border-input bg-transparent text-left text-sm transition-colors outline-none hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-invalido:border-destructive data-invalido:ring-3 data-invalido:ring-destructive/20 dark:bg-input/30",
+                    tamano === "md" ? "h-10 rounded-md px-3" : "h-8 rounded-sm px-2 text-[13px]",
+                    vaciable && elegida && "pr-8",
+                  )
+            }
           >
-            {elegida?.icono}
-            <span className={cn("min-w-0 flex-1 truncate", !elegida && "text-muted-foreground")}>{elegida?.label ?? placeholder}</span>
-            {elegida?.detalle && tamano === "md" && <span className="hidden max-w-[45%] truncate text-xs text-muted-foreground sm:inline">{elegida.detalle}</span>}
-            {!(vaciable && elegida) && <ChevronDownIcon className="size-4 flex-none text-muted-foreground" />}
+            {aspecto === "boton" ? (
+              disparador
+            ) : (
+              <>
+                {elegida?.icono}
+                <span className={cn("min-w-0 flex-1 truncate", !elegida && "text-muted-foreground")}>{elegida?.label ?? placeholder}</span>
+                {elegida?.detalle && tamano === "md" && <span className="hidden max-w-[45%] truncate text-xs text-muted-foreground sm:inline">{elegida.detalle}</span>}
+                {!(vaciable && elegida) && <ChevronDownIcon className="size-4 flex-none text-muted-foreground" />}
+              </>
+            )}
           </button>
         </PopoverTrigger>
-        {vaciable && elegida && !disabled && (
+        {vaciable && elegida && !disabled && aspecto === "campo" && (
           <button type="button" aria-label={`Quitar ${elegida.label}`} onClick={() => onChange("")} className="absolute top-1/2 right-2 grid size-5 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
             <XIcon className="size-3.5" />
           </button>
@@ -129,8 +149,8 @@ export function SelectorBuscable({
       </div>
       <PopoverContent
         align="start"
-        sideOffset={-ALTOS[tamano]}
-        className="group w-(--radix-popover-trigger-width) min-w-64 gap-0 overflow-hidden p-0 data-[side=top]:flex-col-reverse"
+        sideOffset={aspecto === "boton" ? 6 : -ALTOS[tamano]}
+        className={cn("group min-w-64 gap-0 overflow-hidden p-0 data-[side=top]:flex-col-reverse", ESQUINAS_FORMULARIO, aspecto === "boton" ? "w-72" : "w-(--radix-popover-trigger-width)")}
         onOpenAutoFocus={(e) => {
           e.preventDefault()
           entrada.current?.focus()

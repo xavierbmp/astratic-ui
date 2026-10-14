@@ -169,6 +169,7 @@ export function siguientePasoDePieza(p: Pieza): string {
   if (guion?.estado === "cambios") return `Cambios pedidos en el ${texto.toLowerCase()}`
   if (guion?.estado === "en-revision") return `${texto} esperando a la marca`
   if (guion?.estado === "borrador") return `${texto} sin enviar`
+  if (!llevaGuion(p)) return TIPOS_PIEZA[p.tipo].media === "video" ? "Grabar y subir la v1" : "Hacer las fotos y subirlas"
   return `Escribir el ${texto.toLowerCase()}`
 }
 

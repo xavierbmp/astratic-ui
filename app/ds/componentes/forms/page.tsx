@@ -139,6 +139,12 @@ export default function FormsPage() {
             elegida. Un registro con imagen y logo empieza por <code>PortadaFormulario</code>, como una tarjeta de
             perfil.
           </p>
+          <p>
+            <strong>Formas distintas por papel:</strong> el marco del diálogo y sus botones siguen al tema; lo de
+            dentro del cuerpo (campos, tarjetas y sus desplegables) va más recto, con la escala de Astratic UI
+            (<code>ESQUINAS_FORMULARIO</code>), aunque el tema sea más redondo. Lo que se elige y se reconoce de un
+            vistazo va en píldora; los atajos que solo añaden, sin recuadro.
+          </p>
         </Prose>
         <Rules
           items={[

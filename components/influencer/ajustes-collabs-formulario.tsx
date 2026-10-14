@@ -1,27 +1,24 @@
 "use client"
 
 import * as React from "react"
-import { BanIcon, ChevronDownIcon, PlusIcon, Settings2Icon, Trash2Icon } from "lucide-react"
+import { ChevronDownIcon, PlusIcon, Settings2Icon, Trash2Icon } from "lucide-react"
 import { cn } from "cn"
 import { CAMPOS_BRIEF, LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, TIPOS_PIEZA, type AjustesCollabs, type FormatoPieza, type TipoCondicion } from "@/lib/influencer/modelo"
-import { REDES_PIEZA } from "@/lib/influencer/formularios"
 import { esquemaAjustesCollabs } from "@/lib/influencer/ajustes-collabs"
 import { idNuevo } from "@/lib/influencer/tareas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { SocialIcon, socialLabel } from "@/components/app/social-icons"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { CampoFormulario, Formulario, FormularioCabecera, FormularioCuerpo, FormularioPie } from "@/components/app/formulario/formulario-dialog"
 import { CasillasOpcion, IconosOpcion } from "@/components/app/formulario/opciones-visuales"
 import { ICONOS_PIEZA, IconoTipoPieza } from "@/components/influencer/piezas-editor"
+import { SelectorPlataforma } from "@/components/influencer/plataformas"
 
-const SIN_RED = "ninguna"
 const OPCIONES_TIPO = LISTA_TIPOS_PIEZA.map((t) => {
   const Icono = ICONOS_PIEZA[t]
   return { value: t, label: TIPOS_PIEZA[t].label, icono: <Icono /> }
 })
-const OPCIONES_RED = [...REDES_PIEZA.map((r) => ({ value: r, label: socialLabel[r], icono: <SocialIcon network={r} /> })), { value: SIN_RED, label: "En ningún sitio", icono: <BanIcon /> }]
 const OPCIONES_BRIEF = LISTA_CAMPOS_BRIEF.map((c) => ({ value: c, label: CAMPOS_BRIEF[c].label, descripcion: CAMPOS_BRIEF[c].descripcion }))
 
 /** Una fila de formato: nombre y guion a la vista; qué se entrega y dónde se publica, al desplegarla. */
@@ -51,7 +48,7 @@ function FilaFormato({ formato, asa, onCambiar, onQuitar }: { formato: FormatoPi
             Qué entregas <IconosOpcion tamano="sm" aria-label="Qué entregas" opciones={OPCIONES_TIPO} valor={formato.tipo} onChange={(t) => t && onCambiar({ ...formato, tipo: t, conGuion: t !== "texto" && formato.conGuion })} />
           </span>
           <span className="flex items-center gap-2">
-            Dónde <IconosOpcion tamano="sm" aria-label="Dónde se publica" opciones={OPCIONES_RED} valor={formato.red ?? SIN_RED} onChange={(r) => onCambiar({ ...formato, red: REDES_PIEZA.find((x) => x === r) })} />
+            Dónde <SelectorPlataforma tamano="sm" aria-label="Dónde se publica" value={formato.plataforma} onChange={(plataforma) => onCambiar({ ...formato, plataforma })} className="w-48" />
           </span>
         </div>
       )}
@@ -99,7 +96,7 @@ export function AjustesCollabsFormulario({ ajustes, migas, onVolver, onCancelar,
             <ListaOrdenable items={a.formatos} clave={(f) => f.id} onReordenar={(formatos) => cambiar({ formatos })} className="flex flex-col gap-1.5">
               {(f, asa) => <FilaFormato formato={f} asa={asa} onCambiar={cambiarFormato} onQuitar={() => cambiar({ formatos: a.formatos.filter((x) => x.id !== f.id) })} />}
             </ListaOrdenable>
-            <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => cambiar({ formatos: [...a.formatos, { id: idNuevo("fp"), nombre: "", tipo: "video", red: "instagram", conGuion: true }] })}>
+            <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => cambiar({ formatos: [...a.formatos, { id: idNuevo("fp"), nombre: "", tipo: "video", plataforma: "instagram", conGuion: true }] })}>
               <PlusIcon /> Añadir formato
             </Button>
           </CampoFormulario>

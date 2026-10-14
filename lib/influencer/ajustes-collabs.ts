@@ -3,17 +3,27 @@
 // que se rellena solo en el alta a partir de ellos (el nombre de cada pieza, la fecha del guion, las
 // fechas de la collab). El mismo esquema valida en el formulario y en la acción que los guarda.
 import { z } from "zod"
-import { LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, type AjustesCollabs, type CampoBrief, type FormatoPieza, type TipoCondicion } from "@/lib/influencer/modelo"
-import { type PiezaPedidaForm } from "@/lib/influencer/formularios"
+import { LISTA_CAMPOS_BRIEF, LISTA_TIPOS_PIEZA, PLATAFORMAS, type AjustesCollabs, type CampoBrief, type FormatoPieza, type TipoCondicion } from "@/lib/influencer/modelo"
+import { REDES_PIEZA, type PiezaPedidaForm } from "@/lib/influencer/formularios"
 import { sumarDias } from "@/lib/influencer/fechas"
+import { idNuevo } from "@/lib/influencer/tareas"
 
 export const FORMATOS_PIEZA_DE_SERIE: FormatoPieza[] = [
-  { id: "reel", nombre: "Reel", tipo: "video", red: "instagram", conGuion: true },
-  { id: "story", nombre: "Story", tipo: "video", red: "instagram", conGuion: false },
-  { id: "post", nombre: "Post", tipo: "foto", red: "instagram", conGuion: false },
-  { id: "carrusel", nombre: "Carrusel", tipo: "carrusel", red: "instagram", conGuion: false },
-  { id: "tiktok", nombre: "TikTok", tipo: "video", red: "tiktok", conGuion: true },
-  { id: "youtube", nombre: "Vídeo de YouTube", tipo: "video", red: "youtube", conGuion: true },
+  { id: "reel", nombre: "Reel", tipo: "video", plataforma: "instagram", conGuion: true },
+  { id: "story", nombre: "Story", tipo: "video", plataforma: "instagram", conGuion: false },
+  { id: "post", nombre: "Post", tipo: "foto", plataforma: "instagram", conGuion: false },
+  { id: "carrusel", nombre: "Carrusel", tipo: "carrusel", plataforma: "instagram", conGuion: false },
+  { id: "tiktok", nombre: "Vídeo de TikTok", tipo: "video", plataforma: "tiktok", conGuion: true },
+  { id: "youtube", nombre: "Vídeo de YouTube", tipo: "video", plataforma: "youtube", conGuion: true },
+  { id: "short", nombre: "Short", tipo: "video", plataforma: "youtube", conGuion: true },
+  { id: "directo", nombre: "Directo", tipo: "video", plataforma: "twitch", conGuion: false },
+  { id: "post-x", nombre: "Post en X", tipo: "texto", plataforma: "x", conGuion: false },
+  { id: "post-facebook", nombre: "Post de Facebook", tipo: "foto", plataforma: "facebook", conGuion: false },
+  { id: "post-linkedin", nombre: "Post de LinkedIn", tipo: "texto", plataforma: "linkedin", conGuion: false },
+  { id: "pin", nombre: "Pin", tipo: "foto", plataforma: "pinterest", conGuion: false },
+  { id: "podcast", nombre: "Mención en el podcast", tipo: "texto", plataforma: "podcast", conGuion: false },
+  { id: "newsletter", nombre: "Mención en la newsletter", tipo: "texto", plataforma: "newsletter", conGuion: false },
+  { id: "articulo", nombre: "Artículo", tipo: "texto", plataforma: "blog", conGuion: false },
   { id: "ugc", nombre: "Vídeo UGC", tipo: "video", conGuion: true },
 ]
 
@@ -43,7 +53,7 @@ export const esquemaFormatoPieza = z.object({
   id: z.string().min(1).max(60),
   nombre,
   tipo: z.enum(LISTA_TIPOS_PIEZA),
-  red: z.enum(["instagram", "tiktok", "youtube", "linkedin"]).optional(),
+  plataforma: z.string().trim().max(40).optional(),
   conGuion: z.boolean(),
 })
 
@@ -89,13 +99,27 @@ export function fechaGuionPorDefecto(publicacion: string, dias: number, hoy: str
 
 type Contexto = { campana: string; diasGuion: number; hoy: string }
 
-/** Una pieza nueva del formulario hecha con un formato: su tipo, su red, si pide guion y su nombre. */
+/** La red de una plataforma, si es una de las que se conectan (Instagram, TikTok, YouTube, LinkedIn). */
+export const redDePlataforma = (plataforma: string | undefined) => REDES_PIEZA.find((r) => r === plataforma)
+
+/**
+ * Los formatos que se ofrecen como atajo: los de las plataformas elegidas y los que valen para todas
+ * (el UGC). Sin ninguna elegida, los de las tres principales.
+ */
+export function formatosDePlataformas(formatos: FormatoPieza[], plataformas: string[]) {
+  const elegidas = plataformas.length ? plataformas : PLATAFORMAS.filter((p) => p.principal).map((p) => p.id)
+  return formatos.filter((f) => !f.plataforma || elegidas.includes(f.plataforma))
+}
+
+/** Una pieza nueva del formulario hecha con un formato: su tipo, su plataforma, si pide guion y su nombre. */
 export function piezaDeFormato(formato: FormatoPieza, publicacion: string, ctx: Contexto): PiezaPedidaForm {
   const requiereGuion = formato.tipo !== "texto" && formato.conGuion
   return {
+    clave: idNuevo("pp"),
     formato: formato.id,
     tipo: formato.tipo,
-    red: formato.red,
+    red: redDePlataforma(formato.plataforma),
+    plataforma: formato.plataforma,
     titulo: nombreDePieza(formato.nombre, ctx.campana),
     publicacion,
     indicaciones: "",
@@ -108,7 +132,7 @@ export function piezaDeFormato(formato: FormatoPieza, publicacion: string, ctx: 
 /** Cambiar el formato de una pieza ya añadida: toma su tipo, su red y si pide guion; el nombre, solo si no lo escribió ella. */
 export function cambiarFormatoDePieza(pieza: PiezaPedidaForm, formato: FormatoPieza, ctx: Contexto): PiezaPedidaForm {
   const nueva = piezaDeFormato(formato, pieza.publicacion, ctx)
-  return { ...pieza, formato: formato.id, tipo: formato.tipo, red: formato.red, requiereGuion: nueva.requiereGuion, fechaGuion: nueva.fechaGuion, titulo: pieza.nombreManual ? pieza.titulo : nueva.titulo }
+  return { ...pieza, formato: formato.id, tipo: formato.tipo, red: nueva.red, plataforma: nueva.plataforma, requiereGuion: nueva.requiereGuion, fechaGuion: nueva.fechaGuion, titulo: pieza.nombreManual ? pieza.titulo : nueva.titulo }
 }
 
 /** Cambiar el día de publicación: la fecha del guion le sigue mientras sea la de serie. */

@@ -263,6 +263,8 @@ export type Brief = {
   derechosUso?: string
   /** Las condiciones que valen para todas las piezas (exclusividad 30 días…); cada pieza puede añadir las suyas. */
   condiciones?: Condicion[]
+  /** Dónde se publica la campaña (`PLATAFORMAS` o las que escribió ella). */
+  plataformas?: string[]
   rondasIncluidas: number
   producto?: { estado: EstadoProducto; detalle?: string }
   contacto: { nombre: string; email: string }
@@ -327,9 +329,33 @@ export const LISTA_TIPOS_PIEZA = Object.keys(TIPOS_PIEZA) as TipoPieza[]
 /**
  * Con qué se añade una pieza («Reel», «Story», «Mención en la bio»): pone su tipo, que decide qué se
  * revisa, y dónde se publica, y el nombre de la pieza empieza siendo el suyo. Cada influencer
- * parte de los de serie y crea, cambia o quita los suyos desde el alta (`lib/influencer/formatos-pieza.ts`).
+ * parte de los de serie y crea, cambia o quita los suyos desde el alta (`lib/influencer/ajustes-collabs.ts`).
  */
-export type FormatoPieza = { id: string; nombre: string; tipo: TipoPieza; red?: SocialNetwork; /** Si pide guion antes de grabar, de serie. */ conGuion: boolean }
+export type FormatoPieza = { id: string; nombre: string; tipo: TipoPieza; /** Dónde se publica (`PLATAFORMAS` o el nombre de una que escribió ella); sin ella, vale para todas (el UGC). */ plataforma?: string; /** Si pide guion antes de grabar, de serie. */ conGuion: boolean }
+
+/**
+ * Dónde se publica una collab o una pieza: las tres de siempre primero (`principal`), el resto de las
+ * del marketing de influencers y, aparte, las que escribe ella (se guardan por su nombre).
+ */
+export const PLATAFORMAS: { id: string; nombre: string; principal?: boolean }[] = [
+  { id: "instagram", nombre: "Instagram", principal: true },
+  { id: "tiktok", nombre: "TikTok", principal: true },
+  { id: "youtube", nombre: "YouTube", principal: true },
+  { id: "twitch", nombre: "Twitch" },
+  { id: "x", nombre: "X" },
+  { id: "facebook", nombre: "Facebook" },
+  { id: "linkedin", nombre: "LinkedIn" },
+  { id: "pinterest", nombre: "Pinterest" },
+  { id: "snapchat", nombre: "Snapchat" },
+  { id: "threads", nombre: "Threads" },
+  { id: "kick", nombre: "Kick" },
+  { id: "podcast", nombre: "Podcast" },
+  { id: "blog", nombre: "Blog o web" },
+  { id: "newsletter", nombre: "Newsletter" },
+]
+
+/** El nombre de una plataforma: el de la lista o, si la escribió ella, tal cual. */
+export const nombrePlataforma = (plataforma: string) => PLATAFORMAS.find((p) => p.id === plataforma)?.nombre ?? plataforma
 
 /**
  * Una condición pactada con su duración si la tiene: exclusividad, derechos de uso, publicidad
@@ -347,7 +373,7 @@ export const CAMPOS_BRIEF: Record<CampoBrief, { label: string; descripcion: stri
   contacto: { label: "Sus datos", descripcion: "Quién lo rellena y su email" },
   campana: { label: "La campaña", descripcion: "El nombre y el brief en un texto" },
   fechas: { label: "Las fechas", descripcion: "Desde cuándo y hasta cuándo se publica" },
-  piezas: { label: "Las piezas", descripcion: "Qué contenidos quieren, con su día" },
+  piezas: { label: "Los entregables", descripcion: "Qué contenidos quieren, con su formato y su día" },
   materiales: { label: "Los materiales", descripcion: "Logos, fotos del producto, la guía de claims" },
   publicar: { label: "Al publicar", descripcion: "Menciones, hashtags, enlace, código, derechos" },
   facturacion: { label: "Datos para la factura", descripcion: "Razón social, NIF, dirección y email" },
@@ -445,8 +471,10 @@ export type Pieza = {
   tipo: TipoPieza
   /** El formato pactado en la propuesta (reel, story…), si lo hay; lo que pide la marca en su formulario va sin él. */
   formato?: Formato
-  /** Dónde se publica. */
+  /** Dónde se publica, si es una red que se conecta. */
   red?: SocialNetwork
+  /** Dónde se publica, sea o no una red (Twitch, un podcast, la que escribió ella). */
+  plataforma?: string
   /** Cuántas unidades cuenta en la collab (3 stories son una pieza de 3). */
   unidades: number
   titulo: string

@@ -12,7 +12,7 @@ import { SelectorBuscable } from "@/components/app/formulario/selector-buscable"
  * escribiéndola (`onNuevoTipo` la guarda en su lista y la devuelve). Vale para la collab entera y
  * para una pieza.
  */
-export function CondicionesEditor({ value, onChange, tipos, onNuevoTipo, tamano = "md", className }: { value: Condicion[]; onChange: (condiciones: Condicion[]) => void; tipos: TipoCondicion[]; onNuevoTipo?: (nombre: string) => TipoCondicion; tamano?: "md" | "sm"; className?: string }) {
+export function CondicionesEditor({ value, onChange, tipos, onNuevoTipo, tamano = "md", abrirAlEmpezar, className }: { value: Condicion[]; onChange: (condiciones: Condicion[]) => void; tipos: TipoCondicion[]; onNuevoTipo?: (nombre: string) => TipoCondicion; tamano?: "md" | "sm"; /** Que el desplegable de añadir salga ya abierto para escribir. */ abrirAlEmpezar?: boolean; className?: string }) {
   const libres = tipos.filter((t) => !value.some((c) => c.id === t.id))
   const anadir = (t: TipoCondicion) => onChange([...value, { id: t.id, nombre: t.nombre }])
   const conDias = (c: Condicion) => tipos.find((t) => t.id === c.id)?.conDias ?? c.dias !== undefined
@@ -20,7 +20,7 @@ export function CondicionesEditor({ value, onChange, tipos, onNuevoTipo, tamano 
   return (
     <div data-slot="ws-condiciones" className={cn("flex flex-wrap items-center gap-1.5", className)}>
       {value.map((c) => (
-        <span key={c.id} className={cn("inline-flex items-center gap-1.5 rounded-lg border bg-brand-soft pr-1 pl-2.5 text-[13px] text-foreground", tamano === "md" ? "h-10" : "h-8")}>
+        <span key={c.id} className={cn("inline-flex items-center gap-1.5 rounded-full border bg-brand-soft pr-1 pl-3 text-[13px] text-foreground", tamano === "md" ? "h-10" : "h-8")}>
           <span className="font-medium">{c.nombre}</span>
           {conDias(c) && (
             <label className="flex items-center gap-1 text-muted-foreground">
@@ -35,12 +35,12 @@ export function CondicionesEditor({ value, onChange, tipos, onNuevoTipo, tamano 
                   const dias = e.target.value ? Math.max(1, Math.round(Number(e.target.value))) : undefined
                   onChange(value.map((x) => (x.id === c.id ? { ...x, dias } : x)))
                 }}
-                className="h-6 w-12 rounded-md border border-input bg-card px-1.5 text-right text-foreground tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                className="h-6 w-12 rounded-full border border-input bg-card px-2 text-right text-foreground tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               />
               días
             </label>
           )}
-          <button type="button" aria-label={`Quitar ${c.nombre}`} onClick={() => onChange(value.filter((x) => x.id !== c.id))} className="grid size-6 place-items-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground">
+          <button type="button" aria-label={`Quitar ${c.nombre}`} onClick={() => onChange(value.filter((x) => x.id !== c.id))} className="grid size-6 place-items-center rounded-full text-muted-foreground hover:bg-card hover:text-foreground">
             <XIcon className="size-3.5" />
           </button>
         </span>
@@ -57,6 +57,7 @@ export function CondicionesEditor({ value, onChange, tipos, onNuevoTipo, tamano 
           if (t) anadir(t)
         }}
         onCrear={onNuevoTipo ? (nombre) => anadir(onNuevoTipo(nombre)) : undefined}
+        abiertoAlEmpezar={abrirAlEmpezar}
         className={tamano === "md" ? "w-48" : "w-40"}
       />
     </div>

@@ -578,6 +578,7 @@
         { "path": "components/influencer/piezas-editor.tsx", "type": "registry:component" },
         { "path": "components/influencer/formato-pieza-formulario.tsx", "type": "registry:component" },
         { "path": "components/influencer/condiciones-editor.tsx", "type": "registry:component" },
+        { "path": "components/influencer/plataformas.tsx", "type": "registry:component" },
         { "path": "components/influencer/ajustes-collabs-formulario.tsx", "type": "registry:component" },
         { "path": "components/influencer/plantillas-menu.tsx", "type": "registry:component" },
         { "path": "components/influencer/compartir-enlace.tsx", "type": "registry:component" },

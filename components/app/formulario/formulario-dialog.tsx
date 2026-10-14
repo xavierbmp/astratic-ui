@@ -9,6 +9,14 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui
 
 const ANCHOS = { sm: "sm:max-w-[480px]", md: "sm:max-w-[560px]", lg: "sm:max-w-[680px]" }
 
+/**
+ * Las esquinas de lo de dentro del formulario, con la escala de Astratic UI (radio base 10 px) aunque
+ * el tema la tenga más redonda (el de influencers, 16 px): el marco del diálogo y sus botones siguen
+ * al tema y los campos, las tarjetas y los desplegables quedan más rectos, para que no todo tenga la
+ * misma forma. La llevan el cuerpo y los desplegables que se abren desde él (van en un portal).
+ */
+export const ESQUINAS_FORMULARIO = "[--radius:0.625rem]"
+
 const CAMPOS_ENFOCABLES = "[data-slot=formulario-cuerpo] :is(input:not([type=hidden]), textarea, [data-slot=selector-buscable], [data-slot=campo-fecha]):not(:disabled)"
 
 /** Si la pantalla es la que se ve: la oculta (debajo de un subformulario) no da título al diálogo. */
@@ -126,7 +134,7 @@ export function Formulario({ className, ...props }: React.ComponentProps<"form">
  */
 export function FormularioCuerpo({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="formulario-cuerpo" className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+    <div data-slot="formulario-cuerpo" className={cn("min-h-0 flex-1 overflow-y-auto px-6 py-5", ESQUINAS_FORMULARIO)}>
       <div className={cn("grid grid-cols-6 gap-x-4 gap-y-5", className)} {...props} />
     </div>
   )
@@ -151,8 +159,9 @@ const ANCHO_CAMPO = { completo: "col-span-6", mitad: "col-span-6 sm:col-span-3",
  * Un campo del formulario: la etiqueta encima (a la derecha, `accion`: un contador, un engranaje), el
  * control, la ayuda y el error debajo. Ningún campo es obligatorio (Xavier, 2026-10-14): lo que falta
  * se completa con su valor por defecto al guardar, y el error solo sale cuando lo escrito no vale
- * (un email mal puesto). Con error, solo la etiqueta y el borde en rojo. Los `Input` que lleva dentro
- * toman el alto de los controles del formulario (40 px).
+ * (un email mal puesto). Con error, solo la etiqueta y el borde en rojo. Los `Input` y `Textarea` que
+ * lleva dentro toman el alto (40 px) y el radio de los controles del formulario: menos redondos que
+ * los bloques que los contienen.
  */
 export function CampoFormulario({
   etiqueta,
@@ -174,7 +183,7 @@ export function CampoFormulario({
   children: React.ReactNode
 }) {
   return (
-    <Field data-invalid={!!error || undefined} className={cn("gap-2 data-[invalid=true]:text-foreground *:data-[slot=input]:h-10 *:data-[slot=input-group]:h-10", ANCHO_CAMPO[ancho], className)}>
+    <Field data-invalid={!!error || undefined} className={cn("gap-2 data-[invalid=true]:text-foreground *:data-[slot=input]:h-10 *:data-[slot=input]:rounded-md *:data-[slot=input-group]:h-10 *:data-[slot=input-group]:rounded-md *:data-[slot=textarea]:rounded-md", ANCHO_CAMPO[ancho], className)}>
       <div className="flex min-h-5 items-center justify-between gap-2">
         <FieldLabel htmlFor={htmlFor} className="text-[13px] font-medium group-data-[invalid=true]/field:text-destructive">
           {etiqueta}

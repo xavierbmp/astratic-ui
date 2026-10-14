@@ -65,7 +65,7 @@ export function IconosOpcion<V extends string>({ opciones, valor, onChange, opci
                 aria-label={o.label}
                 onClick={() => onChange(elegida && opcional ? undefined : o.value)}
                 className={cn(
-                  "grid flex-none place-items-center rounded-lg border border-input text-muted-foreground transition-colors outline-none hover:bg-muted/60 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
+                  "grid flex-none place-items-center rounded-md border border-input text-muted-foreground transition-colors outline-none hover:bg-muted/60 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
                   tamano === "md" ? "size-10 [&_svg]:size-[18px]" : "size-8 [&_svg]:size-4",
                   elegida && "border-brand bg-brand-soft text-brand hover:bg-brand-soft hover:text-brand",
                 )}

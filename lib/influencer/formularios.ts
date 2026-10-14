@@ -15,13 +15,14 @@ export const DIAS_ENLACE = 30
 export const REDES_PIEZA: SocialNetwork[] = ["instagram", "tiktok", "youtube", "linkedin"]
 
 /** Una pieza nueva con sus valores por defecto: en preparación, sin versiones y en la primera ronda. */
-export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: string; publicacion: string; red?: SocialNetwork; formato?: Formato; unidades?: number; indicaciones?: string; sinGuion?: boolean; fechaGuion?: string; condiciones?: Condicion[] }): Pieza {
+export function piezaNueva(datos: { collabId: string; tipo: TipoPieza; titulo: string; publicacion: string; red?: SocialNetwork; plataforma?: string; formato?: Formato; unidades?: number; indicaciones?: string; sinGuion?: boolean; fechaGuion?: string; condiciones?: Condicion[] }): Pieza {
   return {
     id: idNuevo("pz"),
     collabId: datos.collabId,
     tipo: datos.tipo,
     formato: datos.formato,
     red: datos.red,
+    plataforma: datos.plataforma || datos.red,
     unidades: datos.unidades ?? 1,
     titulo: datos.titulo,
     publicacion: datos.publicacion,
@@ -46,6 +47,8 @@ export const esquemaPiezaPedida = z.object({
   /** Vacío si la marca aún no lo sabe: se pone la fecha final de la ventana. */
   publicacion: z.string(),
   red: z.enum(["instagram", "tiktok", "youtube", "linkedin"]).optional(),
+  /** Dónde se publica, sea o no una red que se conecta. */
+  plataforma: z.string().trim().max(40).optional(),
   indicaciones: z.string().max(600),
   /** El formato con el que se añadió (`FormatoPieza.id`): solo ayuda a rellenarla, la pieza no lo guarda. */
   formato: z.string().max(60).optional(),
@@ -56,6 +59,8 @@ export const esquemaPiezaPedida = z.object({
   condiciones: z.array(esquemaCondicion).max(20).optional(),
   /** El nombre lo ha escrito ella: ya no se rellena solo con el formato y la campaña. */
   nombreManual: z.boolean().optional(),
+  /** Solo para la pantalla: distingue cada pieza mientras se rellena (para quitar una sin mover las demás). */
+  clave: z.string().max(80).optional(),
 })
 
 export type PiezaPedidaForm = z.infer<typeof esquemaPiezaPedida>
@@ -70,6 +75,7 @@ export function piezaDeFormulario(p: PiezaPedidaForm, collabId: string, porDefec
     titulo: p.titulo.trim() || TITULO_POR_TIPO[p.tipo],
     publicacion: p.publicacion || porDefecto,
     red: p.red,
+    plataforma: p.plataforma,
     indicaciones: p.indicaciones.trim(),
     sinGuion: p.tipo !== "texto" && p.requiereGuion === false,
     fechaGuion: p.requiereGuion === false ? undefined : p.fechaGuion,
