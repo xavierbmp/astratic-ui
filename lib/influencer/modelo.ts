@@ -5,7 +5,7 @@ import type { StatusTone } from "@/lib/status"
 import type { Tint } from "@/lib/influencer/tints"
 import type { SocialNetwork } from "@/components/app/social-icons"
 import type { ValorCampo } from "@/lib/base/campos"
-import type { Ancla, ArchivoRevision, Mensaje, NotaRevision } from "@/lib/revision-notas"
+import type { Ancla, ArchivoRevision, Mensaje } from "@/lib/revision-notas"
 
 /** Un estado con su etiqueta y el tono de `StatusBadge`. */
 export type Estado<T extends string> = { id: T; label: string; tone: StatusTone }
@@ -422,14 +422,35 @@ export const ESTADOS_VERSION: Estado<EstadoVersion>[] = [
   { id: "aprobada", label: "Aprobada", tone: "success" },
 ]
 
-/** Dónde va una nota: una cita del guion, un segundo del vídeo o un punto de una foto (en %). */
+/**
+ * Dónde va una nota: una cita del texto (el guion o, en el vídeo o las fotos, el copy) con lo que la
+ * rodea para encontrarla aunque se repita, un segundo del vídeo (y el punto del fotograma, en %) o un
+ * punto de una foto (en %). Es el `Ancla` del madre.
+ */
 export type AnclaNota = Ancla
+
+/** Lo que decide quien hace la pieza de una sugerencia de cambio. */
+export type DecisionSugerencia = "aceptada" | "rechazada"
+
+/** Una sugerencia de cambio, como en Google Docs: poner este texto en lugar de la cita del ancla (vacía si solo añade). */
+export type SugerenciaNota = { poner: string; decision?: DecisionSugerencia }
 
 /** Un mensaje del hilo de una versión, de ella o de la marca. */
 export type Comentario = Mensaje<"influencer" | "marca">
 
 /** Lo que pide la marca sobre una versión: se resuelve en la siguiente. */
-export type Nota = NotaRevision<"influencer" | "marca">
+export type Nota = {
+  id: string
+  autor: string
+  el: string
+  texto: string
+  ancla?: AnclaNota
+  /** Si propone un cambio en el texto en vez de (o además de) comentarlo. */
+  sugerencia?: SugerenciaNota
+  resuelta: boolean
+  /** Lo que se contestan sobre esta nota. */
+  respuestas: Comentario[]
+}
 
 /** Un archivo de una versión: el vídeo o cada foto de un carrusel. */
 export type ArchivoVersion = ArchivoRevision

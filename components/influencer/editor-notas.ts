@@ -2,48 +2,23 @@ import { Extension } from "@tiptap/core"
 import type { Node as NodoPM } from "@tiptap/pm/model"
 import { Plugin, PluginKey } from "@tiptap/pm/state"
 import { Decoration, DecorationSet } from "@tiptap/pm/view"
+import { ubicarCita } from "@/lib/revision-sugerencias"
+import { rangoEnDoc, textoDeDoc } from "@/components/influencer/editor-sugerencias"
 
-/** Una nota de la marca anclada a un trozo del texto, con el número con el que sale en el panel. */
-export type MarcaNota = { id: string; numero: number; cita: string; resuelta: boolean }
+/** Una nota de la marca anclada a un trozo del texto (con lo que lo rodea, si se guardó), con el número con el que sale en el panel. */
+export type MarcaNota = { id: string; numero: number; cita: string; antes?: string; despues?: string; resuelta: boolean }
 
 export type EstadoNotas = { notas: MarcaNota[]; seleccionada: string | null }
 
 export const CLAVE_NOTAS = new PluginKey<DecorationSet>("notas-guion")
 
-/** Dónde está una cita en el documento: recorre cada párrafo sumando el texto de sus trozos. */
-function rangoDeCita(doc: NodoPM, cita: string): { desde: number; hasta: number } | null {
-  let rango: { desde: number; hasta: number } | null = null
-  doc.descendants((nodo, pos) => {
-    if (rango || !nodo.isTextblock) return !rango
-    const texto = nodo.textContent
-    const i = texto.indexOf(cita)
-    if (i < 0) return false
-    // Pasar de la posición en el texto a la del documento, contando solo los trozos de texto: el
-    // principio cae dentro de un trozo y el final puede caer justo al acabar uno.
-    const posicion = (indice: number, alFinal: boolean) => {
-      let acumulado = 0
-      let resultado: number | null = null
-      nodo.forEach((hijo, offset) => {
-        if (resultado !== null || !hijo.isText) return
-        const largo = hijo.text?.length ?? 0
-        const dentro = alFinal ? indice > acumulado && indice <= acumulado + largo : indice >= acumulado && indice < acumulado + largo
-        if (dentro) resultado = pos + 1 + offset + (indice - acumulado)
-        acumulado += largo
-      })
-      return resultado
-    }
-    const desde = posicion(i, false)
-    const hasta = posicion(i + cita.length, true)
-    if (desde !== null && hasta !== null) rango = { desde, hasta }
-    return false
-  })
-  return rango
-}
-
 function decorar(doc: NodoPM, { notas, seleccionada }: EstadoNotas) {
+  const mapa = textoDeDoc(doc)
   const decoraciones = notas.flatMap((n) => {
-    const rango = rangoDeCita(doc, n.cita)
-    if (!rango) return []
+    const sitio = n.cita ? ubicarCita(mapa.texto, n) : null
+    if (!sitio) return []
+    const { from, to } = rangoEnDoc(mapa, sitio.desde, sitio.hasta)
+    const rango = { desde: from, hasta: to }
     const clase = ["rounded-sm px-0.5 cursor-pointer transition-colors", n.resuelta ? "bg-success-soft" : "bg-warning-soft", seleccionada === n.id ? "ring-2 ring-brand" : ""].join(" ")
     const numero = () => {
       const el = document.createElement("span")

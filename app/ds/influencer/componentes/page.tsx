@@ -20,7 +20,7 @@ import { FranjaCollabs, type CollabEnFranja } from "@/components/influencer/fran
 import { MiniCalendario } from "@/components/influencer/mini-calendario"
 import { NoticeHighlight, NoticeItem } from "@/components/influencer/notice-card"
 import { LinkGridExample, LinkRowExample, ProfilePanelExample, TaskBlockExample, TaskTableExample } from "@/components/docs/examples/influencer-examples"
-import { EditorGuionExample, FotosExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
+import { EditorGuionExample, FotosExample, ReproductorNotasExample, SugerenciasGuionExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
 import { AgendaContenidosExample, CalendarioContenidosExample, CapturaIdeaExample, CaptionExample, GaleriaIdeasExample } from "@/components/docs/examples/contenidos-examples"
 import { DocPage, DocSection, Example, NextLinks, Prose, Rules } from "@/components/docs/doc"
 
@@ -395,6 +395,26 @@ const [editing, setEditing] = useState(false)
             <>Variables: <code>{"<span data-variable=\"collab.importe\">"}</code> en el HTML, ficha en pantalla, el dato al «Ver con los datos»; escribir <code>{"{{clave}}"}</code> la crea.</>,
           ]}
         />
+      </DocSection>
+
+      <DocSection id="sugerencias" title="Sugerencias de cambio en el texto" lead="Como el modo sugerencia de Google Docs: quien revisa escribe encima del guion o del copy sin cambiar el original; lo borrado queda tachado y lo nuevo resaltado, y cada cambio es una sugerencia que la creadora acepta o rechaza.">
+        <Example className={EXAMPLE} code={`<EditorTexto value={original} editable sugerir={{ pendientes, onCambios: ({ original, tramos }) => sincronizarSugerencias(original, tramos, abiertas) }} />
+<EditorTexto value={original} editable={false} sugerencias={marcas} notaSeleccionada={id} onSeleccionarNota={setId} />`}>
+          <SugerenciasGuionExample />
+        </Example>
+        <Rules
+          items={[
+            <>El original no cambia: <code>sugerir</code> lo compara con lo escrito (<code>tramosDeCambio</code>, palabra a palabra) y cada cambio se ancla al original con su cita y lo que la rodea (<code>lib/revision-sugerencias.ts</code>).</>,
+            <>Borrar una frase y escribir otra es un solo «Reemplazar»; seguir escribiendo en una sugerencia la cambia y deshacerla la retira (<code>sincronizarSugerencias</code>).</>,
+            <>Aceptar aplica el cambio a la versión siguiente (<code>aplicarCambiosHtml</code>, sin pantalla). Lo que ya no encuentra su sitio se avisa.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="notas-video" title="Notas sobre el vídeo" lead="Como en Frame.io: un reproductor con play y pausa, y quien revisa pulsa en un punto del vídeo para dejar ahí una nota en ese segundo; con el tick se guarda y el vídeo sigue. Elegir una nota lleva el vídeo a su fotograma con la nota encima.">
+        <Example className={EXAMPLE} code={`<ReproductorNotas videoUrl={url} portadaUrl={portada} ancho={280} notas={notas} seleccionada={id} onSeleccionar={setId} onAnotar={({ segundo, x, y, texto }) => …} />`}>
+          <ReproductorNotasExample />
+        </Example>
       </DocSection>
 
       <DocSection id="revision" title="Revisión: visor y conversación" lead="Como la revisión de Feedback: el contenido sobre un lienzo con sus versiones, comparar con la anterior y zoom; las notas de la marca en su sitio (segundo del vídeo o punto de la foto), y la conversación con el progreso de las notas.">

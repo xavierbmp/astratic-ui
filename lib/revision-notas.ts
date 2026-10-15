@@ -2,10 +2,13 @@
 // versiones con sus archivos, las notas ancladas a un sitio de la pieza y la conversación. Solo
 // tipos y formato; lo pintan `Conversacion` y `VisorMedia`.
 
-/** Dónde va una nota: una cita del texto, un segundo del vídeo o un punto de una foto (en %). */
+/**
+ * Dónde va una nota: una cita del texto con lo que la rodea (para encontrarla aunque se repita), un
+ * segundo del vídeo (y el punto del fotograma, en %) o un punto de una foto (en %).
+ */
 export type Ancla =
-  | { tipo: "texto"; cita: string }
-  | { tipo: "segundo"; segundo: number }
+  | { tipo: "texto"; cita: string; antes?: string; despues?: string }
+  | { tipo: "segundo"; segundo: number; x?: number; y?: number }
   | { tipo: "punto"; x: number; y: number; /** Qué foto del carrusel, desde 0. */ imagen: number }
 
 /** Un mensaje del hilo, de un lado o del otro (`L`: quien hace la pieza y quien la revisa). */
