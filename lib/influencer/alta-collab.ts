@@ -38,12 +38,31 @@ export type Alta = { collab: Collab; formulario?: FormularioMarca; materiales: M
 /** El nombre de la campaña si se dejó vacío. */
 export const campanaPorDefecto = (marca: Marca) => `Collab con ${marca.nombre}`
 
-/** El mensaje de serie para la marca: si solo se le piden materiales, lo dice; si no, la campaña y lo demás. */
+type CampoPedido = Exclude<CampoBrief, "contacto">
+
+/** Cómo se pide cada apartado: solo (con su detalle) o dentro de una lista. Sus datos no se nombran: los deja al rellenarlo. */
+const PEDIDO_EN_MENSAJE: Record<CampoPedido, { solo: string; enLista: string }> = {
+  campana: { solo: "aquí puedes contarme la campaña y lo que buscáis con ella.", enLista: "la campaña y lo que buscáis con ella" },
+  fechas: { solo: "¿me dices aquí las fechas en las que se publica?", enLista: "las fechas" },
+  piezas: { solo: "¿me cuentas aquí qué contenidos queréis, con su formato y su día?", enLista: "los contenidos que queréis" },
+  materiales: { solo: "¿me subes aquí los materiales de la campaña (logos, fotos del producto, guía de claims)?", enLista: "los materiales" },
+  publicar: { solo: "¿me dejas aquí lo que hay que poner al publicar (menciones, hashtags, enlace o código)?", enLista: "lo que hay que poner al publicar" },
+  facturacion: { solo: "¿me dejas aquí los datos para la factura (razón social, NIF, dirección y email)?", enLista: "los datos para la factura" },
+}
+
+/** «a», «a y b», «a, b y c». */
+const enumerar = (partes: string[]) => (partes.length < 2 ? partes.join("") : `${partes.slice(0, -1).join(", ")} y ${partes.at(-1)}`)
+
+/**
+ * El mensaje de serie para la marca, según lo que se le pide: un apartado solo, con su detalle; varios,
+ * en el orden del formulario. Sin nada más que sus datos, que los deje.
+ */
 export function mensajeParaLaMarca(nombre: string, campos: CampoBrief[]) {
   const hola = `Hola${nombre ? ` ${nombre.split(" ")[0]}` : ""}`
-  return campos.every((c) => c === "contacto" || c === "materiales")
-    ? `${hola}: ¿me subes aquí los materiales de la campaña (logos, fotos del producto, guía de claims)?`
-    : `${hola}: aquí puedes contarme la campaña y lo que necesitáis. Así lo tengo todo en un sitio.`
+  const pedidos = camposEnOrden(campos).filter((c): c is CampoPedido => c !== "contacto")
+  if (pedidos.length === 0) return `${hola}: ¿me dejas aquí tus datos de contacto? Así lo tengo todo en un sitio.`
+  if (pedidos.length === 1) return `${hola}: ${PEDIDO_EN_MENSAJE[pedidos[0]].solo}`
+  return `${hola}: te dejo aquí un formulario para que me pases ${enumerar(pedidos.map((c) => PEDIDO_EN_MENSAJE[c].enLista))}. Así lo tengo todo en un sitio.`
 }
 
 /**
