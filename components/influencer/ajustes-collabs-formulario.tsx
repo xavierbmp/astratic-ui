@@ -111,7 +111,22 @@ function FilaPack({ pack, formatos, asa, onCambiar, onQuitar }: { pack: PackCont
  * entregables de un clic) y los apartados que le pide a la marca de serie. Pantalla
  * de un `FormularioDialog`: sola, desde el engranaje de la tabla, o encima del alta.
  */
-export function AjustesCollabsFormulario({ ajustes, migas, onVolver, onCancelar, onGuardar }: { ajustes: AjustesCollabs; migas?: string; onVolver?: () => void; onCancelar: () => void; onGuardar: (ajustes: AjustesCollabs) => void }) {
+export function AjustesCollabsFormulario({
+  ajustes,
+  migas,
+  onVolver,
+  onCancelar,
+  onGuardar,
+  enPagina,
+}: {
+  ajustes: AjustesCollabs
+  migas?: string
+  onVolver?: () => void
+  onCancelar: () => void
+  onGuardar: (ajustes: AjustesCollabs) => void
+  /** Pintado en una página (Ajustes de bloques), sin la cabecera del diálogo: lo titula el bloque que lo lleva. */
+  enPagina?: boolean
+}) {
   const [a, setA] = React.useState(ajustes)
   const [error, setError] = React.useState<string>()
   const cambiar = (parcial: Partial<AjustesCollabs>) => {
@@ -124,7 +139,7 @@ export function AjustesCollabsFormulario({ ajustes, migas, onVolver, onCancelar,
 
   return (
     <>
-      <FormularioCabecera icono={Settings2Icon} titulo="Ajustes de las collabs" descripcion="Lo que sale de serie al crear una collab. Todo se cambia después en cada una." migas={migas} onVolver={onVolver} />
+      {!enPagina && <FormularioCabecera icono={Settings2Icon} titulo="Ajustes de las collabs" descripcion="Lo que sale de serie al crear una collab. Todo se cambia después en cada una." migas={migas} onVolver={onVolver} />}
       <Formulario
         onSubmit={(e) => {
           e.preventDefault()

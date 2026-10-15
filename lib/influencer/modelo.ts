@@ -756,12 +756,12 @@ export type EtiquetaTarea = { id: string; nombre: string; tint: Tint }
 /** Lo que pasa en una tarea: un comentario suyo o un cambio (estado, fecha, dónde vive…). */
 export type EntradaTarea = { id: string; tipo: "comentario" | "cambio"; texto: string; el: string }
 
-/** A mano, de las fechas del brief, de una plantilla o la siguiente de una que se repite. */
+/** A mano, de una automatización (`lib/influencer/automatizaciones.ts`), de una plantilla o la siguiente de una que se repite. */
 export type OrigenTarea = "manual" | "auto" | "plantilla" | "repetida"
 
 export const ORIGENES_TAREA: Record<OrigenTarea, string> = {
   manual: "A mano",
-  auto: "De las fechas del brief",
+  auto: "Automática",
   plantilla: "De una plantilla",
   repetida: "Se repite",
 }
@@ -786,6 +786,8 @@ export type Tarea = {
   /** Posición a mano en las listas que no se ordenan por nada. */
   orden: number
   origen: OrigenTarea
+  /** La de una automatización: qué regla y de qué registro («serie-marca-feedback:v-12»). Con ella no se repite. */
+  clave?: string
   /** La descripción (HTML del editor). */
   notas?: string
   /** Los valores de los campos que ha creado ella, por id de campo. */
