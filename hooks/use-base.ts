@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import type { DefCampo } from "@/lib/base/campos"
-import { TIPOS_VISTA, idBase, normalizarConfig, normalizarVista, vistaNueva, camposDeFormulario, type AjusteCampo, type CampoFormulario, type ConfigBase, type TipoVista, type VistaBase } from "@/lib/base/vistas"
+import { TIPOS_VISTA, idBase, normalizarConfig, normalizarVista, vistaNueva, camposDeFormulario, type AjusteCampo, type CampoFormulario, type ConfigBase, type TipoVista, type VistaBase, type VistaDeSerie } from "@/lib/base/vistas"
 
 /** Tiempo que se espera antes de guardar: ensanchar una columna no manda un guardado por píxel. */
 const ESPERA_GUARDADO = 500
@@ -22,7 +22,7 @@ export function useBase<T>({
   guardar,
 }: {
   campos: DefCampo<T>[]
-  deSerie: VistaBase[]
+  deSerie: VistaDeSerie[]
   inicial?: ConfigBase | null
   guardar?: (config: ConfigBase) => void
 }) {
