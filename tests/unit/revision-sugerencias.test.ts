@@ -148,6 +148,11 @@ describe("sincronizarSugerencias", () => {
     expect(cambiar).toEqual([{ id: "s1", cambio: expect.objectContaining({ cita: "para", poner: "frena en seco" }) }])
   })
 
+  it("lo ya aceptado sale escrito y no se vuelve a crear", () => {
+    const nuevo = original.replace("para", "frena")
+    expect(sincronizarSugerencias(original, tramosDeCambio(original, nuevo), [], [primera])).toEqual({ crear: [], cambiar: [], retirar: [] })
+  })
+
   it("deshacer un cambio retira su sugerencia y otro cambio aparte se crea", () => {
     const nuevo = original.replace("plano", "toma")
     const r = sincronizarSugerencias(original, tramosDeCambio(original, nuevo), [{ id: "s1", cambio: primera }])

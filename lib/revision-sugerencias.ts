@@ -220,9 +220,11 @@ const mismoCambio = (a: CambioTexto, b: CambioTexto) => a.cita === b.cita && a.p
 /**
  * Qué hay que guardar después de que quien revisa haya escrito sobre el texto: cada cambio que pisa
  * o toca una sugerencia suya ya guardada la cambia; uno nuevo se crea; y la sugerencia que ya no
- * sale (la ha deshecho) se retira. Todo en posiciones del original, que no cambia.
+ * sale (la ha deshecho) se retira. Las ya aceptadas (`fijas`) salen escritas y no se tocan. Todo en
+ * posiciones del original, que no cambia.
  */
-export function sincronizarSugerencias(original: string, tramos: Tramo[], abiertas: SugerenciaAbierta[]): Sincronizacion {
+export function sincronizarSugerencias(original: string, todos: Tramo[], abiertas: SugerenciaAbierta[], fijas: CambioTexto[] = []): Sincronizacion {
+  const tramos = todos.filter((t) => !fijas.some((f) => mismoCambio(f, { ...citaDe(original, t.desde, t.hasta), poner: t.poner })))
   const ubicadas = abiertas.flatMap((s) => {
     const sitio = ubicarCita(original, s.cambio)
     return sitio ? [{ ...s, ...sitio }] : []
