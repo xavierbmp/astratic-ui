@@ -73,7 +73,7 @@ export function EstadoTareaBadge({ tarea, hoy }: { tarea: Pick<Tarea, "estado" |
 }
 
 /** El icono de cada página, el mismo que en la barra de navegación. */
-const ICONO_TIPO: Record<Exclude<TipoTarea, "sin-tipo">, typeof KanbanSquareIcon> = {
+export const ICONO_TIPO_TAREA: Record<Exclude<TipoTarea, "sin-tipo">, typeof KanbanSquareIcon> = {
   crm: KanbanSquareIcon,
   collabs: SparklesIcon,
   contenidos: ClapperboardIcon,
@@ -91,7 +91,7 @@ export function DondeChip({ donde, ctx, enlace, className }: { donde: DondeTarea
   const texto = textoDonde(donde, ctx)
   if (donde.tipo === "sin-tipo") return null
   const href = enlace ? hrefDonde(donde) : undefined
-  const Icono = ICONO_TIPO[donde.tipo]
+  const Icono = ICONO_TIPO_TAREA[donde.tipo]
   const contenido = (
     <>
       {marca ? <BrandMark name={marca.nombre} tint={collabDe(donde, ctx)?.tint ?? marca.tint} size="xs" className="size-4 rounded text-[8px]" /> : <Icono className="size-3.5 flex-none text-muted-foreground" aria-hidden />}
@@ -224,7 +224,7 @@ export function NombreGrupoTarea({ campo, grupo, ctx, etiquetas }: { campo?: str
     case "cuando":
       return <span className={cn(grupo.id === "vencidas" && "text-danger", grupo.id === "hoy" && "text-warning")}>{grupo.label}</span>
     case "tipo": {
-      const Icono = grupo.id in ICONO_TIPO ? ICONO_TIPO[grupo.id as Exclude<TipoTarea, "sin-tipo">] : null // id de LISTA_TIPOS_TAREA
+      const Icono = grupo.id in ICONO_TIPO_TAREA ? ICONO_TIPO_TAREA[grupo.id as Exclude<TipoTarea, "sin-tipo">] : null // id de LISTA_TIPOS_TAREA
       return (
         <span className={cn("inline-flex items-center gap-1.5", !Icono && "text-muted-foreground")}>
           {Icono && <Icono className="size-4 text-muted-foreground" aria-hidden />}

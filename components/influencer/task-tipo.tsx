@@ -90,7 +90,16 @@ function gruposDe(tipo: TipoTarea, ctx: ContextoTareas): { titulo: string; opcio
   return []
 }
 
-function claveDe(d: DondeTarea): string {
+/**
+ * Lo que se elige debajo del tipo, en una lista: «Sin campaña» (o «Sin ficha») primero y después las
+ * campañas o las fichas con su grupo, para el selector del alta de una tarea.
+ */
+export function opcionesDeQue(tipo: TipoTarea, ctx: ContextoTareas): { clave: string; label: string; grupo?: string; donde: DondeTarea }[] {
+  const ninguna = { clave: SIN, label: tipo === "crm" ? "Sin ficha" : "Sin campaña", donde: { tipo } }
+  return [ninguna, ...gruposDe(tipo, ctx).flatMap((g) => g.opciones.map((o) => ({ ...o, grupo: g.titulo })))]
+}
+
+export function claveDe(d: DondeTarea): string {
   if (d.tipo === "collabs" || d.tipo === "cobros") return d.collabId ?? SIN
   if (d.tipo === "crm") return d.registro ? `${d.registro.tipo}:${d.registro.id}` : SIN
   return SIN

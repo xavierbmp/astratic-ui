@@ -4,33 +4,38 @@ import * as React from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type PlantillaTarea, type PrioridadTarea, type Repeticion, type Tarea } from "@/lib/influencer/modelo"
-import { SIN_TIPO, idNuevo, migasDonde, nuevaTarea, type ContextoTareas } from "@/lib/influencer/tareas"
+import { CircleDashedIcon, ListTodoIcon } from "lucide-react"
+import { cn } from "cn"
+import { LISTA_TIPOS_TAREA, PRIORIDADES_TAREA, TIPOS_TAREA, type DondeTarea, type EtiquetaTarea, type PlantillaTarea, type PrioridadTarea, type Repeticion, type Tarea } from "@/lib/influencer/modelo"
+import { SIN_TIPO, cambiarTipo, idNuevo, migasDonde, nuevaTarea, type ContextoTareas } from "@/lib/influencer/tareas"
 import { lunesDe, sumarDias } from "@/lib/influencer/fechas"
 import { tintFor } from "@/lib/influencer/tints"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect } from "@/components/app/multi-select"
-import { SelectorDeQue, SelectorTipo, etiquetaDeQue } from "@/components/influencer/task-tipo"
-import { PrioridadBandera } from "@/components/influencer/task-cells"
+import { CampoFormulario, Formulario, FormularioCabecera, FormularioCuerpo, FormularioDialog, FormularioPie } from "@/components/app/formulario/formulario-dialog"
+import { SelectorBuscable } from "@/components/app/formulario/selector-buscable"
+import { CampoFecha } from "@/components/app/formulario/campo-fecha"
+import { claveDe, etiquetaDeQue, opcionesDeQue } from "@/components/influencer/task-tipo"
+import { ICONO_TIPO_TAREA, PrioridadBandera } from "@/components/influencer/task-cells"
 import { SelectorRepeticion } from "@/components/influencer/task-repeticion"
 
-const esquema = z.object({
-  titulo: z.string().trim().min(1, "Escribe qué hay que hacer").max(160, "Máximo 160 caracteres"),
-  donde: z.custom<DondeTarea>((v) => !!v && typeof v === "object"),
-  fecha: z.string().optional(),
-  hora: z.string().optional(),
-  fechaLimite: z.string().optional(),
-  prioridad: z.enum(["urgente", "alta", "normal", "baja"]),
-  etiquetas: z.array(z.string()),
-  repetir: z.custom<Repeticion>().optional(),
-  notas: z.string().trim().max(2000, "Máximo 2.000 caracteres").optional(),
-  subtareas: z.array(z.string()),
-})
+// Nada es obligatorio: sin título, «Tarea sin título».
+const esquema = z
+  .object({
+    titulo: z.string().trim().max(160, "Máximo 160 caracteres"),
+    donde: z.custom<DondeTarea>((v) => !!v && typeof v === "object"),
+    fecha: z.string(),
+    hora: z.string(),
+    fechaLimite: z.string(),
+    prioridad: z.enum(["urgente", "alta", "normal", "baja"]),
+    etiquetas: z.array(z.string()),
+    repetir: z.custom<Repeticion>().optional(),
+    notas: z.string().trim().max(2000, "Máximo 2.000 caracteres"),
+    subtareas: z.array(z.string()),
+  })
+  .refine((v) => !v.fechaLimite || !v.fecha || v.fechaLimite >= v.fecha, { message: "Es antes del día en que la haces", path: ["fechaLimite"] })
 
 type Valores = z.infer<typeof esquema>
 
@@ -51,12 +56,20 @@ const notasATexto = (html?: string) =>
         .replace(/&amp;/g, "&")
     : ""
 
+const OPCIONES_TIPO = LISTA_TIPOS_TAREA.map((t) => {
+  const Icono = t === "sin-tipo" ? CircleDashedIcon : ICONO_TIPO_TAREA[t]
+  return { value: t, label: TIPOS_TAREA[t], icono: <Icono className="size-4 text-muted-foreground" /> }
+})
+const OPCIONES_PRIORIDAD = PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label, icono: <PrioridadBandera prioridad={p.id} /> }))
+const esTipo = (v: string) => LISTA_TIPOS_TAREA.find((t) => t === v)
+const esPrioridad = (v: string) => PRIORIDADES_TAREA.find((p) => p.id === v)?.id
+
 /**
- * Nueva tarea, el mismo diálogo en toda la app. Se dice qué hay que hacer y su tipo (la página en
- * la que sale: sin tipo, CRM, Collabs o Cobros) y, debajo, de qué campaña o de qué ficha del CRM
- * es, si es de alguna. Nace sin tipo salvo que se cree desde una página (`dondeInicial`) o desde
- * una ficha, que ya lo deja decidido (`dondeFijo`). Desde una plantilla, llega rellena y con sus
- * subtareas.
+ * Nueva tarea, el mismo formulario de alta en toda la app. Se dice qué hay que hacer y su tipo (la
+ * página en la que sale: sin tipo, CRM, Collabs, Contenido o Cobros) y, al lado, de qué campaña o de
+ * qué ficha del CRM es, si es de alguna. Nace sin tipo salvo que se cree desde una página
+ * (`dondeInicial`) o desde una ficha, que ya lo deja decidido (`dondeFijo`). Desde una plantilla,
+ * llega rellena y con sus subtareas. Nada es obligatorio.
  */
 export function TaskDialog({
   open,
@@ -92,13 +105,13 @@ export function TaskDialog({
     defaultValues: { titulo: "", fecha: "", hora: "", fechaLimite: "", prioridad: "normal", etiquetas: [], repetir: undefined, notas: "", subtareas: [] },
   })
   const { errors } = formState
-  const fecha = useWatch({ control, name: "fecha" })
-  const subtareas = useWatch({ control, name: "subtareas" })
+  const [fecha, subtareas] = useWatch({ control, name: ["fecha", "subtareas"] })
   const donde = useWatch({ control, name: "donde" }) ?? SIN_TIPO
+  const dia = hoy.slice(0, 10)
 
   React.useEffect(() => {
     if (!open) return
-    // La plantilla trae su tipo; la campaña o la ficha se eligen debajo.
+    // La plantilla trae su tipo; la campaña o la ficha se eligen al lado.
     const dondePlantilla: DondeTarea | undefined = plantilla ? { tipo: plantilla.tipo } : undefined
     const fechaInicial = inicial?.fecha ?? ""
     reset({
@@ -116,10 +129,10 @@ export function TaskDialog({
   }, [open, plantilla, dondeFijo, dondeInicial, inicial, reset])
 
   const guardar = (v: Valores) => {
-    const ahora = `${hoy.slice(0, 10)}T${new Date().toTimeString().slice(0, 8)}`
+    const ahora = `${dia}T${new Date().toTimeString().slice(0, 8)}`
     const tarea = nuevaTarea(
       {
-        titulo: v.titulo,
+        titulo: v.titulo || "Tarea sin título",
         donde: v.donde,
         fecha: v.fecha ? (v.hora ? `${v.fecha}T${v.hora}` : v.fecha) : undefined,
         fechaLimite: v.fechaLimite || undefined,
@@ -138,96 +151,111 @@ export function TaskDialog({
   }
 
   const atajos: { label: string; fecha: string }[] = [
-    { label: "Hoy", fecha: hoy.slice(0, 10) },
+    { label: "Hoy", fecha: dia },
     { label: "Mañana", fecha: sumarDias(hoy, 1) },
-    { label: "Lunes que viene", fecha: sumarDias(lunesDe(hoy), 7) },
+    { label: "El lunes", fecha: sumarDias(lunesDe(hoy), 7) },
   ]
+  const etiquetaQue = etiquetaDeQue(donde.tipo)
+  const opcionesQue = etiquetaQue ? opcionesDeQue(donde.tipo, ctx) : []
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[520px]">
-        <DialogHeader>
-          <DialogTitle>{plantilla ? `Nueva tarea: ${plantilla.nombre}` : "Nueva tarea"}</DialogTitle>
-          <DialogDescription>
-            {dondeFijo
-              ? `Es de ${migasDonde(dondeFijo, ctx).map((m) => m.label).join(" › ")} y sale también en Tareas.`
-              : "Con un tipo, sale en esa página además de en Tareas. Sin tipo, solo en Tareas."}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(guardar)} noValidate className="grid gap-4">
-          <Field data-invalid={!!errors.titulo || undefined}>
-            <FieldLabel htmlFor="tarea-titulo">Qué hay que hacer</FieldLabel>
-            <Input id="tarea-titulo" placeholder="Enviar la factura a Lumea" autoFocus aria-invalid={!!errors.titulo} {...register("titulo")} />
-            <FieldError errors={[errors.titulo]} />
-          </Field>
+    <FormularioDialog open={open} onOpenChange={onOpenChange}>
+      <FormularioCabecera
+        icono={ListTodoIcon}
+        titulo={plantilla ? `Nueva tarea: ${plantilla.nombre}` : "Nueva tarea"}
+        descripcion={
+          dondeFijo
+            ? `Es de ${migasDonde(dondeFijo, ctx)
+                .map((m) => m.label)
+                .join(" › ")} y sale también en Tareas.`
+            : "Con un tipo, sale en esa página además de en Tareas. Sin tipo, solo en Tareas."
+        }
+      />
+      <Formulario onSubmit={handleSubmit(guardar)}>
+        <FormularioCuerpo>
+          <CampoFormulario etiqueta="Qué hay que hacer" htmlFor="tarea-titulo" error={errors.titulo?.message}>
+            <Input id="tarea-titulo" placeholder="Enviar la factura a Lumea" aria-invalid={!!errors.titulo} {...register("titulo")} />
+          </CampoFormulario>
+
           {!dondeFijo && (
-            <div className="grid gap-3">
-              <Field>
-                <FieldLabel htmlFor="tarea-tipo">Tipo</FieldLabel>
-                <Controller control={control} name="donde" render={({ field }) => <SelectorTipo id="tarea-tipo" value={field.value ?? SIN_TIPO} onChange={field.onChange} />} />
-              </Field>
-              {etiquetaDeQue(donde.tipo) && (
-                <Field>
-                  <FieldLabel htmlFor="tarea-de-que">{etiquetaDeQue(donde.tipo)}</FieldLabel>
-                  <Controller control={control} name="donde" render={({ field }) => <SelectorDeQue id="tarea-de-que" value={field.value ?? SIN_TIPO} onChange={field.onChange} ctx={ctx} />} />
-                </Field>
+            <>
+              <CampoFormulario etiqueta="Tipo" htmlFor="tarea-tipo" ancho={etiquetaQue ? "mitad" : "completo"}>
+                <SelectorBuscable
+                  id="tarea-tipo"
+                  opciones={OPCIONES_TIPO}
+                  valor={donde.tipo}
+                  onChange={(v) => {
+                    const tipo = esTipo(v)
+                    if (tipo) setValue("donde", cambiarTipo(donde, tipo))
+                  }}
+                  placeholder="Escribe o elige el tipo"
+                  vacio="Ningún tipo se llama así"
+                />
+              </CampoFormulario>
+              {etiquetaQue && (
+                <CampoFormulario etiqueta={etiquetaQue} htmlFor="tarea-de-que" ancho="mitad">
+                  <SelectorBuscable
+                    id="tarea-de-que"
+                    opciones={opcionesQue.map((o) => ({ value: o.clave, label: o.label, detalle: o.grupo }))}
+                    valor={claveDe(donde)}
+                    onChange={(clave) => {
+                      const elegida = opcionesQue.find((o) => o.clave === clave)
+                      if (elegida) setValue("donde", elegida.donde)
+                    }}
+                    placeholder={donde.tipo === "crm" ? "Busca una propuesta, marca o contacto" : "Busca una campaña o una marca"}
+                    vacio="Nada se llama así"
+                  />
+                </CampoFormulario>
               )}
-            </div>
+            </>
           )}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="tarea-fecha">Fecha</FieldLabel>
-              <div className="flex gap-2">
-                <Input id="tarea-fecha" type="date" className="min-w-0 flex-1" {...register("fecha")} />
-                <Input aria-label="Hora" type="time" className="w-28" disabled={!fecha} {...register("hora")} />
-              </div>
-              <div className="flex flex-wrap gap-1">
+
+          <CampoFormulario
+            etiqueta="Día"
+            htmlFor="tarea-fecha"
+            ancho="tercio"
+            accion={
+              <span className="flex gap-0.5">
                 {atajos.map((a) => (
-                  <Button key={a.label} type="button" size="sm" variant={fecha === a.fecha ? "secondary" : "ghost"} className="h-7 px-2 text-xs" onClick={() => setValue("fecha", a.fecha, { shouldDirty: true })}>
+                  <button key={a.label} type="button" onClick={() => setValue("fecha", a.fecha, { shouldDirty: true })} className={cn("rounded px-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground", fecha === a.fecha && "bg-brand-soft text-brand hover:bg-brand-soft hover:text-brand")}>
                     {a.label}
-                  </Button>
+                  </button>
                 ))}
-              </div>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="tarea-limite">Fecha límite</FieldLabel>
-              <Input id="tarea-limite" type="date" {...register("fechaLimite")} />
-              <p className="text-xs text-muted-foreground">La entrega de la marca o tu propio plazo.</p>
-            </Field>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="tarea-prioridad">Prioridad</FieldLabel>
-              <Controller
-                control={control}
-                name="prioridad"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="tarea-prioridad" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRIORIDADES_TAREA.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          <PrioridadBandera prioridad={p.id} conTexto />
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="tarea-repetir">Repetir</FieldLabel>
-              <Controller
-                control={control}
-                name="repetir"
-                render={({ field }) => <SelectorRepeticion id="tarea-repetir" value={field.value} onChange={field.onChange} fecha={fecha || hoy.slice(0, 10)} />}
-              />
-            </Field>
-          </div>
-          <Field>
-            <FieldLabel>Etiquetas</FieldLabel>
+              </span>
+            }
+          >
+            <Controller control={control} name="fecha" render={({ field }) => <CampoFecha id="tarea-fecha" valor={field.value} onChange={field.onChange} hoy={dia} placeholder="Sin día" vaciar={{ texto: "Sin día", onVaciar: () => field.onChange("") }} />} />
+          </CampoFormulario>
+          <CampoFormulario etiqueta="Hora" htmlFor="tarea-hora" ancho="tercio">
+            <Input id="tarea-hora" type="time" disabled={!fecha} {...register("hora")} />
+          </CampoFormulario>
+          <CampoFormulario etiqueta="Fecha límite" htmlFor="tarea-limite" ancho="tercio" error={errors.fechaLimite?.message} ayuda="La entrega de la marca o tu plazo.">
+            <Controller control={control} name="fechaLimite" render={({ field }) => <CampoFecha id="tarea-limite" valor={field.value} onChange={field.onChange} hoy={dia} min={fecha || undefined} placeholder="Sin límite" invalido={!!errors.fechaLimite} vaciar={{ texto: "Sin límite", onVaciar: () => field.onChange("") }} />} />
+          </CampoFormulario>
+
+          <CampoFormulario etiqueta="Prioridad" htmlFor="tarea-prioridad" ancho="mitad">
+            <Controller
+              control={control}
+              name="prioridad"
+              render={({ field }) => (
+                <SelectorBuscable
+                  id="tarea-prioridad"
+                  opciones={OPCIONES_PRIORIDAD}
+                  valor={field.value}
+                  onChange={(v) => {
+                    const prioridad = esPrioridad(v)
+                    if (prioridad) field.onChange(prioridad)
+                  }}
+                  vacio="Ninguna prioridad se llama así"
+                />
+              )}
+            />
+          </CampoFormulario>
+          <CampoFormulario etiqueta="Repetir" htmlFor="tarea-repetir" ancho="mitad">
+            <Controller control={control} name="repetir" render={({ field }) => <SelectorRepeticion id="tarea-repetir" value={field.value} onChange={field.onChange} fecha={fecha || dia} className="h-10 rounded-md" />} />
+          </CampoFormulario>
+
+          <CampoFormulario etiqueta="Etiquetas">
             <Controller
               control={control}
               name="etiquetas"
@@ -237,6 +265,7 @@ export function TaskDialog({
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Grabar, editar, gestiones…"
+                  className="min-h-10 rounded-md"
                   onCreate={
                     onCrearEtiqueta
                       ? async (texto) => {
@@ -248,33 +277,32 @@ export function TaskDialog({
                 />
               )}
             />
-          </Field>
-          <Field data-invalid={!!errors.notas || undefined}>
-            <FieldLabel htmlFor="tarea-notas">Notas</FieldLabel>
-            <Textarea id="tarea-notas" rows={2} placeholder="Opcional" {...register("notas")} />
-            <FieldError errors={[errors.notas]} />
-          </Field>
+          </CampoFormulario>
+          <CampoFormulario etiqueta="Notas" htmlFor="tarea-notas" error={errors.notas?.message}>
+            <Textarea id="tarea-notas" rows={2} placeholder="Lo que necesitas para hacerla" aria-invalid={!!errors.notas} {...register("notas")} />
+          </CampoFormulario>
           {subtareas.length > 0 && (
-            <div className="grid gap-1.5">
-              <span className="text-sm font-medium">Subtareas</span>
-              <ul className="grid gap-1">
+            <CampoFormulario etiqueta="Subtareas">
+              <ul className="grid gap-1.5">
                 {subtareas.map((_, i) => (
                   <li key={i}>
-                    <Input aria-label={`Subtarea ${i + 1}`} className="h-8 text-sm" {...register(`subtareas.${i}` as const)} />
+                    <Input aria-label={`Subtarea ${i + 1}`} className="h-9 rounded-md text-sm" {...register(`subtareas.${i}` as const)} />
                   </li>
                 ))}
               </ul>
-            </div>
+            </CampoFormulario>
           )}
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit">Crear tarea</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </FormularioCuerpo>
+        <FormularioPie>
+          <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button type="submit" size="lg">
+            Crear tarea
+          </Button>
+        </FormularioPie>
+      </Formulario>
+    </FormularioDialog>
   )
 }
 

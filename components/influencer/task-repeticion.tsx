@@ -212,12 +212,14 @@ export function SelectorRepeticion({
   fecha,
   variant = "outline",
   id,
+  className,
 }: {
   value?: Repeticion
   onChange: (r: Repeticion | undefined) => void
   fecha: string
   variant?: "outline" | "inline"
   id?: string
+  className?: string
 }) {
   const autoEdit = React.useContext(InlineAutoEdit)
   const [abierto, setAbierto] = React.useState(autoEdit)
@@ -236,7 +238,7 @@ export function SelectorRepeticion({
             <span className={cn("truncate text-sm", !value && "text-muted-foreground")}>{texto}</span>
           </button>
         ) : (
-          <Button type="button" id={id} variant="outline" className="w-full justify-between font-normal">
+          <Button type="button" id={id} variant="outline" className={cn("w-full justify-between font-normal", className)}>
             <span className="flex min-w-0 items-center gap-1.5">
               {value && <RepeatIcon className="text-muted-foreground" />}
               <span className="truncate">{texto}</span>
