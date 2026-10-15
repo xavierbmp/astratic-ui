@@ -2,8 +2,7 @@
 
 import * as React from "react"
 import { toast } from "sonner"
-import { ArrowLeftIcon, ArrowRightIcon, FileSpreadsheetIcon, TriangleAlertIcon, UploadIcon } from "lucide-react"
-import { cn } from "cn"
+import { ArrowLeftIcon, ArrowRightIcon, FileSpreadsheetIcon, TriangleAlertIcon } from "lucide-react"
 import type { DefCampo, ValorCampo } from "@/lib/base/campos"
 import { MAXIMO_FILAS_IMPORTAR, camposImportables, filasParaImportar, leerCsv, limpiarTabla, sugerirMapeo, type Tabla } from "@/lib/base/importar"
 import { Button } from "@/components/ui/button"
@@ -12,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { CampoFormulario, Formulario, FormularioCabecera, FormularioCuerpo, FormularioDialog, FormularioPie } from "@/components/app/formulario/formulario-dialog"
 import { SelectorBuscable } from "@/components/app/formulario/selector-buscable"
 import { ICONO_TIPO } from "@/components/app/base/apariencia"
+import { ZonaSubida } from "@/components/app/zona-subida"
 
 const EXTENSIONES_EXCEL = /\.(xlsx|xlsm)$/i
 const ACEPTA = ".csv,.tsv,.txt,.xlsx,.xlsm,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -61,7 +61,6 @@ export function ImportarDialog<T>({
   const [mapeo, setMapeo] = React.useState<(string | null)[]>([])
   const [pegado, setPegado] = React.useState("")
   const [leyendo, setLeyendo] = React.useState(false)
-  const [encima, setEncima] = React.useState(false)
   const importables = React.useMemo(() => camposImportables(campos), [campos])
 
   const cerrar = (o: boolean) => {
@@ -123,26 +122,15 @@ export function ImportarDialog<T>({
         <FormularioCuerpo>
           {!tabla ? (
             <>
-              <label
-                onDragOver={(e) => {
-                  e.preventDefault()
-                  setEncima(true)
-                }}
-                onDragLeave={() => setEncima(false)}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  setEncima(false)
-                  void abrirArchivo(e.dataTransfer.files[0])
-                }}
-                className={cn("col-span-6 flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-4 py-10 text-center transition-colors hover:bg-muted/50", encima && "border-brand bg-brand-soft")}
-              >
-                <span className="grid size-10 place-items-center rounded-full bg-muted">
-                  <UploadIcon className="size-5 text-muted-foreground" />
-                </span>
-                <span className="text-sm font-medium">{leyendo ? "Leyendo…" : "Arrastra aquí el archivo o pulsa para elegirlo"}</span>
-                <span className="text-xs text-muted-foreground">Excel (.xlsx) o CSV, con una fila por {objeto.singular}. Hasta {MAXIMO_FILAS_IMPORTAR.toLocaleString("es-ES")} filas.</span>
-                <input type="file" accept={ACEPTA} className="sr-only" disabled={leyendo} onChange={(e) => void abrirArchivo(e.target.files?.[0])} />
-              </label>
+              <ZonaSubida
+                onArchivos={([archivo]) => void abrirArchivo(archivo)}
+                accept={ACEPTA}
+                multiple={false}
+                desactivada={leyendo}
+                titulo={leyendo ? "Leyendo…" : "Arrastra aquí el archivo o pulsa para elegirlo"}
+                ayuda={`Excel (.xlsx) o CSV, con una fila por ${objeto.singular}. Hasta ${MAXIMO_FILAS_IMPORTAR.toLocaleString("es-ES")} filas.`}
+                className="col-span-6 py-10"
+              />
               <CampoFormulario etiqueta="O pégalo" htmlFor="imp-pegado" ayuda="Copia las celdas en Excel, Numbers o Google Sheets (con la fila de los nombres) y pégalas aquí.">
                 <Textarea id="imp-pegado" rows={4} value={pegado} onChange={(e) => setPegado(e.target.value)} placeholder={"Nombre\tEmail\tTeléfono\nAna Ruiz\tana@marca.com\t600 000 000"} className="font-mono text-xs" />
                 {pegado.trim() && (

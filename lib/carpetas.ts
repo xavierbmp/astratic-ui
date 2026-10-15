@@ -1,20 +1,22 @@
-// Las carpetas del directorio de Contenidos como un árbol: carpetas dentro de carpetas, en el orden
-// que ella les da. Se guardan en una lista plana: cada una sabe quién es su madre y su `orden` entre
-// sus hermanas. Pura: sin datos ni React.
-import type { Carpeta } from "@/lib/influencer/modelo"
+// Carpetas en árbol: carpetas dentro de carpetas, en el orden que les da quien las usa. Se guardan
+// en una lista plana: cada una sabe quién es su madre y su `orden` entre sus hermanas. Pura: sin
+// datos ni React. Lo pinta `ArbolCarpetas`.
+
+/** Lo mínimo de una carpeta; cada portal añade lo suyo (un color, un icono). */
+export type CarpetaArbol = { id: string; nombre: string; padreId?: string; orden: number }
 
 /** Las que cuelgan directamente de una carpeta (o las de arriba del todo, sin `padreId`), en su orden. */
-export function hijasDe(carpetas: Carpeta[], padreId?: string): Carpeta[] {
+export function hijasDe<C extends CarpetaArbol>(carpetas: C[], padreId?: string): C[] {
   return carpetas.filter((c) => c.padreId === padreId).sort((a, b) => a.orden - b.orden)
 }
 
 /** El `orden` de una carpeta nueva al final de las hijas de `padreId`. */
-export function siguienteOrden(carpetas: Carpeta[], padreId?: string): number {
+export function siguienteOrden<C extends CarpetaArbol>(carpetas: C[], padreId?: string): number {
   return Math.max(-1, ...hijasDe(carpetas, padreId).map((c) => c.orden)) + 1
 }
 
 /** Las carpetas con `orden` puesto según las listas dadas (madre → hijas en orden); las que no cambian, las mismas. */
-function conOrden(carpetas: Carpeta[], grupos: Carpeta[][], cambiada?: Carpeta): Carpeta[] {
+function conOrden<C extends CarpetaArbol>(carpetas: C[], grupos: C[][], cambiada?: C): C[] {
   const orden = new Map(grupos.flatMap((g) => g.map((c, n) => [c.id, n] as const)))
   return carpetas.map((c) => {
     const base = c.id === cambiada?.id ? cambiada : c
@@ -24,7 +26,7 @@ function conOrden(carpetas: Carpeta[], grupos: Carpeta[][], cambiada?: Carpeta):
 }
 
 /** La carpeta y todas las que lleva dentro, a cualquier profundidad. */
-export function conDescendientes(carpetas: Carpeta[], id: string): Set<string> {
+export function conDescendientes<C extends CarpetaArbol>(carpetas: C[], id: string): Set<string> {
   const ids = new Set([id])
   // Cada vuelta baja un nivel; para cuando un nivel ya no añade ninguna.
   for (let tamano = 0; tamano !== ids.size; ) {
@@ -35,8 +37,8 @@ export function conDescendientes(carpetas: Carpeta[], id: string): Set<string> {
 }
 
 /** El camino desde arriba hasta la carpeta: [Navidad, Regalos]. Vacío si no existe. */
-export function rutaDeCarpeta(carpetas: Carpeta[], id: string): Carpeta[] {
-  const ruta: Carpeta[] = []
+export function rutaDeCarpeta<C extends CarpetaArbol>(carpetas: C[], id: string): C[] {
+  const ruta: C[] = []
   let actual = carpetas.find((c) => c.id === id)
   while (actual && !ruta.includes(actual)) {
     ruta.unshift(actual)
@@ -47,15 +49,15 @@ export function rutaDeCarpeta(carpetas: Carpeta[], id: string): Carpeta[] {
 }
 
 /** «Navidad / Regalos»: el nombre con sus madres, para los selectores y los filtros. */
-export function nombreCompleto(carpetas: Carpeta[], id: string): string {
+export function nombreCompleto<C extends CarpetaArbol>(carpetas: C[], id: string): string {
   return rutaDeCarpeta(carpetas, id)
     .map((c) => c.nombre)
     .join(" / ")
 }
 
 /** Todas en el orden del árbol (cada madre seguida de sus hijas), con su nivel: para pintar el árbol o un selector. */
-export function carpetasEnArbol(carpetas: Carpeta[], abiertas?: Set<string>): { carpeta: Carpeta; nivel: number; tieneHijas: boolean }[] {
-  const lista: { carpeta: Carpeta; nivel: number; tieneHijas: boolean }[] = []
+export function carpetasEnArbol<C extends CarpetaArbol>(carpetas: C[], abiertas?: Set<string>): { carpeta: C; nivel: number; tieneHijas: boolean }[] {
+  const lista: { carpeta: C; nivel: number; tieneHijas: boolean }[] = []
   const bajar = (padreId: string | undefined, nivel: number) => {
     for (const c of hijasDe(carpetas, padreId)) {
       const tieneHijas = carpetas.some((h) => h.padreId === c.id)
@@ -68,7 +70,7 @@ export function carpetasEnArbol(carpetas: Carpeta[], abiertas?: Set<string>): { 
 }
 
 /** Las carpetas para un selector o un filtro, en orden de árbol y con su nombre completo. */
-export function opcionesDeCarpetas(carpetas: Carpeta[]): { value: string; label: string }[] {
+export function opcionesDeCarpetas<C extends CarpetaArbol>(carpetas: C[]): { value: string; label: string }[] {
   return carpetasEnArbol(carpetas).map(({ carpeta }) => ({ value: carpeta.id, label: nombreCompleto(carpetas, carpeta.id) }))
 }
 
@@ -80,7 +82,7 @@ export type DestinoCarpeta = { padreId?: string; antesDe?: string }
  * Renumera el `orden` de las hermanas que cambian. Devuelve la lista nueva, o `null` si el destino
  * está dentro de ella misma.
  */
-export function moverCarpeta(carpetas: Carpeta[], id: string, destino: DestinoCarpeta): Carpeta[] | null {
+export function moverCarpeta<C extends CarpetaArbol>(carpetas: C[], id: string, destino: DestinoCarpeta): C[] | null {
   const carpeta = carpetas.find((c) => c.id === id)
   if (!carpeta) return null
   if (destino.padreId && conDescendientes(carpetas, id).has(destino.padreId)) return null
@@ -94,7 +96,7 @@ export function moverCarpeta(carpetas: Carpeta[], id: string, destino: DestinoCa
 }
 
 /** Al borrar una carpeta, lo que llevaba dentro (carpetas y apuntes) sube a su madre (al final de sus hijas), o arriba del todo. */
-export function borrarCarpeta(carpetas: Carpeta[], id: string): { carpetas: Carpeta[]; destino?: string } {
+export function borrarCarpeta<C extends CarpetaArbol>(carpetas: C[], id: string): { carpetas: C[]; destino?: string } {
   const destino = carpetas.find((c) => c.id === id)?.padreId
   const quedan = carpetas.filter((c) => c.id !== id)
   const suben = hijasDe(quedan, id).map((c) => ({ ...c, padreId: destino }))

@@ -1,49 +1,13 @@
 // Fechas del workspace: todo se compara por día (AAAA-MM-DD), sin horas ni zonas.
 
-import { lunesDe, soloFecha, sumarDias } from "@/lib/filtros/fechas"
-
-// Las de comparar por día son las mismas que usan filtros y vistas: viven en `lib/filtros/fechas`.
+// Las de comparar por día son las mismas que usan filtros y vistas (`lib/filtros/fechas`), y las de
+// pintar calendarios, las del kit (`lib/base/calendario`).
 export { diasEntre, lunesDe, soloFecha, sumarDias } from "@/lib/filtros/fechas"
+export { casillasDelMes, diaLargo, mismoMes, moverPeriodo, nombreMes, periodoCalendario } from "@/lib/base/calendario"
 
-/** Las 42 casillas (6 semanas, de lunes a domingo) del mes al que pertenece la fecha. */
-export function casillasDelMes(fecha: string) {
-  const primero = `${fecha.slice(0, 7)}-01`
-  const inicio = lunesDe(primero)
-  return Array.from({ length: 42 }, (_, i) => sumarDias(inicio, i))
-}
-
-export function mismoMes(a: string, b: string) {
-  return a.slice(0, 7) === b.slice(0, 7)
-}
-
+/** El día 1 del mes `meses` meses más allá (o más acá) del de la fecha. */
 export function sumarMeses(fecha: string, meses: number) {
   const d = new Date(`${fecha.slice(0, 7)}-01T12:00:00`)
   d.setMonth(d.getMonth() + meses)
   return d.toISOString().slice(0, 10)
-}
-
-const mesLargo = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" })
-
-/** «octubre de 2026». */
-export function nombreMes(fecha: string) {
-  return mesLargo.format(new Date(`${fecha.slice(0, 7)}-01T12:00:00`))
-}
-
-const diaSemana = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" })
-
-/** «martes, 6 de octubre». */
-export function diaLargo(fecha: string) {
-  return diaSemana.format(new Date(`${soloFecha(fecha)}T12:00:00`))
-}
-
-/** Los días que enseña un calendario (las 6 semanas del mes o los 7 de la semana), con su título. */
-export function periodoCalendario(ancla: string, modo: "mes" | "semana") {
-  const dias = modo === "mes" ? casillasDelMes(ancla) : Array.from({ length: 7 }, (_, i) => sumarDias(lunesDe(ancla), i))
-  const titulo = modo === "mes" ? nombreMes(ancla) : `Semana del ${diaLargo(lunesDe(ancla)).replace(/^lunes, /, "")}`
-  return { dias, titulo, desde: dias[0], hasta: dias[dias.length - 1] }
-}
-
-/** El mismo día un mes o una semana más allá (o más acá, con `n` negativo). */
-export function moverPeriodo(ancla: string, modo: "mes" | "semana", n: number) {
-  return modo === "mes" ? sumarMeses(ancla, n) : sumarDias(ancla, 7 * n)
 }

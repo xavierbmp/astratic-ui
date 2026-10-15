@@ -2,7 +2,7 @@
 // Pura: sale de la fecha de publicación de cada pieza, como las tareas automáticas.
 import type { Pieza } from "@/lib/influencer/modelo"
 import { hitosDePieza, type TipoHito } from "@/lib/influencer/collabs"
-import { diasEntre, sumarDias } from "@/lib/influencer/fechas"
+import { sumarDias } from "@/lib/influencer/fechas"
 
 /** Días que se dan para escribir el guion antes de su entrega. */
 const DIAS_ESCRIBIR = 4
@@ -42,14 +42,6 @@ export function fasesDePieza(p: Pieza): Fase[] {
     const label = tipo === "grabacion" && p.tipo !== "video" ? "Fotos" : tipo === "guion" && p.tipo === "texto" ? "Texto" : FASES[tipo]
     return [{ tipo, label, desde, hasta: h.fecha, hecha: h.hecho }]
   })
-}
-
-/** De qué día a qué día se pinta un cronograma: todas las fechas con un margen, y siempre con hoy dentro. */
-export function rangoDeFechas(fechas: string[], hoy: string, margen = 3) {
-  const todas = [...fechas, hoy].sort()
-  const desde = sumarDias(todas[0], -margen)
-  const hasta = sumarDias(todas[todas.length - 1], margen)
-  return { desde, hasta, dias: diasEntre(desde, hasta) + 1 }
 }
 
 /** Mueve la publicación (y con ella todas sus fases y la fecha del guion) unos días. */

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { conDato, datosDelBloque, hojasDelMediaKit, seVe } from "@/lib/influencer/media-kit"
+import { datosDelBloque, hojasDelMediaKit } from "@/lib/influencer/media-kit"
+import { conDato, seVe } from "@/lib/bloques"
 import { demoMediaKit, demoPerfil } from "@/lib/influencer/demo-data"
 
 describe("media kit", () => {

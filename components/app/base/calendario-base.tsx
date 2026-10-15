@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/app/states"
 import { textoDeValor, type ColorOpcion, type DefCampo, type ValorCampo } from "@/lib/base/campos"
 import { DIAS_SEMANA, mesDe, nombreMes, semanasDelMes, sumarMeses } from "@/lib/base/calendario"
 import { CLASE_FUERTE } from "@/components/app/base/apariencia"
+import { NumeroDia } from "@/components/app/agenda"
 
 /** Los registros que caben en un día antes del «+N más». */
 const EN_EL_DIA = 3
@@ -131,13 +132,11 @@ export function CalendarioBase<T>({ campo, principal, registros, getId, hoy, col
   )
 }
 
-const formatoDia = (dia: string) => Number(dia.slice(8, 10))
-
 function Dia({ dia, fuera, hoy, children }: { dia: string; fuera: boolean; hoy: boolean; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id: dia })
   return (
     <div ref={setNodeRef} className={cn("flex min-w-0 flex-col gap-1 border-r border-b p-1.5 last:border-r-0", fuera && "bg-muted/40", isOver && "bg-brand-soft")}>
-      <span className={cn("flex size-6 flex-none items-center justify-center rounded-full text-xs tabular-nums", fuera ? "text-muted-foreground" : "text-foreground", hoy && "bg-brand font-semibold text-brand-foreground")}>{formatoDia(dia)}</span>
+      <NumeroDia dia={dia} hoy={hoy} fuera={fuera} />
       {children}
     </div>
   )

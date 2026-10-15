@@ -5,32 +5,57 @@ import { UploadCloudIcon } from "lucide-react"
 import { cn } from "cn"
 
 /**
- * Zona para soltar o elegir archivos. En el portal, cada archivo sube directo a R2 con una URL
- * firmada y por partes (aguanta cortes); aquí se queda en el navegador.
+ * Zona para soltar o elegir archivos: toda subida de archivos del kit pasa por aquí (importar una
+ * hoja, adjuntar imágenes, subir una versión o una factura). Se pulsa o se le suelta encima; quien la
+ * usa sube los archivos (en un portal, directos a su almacenamiento con una URL firmada).
  */
-export function ZonaSubida({ onArchivos, accept, multiple = true, titulo = "Arrastra aquí los archivos o elígelos", ayuda, compacta, className }: { onArchivos: (archivos: File[]) => void; accept?: string; multiple?: boolean; titulo?: string; ayuda?: string; compacta?: boolean; className?: string }) {
+export function ZonaSubida({
+  onArchivos,
+  accept,
+  multiple = true,
+  titulo = "Arrastra aquí los archivos o elígelos",
+  ayuda,
+  compacta,
+  desactivada,
+  className,
+}: {
+  onArchivos: (archivos: File[]) => void
+  accept?: string
+  multiple?: boolean
+  titulo?: string
+  ayuda?: string
+  compacta?: boolean
+  /** Mientras lee o cuando ya no caben más: ni se pulsa ni recibe. */
+  desactivada?: boolean
+  className?: string
+}) {
   const entrada = React.useRef<HTMLInputElement>(null)
   const [encima, setEncima] = React.useState(false)
+  const elegir = () => !desactivada && entrada.current?.click()
   return (
     <div
-      data-slot="ws-zona-subida"
+      data-slot="zona-subida"
       role="button"
-      tabIndex={0}
-      onClick={() => entrada.current?.click()}
+      tabIndex={desactivada ? -1 : 0}
+      aria-disabled={desactivada || undefined}
+      onClick={elegir}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault()
-          entrada.current?.click()
+          elegir()
         }
       }}
       onDragOver={(e) => {
+        if (desactivada) return
         e.preventDefault()
         setEncima(true)
       }}
       onDragLeave={() => setEncima(false)}
       onDrop={(e) => {
-        e.preventDefault()
         setEncima(false)
+        if (desactivada) return
+        // Lo que se suelta aquí es de la zona: quien la contiene lo sabe por `isDefaultPrevented()`.
+        e.preventDefault()
         const archivos = Array.from(e.dataTransfer.files)
         if (archivos.length) onArchivos(multiple ? archivos : archivos.slice(0, 1))
       }}
@@ -38,6 +63,7 @@ export function ZonaSubida({ onArchivos, accept, multiple = true, titulo = "Arra
         "flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-control text-center transition-colors outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50",
         compacta ? "px-3 py-4" : "px-4 py-8",
         encima && "border-brand bg-brand-soft",
+        desactivada && "pointer-events-none opacity-50",
         className,
       )}
     >
@@ -49,6 +75,7 @@ export function ZonaSubida({ onArchivos, accept, multiple = true, titulo = "Arra
         type="file"
         accept={accept}
         multiple={multiple}
+        disabled={desactivada}
         className="hidden"
         aria-label={titulo}
         onChange={(e) => {

@@ -4,10 +4,11 @@
 // lienzos marcados sobre la página. Se reducen en el navegador antes de enviarlas: un reporte pesa poco.
 
 import * as React from "react"
-import { ImagePlusIcon, PencilRulerIcon, XIcon } from "lucide-react"
+import { PencilRulerIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { ZonaSubida } from "@/components/app/zona-subida"
 
 export type ReportRect = { x: number; y: number; width: number; height: number }
 
@@ -66,7 +67,7 @@ async function shrinkImage(file: Blob): Promise<string> {
 }
 
 /** Las imágenes de un archivo, del portapapeles o de lo que se arrastra. */
-export function imageFiles(list: FileList | null | undefined): File[] {
+export function imageFiles(list: FileList | File[] | null | undefined): File[] {
   return Array.from(list ?? []).filter((f) => f.type.startsWith("image/"))
 }
 
@@ -128,7 +129,6 @@ export function AttachmentsField({
   /** Abre el lienzo; sin ella no se ofrece. */
   onCanvas?: () => void
 }) {
-  const input = React.useRef<HTMLInputElement>(null)
   const { items, addFiles, remove } = attachments
   const full = items.length >= MAX_ATTACHMENTS
 
@@ -160,34 +160,22 @@ export function AttachmentsField({
           ))}
         </ul>
       )}
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" disabled={full} onClick={() => input.current?.click()}>
-          <ImagePlusIcon /> Adjuntar imagen
-        </Button>
-        {onCanvas && (
-          <Button type="button" variant="outline" disabled={full} onClick={onCanvas}>
+      <ZonaSubida
+        compacta
+        accept="image/*"
+        desactivada={full}
+        onArchivos={(archivos) => void addFiles(imageFiles(archivos))}
+        titulo={full ? `Ya hay ${MAX_ATTACHMENTS}, el máximo` : "Arrastra aquí una imagen o elígela"}
+        ayuda={full ? "Quita alguna para añadir otra." : "También puedes pegar una captura con ⌘V."}
+      />
+      {onCanvas && (
+        <div className="flex flex-col gap-1">
+          <Button type="button" variant="outline" disabled={full} onClick={onCanvas} className="w-fit">
             <PencilRulerIcon /> Abrir el lienzo
           </Button>
-        )}
-      </div>
-      <p className="text-xs text-muted-foreground">
-        {full
-          ? `Ya hay ${MAX_ATTACHMENTS}, el máximo. Quita alguna para añadir otra.`
-          : onCanvas
-            ? "Pega una captura con ⌘V o arrástrala aquí. En el lienzo mueves, cambias de tamaño o quitas bloques de la pantalla y dibujas encima."
-            : "También puedes pegar una captura con ⌘V o arrastrarla aquí."}
-      </p>
-      <input
-        ref={input}
-        type="file"
-        accept="image/*"
-        multiple
-        hidden
-        onChange={(e) => {
-          void addFiles(imageFiles(e.target.files))
-          e.target.value = ""
-        }}
-      />
+          <p className="text-xs text-muted-foreground">En el lienzo mueves, cambias de tamaño o quitas bloques de la pantalla y dibujas encima.</p>
+        </div>
+      )}
     </div>
   )
 }

@@ -8,7 +8,7 @@ import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useOrigen } from "@/components/influencer/navegador"
+import { useOrigen } from "@/hooks/use-origen"
 
 type Envio = {
   /** Ruta del enlace, sin dominio: `/revisar/rv-…`. */
@@ -17,22 +17,23 @@ type Envio = {
   mensaje: string
   asunto: string
   email?: string
-  /** Texto del botón que abre el enlace como lo verá la marca. */
+  /** Texto del botón que abre el enlace como lo verá quien lo recibe. */
   verComo?: string
 }
 
 /**
- * Un enlace sin cuenta para la marca, listo para mandar: copiar, WhatsApp, email desde su correo y
- * abrirlo como lo verá ella. El dominio se añade al copiar (la ruta se pinta igual en servidor y cliente).
+ * Un enlace sin cuenta para alguien de fuera (un cliente, una marca), listo para mandar: copiar,
+ * WhatsApp, email desde el correo de quien lo manda y abrirlo como lo verá quien lo recibe. El
+ * dominio se añade al copiar (la ruta se pinta igual en servidor y cliente).
  */
-export function CompartirEnlace({ ruta, mensaje, asunto, email, verComo = "Ver como la marca", nota, className }: Envio & { nota?: React.ReactNode; className?: string }) {
+export function CompartirEnlace({ ruta, mensaje, asunto, email, verComo = "Abrir el enlace", nota, className }: Envio & { nota?: React.ReactNode; className?: string }) {
   const origen = useOrigen()
   const completo = `${origen}${ruta}`
   const texto = `${mensaje} ${completo}`
   return (
-    <div data-slot="ws-compartir-enlace" className={cn("flex flex-col gap-2.5", className)}>
+    <div data-slot="compartir-enlace" className={cn("flex flex-col gap-2.5", className)}>
       <div className="flex items-center gap-2">
-        <Input readOnly value={completo} onFocus={(e) => e.currentTarget.select()} className="h-8 font-mono text-xs" aria-label="Enlace para la marca" />
+        <Input readOnly value={completo} onFocus={(e) => e.currentTarget.select()} className="h-8 font-mono text-xs" aria-label="Enlace para compartir" />
         <Button
           type="button"
           variant="outline"

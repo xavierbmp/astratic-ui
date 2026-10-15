@@ -6,7 +6,7 @@ import { ESTADOS_IDEA_A_MANO, FORMATOS, type Apunte, type Carpeta, type Contenid
 import { SIN_VALOR } from "@/lib/vistas/core"
 import { diasEntre } from "@/lib/influencer/fechas"
 import { textoPlano } from "@/lib/influencer/guion"
-import { conDescendientes } from "@/lib/influencer/carpetas"
+import { conDescendientes } from "@/lib/carpetas"
 
 /** Con cuántos días de margen se avisa de que una idea caduca. */
 export const DIAS_AVISO_CADUCA = 3

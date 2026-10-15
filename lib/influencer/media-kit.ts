@@ -1,5 +1,6 @@
 // El media kit: sus cifras, qué bloques se enseñan y cómo se reparten en hojas A4.
 import { FORMATOS, nombrePlataforma, type BloqueMediaKit, type MediaKit, type Perfil } from "@/lib/influencer/modelo"
+import { bloquesVisibles as visibles, type DatoBloque } from "@/lib/bloques"
 
 /**
  * Alto aproximado de cada bloque en la hoja (px a tamaño real, con su título). Sirve para repartir
@@ -21,7 +22,7 @@ const ALTO_HOJA = 960
 
 /** Los bloques visibles en su orden; sin tarifas si la propuesta va sin precios. */
 export function bloquesVisibles(kit: MediaKit, opciones?: { conPrecios?: boolean }) {
-  return kit.bloques.filter((b) => b.visible && !(b.id === "tarifas" && opciones?.conPrecios === false)).map((b) => b.id)
+  return visibles(kit).filter((b) => !(b === "tarifas" && opciones?.conPrecios === false))
 }
 
 /** Los bloques repartidos en hojas, en orden y sin partir ninguno. */
@@ -50,14 +51,11 @@ export function cifrasDelPerfil(perfil: Perfil) {
   }
 }
 
-/** Algo que se enseña o se esconde dentro de un bloque: su clave «bloque.dato» y su nombre. */
-export type DatoMediaKit = { clave: string; label: string }
-
 /**
  * Lo que se puede esconder dentro de cada bloque (Xavier, 2026-10-14: «cada bloque ocultable y dentro de cada bloque,
  * info específica»): los datos fijos y, en redes, destacados, marcas y tarifas, cada elemento suyo.
  */
-export function datosDelBloque(bloque: BloqueMediaKit, perfil: Perfil, kit: MediaKit, marcasTrabajadas: string[]): DatoMediaKit[] {
+export function datosDelBloque(bloque: BloqueMediaKit, perfil: Perfil, kit: MediaKit, marcasTrabajadas: string[]): DatoBloque[] {
   switch (bloque) {
     case "portada":
       return [
@@ -100,24 +98,4 @@ export function datosDelBloque(bloque: BloqueMediaKit, perfil: Perfil, kit: Medi
         { clave: "contacto.sello", label: "Sello de Astratic" },
       ]
   }
-}
-
-/** Si un dato de un bloque se enseña. */
-export const seVe = (kit: MediaKit, clave: string) => !kit.ocultos?.includes(clave)
-
-/** El kit con un dato enseñado o escondido. */
-export function conDato(kit: MediaKit, clave: string, visible: boolean): MediaKit {
-  const ocultos = (kit.ocultos ?? []).filter((c) => c !== clave)
-  return { ...kit, ocultos: visible ? ocultos : [...ocultos, clave] }
-}
-
-/** Mueve un bloque de sitio (arrastrar en el editor). */
-export function moverBloque(kit: MediaKit, desde: BloqueMediaKit, hasta: BloqueMediaKit): MediaKit {
-  const i = kit.bloques.findIndex((b) => b.id === desde)
-  const j = kit.bloques.findIndex((b) => b.id === hasta)
-  if (i === -1 || j === -1 || i === j) return kit
-  const bloques = [...kit.bloques]
-  const [movido] = bloques.splice(i, 1)
-  bloques.splice(j, 0, movido)
-  return { ...kit, bloques }
 }

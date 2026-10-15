@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { borrarCarpeta, carpetasEnArbol, conDescendientes, hijasDe, moverCarpeta, nombreCompleto, opcionesDeCarpetas, rutaDeCarpeta, siguienteOrden } from "@/lib/influencer/carpetas"
+import { borrarCarpeta, carpetasEnArbol, conDescendientes, hijasDe, moverCarpeta, nombreCompleto, opcionesDeCarpetas, rutaDeCarpeta, siguienteOrden } from "@/lib/carpetas"
 import type { Carpeta } from "@/lib/influencer/modelo"
 
 const k = (id: string, orden: number, padreId?: string): Carpeta => ({ id, nombre: id.toUpperCase(), tint: "mint", padreId, orden })

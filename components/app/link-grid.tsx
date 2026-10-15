@@ -90,7 +90,7 @@ export function LinkGrid({
     <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={links.map((l) => l.id)} strategy={rectSortingStrategy}>
-          <ul data-slot="ws-link-grid" className={cn("grid grid-cols-4 gap-2", className)}>
+          <ul data-slot="link-grid" className={cn("grid grid-cols-4 gap-2", className)}>
             {links.map((link) => (
               <LinkTile
                 key={link.id}
@@ -299,7 +299,7 @@ export function LinkRow({
           <PlusIcon /> Añadir enlace
         </Button>
       ) : (
-        <ul data-slot="ws-link-row" aria-label="Mis enlaces" className={cn("flex flex-wrap items-center justify-end gap-1.5", className)}>
+        <ul data-slot="link-row" aria-label="Mis enlaces" className={cn("flex flex-wrap items-center justify-end gap-1.5", className)}>
           {visibles.map((link) => (
             <li key={link.id}>
               <Tooltip>

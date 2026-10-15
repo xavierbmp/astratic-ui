@@ -300,7 +300,8 @@ export function ReportButton({
           onDrop={(e) => {
             setDropping(false)
             const files = imageFiles(e.dataTransfer.files)
-            if (tab !== "new" || !files.length) return
+            // Lo soltado sobre la zona de las imágenes ya lo ha recogido ella.
+            if (tab !== "new" || !files.length || e.isDefaultPrevented()) return
             e.preventDefault()
             void attachments.addFiles(files)
           }}

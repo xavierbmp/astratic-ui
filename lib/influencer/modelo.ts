@@ -5,6 +5,8 @@ import type { StatusTone } from "@/lib/status"
 import type { Tint } from "@/lib/influencer/tints"
 import type { SocialNetwork } from "@/components/app/social-icons"
 import type { ValorCampo } from "@/lib/base/campos"
+import type { Ancla, ArchivoRevision, Mensaje, NotaRevision } from "@/lib/revision-notas"
+import type { CarpetaArbol } from "@/lib/carpetas"
 
 /** Un estado con su etiqueta y el tono de `StatusBadge`. */
 export type Estado<T extends string> = { id: T; label: string; tone: StatusTone }
@@ -422,37 +424,16 @@ export const ESTADOS_VERSION: Estado<EstadoVersion>[] = [
 ]
 
 /** Dónde va una nota: una cita del guion, un segundo del vídeo o un punto de una foto (en %). */
-export type AnclaNota =
-  | { tipo: "texto"; cita: string }
-  | { tipo: "segundo"; segundo: number }
-  | { tipo: "punto"; x: number; y: number; /** Qué foto del carrusel, desde 0. */ imagen: number }
+export type AnclaNota = Ancla
 
 /** Un mensaje del hilo de una versión, de ella o de la marca. */
-export type Comentario = { id: string; autor: string; lado: "influencer" | "marca"; el: string; texto: string }
+export type Comentario = Mensaje<"influencer" | "marca">
 
 /** Lo que pide la marca sobre una versión: se resuelve en la siguiente. */
-export type Nota = {
-  id: string
-  autor: string
-  el: string
-  texto: string
-  ancla?: AnclaNota
-  resuelta: boolean
-  /** Lo que se contestan sobre esta nota. */
-  respuestas: Comentario[]
-}
+export type Nota = NotaRevision<"influencer" | "marca">
 
 /** Un archivo de una versión: el vídeo o cada foto de un carrusel. */
-export type ArchivoVersion = {
-  nombre: string
-  tamano: number
-  /** La foto o la portada del vídeo. En el portal, un enlace firmado que caduca. */
-  url?: string
-  /** El vídeo para reproducirlo (en el portal, enlace firmado de R2). */
-  videoUrl?: string
-  /** Solo vídeo, en segundos. */
-  duracion?: number
-}
+export type ArchivoVersion = ArchivoRevision
 
 export type Version = {
   id: string
@@ -1177,7 +1158,7 @@ export type Apunte = {
 }
 
 /** Donde ordena sus apuntes, con un tinte para reconocerla. Puede ir dentro de otra; `orden`, su sitio entre sus hermanas. */
-export type Carpeta = { id: string; nombre: string; tint: Tint; padreId?: string; orden: number }
+export type Carpeta = CarpetaArbol & { tint: Tint }
 
 /** Una nota enlazada con una idea (la investigación de un producto con las ideas que salen de ella). Da igual cuál es `desde`. */
 export type VinculoApunte = { id: string; desde: string; hasta: string }

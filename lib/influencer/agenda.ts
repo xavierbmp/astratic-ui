@@ -1,6 +1,6 @@
 // La agenda: los hitos de cada pieza, los cobros y las tareas con fecha, como eventos de un día.
 import { ESTADOS_ABIERTOS, type Collab, type Marca, type Propuesta, type Tarea } from "@/lib/influencer/modelo"
-import type { Tint } from "@/lib/influencer/tints"
+import { tintClass, type Tint } from "@/lib/influencer/tints"
 import { hitosDePieza, marcaDe, tituloCorto, type TipoHito } from "@/lib/influencer/collabs"
 import { collabIdDe, diaDeTarea, estaCerrada, hrefDonde } from "@/lib/influencer/tareas"
 
@@ -16,6 +16,11 @@ export type Evento = {
   tint?: Tint
   href: string
   hecho: boolean
+}
+
+/** Un evento como lo pintan la agenda y el mini calendario del kit: con su tipo y su marca al pasar por encima y el tinte de su collab. */
+export function eventoDeCalendario(e: Evento) {
+  return { id: e.id, fecha: e.fecha, titulo: e.titulo, detalle: [TIPOS_EVENTO[e.tipo], e.contexto].filter(Boolean).join(" · "), color: e.tint ? tintClass[e.tint] : undefined, hecho: e.hecho, href: e.href }
 }
 
 export const TIPOS_EVENTO: Record<TipoEvento, string> = {
@@ -84,6 +89,3 @@ export function eventosDePropuestas(propuestas: Propuesta[], marcas: Marca[]): E
     })
 }
 
-export function eventosDelDia(eventos: Evento[], fecha: string) {
-  return eventos.filter((e) => e.fecha === fecha).sort((a, b) => Number(a.hecho) - Number(b.hecho))
-}

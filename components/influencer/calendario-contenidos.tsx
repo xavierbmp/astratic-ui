@@ -2,24 +2,20 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { useDraggable, useDroppable } from "@dnd-kit/core"
+import { useDraggable } from "@dnd-kit/core"
 import { CSS } from "@dnd-kit/utilities"
-import { CircleCheckIcon, CircleIcon, EuroIcon, FlagIcon, LockIcon, MilestoneIcon, PlusIcon } from "lucide-react"
+import { CircleCheckIcon, CircleIcon, EuroIcon, FlagIcon, LockIcon, MilestoneIcon } from "lucide-react"
 import { cn } from "cn"
 import type { StatusTone } from "@/lib/status"
 import type { EntradaCalendario } from "@/lib/influencer/planificacion"
 import { entradasPorDia } from "@/lib/influencer/planificacion"
-import { diaLargo, mismoMes, periodoCalendario } from "@/lib/influencer/fechas"
+import { diaLargo } from "@/lib/influencer/fechas"
 import { tintClass } from "@/lib/influencer/tints"
-import { Button } from "@/components/ui/button"
 import { SocialIcon } from "@/components/app/social-icons"
+import { AvisoDia, CalendarioPeriodo } from "@/components/app/calendario-periodo"
 
-/** Prefijos de los identificadores de arrastre: así la página sabe qué se suelta y dónde. */
-export const PREFIJO_DIA = "dia:"
+/** Prefijo del id de arrastre de cada cosa: así la página sabe qué se suelta (dónde, con `PREFIJO_DIA` del kit). */
 export const PREFIJO_ENTRADA = "entrada:"
-
-const DIAS = ["L", "M", "X", "J", "V", "S", "D"]
-const MAX_EN_MES = 3
 
 export const PUNTO_TONO: Record<StatusTone, string> = {
   success: "bg-success",
@@ -105,20 +101,11 @@ export function EntradaChip({ entrada, grande, activa, onAbrir }: { entrada: Ent
   )
 }
 
-function Dia({ dia, children, className }: { dia: string; children: React.ReactNode; className?: string }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `${PREFIJO_DIA}${dia}` })
-  return (
-    <div ref={setNodeRef} data-dia={dia} className={cn(className, isOver && "bg-brand-soft")}>
-      {children}
-    </div>
-  )
-}
-
 /**
- * El calendario de lo que publica: el mes (seis semanas) o la semana, con las fechas clave en la
- * cabecera de cada día, el «+» para planificar ese día y cada cosa en su día. Lo propio se arrastra
- * a otro día; lo que se suelta en un día lo resuelve la página, que pone el `DndContext` (así se
- * puede soltar también lo que viene de fuera: una idea). Se adapta a su sitio, no a la pantalla.
+ * El calendario de lo que publica, sobre el `CalendarioPeriodo` del kit: el mes (seis semanas) o la
+ * semana, con las fechas clave en la cabecera de cada día, el «+» para planificar ese día y cada cosa
+ * en su día con el tinte de su marca o su pilar. Lo propio se arrastra a otro día; lo que se suelta
+ * en un día lo resuelve la página, que pone el `DndContext` (así se puede soltar también una idea).
  */
 export function CalendarioContenidos({
   entradas,
@@ -141,56 +128,19 @@ export function CalendarioContenidos({
   /** Planificar algo ese día. */
   onNuevo?: (dia: string) => void
 }) {
-  const [abiertos, setAbiertos] = React.useState<Set<string>>(new Set())
   const porDia = React.useMemo(() => entradasPorDia(entradas), [entradas])
-  const { dias } = periodoCalendario(ancla, modo)
-  const columnas = finesDeSemana ? 7 : 5
-  const visibles = finesDeSemana ? dias : dias.filter((_, i) => i % 7 < 5)
-  const semana = modo === "semana"
-
+  const delDia = (dia: string) => porDia.get(dia) ?? []
   return (
-    <div className="@container">
-      <div className="grid gap-px overflow-hidden rounded-lg border bg-border" style={{ gridTemplateColumns: `repeat(${columnas}, minmax(0, 1fr))` }}>
-        {DIAS.slice(0, columnas).map((d) => (
-          <div key={d} className="bg-muted/60 px-2 py-1 text-center text-xs font-medium text-muted-foreground">
-            {d}
-          </div>
-        ))}
-        {visibles.map((dia) => {
-          const lista = porDia.get(dia) ?? []
-          const fechas = lista.filter((e) => e.clase === "fecha-clave")
-          const cosas = lista.filter((e) => e.clase !== "fecha-clave")
-          const enMes = semana || mismoMes(dia, ancla)
-          const abierto = semana || abiertos.has(dia)
-          const vistas = abierto ? cosas : cosas.slice(0, MAX_EN_MES)
-          return (
-            <Dia key={dia} dia={dia} className={cn("group/dia flex min-w-0 flex-col gap-1 bg-card p-1 @2xl:p-1.5", semana ? "min-h-64 @2xl:min-h-80" : "min-h-20 @2xl:min-h-28", !enMes && "bg-muted/30")}>
-              <div className="flex items-center justify-between gap-1">
-                <span className={cn("grid size-6 flex-none place-items-center rounded-full text-xs tabular-nums", dia === hoy ? "bg-foreground font-semibold text-background" : enMes ? "text-foreground" : "text-muted-foreground")}>{Number(dia.slice(8))}</span>
-                {onNuevo && (
-                  <Button variant="ghost" size="icon-sm" aria-label={`Planificar el ${diaLargo(dia)}`} className="size-5 text-muted-foreground opacity-0 group-hover/dia:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100" onClick={() => onNuevo(dia)}>
-                    <PlusIcon className="size-3.5" />
-                  </Button>
-                )}
-              </div>
-              {fechas.map((f) => (
-                <span key={f.id} title={[f.titulo, f.contexto].filter(Boolean).join(" · ")} className="flex min-w-0 items-center gap-1 rounded-md bg-info-soft px-1.5 py-0.5 text-[10px] font-medium text-info">
-                  <FlagIcon className="size-3 flex-none" />
-                  <span className="line-clamp-2">{f.titulo}</span>
-                </span>
-              ))}
-              {vistas.map((e) => (
-                <EntradaChip key={e.id} entrada={e} grande={semana} activa={activaId === e.id} onAbrir={() => onAbrir(e)} />
-              ))}
-              {!abierto && cosas.length > MAX_EN_MES && (
-                <button type="button" onClick={() => setAbiertos((s) => new Set(s).add(dia))} className="px-1 text-left text-[11px] text-muted-foreground hover:text-foreground">
-                  +{cosas.length - MAX_EN_MES} más
-                </button>
-              )}
-            </Dia>
-          )
-        })}
-      </div>
-    </div>
+    <CalendarioPeriodo
+      entradasDe={(dia) => delDia(dia).filter((e) => e.clase !== "fecha-clave")}
+      avisosDe={(dia) => delDia(dia).filter((e) => e.clase === "fecha-clave").map((f) => <AvisoDia key={f.id} icono={FlagIcon} titulo={f.titulo} detalle={f.contexto} />)}
+      pintar={(e, { grande }) => <EntradaChip entrada={e} grande={grande} activa={activaId === e.id} onAbrir={() => onAbrir(e)} />}
+      hoy={hoy}
+      ancla={ancla}
+      modo={modo}
+      finesDeSemana={finesDeSemana}
+      onNuevo={onNuevo}
+      etiquetaNuevo={(dia) => `Planificar el ${diaLargo(dia)}`}
+    />
   )
 }
