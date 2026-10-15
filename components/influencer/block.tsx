@@ -38,8 +38,8 @@ export function BlockHeader({
     >
       <h2 className="text-base font-semibold tracking-tight">{title}</h2>
       {count !== undefined && <span className="text-sm text-muted-foreground tabular-nums">{count}</span>}
-      {/* Lo que va dentro (pestañas, filtros) sigue al título; en móvil baja a una línea propia bajo la cabecera. */}
-      {children && <div className="order-last flex basis-full items-center sm:order-none sm:basis-auto">{children}</div>}
+      {/* Lo que va dentro (pestañas, filtros) sigue al título; en móvil baja a una línea propia bajo la cabecera y no la ensancha: lo que no cabe se desplaza dentro. */}
+      {children && <div className="order-last flex min-w-0 basis-full items-center sm:order-none sm:basis-auto">{children}</div>}
       <div className="ml-auto flex items-center gap-1.5">
         {action}
         {href && (
