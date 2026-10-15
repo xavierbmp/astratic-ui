@@ -5,7 +5,7 @@ import type { StatusTone } from "@/lib/status"
 import type { Tint } from "@/lib/influencer/tints"
 import type { SocialNetwork } from "@/components/app/social-icons"
 import type { ValorCampo } from "@/lib/base/campos"
-import type { Ancla, ArchivoRevision, Mensaje } from "@/lib/revision-notas"
+import type { Ancla, ArchivoRevision, DecisionSugerencia, Mensaje, SugerenciaRevision } from "@/lib/revision-notas"
 
 /** Un estado con su etiqueta y el tono de `StatusBadge`. */
 export type Estado<T extends string> = { id: T; label: string; tone: StatusTone }
@@ -429,11 +429,10 @@ export const ESTADOS_VERSION: Estado<EstadoVersion>[] = [
  */
 export type AnclaNota = Ancla
 
-/** Lo que decide quien hace la pieza de una sugerencia de cambio. */
-export type DecisionSugerencia = "aceptada" | "rechazada"
+export type { DecisionSugerencia }
 
-/** Una sugerencia de cambio, como en Google Docs: poner este texto en lugar de la cita del ancla (vacía si solo añade). */
-export type SugerenciaNota = { poner: string; decision?: DecisionSugerencia }
+/** Una sugerencia de cambio de la marca, como en Google Docs. */
+export type SugerenciaNota = SugerenciaRevision
 
 /** Un mensaje del hilo de una versión, de ella o de la marca. */
 export type Comentario = Mensaje<"influencer" | "marca">

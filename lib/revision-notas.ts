@@ -14,6 +14,12 @@ export type Ancla =
 /** Un mensaje del hilo, de un lado o del otro (`L`: quien hace la pieza y quien la revisa). */
 export type Mensaje<L extends string = string> = { id: string; autor: string; lado: L; el: string; texto: string }
 
+/** Lo que decide quien hace la pieza de una sugerencia de cambio. */
+export type DecisionSugerencia = "aceptada" | "rechazada"
+
+/** Una sugerencia de cambio, como en Google Docs: poner este texto en lugar de la cita del ancla (vacía si solo añade). */
+export type SugerenciaRevision = { poner: string; decision?: DecisionSugerencia }
+
 /** Lo que pide quien revisa sobre una versión: se resuelve en la siguiente. */
 export type NotaRevision<L extends string = string> = {
   id: string
@@ -21,6 +27,8 @@ export type NotaRevision<L extends string = string> = {
   el: string
   texto: string
   ancla?: Ancla
+  /** Si propone un cambio en el texto en vez de (o además de) comentarlo. */
+  sugerencia?: SugerenciaRevision
   resuelta: boolean
   /** Lo que se contestan sobre esta nota. */
   respuestas: Mensaje<L>[]

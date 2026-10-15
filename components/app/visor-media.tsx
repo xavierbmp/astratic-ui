@@ -2,121 +2,61 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { PauseIcon, PlayIcon } from "lucide-react"
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
-import { segundos, type Ancla, type ArchivoRevision, type NotaRevision, type VersionRevision } from "@/lib/revision-notas"
+import { puntoEnCaja } from "@/lib/notas-medio"
+import { type Ancla, type ArchivoRevision, type NotaRevision, type VersionRevision } from "@/lib/revision-notas"
+import { Chincheta, EscribirNota, NotaAbierta } from "@/components/app/notas-medio"
+import { ReproductorNotas, type NotaEnVideo } from "@/components/app/reproductor-notas"
 
 type Pin = { nota: NotaRevision; numero: number }
 
-/** Lo que comparten la foto y el vídeo: sus notas, la que se está escribiendo y el fondo mientras carga. */
-type PropsMedio = { pins: Pin[]; pendiente?: Ancla | null; seleccionada?: string | null; onSeleccionar?: (id: string) => void; onMarcar?: (a: Ancla) => void; ancho: number; fondo: string }
+/** Dejar una nota escrita en un sitio del contenido (el punto de una foto o el segundo y el punto del vídeo). */
+type Anotar = (texto: string, ancla: Ancla) => void
 
-function Chincheta({ numero, resuelta, activa, pendiente, onClick, style }: { numero?: number; resuelta?: boolean; activa?: boolean; pendiente?: boolean; onClick?: () => void; style: React.CSSProperties }) {
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation()
-        onClick?.()
-      }}
-      style={style}
-      aria-label={pendiente ? "Nueva nota aquí" : `Nota ${numero}`}
-      className={cn(
-        "absolute z-10 grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full rounded-bl-none text-xs font-semibold text-white shadow-pop ring-2 ring-white transition-transform hover:scale-110",
-        pendiente ? "border-2 border-dashed border-white bg-brand/60" : resuelta ? "bg-success" : "bg-brand",
-        activa && "scale-110 ring-4",
-      )}
-    >
-      {numero}
-    </button>
-  )
-}
+/** Lo que comparten la foto y el vídeo: sus notas, la elegida, dejar una nota y el fondo mientras carga. */
+type PropsMedio = { pins: Pin[]; seleccionada?: string | null; onSeleccionar?: (id: string) => void; onAnotar?: Anotar; ancho: number; fondo: string }
 
-/** Una foto con sus notas clavadas donde las dejó la marca; pulsar en ella propone una nota ahí. */
-function FotoConNotas({ archivo, indice, pins, pendiente, seleccionada, onSeleccionar, onMarcar, ancho, fondo }: PropsMedio & { archivo: ArchivoRevision; indice: number }) {
-  const marcar = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!onMarcar) return
-    const r = e.currentTarget.getBoundingClientRect()
-    onMarcar({ tipo: "punto", x: Math.round(((e.clientX - r.left) / r.width) * 100), y: Math.round(((e.clientY - r.top) / r.height) * 100), imagen: indice })
-  }
-  return (
-    <div onClick={marcar} style={{ width: ancho }} className={cn("relative aspect-[4/5] flex-none overflow-hidden rounded-lg shadow-pop", fondo, onMarcar && "cursor-crosshair")}>
-      {archivo.url && <Image src={archivo.url} alt={archivo.nombre} fill sizes={`${ancho}px`} className="object-cover" unoptimized={archivo.url.startsWith("blob:")} />}
-      {pins.map((p) => p.nota.ancla?.tipo === "punto" && <Chincheta key={p.nota.id} numero={p.numero} resuelta={p.nota.resuelta} activa={seleccionada === p.nota.id} onClick={() => onSeleccionar?.(p.nota.id)} style={{ left: `${p.nota.ancla.x}%`, top: `${p.nota.ancla.y}%` }} />)}
-      {pendiente?.tipo === "punto" && pendiente.imagen === indice && <Chincheta pendiente style={{ left: `${pendiente.x}%`, top: `${pendiente.y}%` }} />}
-    </div>
-  )
-}
+/** Proporción de las fotos del visor: alto / ancho. */
+const PROPORCION_FOTO = 5 / 4
 
 /**
- * El vídeo con su línea de tiempo: se reproduce si hay archivo (en el portal, de R2), y las notas
- * van como marcas en su segundo. Pulsar en la línea propone una nota en ese segundo.
+ * Una foto con sus notas clavadas donde las dejó quien revisa. Con `onAnotar`, pulsar en ella abre ahí
+ * la caja de escribir la nota; la nota elegida se abre encima de su chincheta.
  */
-function VideoConNotas({ archivo, pins, pendiente, seleccionada, onSeleccionar, onMarcar, ancho, fondo }: PropsMedio & { archivo: ArchivoRevision }) {
-  const video = React.useRef<HTMLVideoElement>(null)
-  const [actual, setActual] = React.useState(0)
-  const [reproduciendo, setReproduciendo] = React.useState(false)
-  const duracion = archivo.duracion ?? 30
-  const enSegundo = pins.flatMap((p) => (p.nota.ancla?.tipo === "segundo" ? [{ ...p, segundo: p.nota.ancla.segundo }] : []))
-
-  const ir = (s: number) => {
-    setActual(s)
-    if (video.current) video.current.currentTime = s
+function FotoConNotas({ archivo, indice, pins, seleccionada, onSeleccionar, onAnotar, ancho, fondo }: PropsMedio & { archivo: ArchivoRevision; indice: number }) {
+  const [borrador, setBorrador] = React.useState<{ x: number; y: number } | null>(null)
+  const fotograma = { ancho, alto: ancho * PROPORCION_FOTO }
+  const abierta = borrador ? null : pins.find((p) => p.nota.id === seleccionada)
+  const pulsar = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (onAnotar) setBorrador(puntoEnCaja(e.currentTarget.getBoundingClientRect(), e.clientX, e.clientY))
   }
-  const pulsarLinea = (e: React.MouseEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    const s = Math.min(duracion, Math.max(0, Math.round(((e.clientX - r.left) / r.width) * duracion)))
-    ir(s)
-    onMarcar?.({ tipo: "segundo", segundo: s })
-  }
-  const alternar = () => {
-    const v = video.current
-    if (!v) return
-    if (v.paused) void v.play()
-    else v.pause()
-  }
-
   return (
-    <div style={{ width: ancho }} className="flex flex-none flex-col gap-2">
-      <div className={cn("relative aspect-[9/16] overflow-hidden rounded-xl shadow-pop", fondo)}>
-        {archivo.videoUrl ? (
-          <video ref={video} src={archivo.videoUrl} poster={archivo.url} className="size-full object-cover" onTimeUpdate={(e) => setActual(e.currentTarget.currentTime)} onPlay={() => setReproduciendo(true)} onPause={() => setReproduciendo(false)} playsInline />
-        ) : (
-          archivo.url && <Image src={archivo.url} alt="" fill sizes={`${ancho}px`} className="object-cover" />
-        )}
-        <button type="button" onClick={alternar} disabled={!archivo.videoUrl} aria-label={reproduciendo ? "Pausa" : "Reproducir"} title={archivo.videoUrl ? undefined : "En el portal se reproduce el archivo subido"} className={cn("absolute inset-0 m-auto grid size-14 place-items-center rounded-full bg-black/55 text-white backdrop-blur-sm transition-opacity", reproduciendo && "opacity-0 hover:opacity-100")}>
-          {reproduciendo ? <PauseIcon className="size-6 fill-current" /> : <PlayIcon className="ml-0.5 size-6 fill-current" />}
-        </button>
-        <span className="absolute top-2.5 right-2.5 rounded-md bg-black/60 px-1.5 py-0.5 font-mono text-xs text-white">{segundos(actual)}</span>
-      </div>
-      <div onClick={pulsarLinea} role="slider" aria-label="Línea de tiempo" aria-valuemin={0} aria-valuemax={duracion} aria-valuenow={Math.round(actual)} tabIndex={0} className={cn("relative h-2.5 rounded-full bg-muted", onMarcar && "cursor-crosshair")}>
-        <span className="absolute inset-y-0 left-0 rounded-full bg-foreground/15" style={{ width: `${(actual / duracion) * 100}%` }} />
-        {enSegundo.map((p) => (
-          <button
-            key={p.nota.id}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              ir(p.segundo)
-              onSeleccionar?.(p.nota.id)
+    <div onClick={pulsar} style={{ width: ancho }} className={cn("relative aspect-[4/5] max-w-full flex-none overflow-hidden rounded-lg shadow-pop", fondo, onAnotar && "cursor-crosshair")}>
+      {archivo.url && <Image src={archivo.url} alt={archivo.nombre} fill sizes={`${ancho}px`} className="object-cover" unoptimized={archivo.url.startsWith("blob:")} />}
+      {pins.map((p) => p.nota.ancla?.tipo === "punto" && <Chincheta key={p.nota.id} numero={p.numero} resuelta={p.nota.resuelta} activa={seleccionada === p.nota.id} onClick={() => onSeleccionar?.(p.nota.id)} style={{ left: `${p.nota.ancla.x}%`, top: `${p.nota.ancla.y}%` }} />)}
+      {abierta?.nota.ancla?.tipo === "punto" && <NotaAbierta punto={abierta.nota.ancla} fotograma={fotograma} numero={abierta.numero} autor={abierta.nota.autor} texto={abierta.nota.texto} resuelta={abierta.nota.resuelta} />}
+      {borrador && (
+        <>
+          <Chincheta pendiente style={{ left: `${borrador.x}%`, top: `${borrador.y}%` }} />
+          <EscribirNota
+            punto={borrador}
+            fotograma={fotograma}
+            onCancelar={() => setBorrador(null)}
+            onGuardar={(texto) => {
+              onAnotar?.(texto, { tipo: "punto", ...borrador, imagen: indice })
+              setBorrador(null)
             }}
-            aria-label={`Nota ${p.numero} en ${segundos(p.segundo)}`}
-            style={{ left: `${(p.segundo / duracion) * 100}%` }}
-            className={cn("absolute top-1/2 grid size-5 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-[10px] font-semibold text-white ring-2 ring-card", p.nota.resuelta ? "bg-success" : "bg-brand", seleccionada === p.nota.id && "scale-125")}
-          >
-            {p.numero}
-          </button>
-        ))}
-        {pendiente?.tipo === "segundo" && <span className="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-brand bg-card" style={{ left: `${(pendiente.segundo / duracion) * 100}%` }} />}
-      </div>
-      <div className="flex justify-between font-mono text-[11px] text-muted-foreground">
-        <span>0:00</span>
-        <span>{segundos(duracion)}</span>
-      </div>
+          />
+        </>
+      )}
     </div>
   )
 }
+
+/** Las notas de una versión que van en un segundo del vídeo, con su número. */
+const notasEnVideo = (pins: Pin[]): NotaEnVideo[] =>
+  pins.flatMap(({ nota, numero }) => (nota.ancla?.tipo === "segundo" ? [{ id: nota.id, numero, segundo: nota.ancla.segundo, x: nota.ancla.x, y: nota.ancla.y, autor: nota.autor, texto: nota.texto, resuelta: nota.resuelta }] : []))
 
 function EtiquetaVersion({ version, estado, atenuada }: { version: VersionRevision; estado?: string; atenuada?: boolean }) {
   return (
@@ -137,8 +77,8 @@ export type PropsVisorMedia<V extends VersionRevision> = {
   notas: NotaRevision[]
   seleccionada?: string | null
   onSeleccionar?: (id: string) => void
-  onMarcar?: (a: Ancla) => void
-  marcaPendiente?: Ancla | null
+  /** Quien revisa: pulsar en una foto o en el vídeo abre ahí la caja de escribir la nota (en el vídeo, en ese segundo). */
+  onAnotar?: Anotar
   /** En %, de 50 a 200. */
   zoom?: number
   /** El estado de una versión, en palabras («En revisión»), junto a su número. */
@@ -149,18 +89,19 @@ export type PropsVisorMedia<V extends VersionRevision> = {
 }
 
 /**
- * El contenido de una versión sobre un lienzo de puntos, como en Feedback: las fotos (una o un
- * carrusel) o el vídeo, con las notas en su sitio. Pulsar en una foto o en la línea del vídeo
- * propone una nota ahí. Con `anterior`, la versión previa al lado para comparar.
+ * El contenido de una versión sobre un lienzo de puntos, como en Feedback y Frame.io: las fotos (una o
+ * un carrusel) o el vídeo con su reproductor, con las notas en su sitio. Quien revisa pulsa en la foto
+ * o en el vídeo y escribe la nota ahí; elegir una nota la abre encima (en el vídeo, en su fotograma).
+ * Con `anterior`, la versión previa al lado para comparar.
  */
-export function VisorMedia<V extends VersionRevision>({ version, anterior, medio, notas, seleccionada, onSeleccionar, onMarcar, marcaPendiente, zoom = 100, estado, fondo = "bg-muted text-muted-foreground", className }: PropsVisorMedia<V>) {
+export function VisorMedia<V extends VersionRevision>({ version, anterior, medio, notas, seleccionada, onSeleccionar, onAnotar, zoom = 100, estado, fondo = "bg-muted text-muted-foreground", className }: PropsVisorMedia<V>) {
   const pins: Pin[] = notas.map((nota, i) => ({ nota, numero: i + 1 }))
-  const ancho = Math.round((medio === "video" ? 260 : 300) * (zoom / 100))
+  const ancho = Math.round(300 * (zoom / 100))
 
   const contenido = (v: V, actual: boolean) => {
     const archivos = v.archivos ?? []
     const propios = actual ? pins : v.notas.map((nota, i) => ({ nota, numero: i + 1 }))
-    const accion = actual ? { onSeleccionar, onMarcar, pendiente: marcaPendiente, seleccionada } : {}
+    const accion = actual ? { onSeleccionar, onAnotar, seleccionada } : {}
     return (
       <div key={v.id} className={cn("flex flex-col", !actual && "opacity-70 saturate-50")}>
         <EtiquetaVersion version={v} estado={estado?.(v)} atenuada={!actual} />
@@ -170,7 +111,17 @@ export function VisorMedia<V extends VersionRevision>({ version, anterior, medio
               Sin archivo
             </div>
           ) : medio === "video" ? (
-            <VideoConNotas archivo={archivos[0]} pins={propios} ancho={ancho} fondo={fondo} {...accion} />
+            <ReproductorNotas
+              videoUrl={archivos[0].videoUrl}
+              portadaUrl={archivos[0].url}
+              duracion={archivos[0].duracion}
+              ancho={ancho}
+              fondo={fondo}
+              notas={notasEnVideo(propios)}
+              seleccionada={accion.seleccionada}
+              onSeleccionar={accion.onSeleccionar}
+              onAnotar={accion.onAnotar ? ({ segundo, x, y, texto }) => accion.onAnotar?.(texto, { tipo: "segundo", segundo, x, y }) : undefined}
+            />
           ) : (
             archivos.map((a, i) => (
               <div key={`${a.nombre}-${i}`} className="flex flex-col gap-1.5">
@@ -186,7 +137,7 @@ export function VisorMedia<V extends VersionRevision>({ version, anterior, medio
 
   return (
     <div data-slot="visor-media" className={cn("min-h-0 overflow-auto bg-[radial-gradient(var(--border)_1px,transparent_1px)] [background-size:16px_16px]", className)}>
-      <div className="flex min-h-full w-max min-w-full items-center justify-center gap-10 p-8">
+      <div className="flex min-h-full w-max min-w-full items-center justify-center gap-10 p-3 sm:p-8">
         {anterior && contenido(anterior, false)}
         {contenido(version, true)}
       </div>

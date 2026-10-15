@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { Nota, Version } from "@/lib/influencer/modelo"
-import { aceptadasDe, borradorSiguiente, cambioDeNota, copySiguiente, decidirSugerencia, describirSugerencia, marcasDeCitas, marcasDeSugerencias, notasParaConversacion, sugerenciaAbierta } from "@/lib/influencer/sugerencias"
+import { aceptadasDe, borradorSiguiente, cambioDeNota, copySiguiente, decidirSugerencia, marcasDeCitas, marcasDeSugerencias, sugerenciaAbierta } from "@/lib/influencer/sugerencias"
 
 const nota = (datos: Partial<Nota>): Nota => ({ id: "n", autor: "Ana", el: "2026-10-15T10:00", texto: "", resuelta: false, respuestas: [], ...datos })
 const version = (datos: Partial<Version>): Version => ({ id: "v1", tipo: "media", numero: 1, estado: "en-revision", creadaEl: "2026-10-14T10:00", notas: [], mensajes: [], ...datos })
@@ -40,13 +40,5 @@ describe("sugerencias de la marca", () => {
     expect(borradorSiguiente([v1, v2], v1)).toBe(v2)
     expect(borradorSiguiente([v1], v1)).toBeNull()
     expect(borradorSiguiente([v1, { ...v2, estado: "en-revision" }], v1)).toBeNull()
-  })
-
-  it("en la conversación una sugerencia dice qué cambia, con el comentario si lo hay", () => {
-    expect(describirSugerencia(sugerencia)).toBe("Cambiar «#ad» por «#publi»")
-    expect(describirSugerencia({ ...sugerencia, texto: "En España no vale" })).toBe("Cambiar «#ad» por «#publi». En España no vale")
-    expect(describirSugerencia(nota({ ancla: { tipo: "texto", cita: "" }, sugerencia: { poner: "Hola" } }))).toBe("Añadir «Hola»")
-    expect(describirSugerencia(nota({ ancla: { tipo: "texto", cita: "sobra" }, sugerencia: { poner: "" } }))).toBe("Quitar «sobra»")
-    expect(notasParaConversacion([comentario])[0]).toBe(comentario)
   })
 })

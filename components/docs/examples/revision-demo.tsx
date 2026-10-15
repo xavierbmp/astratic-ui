@@ -16,14 +16,14 @@ const MENSAJES: Mensaje<Lado>[] = [{ id: "m1", autor: "Equipo", lado: "equipo", 
 
 const VERSION: VersionRevision = { id: "v1", numero: 1, creadaEl: "2026-10-13", archivos: [{ nombre: "portada.jpg", tamano: 0 }, { nombre: "producto.jpg", tamano: 0 }], notas: NOTAS }
 
-/** El visor y la conversación de una versión, enlazados: pulsar una nota la marca en los dos y pulsar en la foto propone una nueva. */
+/** El visor y la conversación de una versión, enlazados: pulsar una nota la abre en los dos y pulsar en la foto deja una nueva ahí. */
 export function RevisionDemo() {
   const [notas, setNotas] = React.useState(NOTAS)
   const [seleccionada, setSeleccionada] = React.useState<string | null>(null)
-  const [pendiente, setPendiente] = React.useState<Ancla | null>(null)
+  const anotar = (texto: string, ancla?: Ancla) => setNotas((n) => [...n, { id: `n${n.length + 1}`, autor: "Cliente", el: "2026-10-14T09:00:00", texto, ancla, resuelta: false, respuestas: [] }])
   return (
     <div className="grid h-[520px] w-full overflow-hidden rounded-lg border bg-card lg:grid-cols-[minmax(0,1fr)_320px]">
-      <VisorMedia version={{ ...VERSION, notas }} medio="imagen" notas={notas} seleccionada={seleccionada} onSeleccionar={setSeleccionada} onMarcar={setPendiente} marcaPendiente={pendiente} zoom={70} estado={() => "En revisión"} className="max-lg:hidden" />
+      <VisorMedia version={{ ...VERSION, notas }} medio="imagen" notas={notas} seleccionada={seleccionada} onSeleccionar={setSeleccionada} onAnotar={anotar} zoom={70} estado={() => "En revisión"} className="max-lg:hidden" />
       <Conversacion
         notas={notas}
         mensajes={MENSAJES}
@@ -31,9 +31,7 @@ export function RevisionDemo() {
         ladoAutor="equipo"
         seleccionada={seleccionada}
         onSeleccionar={setSeleccionada}
-        anclaPendiente={pendiente}
-        onQuitarAncla={() => setPendiente(null)}
-        onEnviar={(texto, ancla) => setNotas((n) => [...n, { id: `n${n.length + 1}`, autor: "Cliente", el: "2026-10-14T09:00:00", texto, ancla, resuelta: false, respuestas: [] }])}
+        onEnviar={anotar}
         className="min-h-0 border-l"
       />
     </div>

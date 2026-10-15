@@ -46,10 +46,10 @@ export default function RevisionPage() {
       <DocSection id="ejemplo" title="Ejemplo">
         <Example
           title="Un carrusel en revisión"
-          description="Pulsa en una foto para proponer una nota ahí y escríbela en la conversación."
+          description="Pulsa en una foto y escribe la nota ahí: con el tick va a la conversación. Pulsar una nota la abre encima de su sitio."
           padded={false}
-          code={`<VisorMedia version={version} medio="imagen" notas={version.notas} seleccionada={sel} onSeleccionar={setSel} onMarcar={setPendiente} marcaPendiente={pendiente} />
-<Conversacion notas={version.notas} mensajes={version.mensajes} lado="cliente" ladoAutor="equipo" anclaPendiente={pendiente} onEnviar={dejarNota} … />`}
+          code={`<VisorMedia version={version} medio="imagen" notas={version.notas} seleccionada={sel} onSeleccionar={setSel} onAnotar={(texto, ancla) => dejarNota(texto, ancla)} />
+<Conversacion notas={version.notas} mensajes={version.mensajes} lado="cliente" ladoAutor="equipo" onEnviar={dejarNota} onDecidir={decidirSugerencia} … />`}
         >
           <RevisionDemo />
         </Example>
@@ -60,11 +60,12 @@ export default function RevisionPage() {
           columns={["Prop", "Tipo", "Descripción"]}
           rows={[
             [<code key="v">VisorMedia version · anterior</code>, <code key="vt">VersionRevision</code>, "La versión que se revisa y, opcional, la de antes para comparar."],
-            [<code key="m">medio</code>, <code key="mt">{'"video" | "imagen"'}</code>, "Un vídeo con su línea de tiempo o una o varias fotos."],
-            [<code key="mk">onMarcar · marcaPendiente</code>, <code key="mkt">Ancla</code>, "Pulsar en la foto o en la línea propone una nota ahí; la pendiente se pinta discontinua."],
+            [<code key="m">medio</code>, <code key="mt">{'"video" | "imagen"'}</code>, "Un vídeo con su reproductor (play, pausa, línea de tiempo con las notas) o una o varias fotos."],
+            [<code key="mk">onAnotar</code>, <code key="mkt">{"(texto, Ancla) => void"}</code>, "Quien revisa pulsa en la foto o en el vídeo (que se para) y escribe la nota en ese punto y ese segundo; con el tick se guarda y el vídeo sigue. Elegir una nota lleva el vídeo a su fotograma y la abre encima."],
             [<code key="e">estado · fondo</code>, <code key="et">{"(v) => string · string"}</code>, "El estado en palabras junto al número de versión y el fondo de cada archivo mientras carga."],
             [<code key="c">Conversacion lado · ladoAutor</code>, <code key="ct">string</code>, "Quién mira y qué lado hace la pieza."],
-            [<code key="cr">onResolver · onResponder · onEnviar</code>, <code key="crt">funciones</code>, "Resolver una nota, contestar en su hilo y escribir (una nota anclada si hay ancla pendiente)."],
+            [<code key="cr">onResolver · onResponder · onEnviar</code>, <code key="crt">funciones</code>, "Resolver una nota, contestar en su hilo y escribir (una nota anclada si hay ancla pendiente, como una cita del texto)."],
+            [<code key="cd">onDecidir</code>, <code key="cdt">{"(id, \"aceptada\" | \"rechazada\") => void"}</code>, "Quien hace la pieza acepta o rechaza una sugerencia de cambio (`NotaRevision.sugerencia`), que se pinta como lo quitado tachado y lo puesto resaltado. Decidida ya no se reabre."],
             [<code key="cc">cerrada</code>, <code key="cct">boolean</code>, "Versión aprobada o con cambios pedidos: se lee, no se escribe."],
           ]}
         />

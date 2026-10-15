@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, CornerDownRightIcon, MapPinIcon, QuoteIcon, SendHorizontalIcon, TimerIcon, XIcon } from "lucide-react"
+import { CheckIcon, CornerDownRightIcon, MapPinIcon, PencilLineIcon, QuoteIcon, SendHorizontalIcon, TimerIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { fmt, initials } from "@/lib/format"
-import { segundos, type Ancla, type Mensaje, type NotaRevision } from "@/lib/revision-notas"
+import { segundos, type Ancla, type DecisionSugerencia, type Mensaje, type NotaRevision } from "@/lib/revision-notas"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Segmentado } from "@/components/app/segmentado"
@@ -19,6 +19,18 @@ export function AnclaChip({ ancla, className }: { ancla: Ancla; className?: stri
       <Icono className="size-3 flex-none" aria-hidden />
       <span className="truncate">{texto}</span>
     </span>
+  )
+}
+
+/** Lo que propone una sugerencia: lo que quita, tachado, y lo que pone, resaltado; y, si ya se decidió, qué se hizo. */
+function CambioSugerido({ nota }: { nota: NotaRevision }) {
+  const cita = nota.ancla?.tipo === "texto" ? nota.ancla.cita : ""
+  const decision = nota.sugerencia?.decision
+  return (
+    <p className={cn("mt-1 text-sm whitespace-pre-wrap", decision === "rechazada" && "opacity-60")}>
+      {cita && <del className="rounded-sm bg-danger-soft px-0.5 text-danger">{cita}</del>} {nota.sugerencia?.poner && <ins className="rounded-sm bg-success-soft px-0.5 text-success no-underline">{nota.sugerencia.poner}</ins>}
+      {decision && <span className={cn("ml-1.5 text-xs font-medium", decision === "aceptada" ? "text-success" : "text-muted-foreground")}>{decision === "aceptada" ? "Aceptada" : "Rechazada"}</span>}
+    </p>
   )
 }
 
@@ -73,6 +85,8 @@ export type PropsConversacion<L extends string> = {
   seleccionada?: string | null
   onSeleccionar?: (id: string | null) => void
   onResolver?: (id: string) => void
+  /** Quien hace la pieza acepta o rechaza una sugerencia de cambio (una vez: decidida ya no se reabre). */
+  onDecidir?: (notaId: string, decision: DecisionSugerencia) => void
   onResponder?: (notaId: string, texto: string) => void
   /** Quien hace la pieza: un mensaje. Quien revisa: una nota, anclada si ha marcado un sitio. */
   onEnviar?: (texto: string, ancla?: Ancla) => void
@@ -90,7 +104,7 @@ export type PropsConversacion<L extends string> = {
  * orden, cada nota con su número, su sitio en la pieza, su hilo y su estado. «Solo notas» deja lo
  * que hay que resolver. Abajo, el progreso: cuántas notas están resueltas.
  */
-export function Conversacion<L extends string>({ notas, mensajes, lado, ladoAutor, seleccionada, onSeleccionar, onResolver, onResponder, onEnviar, anclaPendiente, onQuitarAncla, cerrada, placeholder, textos: propios, className }: PropsConversacion<L>) {
+export function Conversacion<L extends string>({ notas, mensajes, lado, ladoAutor, seleccionada, onSeleccionar, onResolver, onDecidir, onResponder, onEnviar, anclaPendiente, onQuitarAncla, cerrada, placeholder, textos: propios, className }: PropsConversacion<L>) {
   const textos = { ...TEXTOS, ...propios }
   const esAutor = lado === ladoAutor
   const [vista, setVista] = React.useState<"todo" | "notas">("todo")
@@ -168,9 +182,16 @@ export function Conversacion<L extends string>({ notas, mensajes, lado, ladoAuto
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
                         <span className="font-semibold">{e.n.autor}</span>
                         <span className="text-muted-foreground">{fmt.time(e.n.el)}</span>
-                        {e.n.ancla && <AnclaChip ancla={e.n.ancla} className="max-w-[60%]" />}
+                        {e.n.sugerencia ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-brand-soft px-1.5 py-px text-[11px] text-brand">
+                            <PencilLineIcon className="size-3" aria-hidden /> Sugerencia
+                          </span>
+                        ) : (
+                          e.n.ancla && <AnclaChip ancla={e.n.ancla} className="max-w-[60%]" />
+                        )}
                       </div>
-                      <p className={cn("mt-1 text-sm", e.n.resuelta && "text-muted-foreground line-through decoration-muted-foreground/40")}>{e.n.texto}</p>
+                      {e.n.sugerencia && <CambioSugerido nota={e.n} />}
+                      {(!e.n.sugerencia || e.n.texto) && <p className={cn("mt-1 text-sm", e.n.resuelta && !e.n.sugerencia && "text-muted-foreground line-through decoration-muted-foreground/40", e.n.sugerencia && "text-muted-foreground")}>{e.n.texto}</p>}
                     </div>
                   </div>
                   {e.n.respuestas.length > 0 && (
@@ -187,7 +208,17 @@ export function Conversacion<L extends string>({ notas, mensajes, lado, ladoAuto
                   )}
                   {!cerrada || esAutor ? (
                     <div className="flex flex-wrap items-center gap-1.5 border-t px-2 py-1.5" onClick={(ev) => ev.stopPropagation()}>
-                      {esAutor && onResolver && (
+                      {esAutor && onDecidir && e.n.sugerencia && !e.n.sugerencia.decision && (
+                        <>
+                          <Button size="sm" className="h-7" onClick={() => onDecidir(e.n.id, "aceptada")}>
+                            <CheckIcon /> Aceptar
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-7 text-muted-foreground" onClick={() => onDecidir(e.n.id, "rechazada")}>
+                            <XIcon /> Rechazar
+                          </Button>
+                        </>
+                      )}
+                      {esAutor && onResolver && !e.n.sugerencia && (
                         <Button variant="ghost" size="sm" className={cn("h-7", e.n.resuelta ? "text-muted-foreground" : "text-success hover:text-success")} onClick={() => onResolver(e.n.id)}>
                           <CheckIcon /> {e.n.resuelta ? "Reabrir" : "Hecha"}
                         </Button>

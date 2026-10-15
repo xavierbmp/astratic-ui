@@ -5,11 +5,9 @@ import Image from "next/image"
 import { PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from "lucide-react"
 import { cn } from "cn"
 import { notasEnFotograma, puntoEnCaja, segundoDeNota } from "@/lib/notas-medio"
+import { segundos } from "@/lib/revision-notas"
 import { Button } from "@/components/ui/button"
 import { Chincheta, EscribirNota, NotaAbierta } from "@/components/app/notas-medio"
-
-/** Un segundo como «1:05». */
-const tiempo = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`
 
 /** Una nota del vídeo: su segundo y, si se dejó sobre el fotograma, su punto (en %). */
 export type NotaEnVideo = { id: string; numero: number; segundo: number; x?: number; y?: number; autor: string; texto: string; resuelta: boolean }
@@ -137,7 +135,7 @@ export function ReproductorNotas({ videoUrl, portadaUrl, duracion: duracionDada,
         {enPantalla.map((n) => (
           <Chincheta key={n.id} numero={n.numero} resuelta={n.resuelta} activa={n.id === seleccionada} onClick={() => onSeleccionar?.(n.id)} style={{ left: `${n.x ?? SIN_PUNTO.x}%`, top: `${n.y ?? SIN_PUNTO.y}%` }} />
         ))}
-        {abierta && <NotaAbierta punto={{ x: abierta.x ?? SIN_PUNTO.x, y: abierta.y ?? SIN_PUNTO.y }} fotograma={fotograma} numero={abierta.numero} autor={abierta.autor} texto={abierta.texto} contexto={tiempo(abierta.segundo)} resuelta={abierta.resuelta} />}
+        {abierta && <NotaAbierta punto={{ x: abierta.x ?? SIN_PUNTO.x, y: abierta.y ?? SIN_PUNTO.y }} fotograma={fotograma} numero={abierta.numero} autor={abierta.autor} texto={abierta.texto} contexto={segundos(abierta.segundo)} resuelta={abierta.resuelta} />}
         {borrador && (
           <>
             <Chincheta pendiente style={{ left: `${borrador.x}%`, top: `${borrador.y}%` }} />
@@ -145,7 +143,7 @@ export function ReproductorNotas({ videoUrl, portadaUrl, duracion: duracionDada,
               key={`${borrador.segundo}`}
               punto={borrador}
               fotograma={fotograma}
-              contexto={`Nota en ${tiempo(borrador.segundo)}`}
+              contexto={`Nota en ${segundos(borrador.segundo)}`}
               onCancelar={cerrarBorrador}
               onGuardar={(texto) => {
                 onAnotar?.({ segundo: borrador.segundo, x: borrador.x, y: borrador.y, texto })
@@ -154,7 +152,7 @@ export function ReproductorNotas({ videoUrl, portadaUrl, duracion: duracionDada,
             />
           </>
         )}
-        <span className="pointer-events-none absolute top-2.5 right-2.5 rounded-md bg-black/60 px-1.5 py-0.5 font-mono text-xs text-white">{tiempo(actual)}</span>
+        <span className="pointer-events-none absolute top-2.5 right-2.5 rounded-md bg-black/60 px-1.5 py-0.5 font-mono text-xs text-white">{segundos(actual)}</span>
       </div>
 
       <div
@@ -165,7 +163,7 @@ export function ReproductorNotas({ videoUrl, portadaUrl, duracion: duracionDada,
         aria-valuemin={0}
         aria-valuemax={Math.round(duracion)}
         aria-valuenow={Math.round(actual)}
-        aria-valuetext={tiempo(actual)}
+        aria-valuetext={segundos(actual)}
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId)
           ir(segundoEn(e.clientX))
@@ -186,7 +184,7 @@ export function ReproductorNotas({ videoUrl, portadaUrl, duracion: duracionDada,
             type="button"
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => onSeleccionar?.(n.id)}
-            aria-label={`Nota ${n.numero} en ${tiempo(n.segundo)}`}
+            aria-label={`Nota ${n.numero} en ${segundos(n.segundo)}`}
             style={{ left: `${Math.min(100, (n.segundo / duracion) * 100)}%` }}
             className={cn("absolute top-1/2 grid size-5 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-[10px] font-semibold text-white ring-2 ring-card", n.resuelta ? "bg-success" : "bg-brand", seleccionada === n.id && "scale-125")}
           >
@@ -201,7 +199,7 @@ export function ReproductorNotas({ videoUrl, portadaUrl, duracion: duracionDada,
           {reproduciendo ? <PauseIcon className="fill-current" /> : <PlayIcon className="fill-current" />}
         </Button>
         <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
-          {tiempo(actual)} / {tiempo(duracion)}
+          {segundos(actual)} / {segundos(duracion)}
         </span>
         <Button variant="ghost" size="icon-sm" className="ml-auto" onClick={() => setSilencio((s) => !s)} disabled={!videoUrl} aria-label={silencio ? "Activar el sonido" : "Silenciar"}>
           {silencio ? <VolumeXIcon /> : <Volume2Icon />}
