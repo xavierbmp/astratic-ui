@@ -96,11 +96,13 @@ export function aplicarCambiosContactos(contactos: Contacto[], cambios: { id: st
   })
 }
 
-/** Un contacto nuevo con lo que se rellenó en el formulario. La marca es opcional; el primero de una marca es su principal. */
-export function contactoDeFormulario(valores: Record<string, ValorCampo>, campos: DefCampo<Contacto>[], datos: { id: string; hoy: string; contactos: Contacto[] }): Contacto | string {
-  const nombre = textoLimpio(valores.nombre ?? null)
+/**
+ * Un contacto nuevo con lo que se rellenó en el formulario. Nada es obligatorio: sin nombre, «Contacto
+ * sin nombre». La marca es opcional; el primero de una marca es su principal.
+ */
+export function contactoDeFormulario(valores: Record<string, ValorCampo>, campos: DefCampo<Contacto>[], datos: { id: string; hoy: string; contactos: Contacto[] }): Contacto {
+  const nombre = textoLimpio(valores.nombre ?? null) || "Contacto sin nombre"
   const marcaId = typeof valores.marca === "string" ? valores.marca : undefined
-  if (!nombre) return "Escribe el nombre"
   let contacto: Contacto = { id: datos.id, nombre, ...(marcaId ? { marcaId } : {}), creadoEl: datos.hoy }
   for (const campo of campos) {
     if (campo.id === "nombre" || campo.id === "marca" || !(campo.id in valores)) continue

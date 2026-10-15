@@ -35,8 +35,8 @@ describe("base de contactos", () => {
     expect(campo("marca").obligatorio).toBeFalsy()
     expect(escribirEnContacto(contactos[0], campo("marca"), null)).toMatchObject({ marcaId: undefined, principal: false })
   })
-  it("del formulario: pide el nombre; la marca es opcional y el primero de una marca es su principal", () => {
-    expect(contactoDeFormulario({}, campos, { id: "c3", hoy: "2026-10-13", contactos })).toBe("Escribe el nombre")
+  it("del formulario: nada es obligatorio (sin nombre, «Contacto sin nombre»); el primero de una marca es su principal", () => {
+    expect(contactoDeFormulario({}, campos, { id: "c3", hoy: "2026-10-13", contactos })).toEqual({ id: "c3", nombre: "Contacto sin nombre", creadoEl: "2026-10-13" })
     const suelto = contactoDeFormulario({ nombre: "Carla" }, campos, { id: "c3", hoy: "2026-10-13", contactos })
     expect(suelto).toEqual({ id: "c3", nombre: "Carla", creadoEl: "2026-10-13" })
     const nuevo = contactoDeFormulario({ nombre: "Carla", marca: "m2", email: "carla@nuura.es", f1: 50 }, campos, { id: "c3", hoy: "2026-10-13", contactos })

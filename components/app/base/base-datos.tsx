@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { toast } from "sonner"
-import { PlusIcon, Trash2Icon, UploadIcon } from "lucide-react"
+import { PlusIcon, Trash2Icon, UploadIcon, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { BulkBar } from "@/components/app/bulk-bar"
@@ -133,7 +133,7 @@ export function BaseDatos<T>({
   kanban?: { resumen?: (filas: T[]) => React.ReactNode; plegadas?: string[] }
   /** Botones de más en la barra de la selección (copiar emails, exportar…). */
   accionesSeleccion?: (ids: string[]) => React.ReactNode
-  formulario?: { titulo?: string; descripcion?: string; textoCrear?: string }
+  formulario?: { titulo?: string; descripcion?: string; textoCrear?: string; icono?: LucideIcon }
   /** Llegar con el formulario abierto («Nuevo contacto» desde otra página). */
   nuevoInicial?: boolean
   vacio?: (hayFiltro: boolean, limpiar: () => void) => React.ReactNode
@@ -438,6 +438,8 @@ export function BaseDatos<T>({
           onOpenChange={setNuevo}
           titulo={formulario?.titulo ?? objeto.nuevo}
           descripcion={formulario?.descripcion}
+          icono={formulario?.icono}
+          hoy={hoy}
           campos={base.formulario}
           onConfigurar={base.cambiarFormulario}
           iniciales={iniciales}
