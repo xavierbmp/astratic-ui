@@ -71,8 +71,8 @@ export default function InfluencerOperarPage() {
       <DocSection id="revisar" title="Lo que ve la marca, sin cuenta">
         <Prose>
           <p>
-            Todo con <code>PaginaMarca</code>: cabecera con lo que es y para quién, la creadora delante, Astratic discreto y el pie con
-            la privacidad del enlace. <code>/revisar/[token]</code> es la revisión de Feedback adaptada a una creadora: la versión y
+            Todo con <code>PaginaMarca</code>: cabecera con el logotipo de Astratic, lo que es y para quién y la creadora a la derecha, y el
+            pie con la privacidad del enlace y la firma de Astratic con su web (también al imprimir). <code>/revisar/[token]</code> es la revisión de Feedback adaptada a una creadora: la versión y
             las anteriores, notas en la cita del texto, el segundo del vídeo o el punto de la foto, la conversación, «Pedir cambios»
             y «Aprobar» con su nombre, y «Siguiente por revisar». <code>/formulario/[token]</code> es el brief rápido (o solo los
             materiales), <code>/contrato/[token]</code> la firma y <code>/informe/[token]</code> los resultados.
