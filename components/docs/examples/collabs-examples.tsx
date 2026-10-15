@@ -13,6 +13,7 @@ import { aplicarCambiosHtml } from "@/components/influencer/editor-aplicar"
 import { sincronizarSugerencias, tipoDeCambio, type CambioTexto, type Tramo } from "@/lib/revision-sugerencias"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ReproductorNotas, type NotaEnVideo } from "@/components/app/reproductor-notas"
 import { Conversacion } from "@/components/influencer/conversacion"
 import { VisorMedia } from "@/components/influencer/visor-media"
 import { PiezasEditor } from "@/components/influencer/piezas-editor"
@@ -119,6 +120,40 @@ export function SugerenciasGuionExample() {
             <EditorTexto value={siguiente} editable={false} className="max-h-48" contenidoClassName="px-3 py-2 text-xs" />
           </li>
         )}
+      </ol>
+    </div>
+  )
+}
+
+/** El vídeo de Maison Vero como lo revisa la marca: pulsar en el vídeo deja una nota en ese segundo y ese punto. */
+export function ReproductorNotasExample({ videoUrl }: { videoUrl?: string }) {
+  const v = vero.piezas[0].media[0]
+  const iniciales = v.notas.flatMap((n, i): NotaEnVideo[] => (n.ancla?.tipo === "segundo" ? [{ id: n.id, numero: i + 1, segundo: n.ancla.segundo, autor: n.autor, texto: n.texto, resuelta: n.resuelta }] : []))
+  const [notas, setNotas] = React.useState(iniciales)
+  const [nota, setNota] = React.useState<string | null>(null)
+  return (
+    <div className="flex w-full flex-wrap items-start justify-center gap-6 rounded-2xl bg-card p-6 shadow-card">
+      <ReproductorNotas
+        videoUrl={videoUrl}
+        portadaUrl={v.archivos?.[0]?.url}
+        duracion={v.archivos?.[0]?.duracion}
+        ancho={280}
+        notas={notas}
+        seleccionada={nota}
+        onSeleccionar={setNota}
+        onAnotar={({ segundo, x, y, texto }) => setNotas((ns) => [...ns, { id: `nv-${ns.length + 1}`, numero: ns.length + 1, segundo, x, y, autor: "Marca", texto, resuelta: false }])}
+      />
+      <ol className="flex w-64 flex-col gap-2 text-sm">
+        {notas.map((n) => (
+          <li key={n.id}>
+            <button type="button" onClick={() => setNota(n.id)} className={`w-full rounded-xl border p-2.5 text-left ${nota === n.id ? "border-brand ring-1 ring-brand" : "hover:border-input"}`}>
+              <span className="font-mono text-xs text-muted-foreground">
+                {n.numero} · {Math.floor(n.segundo / 60)}:{String(Math.floor(n.segundo % 60)).padStart(2, "0")}
+              </span>
+              <span className="block">{n.texto}</span>
+            </button>
+          </li>
+        ))}
       </ol>
     </div>
   )
