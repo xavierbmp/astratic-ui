@@ -22,11 +22,20 @@ export type QuickLink = { id: string; label: string; url: string }
 
 const schema = z.object({
   label: z.string().trim().min(1, "Ponle un nombre").max(40, "Máximo 40 caracteres"),
-  url: z.string().trim().url("Pega la dirección completa, con https://"),
+  url: z.string().trim().url("Pega la dirección completa, con https://").refine((u) => enlaceSeguro(u) !== undefined, "Solo direcciones que empiecen por http:// o https://"),
 })
 type Values = z.infer<typeof schema>
 
 const FAVICON = "https://www.google.com/s2/favicons"
+
+/** La dirección si es una web (http o https); nunca un `javascript:` que se ejecutaría al pulsarla. */
+function enlaceSeguro(url: string) {
+  try {
+    return ["http:", "https:"].includes(new URL(url).protocol) ? url : undefined
+  } catch {
+    return undefined
+  }
+}
 
 function faviconUrl(url: string) {
   try {
@@ -200,7 +209,7 @@ function LinkTile({
         </div>
       ) : (
         <a
-          href={link.url}
+          href={enlaceSeguro(link.url)}
           target="_blank"
           rel="noreferrer"
           className="flex min-h-20 flex-col items-center justify-center gap-1.5 rounded-xl bg-background/70 px-1.5 py-2.5 outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50"
@@ -305,7 +314,7 @@ export function LinkRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <a
-                    href={link.url}
+                    href={enlaceSeguro(link.url)}
                     target="_blank"
                     rel="noreferrer"
                     aria-label={link.label}
