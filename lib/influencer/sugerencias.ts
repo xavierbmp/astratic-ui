@@ -2,7 +2,7 @@
 // las fotos, sobre el copy): cuáles hay, cómo se pintan, decidirlas y dónde caen las aceptadas, que
 // van a la versión siguiente (la enviada no se edita).
 import type { DecisionSugerencia, Nota, Version } from "@/lib/influencer/modelo"
-import { aplicarCambios, type CambioTexto } from "@/lib/revision-sugerencias"
+import { aplicarCambios, tipoDeCambio, type CambioTexto } from "@/lib/revision-sugerencias"
 
 /** El cambio que propone una nota (su cita, con lo que la rodea, y lo que pone), o nada si solo comenta. */
 export function cambioDeNota(n: Nota): CambioTexto | null {
@@ -48,3 +48,18 @@ export function borradorSiguiente(versiones: Version[], v: Version) {
 export function decidirSugerencia(n: Nota, decision: DecisionSugerencia): Nota {
   return n.sugerencia ? { ...n, resuelta: true, sugerencia: { ...n.sugerencia, decision } } : n
 }
+
+const corta = (t: string) => (t.length > 80 ? `${t.slice(0, 80)}…` : t).replace(/\n/g, " ")
+
+/** Una sugerencia en palabras («Cambiar «x» por «y»»), con el comentario de la marca si lo dejó. */
+export function describirSugerencia(n: Nota) {
+  const cambio = cambioDeNota(n)
+  if (!cambio) return n.texto
+  const tipo = tipoDeCambio(cambio)
+  const que = tipo === "anadir" ? `Añadir «${corta(cambio.poner.trim())}»` : tipo === "quitar" ? `Quitar «${corta(cambio.cita.trim())}»` : `Cambiar «${corta(cambio.cita.trim())}» por «${corta(cambio.poner.trim())}»`
+  return n.texto ? `${que}. ${n.texto}` : que
+}
+
+/** Las notas como se leen en la conversación: las sugerencias dicen qué cambian. */
+export const notasParaConversacion = (notas: Nota[]) => notas.map((n) => (n.sugerencia ? { ...n, texto: describirSugerencia(n) } : n))
+
