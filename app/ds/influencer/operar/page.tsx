@@ -74,7 +74,7 @@ export default function InfluencerOperarPage() {
             Todo con <code>PaginaMarca</code>: cabecera con el logotipo de Astratic, lo que es y para quién y la creadora a la derecha, y el
             pie con la privacidad del enlace y la firma de Astratic con su web (también al imprimir). <code>/revisar/[token]</code> es la revisión de Feedback adaptada a una creadora: la versión y
             las anteriores, notas en la cita del texto, el segundo del vídeo o el punto de la foto, la conversación, «Pedir cambios»
-            y «Aprobar» con su nombre, y «Siguiente por revisar»; arriba, los contenidos de la campaña con su estado para pasar de uno a otro. <code>/formulario/[token]</code> es el brief rápido (o solo los
+            y «Aprobar» con su nombre, y «Siguiente por revisar»; arriba, los contenidos de la campaña con su estado para pasar de uno a otro, y en la cabecera «Compartir» y «Descargar» (el guion y el copy en Word, PDF o copiados, el vídeo y las fotos) con la invitación de Astratic Network Devs. <code>/formulario/[token]</code> es el brief rápido (o solo los
             materiales), <code>/contrato/[token]</code> la firma y <code>/informe/[token]</code> los resultados.
           </p>
         </Prose>
