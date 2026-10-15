@@ -61,6 +61,8 @@ const OPCIONES_TIPO = LISTA_TIPOS_TAREA.map((t) => {
   return { value: t, label: TIPOS_TAREA[t], icono: <Icono className="size-4 text-muted-foreground" /> }
 })
 const OPCIONES_PRIORIDAD = PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label, icono: <PrioridadBandera prioridad={p.id} /> }))
+/** Los selectores que son un botón, con la cara de los demás campos del formulario (40 px, sin relleno). */
+const CONTROL_BOTON = "h-10 rounded-md bg-transparent font-normal hover:bg-muted/50 dark:bg-input/30"
 const esTipo = (v: string) => LISTA_TIPOS_TAREA.find((t) => t === v)
 const esPrioridad = (v: string) => PRIORIDADES_TAREA.find((p) => p.id === v)?.id
 
@@ -214,10 +216,10 @@ export function TaskDialog({
             etiqueta="Día"
             htmlFor="tarea-fecha"
             ancho="tercio"
-            accion={
-              <span className="flex gap-0.5">
+            ayuda={
+              <span className="-ml-1 flex flex-wrap gap-0.5">
                 {atajos.map((a) => (
-                  <button key={a.label} type="button" onClick={() => setValue("fecha", a.fecha, { shouldDirty: true })} className={cn("rounded px-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground", fecha === a.fecha && "bg-brand-soft text-brand hover:bg-brand-soft hover:text-brand")}>
+                  <button key={a.label} type="button" onClick={() => setValue("fecha", a.fecha, { shouldDirty: true })} className={cn("rounded px-1 hover:bg-muted hover:text-foreground", fecha === a.fecha && "bg-brand-soft text-brand hover:bg-brand-soft hover:text-brand")}>
                     {a.label}
                   </button>
                 ))}
@@ -252,7 +254,7 @@ export function TaskDialog({
             />
           </CampoFormulario>
           <CampoFormulario etiqueta="Repetir" htmlFor="tarea-repetir" ancho="mitad">
-            <Controller control={control} name="repetir" render={({ field }) => <SelectorRepeticion id="tarea-repetir" value={field.value} onChange={field.onChange} fecha={fecha || dia} className="h-10 rounded-md" />} />
+            <Controller control={control} name="repetir" render={({ field }) => <SelectorRepeticion id="tarea-repetir" value={field.value} onChange={field.onChange} fecha={fecha || dia} className={CONTROL_BOTON} />} />
           </CampoFormulario>
 
           <CampoFormulario etiqueta="Etiquetas">
@@ -265,7 +267,7 @@ export function TaskDialog({
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Grabar, editar, gestiones…"
-                  className="min-h-10 rounded-md"
+                  className={cn(CONTROL_BOTON, "h-auto min-h-10")}
                   onCreate={
                     onCrearEtiqueta
                       ? async (texto) => {
