@@ -302,6 +302,19 @@ export default function PanelesPage() {
         />
       </DocSection>
 
+      <DocSection id="bloques" title="Los bloques de una página o un documento" lead="La misma idea fuera del panel: cada persona ordena, esconde y elige qué enseña cada bloque.">
+        <Prose>
+          <p>
+            Una ficha larga, una portada de bloques o un documento que se manda (un media kit, una propuesta) se ajustan con{" "}
+            <code>ListaBloques</code>: arrastrar para ordenar, el interruptor para esconder y, al desplegar un bloque, qué datos
+            enseña. En una página va tras el engranaje de su cabecera (<code>AjustesBloquesBoton</code>); en un editor de
+            documentos, a la vista junto a la vista previa. Lo guardado son los bloques en su orden y los datos escondidos por su
+            clave «bloque.dato» (<code>lib/bloques.ts</code>). Detalle en{" "}
+            <a href="/ds/componentes/ajustes-bloques">Ajustes de bloques</a>.
+          </p>
+        </Prose>
+      </DocSection>
+
       <DocSection id="siguiente" title="Relacionado">
         <NextLinks
           links={[

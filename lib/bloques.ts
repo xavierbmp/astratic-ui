@@ -19,7 +19,7 @@ export function bloquesVisibles<Id extends string>(ajustes: AjustesBloques<Id>):
 }
 
 /** Los ajustes con un bloque enseñado o escondido. */
-export function conBloque<A extends AjustesBloques>(ajustes: A, id: A["bloques"][number]["id"], visible: boolean): A {
+export function conBloque<A extends AjustesBloques>(ajustes: A, id: string, visible: boolean): A {
   return { ...ajustes, bloques: ajustes.bloques.map((b) => (b.id === id ? { ...b, visible } : b)) }
 }
 

@@ -118,7 +118,8 @@
         { "path": "components/app/states.tsx", "type": "registry:component" },
         { "path": "components/app/status-badge.tsx", "type": "registry:component" },
         { "path": "lib/status.ts", "type": "registry:lib" },
-        { "path": "lib/format.ts", "type": "registry:lib" }
+        { "path": "lib/format.ts", "type": "registry:lib" },
+        { "path": "components/app/zona-subida.tsx", "type": "registry:component" }
       ]
     },
     {
@@ -285,7 +286,11 @@
         { "path": "components/app/confirm-dialog.tsx", "type": "registry:component" },
         { "path": "components/app/avatar-initials.tsx", "type": "registry:component" },
         { "path": "components/app/states.tsx", "type": "registry:component" },
-        { "path": "components/ui/context-menu.tsx", "type": "registry:ui" }
+        { "path": "components/ui/context-menu.tsx", "type": "registry:ui" },
+        { "path": "components/app/agenda.tsx", "type": "registry:component" },
+        { "path": "components/app/zona-subida.tsx", "type": "registry:component" },
+        { "path": "components/app/base/importar-dialog.tsx", "type": "registry:component" },
+        { "path": "lib/base/importar.ts", "type": "registry:lib" }
       ]
     },
     {
@@ -460,6 +465,109 @@
       ]
     },
     {
+      "name": "ajustes-bloques",
+      "type": "registry:component",
+      "title": "Ajustes de bloques",
+      "description": "Ordenar arrastrando, enseñar o esconder los bloques de una página o un documento y, al desplegar uno, qué datos enseña. A la vista (ListaBloques) o tras el engranaje de la cabecera (AjustesBloquesBoton). Lógica pura en lib/bloques.ts.",
+      "dependencies": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "lucide-react"],
+      "registryDependencies": ["switch", "popover", "button"],
+      "files": [
+        { "path": "components/app/ajustes-bloques.tsx", "type": "registry:component" },
+        { "path": "components/app/arrastre-filas.tsx", "type": "registry:component" },
+        { "path": "components/app/config-button.tsx", "type": "registry:component" },
+        { "path": "lib/bloques.ts", "type": "registry:lib" }
+      ]
+    },
+    {
+      "name": "segmentado",
+      "type": "registry:component",
+      "title": "Segmentado de cabecera",
+      "description": "El control segmentado pequeño de la cabecera de un bloque o un panel: elige un valor o recorta lo que se ve.",
+      "registryDependencies": ["tabs"],
+      "files": [
+        { "path": "components/app/segmentado.tsx", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "revision",
+      "type": "registry:component",
+      "title": "Revisión con notas",
+      "description": "La revisión de un contenido por alguien de fuera, como en Feedback: el visor de fotos y vídeo con las notas clavadas en su sitio (VisorMedia) y la conversación con las notas, sus hilos y el progreso (Conversacion). Tipos en lib/revision-notas.ts.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "textarea", "tabs"],
+      "files": [
+        { "path": "components/app/conversacion.tsx", "type": "registry:component" },
+        { "path": "components/app/visor-media.tsx", "type": "registry:component" },
+        { "path": "components/app/segmentado.tsx", "type": "registry:component" },
+        { "path": "lib/revision-notas.ts", "type": "registry:lib" }
+      ]
+    },
+    {
+      "name": "carpetas",
+      "type": "registry:component",
+      "title": "Carpetas en árbol",
+      "description": "Carpetas dentro de carpetas que se pliegan, se arrastran (encima, dentro o debajo de otra) y se crean, renombran, mueven y borran desde su menú; en un bloque, en el lateral de una base o en el móvil. Lógica pura en lib/carpetas.ts.",
+      "dependencies": ["@dnd-kit/core", "lucide-react", "sonner"],
+      "registryDependencies": ["button", "dropdown-menu", "sheet"],
+      "files": [
+        { "path": "components/app/arbol-carpetas.tsx", "type": "registry:component" },
+        { "path": "components/app/carpetas-bloque.tsx", "type": "registry:component" },
+        { "path": "components/app/resize-handle.tsx", "type": "registry:component" },
+        { "path": "components/app/confirm-dialog.tsx", "type": "registry:component" },
+        { "path": "hooks/use-local-storage.ts", "type": "registry:hook" },
+        { "path": "lib/carpetas.ts", "type": "registry:lib" }
+      ]
+    },
+    {
+      "name": "calendarios",
+      "type": "registry:component",
+      "title": "Agenda, calendarios y Gantt",
+      "description": "La agenda del mes (cuadrícula y, en el móvil, lista), el calendario pequeño de un resumen, el calendario para planificar por mes o semana con arrastre y el cronograma en Gantt. Fechas en lib/base/calendario.ts.",
+      "dependencies": ["@dnd-kit/core", "lucide-react"],
+      "registryDependencies": ["button", "tooltip"],
+      "files": [
+        { "path": "components/app/agenda.tsx", "type": "registry:component" },
+        { "path": "components/app/calendario-periodo.tsx", "type": "registry:component" },
+        { "path": "components/app/gantt.tsx", "type": "registry:component" },
+        { "path": "lib/base/calendario.ts", "type": "registry:lib" },
+        { "path": "lib/filtros/fechas.ts", "type": "registry:lib" }
+      ]
+    },
+    {
+      "name": "link-grid",
+      "type": "registry:component",
+      "title": "Directorio de enlaces",
+      "description": "Los enlaces de uso diario con el icono de cada web, en mosaico o en una fila, que se ordenan arrastrando, se editan y se borran.",
+      "dependencies": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "react-hook-form", "@hookform/resolvers", "zod", "sonner", "lucide-react"],
+      "registryDependencies": ["button", "dialog", "field", "input", "tooltip"],
+      "files": [
+        { "path": "components/app/link-grid.tsx", "type": "registry:component" },
+        { "path": "components/app/confirm-dialog.tsx", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "zona-subida",
+      "type": "registry:component",
+      "title": "Zona de subida",
+      "description": "Soltar o elegir archivos: la forma de subir archivos de todo el kit.",
+      "dependencies": ["lucide-react"],
+      "files": [
+        { "path": "components/app/zona-subida.tsx", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "compartir-enlace",
+      "type": "registry:component",
+      "title": "Compartir un enlace",
+      "description": "Un enlace sin cuenta para alguien de fuera, listo para mandar: copiar, WhatsApp, email y abrirlo como lo verá. Suelto o en un diálogo.",
+      "dependencies": ["lucide-react", "sonner"],
+      "registryDependencies": ["button", "input", "dialog"],
+      "files": [
+        { "path": "components/app/compartir-enlace.tsx", "type": "registry:component" },
+        { "path": "hooks/use-origen.ts", "type": "registry:hook" }
+      ]
+    },
+    {
       "name": "operations-page",
       "type": "registry:block",
       "title": "Página de operación",
@@ -541,14 +649,18 @@
         { "path": "hooks/use-base.ts", "type": "registry:hook" },
         { "path": "hooks/use-base-local.ts", "type": "registry:hook" },
         { "path": "components/app/resize-handle.tsx", "type": "registry:component" },
-        { "path": "components/ui/context-menu.tsx", "type": "registry:ui" }
+        { "path": "components/ui/context-menu.tsx", "type": "registry:ui" },
+        { "path": "components/app/agenda.tsx", "type": "registry:component" },
+        { "path": "components/app/zona-subida.tsx", "type": "registry:component" },
+        { "path": "components/app/base/importar-dialog.tsx", "type": "registry:component" },
+        { "path": "lib/base/importar.ts", "type": "registry:lib" }
       ]
     },
     {
       "name": "influencer-workspace",
       "type": "registry:block",
       "title": "Influencer Workspace (design system hijo)",
-      "description": "Capa de estilo y componentes del workspace de influencers: bloque, cifra, tarjeta de collab, collabs en diagonal, calendario pequeño, tarea, tarjeta del perfil, avisos, directorio de enlaces, barra inferior del móvil, marca, lista y diálogo de tareas, agenda, tarjeta de pieza, cronograma en Gantt, editor de texto con notas y variables, visor de vídeo y fotos con notas, conversación, piezas para formularios, compartir enlace, página de la marca, tarjeta de idea, apuntar al vuelo, calendario y lista de contenidos, caption con los límites de cada red, antes de publicar, teleprompter y el modelo con su lógica. Requiere el tema `.theme-influencer` de globals.css.",
+      "description": "Capa de estilo y componentes del workspace de influencers: bloque, cifra, tarjeta de collab, collabs en diagonal, tarea, tarjeta del perfil, avisos, barra inferior del móvil, marca, lista y diálogo de tareas, tarjeta de pieza, editor de texto con notas y variables, piezas para formularios, página de la marca, tarjeta de idea, apuntar al vuelo, lista de contenidos, caption con los límites de cada red, antes de publicar, teleprompter y el modelo con su lógica. La agenda, el calendario pequeño, el de contenidos, el Gantt, el visor y la conversación son las piezas del madre con sus tintes y sus textos: instala también calendarios, revision, carpetas, link-grid, zona-subida, compartir-enlace y ajustes-bloques. Requiere el tema `.theme-influencer` de globals.css.",
       "dependencies": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities", "react-hook-form", "@hookform/resolvers", "zod", "sonner", "lucide-react", "@tiptap/react", "@tiptap/pm", "@tiptap/starter-kit", "@tiptap/extensions", "@tiptap/extension-highlight", "@tiptap/extension-text-align"],
       "registryDependencies": ["button", "checkbox", "dialog", "dropdown-menu", "field", "input", "popover", "radio-group", "select", "separator", "skeleton", "slider", "switch", "tabs", "textarea", "toggle-group", "tooltip"],
       "files": [
@@ -561,7 +673,6 @@
         { "path": "components/influencer/task-card.tsx", "type": "registry:component" },
         { "path": "components/influencer/profile-panel.tsx", "type": "registry:component" },
         { "path": "components/influencer/notice-card.tsx", "type": "registry:component" },
-        { "path": "components/influencer/link-grid.tsx", "type": "registry:component" },
         { "path": "components/influencer/mobile-tab-bar.tsx", "type": "registry:component" },
         { "path": "components/influencer/brand-mark.tsx", "type": "registry:component" },
         { "path": "components/influencer/task-table.tsx", "type": "registry:component" },
@@ -596,8 +707,6 @@
         { "path": "components/influencer/plataformas.tsx", "type": "registry:component" },
         { "path": "components/influencer/ajustes-collabs-formulario.tsx", "type": "registry:component" },
         { "path": "components/influencer/plantillas-menu.tsx", "type": "registry:component" },
-        { "path": "components/influencer/compartir-enlace.tsx", "type": "registry:component" },
-        { "path": "components/influencer/zona-subida.tsx", "type": "registry:component" },
         { "path": "components/influencer/icono-material.tsx", "type": "registry:component" },
         { "path": "components/influencer/pagina-marca.tsx", "type": "registry:component" },
         { "path": "components/influencer/firmas-contrato.tsx", "type": "registry:component" },
@@ -645,7 +754,6 @@
         { "path": "lib/influencer/avisos.ts", "type": "registry:lib" },
         { "path": "lib/influencer/primeros-pasos.ts", "type": "registry:lib" },
         { "path": "lib/influencer/apuntes.ts", "type": "registry:lib" },
-        { "path": "lib/influencer/carpetas.ts", "type": "registry:lib" },
         { "path": "lib/influencer/materiales.ts", "type": "registry:lib" },
         { "path": "lib/influencer/planificacion.ts", "type": "registry:lib" },
         { "path": "lib/influencer/campos-planificacion.ts", "type": "registry:lib" },

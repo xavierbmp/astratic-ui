@@ -158,7 +158,7 @@ export default function InfluencerComponentesPage() {
         />
       </DocSection>
 
-      <DocSection id="mini-calendario" title="Calendario pequeño" lead="El mes de un vistazo para un resumen, como Google Calendar: cada día es un bloque con lo que tiene escrito en pequeño (hitos, cobros, tareas) en el tinte de su collab, y crece hasta llenar su bloque.">
+      <DocSection id="mini-calendario" title="Calendario pequeño" lead="El mes de un vistazo para un resumen, como Google Calendar: cada día es un bloque con lo que tiene escrito en pequeño (hitos, cobros, tareas) en el tinte de su collab, y crece hasta llenar su bloque. Es el MiniCalendario del madre con los eventos de la agenda.">
         <Example className={EXAMPLE} code={`<Block>
   <BlockHeader title="Calendario" href="/workspace/contenidos/planificacion" />
   <MiniCalendario eventos={eventos} hoy={hoy} hrefDia={(dia) => "/workspace/contenidos/planificacion?dia=" + dia} />
@@ -226,7 +226,7 @@ export default function InfluencerComponentesPage() {
         </Example>
       </DocSection>
 
-      <DocSection id="links" title="Directorio de enlaces" lead="Los enlaces de uso diario en mosaico, con el icono de su web. En modo edición se ordenan arrastrando, se editan y se borran con confirmación.">
+      <DocSection id="links" title="Directorio de enlaces" lead="Los enlaces de uso diario en mosaico, con el icono de su web. En modo edición se ordenan arrastrando, se editan y se borran con confirmación. Son LinkGrid y LinkRow del madre, tal cual, dentro de un bloque del hijo.">
         <Example className={EXAMPLE} code={`const [links, setLinks] = useState(initial)
 const [editing, setEditing] = useState(false)
 
@@ -316,7 +316,7 @@ const [editing, setEditing] = useState(false)
         />
       </DocSection>
 
-      <DocSection id="agenda" title="Agenda" lead="Mes con los hitos de cada pieza (guion, grabación, V1, publicación, resultados), los cobros y las tareas con fecha, cada uno con el tinte de su collab. En el móvil, la lista del mes.">
+      <DocSection id="agenda" title="Agenda" lead="Mes con los hitos de cada pieza (guion, grabación, V1, publicación, resultados), los cobros y las tareas con fecha, cada uno con el tinte de su collab. En el móvil, la lista del mes. Es la Agenda del madre: eventoDeCalendario le da a cada evento su tipo, su marca y su tinte.">
         <Example className={EXAMPLE} code={`const eventos = [...eventosDeCollabs(collabs, marcas), ...eventosDeTareas(tareas, collabs)]
 <Agenda eventos={eventos} hoy={hoy} />`}>
           <Agenda eventos={eventosDeCollabs(demoCollabs.slice(0, 2), demoMarcas)} hoy={HOY} className="w-full" />
@@ -348,7 +348,7 @@ const [editing, setEditing] = useState(false)
         </Example>
       </DocSection>
 
-      <DocSection id="gantt" title="Cronograma (Gantt)" lead="Una fila por pieza con sus fases (guion, grabación, edición, revisión, resultados) entre sus hitos, el rombo de la publicación y la línea de hoy. Arrastrar una fila (o las flechas con ella enfocada) mueve la publicación y todas sus fases.">
+      <DocSection id="gantt" title="Cronograma (Gantt)" lead="Una fila por pieza con sus fases (guion, grabación, edición, revisión, resultados) entre sus hitos, el rombo de la publicación y la línea de hoy. Arrastrar una fila (o las flechas con ella enfocada) mueve la publicación y todas sus fases. Es el Gantt del madre con las fases en su tinte, «Pieza» de columna y la publicación de hito.">
         <Example className={EXAMPLE} code={`<Gantt
   hoy={hoy}
   filas={piezas.map((p) => ({ id: p.id, titulo: p.titulo, fases: fasesDePieza(p), publicacion: p.publicacion }))}
@@ -394,7 +394,7 @@ const [editing, setEditing] = useState(false)
         </Example>
         <Prose>
           <p>
-            En la pieza, junto al guion o al vídeo, y en lo que ve la marca con el enlace de revisión. <code>lado="marca"</code> deja escribir notas ancladas; <code>lado="influencer"</code>, resolverlas, contestar y escribir a la marca.
+            En la pieza, junto al guion o al vídeo, y en lo que ve la marca con el enlace de revisión. Son <code>VisorMedia</code> y <code>Conversacion</code> del madre (<a href="/ds/componentes/revision">Revisión con notas</a>) con el tinte de la marca de fondo, el estado de cada versión y los textos que hablan de la marca: ella hace la pieza. <code>lado="marca"</code> deja escribir notas ancladas; <code>lado="influencer"</code>, resolverlas, contestar y escribir a la marca.
           </p>
         </Prose>
       </DocSection>
@@ -408,8 +408,8 @@ const [editing, setEditing] = useState(false)
             <><code>PlataformasEditor</code>: dónde se publica la campaña. Instagram, TikTok y YouTube a la vista, «Más plataformas» con el resto del marketing de influencers y «Otra» para escribir la que falte; en píldoras, se eligen varias. <code>SelectorPlataforma</code> elige la de un formato e <code>IconoPlataforma</code> pinta su icono.</>,
             <><code>PiezasEditor</code> (en pantalla, «Entregables»): arriba, sin recuadro, un atajo por cada formato de las <code>plataformas</code> elegidas y «Más formatos» (todos, o uno nuevo escribiéndolo). Cada entregable es una tarjeta: el icono de su formato con el de su plataforma (se pulsa para cambiarlo), su nombre de serie con la campaña («Reel · Otoño», se cambia al momento), su importe con <code>conImporte</code> y, en la franja de abajo, «Publica el», «Script el …» con su día (de serie, unos días antes de publicar; «Sin script» en su calendario lo quita), sus condiciones en línea (<code>CondicionesEditor</code>) e «Indicaciones».</>,
             <><code>CondicionesEditor</code>: cada condición es su icono y sus días (el nombre, al pasar por encima), en una sola fila que se desplaza con el borde difuminado si no caben. El «+» abre la lista para escribir, elegir (sale con sus días de serie) o quitar las marcadas; con <code>onNuevoTipo</code>, la que no existe se crea encima con <code>CondicionFormulario</code> (nombre, icono y días de serie). <code>SelectorIconoCondicion</code> cambia el icono desde una fila de los ajustes. Con <code>onNuevoFormato</code> y <code>onEditarFormato</code>, el formato que falta se crea o se cambia encima (<code>FormatoPiezaFormulario</code>). Lo usan el formulario de la marca, «Nueva collab» y «Añadir piezas».</>,
-            <><code>CompartirEnlace</code> y <code>CompartirEnlaceDialog</code>: copiar, WhatsApp, email desde su correo y «Ver como la marca». Revisión, formulario, contrato e informe se mandan igual.</>,
-            <><code>PaginaMarca</code>: la página sin cuenta (cabecera con lo que es y para quién, la creadora delante, pie con la privacidad). <code>ZonaSubida</code>: soltar o elegir archivos.</>,
+            <><code>CompartirEnlace</code> y <code>CompartirEnlaceDialog</code>, del madre: copiar, WhatsApp, email desde su correo y, con <code>verComo=&quot;Ver como la marca&quot;</code>, abrirlo como lo verá. Revisión, formulario, contrato e informe se mandan igual.</>,
+            <><code>PaginaMarca</code>: la página sin cuenta (cabecera con lo que es y para quién, la creadora delante, pie con la privacidad). <code>ZonaSubida</code>, del madre: soltar o elegir archivos.</>,
             <><code>Firmas</code> (contrato) y <code>ResumenResultados</code>, <code>CifrasPieza</code> y <code>Capturas</code> (informe): las mismas en el workspace y en la página de la marca.</>,
           ]}
         />
@@ -446,8 +446,8 @@ const [editing, setEditing] = useState(false)
           items={[
             <><code>ApunteCard</code>: una idea o una nota en la galería (portada con la imagen que elija, el principio del texto o el tinte de su pilar), con las propiedades que pide la vista y la caducidad siempre. La estrella, la casilla y la acción no abren la ficha. <code>COLUMNAS_GALERIA</code> da el tamaño de tarjeta de la vista.</>,
             <><code>CapturaIdea</code>: apuntar en cinco segundos, con texto o un enlace (la red sale del dominio) o con una captura.</>,
-            <>Las carpetas son un árbol (<code>lib/influencer/carpetas.ts</code>: cada una sabe su madre y su `orden` entre sus hermanas). Una carpeta enseña también lo de las que lleva dentro; al borrarla, lo suyo sube a su madre. Las notas se enlazan con ideas (<code>VinculoApunte</code>, <code>enlazar</code>). Lo que se adjunta usa los tipos de los materiales (<code>tipoDeArchivo</code>, <code>ICONOS_MATERIAL</code>).</>,
-            <><code>CalendarioContenidos</code> (mes o semana) y <code>AgendaContenidos</code> (lista con los huecos libres): pintan <code>EntradaCalendario</code> de <code>lib/influencer/planificacion.ts</code>, sea contenido propio, pieza de collab (con candado: fecha pactada), hito, tarea, cobro o fecha clave. El calendario no pone su <code>DndContext</code>: lo pone la página para poder soltar ideas de fuera.</>,
+            <>Las carpetas son las del madre (<code>CarpetasBloque</code> con <code>lib/carpetas.ts</code>: cada una sabe su madre y su <code>orden</code> entre sus hermanas), con el tinte de cada una y los atajos Todo, Favoritas y Sin carpeta. Una carpeta enseña también lo de las que lleva dentro; al borrarla, lo suyo sube a su madre. Las notas se enlazan con ideas (<code>VinculoApunte</code>, <code>enlazar</code>). Lo que se adjunta usa los tipos de los materiales (<code>tipoDeArchivo</code>, <code>ICONOS_MATERIAL</code>).</>,
+            <><code>CalendarioContenidos</code> (mes o semana, sobre el <code>CalendarioPeriodo</code> del madre) y <code>AgendaContenidos</code> (lista con los huecos libres): pintan <code>EntradaCalendario</code> de <code>lib/influencer/planificacion.ts</code>, sea contenido propio, pieza de collab (con candado: fecha pactada), hito, tarea, cobro o fecha clave. El calendario no pone su <code>DndContext</code>: lo pone la página para poder soltar ideas de fuera.</>,
             <><code>EditorCaption</code>: un solo texto con los hashtags dentro; cuenta lo que admite cada red (Instagram, 2.200 caracteres y 5 hashtags), enseña lo que se ve antes de «más» y avisa de la publicidad sin marcar. <code>AntesDePublicar</code>: lo que falta, poco y útil.</>,
             <><code>Teleprompter</code>: el guion a pantalla completa, con velocidad, tamaño de letra y espejo, para leerlo desde otro dispositivo al grabar.</>,
           ]}

@@ -6,7 +6,6 @@ import type { Tint } from "@/lib/influencer/tints"
 import type { SocialNetwork } from "@/components/app/social-icons"
 import type { ValorCampo } from "@/lib/base/campos"
 import type { Ancla, ArchivoRevision, Mensaje, NotaRevision } from "@/lib/revision-notas"
-import type { CarpetaArbol } from "@/lib/carpetas"
 
 /** Un estado con su etiqueta y el tono de `StatusBadge`. */
 export type Estado<T extends string> = { id: T; label: string; tone: StatusTone }
@@ -1158,7 +1157,7 @@ export type Apunte = {
 }
 
 /** Donde ordena sus apuntes, con un tinte para reconocerla. Puede ir dentro de otra; `orden`, su sitio entre sus hermanas. */
-export type Carpeta = CarpetaArbol & { tint: Tint }
+export type Carpeta = { id: string; nombre: string; tint: Tint; padreId?: string; orden: number }
 
 /** Una nota enlazada con una idea (la investigación de un producto con las ideas que salen de ella). Da igual cuál es `desde`. */
 export type VinculoApunte = { id: string; desde: string; hasta: string }

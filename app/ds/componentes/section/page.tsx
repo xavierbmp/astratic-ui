@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/app/status-badge"
 import { AvatarInitials } from "@/components/app/avatar-initials"
 import { DocPage, DocSection, DoDont, Example, NextLinks, Prose, Rules, SpecTable } from "@/components/docs/doc"
 import { CodeBlock } from "@/components/docs/code-block"
+import { SegmentadoDemo } from "@/components/docs/examples/segmentado-demo"
 
 export const metadata = { title: "Sección" }
 
@@ -60,6 +61,10 @@ export default function SectionPage() {
               <strong>La acción de la cabecera es del bloque</strong>, no de la página: «Ver todas» o el engranaje de configurar lo que
               enseña el bloque (<code>ConfigButton</code>). Una lista de registros no va en un bloque: es una base de datos, con su barra.
               Botones <code>ghost</code> tamaño <code>sm</code>.
+            </>,
+            <>
+              <strong>Elegir qué enseña el bloque</strong> (el periodo, Todo o Notas, Mes o Semana) es un <code>Segmentado</code> en la
+              cabecera: el segmentado gris de 28 px, uno por cabecera. Cambiar de página o de parte de una ficha son pestañas, no esto.
             </>,
           ]}
         />
@@ -151,6 +156,13 @@ export default function SectionPage() {
           <WorkGrid toolbar={<Box label="toolbar · ancho del bloque" className="h-8" />} aside={<Box label="aside · 320 px" className="h-full min-h-60" />}>
             <Box label="children · 1fr" />
           </WorkGrid>
+        </Example>
+        <Example
+          title="Con un segmentado en la cabecera"
+          description="Segmentado, en components/app/segmentado.tsx: valor, opciones { id, label }, onCambiar y label (para lectores de pantalla)."
+          code={`<SectionHeader title="Facturado" action={<Segmentado valor={periodo} onCambiar={setPeriodo} label="Periodo" opciones={PERIODOS} />} />`}
+        >
+          <SegmentadoDemo />
         </Example>
       </DocSection>
 
