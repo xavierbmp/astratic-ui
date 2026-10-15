@@ -20,6 +20,7 @@ import { CampoFecha } from "@/components/app/formulario/campo-fecha"
 import { claveDe, etiquetaDeQue, opcionesDeQue } from "@/components/influencer/task-tipo"
 import { ICONO_TIPO_TAREA, PrioridadBandera } from "@/components/influencer/task-cells"
 import { SelectorRepeticion } from "@/components/influencer/task-repeticion"
+import { EditorSubtareas } from "@/components/influencer/task-subtareas"
 
 // Nada es obligatorio: sin título, «Tarea sin título».
 const esquema = z
@@ -71,7 +72,7 @@ const esPrioridad = (v: string) => PRIORIDADES_TAREA.find((p) => p.id === v)?.id
  * página en la que sale: sin tipo, CRM, Collabs, Contenido o Cobros) y, al lado, de qué campaña o de
  * qué ficha del CRM es, si es de alguna. Nace sin tipo salvo que se cree desde una página
  * (`dondeInicial`) o desde una ficha, que ya lo deja decidido (`dondeFijo`). Desde una plantilla,
- * llega rellena y con sus subtareas. Nada es obligatorio.
+ * llega rellena y con sus subtareas; si no, se le añaden aquí. Nada es obligatorio.
  */
 export function TaskDialog({
   open,
@@ -99,7 +100,7 @@ export function TaskDialog({
   inicial?: Partial<Pick<Tarea, "titulo" | "fecha" | "fechaLimite" | "prioridad" | "etiquetas" | "estado">>
   plantilla?: PlantillaTarea | null
   onCrearEtiqueta?: (nombre: string) => EtiquetaTarea
-  /** La tarea y los títulos de sus subtareas (los de la plantilla). */
+  /** La tarea y los títulos de sus subtareas (las escritas en el alta o las de la plantilla). */
   onCreate: (tarea: Tarea, subtareas: string[]) => void
 }) {
   const { register, handleSubmit, control, reset, setValue, formState } = useForm<Valores>({
@@ -283,17 +284,9 @@ export function TaskDialog({
           <CampoFormulario etiqueta="Notas" htmlFor="tarea-notas" error={errors.notas?.message}>
             <Textarea id="tarea-notas" rows={2} placeholder="Lo que necesitas para hacerla" aria-invalid={!!errors.notas} {...register("notas")} />
           </CampoFormulario>
-          {subtareas.length > 0 && (
-            <CampoFormulario etiqueta="Subtareas">
-              <ul className="grid gap-1.5">
-                {subtareas.map((_, i) => (
-                  <li key={i}>
-                    <Input aria-label={`Subtarea ${i + 1}`} className="h-9 rounded-md text-sm" {...register(`subtareas.${i}` as const)} />
-                  </li>
-                ))}
-              </ul>
-            </CampoFormulario>
-          )}
+          <CampoFormulario etiqueta="Subtareas" htmlFor="tarea-subtareas" ayuda={subtareas.length ? "Intro añade la siguiente." : undefined}>
+            <Controller control={control} name="subtareas" render={({ field }) => <EditorSubtareas id="tarea-subtareas" value={field.value} onChange={field.onChange} />} />
+          </CampoFormulario>
         </FormularioCuerpo>
         <FormularioPie>
           <Button type="button" variant="outline" size="lg" onClick={() => onOpenChange(false)}>

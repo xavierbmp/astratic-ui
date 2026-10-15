@@ -129,8 +129,8 @@ export function BaseDatos<T>({
   ficha?: PanelFicha
   /** Si el lateral de vistas empieza abierto (de serie, sí; cerrado si la página tiene panel). */
   lateralInicial?: boolean
-  /** Del kanban: el resumen de cada columna y las que empiezan plegadas. */
-  kanban?: { resumen?: (filas: T[]) => React.ReactNode; plegadas?: string[] }
+  /** Del kanban: el resumen de cada columna, las que empiezan plegadas y los botones al pie de cada tarjeta. */
+  kanban?: { resumen?: (filas: T[]) => React.ReactNode; plegadas?: string[]; acciones?: (fila: T) => React.ReactNode }
   /** Botones de más en la barra de la selección (copiar emails, exportar…). */
   accionesSeleccion?: (ids: string[]) => React.ReactNode
   formulario?: { titulo?: string; descripcion?: string; textoCrear?: string; icono?: LucideIcon }
@@ -307,7 +307,7 @@ export function BaseDatos<T>({
     if (movil) return <ListaMovil registros={registros} columnas={columnas} getId={getId} celdas={celdas} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
     switch (tipo) {
       case "kanban":
-        return <KanbanBase {...tarjetas} campo={campos.find((c) => c.id === vista.apilar)} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} onEscribir={escribirUno} clave={`${clave}:${vista.id}`} resumen={kanban?.resumen} plegadas={kanban?.plegadas} />
+        return <KanbanBase {...tarjetas} campo={campos.find((c) => c.id === vista.apilar)} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} onEscribir={escribirUno} clave={`${clave}:${vista.id}`} resumen={kanban?.resumen} plegadas={kanban?.plegadas} acciones={kanban?.acciones} />
       case "galeria":
         return <GaleriaBase {...tarjetas} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
       case "calendario":

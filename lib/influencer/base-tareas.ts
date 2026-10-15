@@ -5,7 +5,7 @@
 
 import { SIN_VALOR } from "@/lib/vistas/core"
 import { opcionesDeEstados, textoLimpio, type ColorOpcion, type DefCampo, type TipoCampo, type ValorCampo } from "@/lib/base/campos"
-import { vistaNueva, type VistaBase } from "@/lib/base/vistas"
+import { vistaNueva, type VistaDeSerie } from "@/lib/base/vistas"
 import { soloFecha } from "@/lib/influencer/fechas"
 import { asignarCampo, conValor, idCampoPropio } from "@/lib/influencer/campos-tareas"
 import { CUANDO_TAREA, collabIdDe, cuandoDe, estaVencida, marcaIdDe, nombreDeCampana, proyectoDe, proyectosPosibles, type ContextoTareas } from "@/lib/influencer/tareas"
@@ -23,6 +23,8 @@ export type ParamsBaseTareas = { ctx: ContextoTareas; etiquetas: EtiquetaTarea[]
 export function camposBaseTareas({ ctx, etiquetas, hoy, tareas, propios }: ParamsBaseTareas): DefCampo<Tarea>[] {
   const dia = soloFecha(hoy)
   const hijas = (t: Tarea) => tareas.filter((x) => x.padreId === t.id)
+  const conHijas = new Set(tareas.map((t) => t.padreId))
+  const madres = tareas.filter((t) => conHijas.has(t.id))
   return [
     { id: "titulo", nombre: "Tarea", tipo: "texto", principal: true, obligatorio: true, grupo: "Tarea", valor: (t) => t.titulo },
     { id: "hecha", nombre: "Hecha", tipo: "casilla", grupo: "Tarea", valor: (t) => t.estado === "hecha" },
@@ -38,6 +40,7 @@ export function camposBaseTareas({ ctx, etiquetas, hoy, tareas, propios }: Param
     { id: "campana", nombre: "Campaña", tipo: "select", ocultoDeSerie: true, opciones: ctx.collabs.map((c) => ({ id: c.id, label: nombreDeCampana(c, ctx) })), grupo: "De qué es", valor: (t) => collabIdDe(t.donde) ?? null },
     { id: "marca", nombre: "Marca", tipo: "vinculo", vinculo: { objeto: "marca" }, soloLectura: true, ocultoDeSerie: true, opciones: opcionesDeMarcas(ctx.marcas), grupo: "De qué es", valor: (t) => marcaIdDe(t.donde, ctx) ?? null },
     { id: "esSubtarea", nombre: "Es subtarea", tipo: "casilla", soloLectura: true, ocultoDeSerie: true, grupo: "Tarea", valor: (t) => !!t.padreId },
+    { id: "madre", nombre: "Tarea principal", tipo: "select", soloLectura: true, ocultoDeSerie: true, opciones: madres.map((m) => ({ id: m.id, label: m.titulo })), grupo: "Tarea", descripcion: "De qué tarea cuelga una subtarea.", valor: (t) => t.padreId ?? null },
     { id: "vencida", nombre: "Vencida", tipo: "casilla", soloLectura: true, ocultoDeSerie: true, grupo: "Fechas", valor: (t) => estaVencida(t, dia) },
     { id: "repite", nombre: "Se repite", tipo: "casilla", soloLectura: true, ocultoDeSerie: true, grupo: "Fechas", valor: (t) => !!t.repetir },
     { id: "origen", nombre: "Origen", tipo: "select", soloLectura: true, ocultoDeSerie: true, opciones: Object.entries(ORIGENES_TAREA).map(([id, label]) => ({ id, label })), grupo: "Más", valor: (t) => t.origen },
@@ -57,14 +60,17 @@ export function camposBaseTareas({ ctx, etiquetas, hoy, tareas, propios }: Param
 }
 
 const sinSubtareas = { union: "y" as const, condiciones: [{ campo: "esSubtarea", op: "falso" as const }] }
+const soloSubtareas = { union: "y" as const, condiciones: [{ campo: "esSubtarea", op: "verdadero" as const }] }
 
-/** Por cuándo toca (la de siempre), el tablero por estado, el calendario, por tipo y todas. */
-export const vistasDeSerieTareas = (campos: DefCampo<Tarea>[]): VistaBase[] => [
+/** Por cuándo toca (la de siempre), el tablero por estado, el calendario, por tipo, todas y las subtareas agrupadas por su tarea. */
+export const vistasDeSerieTareas = (campos: DefCampo<Tarea>[]): VistaDeSerie[] => [
   { ...vistaNueva("Por cuándo", campos, { id: "tareas-cuando" }), filtro: sinSubtareas, grupos: [{ campo: "cuando", ordenGrupos: "asc" }] },
   { ...vistaNueva("Tablero", campos, { id: "tareas-tablero", tipo: "kanban", apilar: "estado" }), filtro: sinSubtareas },
   vistaNueva("Calendario", campos, { id: "tareas-calendario", tipo: "calendario", fecha: "fecha" }),
   { ...vistaNueva("Por tipo", campos, { id: "tareas-tipo" }), filtro: sinSubtareas, grupos: [{ campo: "tipo", ordenGrupos: "asc" }] },
   vistaNueva("Todas", campos, { id: "tareas-todas" }),
+  // Llegó el 2026-10-15 (reporte de Xavier): se añade también a quien ya tenía sus vistas.
+  { ...vistaNueva("Subtareas", campos, { id: "tareas-subtareas" }), filtro: soloSubtareas, grupos: [{ campo: "madre", ordenGrupos: "asc" }], nueva: true },
 ]
 
 /**

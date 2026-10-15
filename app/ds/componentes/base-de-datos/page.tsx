@@ -133,7 +133,8 @@ export default function BaseDeDatosPage() {
             </>,
             <>
               <strong>Kanban</strong>: columnas de una selección o de un vínculo; arrastrar cambia el valor (la página puede pasarlo por sus acciones, como
-              ganar o perder una propuesta). <code>kanban.resumen</code> pone lo que suma cada columna y <code>kanban.plegadas</code>, las que empiezan plegadas.
+              ganar o perder una propuesta). <code>kanban.resumen</code> pone lo que suma cada columna, <code>kanban.plegadas</code>, las que empiezan plegadas, y
+              <code>kanban.acciones</code>, botones al pie de una tarjeta para mover el registro sin abrirlo (ganada o perdida en las que se negocian).
             </>,
             <>
               <strong>Galería</strong> con <code>portada</code> para la imagen de cada tarjeta. <strong>Calendario</strong> sobre un campo de fecha; si la fecha

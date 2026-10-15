@@ -181,6 +181,15 @@ describe("el alta de una collab", () => {
     expect(formulario?.campos).toEqual(["contacto", "piezas"])
     expect(mensajeParaLaMarca("Clara Benet", ["contacto", "materiales"])).toContain("Hola Clara: ¿me subes aquí los materiales")
   })
+
+  it("el mensaje para la marca cambia con lo que se le pide, en el orden del formulario", () => {
+    expect(mensajeParaLaMarca("", ["facturacion"])).toBe("Hola: ¿me dejas aquí los datos para la factura (razón social, NIF, dirección y email)?")
+    expect(mensajeParaLaMarca("Clara", ["materiales", "fechas", "contacto"])).toBe("Hola Clara: te dejo aquí un formulario para que me pases las fechas y los materiales. Así lo tengo todo en un sitio.")
+    expect(mensajeParaLaMarca("Clara", ["facturacion", "campana", "piezas"])).toBe(
+      "Hola Clara: te dejo aquí un formulario para que me pases la campaña y lo que buscáis con ella, los contenidos que queréis y los datos para la factura. Así lo tengo todo en un sitio."
+    )
+    expect(mensajeParaLaMarca("Clara", ["contacto"])).toBe("Hola Clara: ¿me dejas aquí tus datos de contacto? Así lo tengo todo en un sitio.")
+  })
 })
 
 describe("lo que sale solo de los entregables", () => {

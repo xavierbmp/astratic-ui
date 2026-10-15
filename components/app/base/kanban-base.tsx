@@ -29,6 +29,7 @@ export function KanbanBase<T>({
   clave,
   resumen,
   plegadas,
+  acciones,
   ...tarjeta
 }: PropsTarjetas<T> & {
   /** El campo que reparte las columnas. Sin él, se explica cómo elegir uno. */
@@ -44,6 +45,8 @@ export function KanbanBase<T>({
   resumen?: (filas: T[]) => React.ReactNode
   /** Las columnas que empiezan plegadas (las de los extremos: ganadas, perdidas). */
   plegadas?: string[]
+  /** Botones al pie de la tarjeta de un registro (ganar o perder la que se negocia); `null`, ninguno. */
+  acciones?: (fila: T) => React.ReactNode
 }) {
   const derivados = React.useMemo<Item<T>[]>(
     () =>
@@ -88,7 +91,20 @@ export function KanbanBase<T>({
           const item = derivados.find((i) => i.id === id)
           if (item && editable && item.columnId !== columna) onEscribir?.(item.fila, campo, columna === SIN ? null : columna)
         }}
-        renderCard={(item) => <TarjetaRegistro fila={item.fila} {...tarjeta} />}
+        renderCard={(item) => {
+          const botones = acciones?.(item.fila)
+          return (
+            <>
+              <TarjetaRegistro fila={item.fila} {...tarjeta} />
+              {botones && (
+                // Sus botones no abren la ficha ni empiezan a arrastrar la tarjeta.
+                <div className="mt-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                  {botones}
+                </div>
+              )}
+            </>
+          )
+        }}
         onCardClick={(item) => onAbrir(item.id)}
         openId={abiertoId}
         storageKey={clave}

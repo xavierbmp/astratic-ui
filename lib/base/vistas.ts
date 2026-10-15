@@ -102,8 +102,15 @@ export type CampoFormulario = { id: string; visible: boolean }
  */
 export type AjusteCampo = { opciones?: { id: string; color?: ColorOpcion }[] }
 
-/** Todo lo que guarda cada persona de una base: sus vistas, la que tiene abierta, su formulario y sus ajustes de los campos de serie. */
-export type ConfigBase = { vistas: VistaBase[]; activa?: string; formulario?: CampoFormulario[]; ajustes?: Record<string, AjusteCampo> }
+/**
+ * Todo lo que guarda cada persona de una base: sus vistas, la que tiene abierta, su formulario, sus
+ * ajustes de los campos de serie y las vistas de serie que ya conoce (`ofrecidas`), para que una de
+ * serie nueva le llegue una vez y, si la borra, no vuelva.
+ */
+export type ConfigBase = { vistas: VistaBase[]; activa?: string; formulario?: CampoFormulario[]; ajustes?: Record<string, AjusteCampo>; ofrecidas?: string[] }
+
+/** Una vista de serie. `nueva`: llegó después de que hubiera vistas guardadas, así que se añade a quien ya tenía las suyas. */
+export type VistaDeSerie = VistaBase & { nueva?: boolean }
 
 /**
  * Los campos con los ajustes de cada persona: las opciones de un campo de serie en su orden (las
@@ -203,11 +210,29 @@ export function normalizarVista<T>(vista: VistaBase, campos: DefCampo<T>[]): Vis
   }
 }
 
-/** La configuración al día: sin vistas, las de serie; la activa, una que exista. */
-export function normalizarConfig<T>(config: ConfigBase | null | undefined, campos: DefCampo<T>[], deSerie: VistaBase[]): ConfigBase {
-  const vistas = (config?.vistas?.length ? config.vistas : deSerie).map((v) => normalizarVista(v, campos))
+/** La vista de serie tal cual se guarda: sin la marca de nueva. */
+function sinMarcaDeNueva(vista: VistaDeSerie): VistaBase {
+  const copia = { ...vista }
+  delete copia.nueva
+  return copia
+}
+
+/**
+ * Las vistas guardadas más las de serie que aún no conocía: una de serie que no está entre las
+ * guardadas ni entre las ya ofrecidas se añade al final. Sin lista de ofrecidas (lo guardado antes
+ * de que existiera), se dan por conocidas todas las de serie salvo las nuevas.
+ */
+function conLasDeSerieNuevas(config: ConfigBase, deSerie: VistaDeSerie[]): VistaBase[] {
+  const guardadas = new Set(config.vistas.map((v) => v.id))
+  const conocidas = new Set(config.ofrecidas ?? deSerie.filter((v) => !v.nueva).map((v) => v.id))
+  return [...config.vistas, ...deSerie.filter((v) => !guardadas.has(v.id) && !conocidas.has(v.id)).map(sinMarcaDeNueva)]
+}
+
+/** La configuración al día: sin vistas, las de serie (y las de serie nuevas, a quien ya tenía las suyas); la activa, una que exista. */
+export function normalizarConfig<T>(config: ConfigBase | null | undefined, campos: DefCampo<T>[], deSerie: VistaDeSerie[]): ConfigBase {
+  const vistas = (config?.vistas?.length ? conLasDeSerieNuevas(config, deSerie) : deSerie.map(sinMarcaDeNueva)).map((v) => normalizarVista(v, campos))
   const activa = vistas.some((v) => v.id === config?.activa) ? config?.activa : vistas[0]?.id
-  return { vistas, activa, formulario: config?.formulario, ...(config?.ajustes ? { ajustes: config.ajustes } : {}) }
+  return { vistas, activa, formulario: config?.formulario, ...(config?.ajustes ? { ajustes: config.ajustes } : {}), ofrecidas: deSerie.map((v) => v.id) }
 }
 
 /** Los campos que se ven, en el orden de la vista y con su ancho. */
