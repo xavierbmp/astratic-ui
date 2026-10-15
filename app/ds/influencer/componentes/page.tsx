@@ -20,7 +20,7 @@ import { FranjaCollabs, type CollabEnFranja } from "@/components/influencer/fran
 import { MiniCalendario } from "@/components/influencer/mini-calendario"
 import { NoticeHighlight, NoticeItem } from "@/components/influencer/notice-card"
 import { LinkGridExample, LinkRowExample, ProfilePanelExample, TaskBlockExample, TaskTableExample } from "@/components/docs/examples/influencer-examples"
-import { EditorGuionExample, FotosExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
+import { EditorGuionExample, FotosExample, SugerenciasGuionExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
 import { AgendaContenidosExample, CalendarioContenidosExample, CapturaIdeaExample, CaptionExample, GaleriaIdeasExample } from "@/components/docs/examples/contenidos-examples"
 import { DocPage, DocSection, Example, NextLinks, Prose, Rules } from "@/components/docs/doc"
 
@@ -380,6 +380,20 @@ const [editing, setEditing] = useState(false)
             <>Se carga bajo demanda (<code>editor-texto.tsx</code> con <code>next/dynamic</code>): solo pesa en las páginas que escriben.</>,
             <>Lo mismo se escribe y se lee: <code>editable={"{false}"}</code> es la vista de la marca, con las mismas clases de <code>PROSA</code>.</>,
             <>Variables: <code>{"<span data-variable=\"collab.importe\">"}</code> en el HTML, ficha en pantalla, el dato al «Ver con los datos»; escribir <code>{"{{clave}}"}</code> la crea.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="sugerencias" title="Sugerencias de cambio en el texto" lead="Como el modo sugerencia de Google Docs: quien revisa escribe encima del guion o del copy sin cambiar el original; lo borrado queda tachado y lo nuevo resaltado, y cada cambio es una sugerencia que la creadora acepta o rechaza.">
+        <Example className={EXAMPLE} code={`<EditorTexto value={original} editable sugerir={{ pendientes, onCambios: ({ original, tramos }) => sincronizarSugerencias(original, tramos, abiertas) }} />
+<EditorTexto value={original} editable={false} sugerencias={marcas} notaSeleccionada={id} onSeleccionarNota={setId} />`}>
+          <SugerenciasGuionExample />
+        </Example>
+        <Rules
+          items={[
+            <>El original no cambia: <code>sugerir</code> lo compara con lo escrito (<code>tramosDeCambio</code>, palabra a palabra) y cada cambio se ancla al original con su cita y lo que la rodea (<code>lib/revision-sugerencias.ts</code>).</>,
+            <>Borrar una frase y escribir otra es un solo «Reemplazar»; seguir escribiendo en una sugerencia la cambia y deshacerla la retira (<code>sincronizarSugerencias</code>).</>,
+            <>Aceptar aplica el cambio a la versión siguiente (<code>aplicarCambiosHtml</code>, sin pantalla). Lo que ya no encuentra su sitio se avisa.</>,
           ]}
         />
       </DocSection>

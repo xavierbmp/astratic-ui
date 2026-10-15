@@ -7,7 +7,12 @@ import { PIEZA_VACIA, type PiezaPedidaForm } from "@/lib/influencer/formularios"
 import { fasesDePieza, moverPieza } from "@/lib/influencer/cronograma"
 import { etiquetaDePieza } from "@/lib/influencer/collabs"
 import { Gantt } from "@/components/influencer/gantt"
-import { EditorTexto } from "@/components/influencer/editor-texto"
+import { CheckIcon, XIcon } from "lucide-react"
+import { EditorTexto, type EstadoSugerencia } from "@/components/influencer/editor-texto"
+import { aplicarCambiosHtml } from "@/components/influencer/editor-aplicar"
+import { sincronizarSugerencias, tipoDeCambio, type CambioTexto, type Tramo } from "@/lib/revision-sugerencias"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Conversacion } from "@/components/influencer/conversacion"
 import { VisorMedia } from "@/components/influencer/visor-media"
 import { PiezasEditor } from "@/components/influencer/piezas-editor"
@@ -38,6 +43,83 @@ export function EditorGuionExample() {
   return (
     <div className="h-[420px] w-full overflow-hidden rounded-2xl bg-card shadow-card">
       <EditorTexto value={texto} onChange={setTexto} notas={marcas} notaSeleccionada={nota} onSeleccionarNota={setNota} className="h-full" contenidoClassName="px-6 py-5" />
+    </div>
+  )
+}
+
+type SugerenciaDemo = { id: string; cambio: CambioTexto; estado: EstadoSugerencia }
+
+/** Las sugerencias tras escribir: se crean, se cambian o se retiran las que siguen abiertas. */
+function conCambios(lista: SugerenciaDemo[], { original, tramos }: { original: string; tramos: Tramo[] }, nuevoId: () => string): SugerenciaDemo[] {
+  const r = sincronizarSugerencias(original, tramos, lista.filter((s) => s.estado === "pendiente"))
+  if (!r.crear.length && !r.cambiar.length && !r.retirar.length) return lista
+  const cambiadas = lista.filter((s) => !r.retirar.includes(s.id)).map((s) => ({ ...s, cambio: r.cambiar.find((c) => c.id === s.id)?.cambio ?? s.cambio }))
+  return [...cambiadas, ...r.crear.map((cambio): SugerenciaDemo => ({ id: nuevoId(), cambio, estado: "pendiente" }))]
+}
+
+/** El guion de Lumea revisado como en Google Docs: la marca escribe sugiriendo y la creadora acepta o rechaza cada cambio. */
+export function SugerenciasGuionExample() {
+  const original = lumea.piezas[0].guion[0].texto ?? ""
+  const [modo, setModo] = React.useState<"sugerir" | "ver">("sugerir")
+  const [sugerencias, setSugerencias] = React.useState<SugerenciaDemo[]>([])
+  const [seleccionada, setSeleccionada] = React.useState<string | null>(null)
+  const [siguiente, setSiguiente] = React.useState<string | null>(null)
+  const contador = React.useRef(0)
+  const decidir = (s: SugerenciaDemo, estado: EstadoSugerencia) => {
+    setSugerencias((ss) => ss.map((x) => (x.id === s.id ? { ...x, estado } : x)))
+    if (estado === "aceptada") setSiguiente((html) => aplicarCambiosHtml(html ?? original, [s.cambio]).html)
+  }
+  const marcas = sugerencias.map((s, i) => ({ id: s.id, numero: i + 1, cambio: s.cambio, estado: s.estado }))
+  return (
+    <div className="grid w-full gap-3 lg:grid-cols-[minmax(0,1fr)_260px]">
+      <div className="flex h-[420px] flex-col overflow-hidden rounded-2xl bg-card shadow-card">
+        <Tabs value={modo} onValueChange={(v) => setModo(v === "ver" ? "ver" : "sugerir")} className="border-b px-3 py-2">
+          <TabsList>
+            <TabsTrigger value="sugerir">Sugerir cambios</TabsTrigger>
+            <TabsTrigger value="ver">Ver sugerencias</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <EditorTexto
+          key={modo}
+          value={original}
+          editable={modo === "sugerir"}
+          sugerir={modo === "sugerir" ? { pendientes: sugerencias.filter((s) => s.estado === "pendiente").map((s) => s.cambio), onCambios: (c) => setSugerencias((ss) => conCambios(ss, c, () => `sg-${++contador.current}`)) } : undefined}
+          sugerencias={modo === "ver" ? marcas : undefined}
+          notaSeleccionada={seleccionada}
+          onSeleccionarNota={setSeleccionada}
+          className="min-h-0 flex-1"
+          contenidoClassName="px-6 py-5"
+        />
+      </div>
+      <ol className="flex flex-col gap-2 text-sm">
+        {sugerencias.length === 0 && <li className="rounded-xl border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">Borra o escribe en el guion: cada cambio sale aquí como sugerencia.</li>}
+        {sugerencias.map((s, i) => (
+          <li key={s.id} className="rounded-xl border bg-card p-3">
+            <p className="text-xs text-muted-foreground">
+              {i + 1} · {tipoDeCambio(s.cambio) === "anadir" ? "Añadir" : tipoDeCambio(s.cambio) === "quitar" ? "Quitar" : "Reemplazar"} · {s.estado}
+            </p>
+            <p className="mt-1">
+              {s.cambio.cita && <del className="rounded-sm bg-danger-soft text-danger">{s.cambio.cita}</del>} {s.cambio.poner && <ins className="rounded-sm bg-success-soft text-success no-underline">{s.cambio.poner}</ins>}
+            </p>
+            {s.estado === "pendiente" && modo === "ver" && (
+              <div className="mt-2 flex gap-1.5">
+                <Button size="sm" variant="outline" onClick={() => decidir(s, "aceptada")}>
+                  <CheckIcon /> Aceptar
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => decidir(s, "rechazada")}>
+                  <XIcon /> Rechazar
+                </Button>
+              </div>
+            )}
+          </li>
+        ))}
+        {siguiente && (
+          <li className="overflow-hidden rounded-xl border bg-card">
+            <p className="border-b px-3 py-2 text-xs font-medium">La v2, con lo aceptado</p>
+            <EditorTexto value={siguiente} editable={false} className="max-h-48" contenidoClassName="px-3 py-2 text-xs" />
+          </li>
+        )}
+      </ol>
     </div>
   )
 }

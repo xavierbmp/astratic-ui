@@ -6,6 +6,7 @@ import type { EditorTextoProps } from "@/components/influencer/editor-texto-base
 
 export type { EditorTextoProps }
 export type { MarcaNota } from "@/components/influencer/editor-notas"
+export type { EstadoSugerencia, MarcaSugerencia } from "@/components/influencer/editor-sugerencias"
 export type { ContextoVariables } from "@/components/influencer/editor-variable"
 
 /**
