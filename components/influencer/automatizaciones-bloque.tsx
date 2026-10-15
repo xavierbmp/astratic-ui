@@ -13,6 +13,22 @@ import { AutomatizacionFormulario } from "@/components/influencer/automatizacion
 
 type Editando = { regla: Automatizacion; nueva: boolean }
 
+const NOMBRE_VARIABLE: Record<string, string> = { marca: "Marca", campana: "Campaña", pieza: "Contenido", parte: "Guion o contenido" }
+
+/** El texto con sus variables («{marca}») como una etiqueta con su nombre, que se lee mejor que las llaves. */
+function ConVariables({ texto }: { texto: string }) {
+  return texto.split(/(\{\w+\})/).map((trozo, i) => {
+    const variable = /^\{(\w+)\}$/.exec(trozo)?.[1]
+    return variable && NOMBRE_VARIABLE[variable] ? (
+      <span key={i} className="mx-0.5 rounded bg-muted px-1 py-px text-xs font-medium text-foreground">
+        {NOMBRE_VARIABLE[variable]}
+      </span>
+    ) : (
+      <React.Fragment key={i}>{trozo}</React.Fragment>
+    )
+  })
+}
+
 /**
  * Las automatizaciones de un bloque (Xavier, 2026-10-15: «si un registro está en el estado X, se
  * crea un registro en Y o la tarea Z»): cada una en una línea, con su interruptor, lo que la dispara
@@ -54,7 +70,9 @@ export function AutomatizacionesBloque({ bloque, reglas, onCambiar, className }:
                   </span>
                   <span className="mt-0.5 flex items-start gap-1.5">
                     <Icono className="mt-0.5 size-4 flex-none text-muted-foreground" aria-hidden />
-                    <span className="min-w-0">{describirAccion(r.accion)}</span>
+                    <span className="min-w-0">
+                      <ConVariables texto={describirAccion(r.accion)} />
+                    </span>
                   </span>
                 </button>
                 <Button type="button" variant="ghost" size="icon-xs" aria-label="Cambiar la automatización" className="text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100" onClick={() => setEditando({ regla: r, nueva: false })}>
