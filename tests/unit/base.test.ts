@@ -76,6 +76,17 @@ describe("vistas", () => {
     expect(config.vistas.map((v) => v.id)).toEqual(["serie"])
     expect(config.activa).toBe("serie")
   })
+  it("una vista de serie nueva llega una vez a quien ya tenía las suyas y, si la borra, no vuelve", () => {
+    const deSerie = [vistaNueva("Todos", campos, { id: "serie" }), vistaNueva("Borrada", campos, { id: "vieja" }), { ...vistaNueva("Nueva", campos, { id: "nueva" }), nueva: true }]
+    const suya = vistaNueva("Mía", campos, { id: "mia" })
+    // Lo guardado antes de que hubiera «ofrecidas»: la vieja ya la conocía (y la borró); la nueva, no.
+    const antes = normalizarConfig({ vistas: [suya] }, campos, deSerie)
+    expect(antes.vistas.map((v) => v.id)).toEqual(["mia", "nueva"])
+    expect(antes.vistas.some((v) => "nueva" in v && v.nueva)).toBe(false)
+    expect(antes.ofrecidas).toEqual(["serie", "vieja", "nueva"])
+    const sinLaNueva = normalizarConfig({ ...antes, vistas: [suya] }, campos, deSerie)
+    expect(sinLaNueva.vistas.map((v) => v.id)).toEqual(["mia"])
+  })
   it("el texto del botón de filtro", () => {
     expect(textoFiltro({ union: "y", condiciones: [{ campo: "marca", op: "es", valor: "lumea" }] }, campos)).toBe("Filtrado por Marca")
     expect(textoFiltro({ union: "y", condiciones: [{ campo: "marca", op: "es", valor: "lumea" }], grupos: [{ union: "o", condiciones: [{ campo: "importe", op: "vacio" }] }] }, campos)).toBe("Filtrado por 2 campos")
