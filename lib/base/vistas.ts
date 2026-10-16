@@ -35,7 +35,7 @@ export const ALTURAS_FILA: Record<AlturaFila, { label: string; px: number }> = {
 }
 
 export const ALTO_CABECERA = 32
-export const ALTO_GRUPO = 48
+export const ALTO_GRUPO = 36
 export const ANCHO_POR_DEFECTO = 180
 export const ANCHO_PRINCIPAL = 260
 export const ANCHO_MINIMO = 80

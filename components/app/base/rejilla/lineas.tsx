@@ -42,8 +42,8 @@ export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, ab
 
 /**
  * La cabecera de un grupo, como en Airtable: la flecha para plegarlo, el nombre del campo en
- * pequeño, su valor (con su color si es una opción) y cuántos registros tiene. Los subgrupos van
- * sangrados y en un gris más claro.
+ * pequeño, su valor (con su color si es una opción) y cuántos registros tiene, en una sola línea fina
+ * (Xavier, 2026-10-16: «no tan gruesas»). Los subgrupos van sangrados y en un gris más claro.
  */
 export function LineaGrupo<T>({ nodo, campo, alto, anchoFijas, total, plegado, onPlegar }: { nodo: NodoGrupo<T>; campo: DefCampo<T> | undefined; alto: number; anchoFijas: number; total: number; plegado: boolean; onPlegar: () => void }) {
   const opcion = campo && (campo.tipo === "select" || campo.tipo === "multiselect" || campo.tipo === "vinculo") ? opcionDe(campo, nodo.id) : undefined
@@ -54,12 +54,12 @@ export function LineaGrupo<T>({ nodo, campo, alto, anchoFijas, total, plegado, o
         <button type="button" aria-expanded={!plegado} aria-label={plegado ? "Desplegar el grupo" : "Plegar el grupo"} onClick={onPlegar} className="flex size-6 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-background/70">
           <ChevronRightIcon className={cn("size-4 transition-transform", !plegado && "rotate-90")} />
         </button>
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-[10px] font-medium tracking-wide text-muted-foreground uppercase">{campo?.nombre}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="flex-none text-[10px] font-medium tracking-wide text-muted-foreground uppercase">{campo?.nombre}</span>
           {opcion && campo?.tipo === "vinculo" ? (
-            <FichaVinculo label={opcion.label} className="self-start" />
+            <FichaVinculo label={opcion.label} className="min-w-0" />
           ) : opcion ? (
-            <FichaOpcion label={opcion.label} color={opcion.color} tono={opcion.tono} className="self-start" />
+            <FichaOpcion label={opcion.label} color={opcion.color} tono={opcion.tono} className="min-w-0" />
           ) : (
             <span className="truncate font-semibold">{nodo.label || (campo?.vinculo ? `Sin ${campo.vinculo.objeto}` : "(Vacío)")}</span>
           )}

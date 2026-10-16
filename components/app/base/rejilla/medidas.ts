@@ -7,7 +7,7 @@ export const ANCHO_IZQUIERDA = 84
 /** La columna del «+» para crear un campo. */
 export const ANCHO_ANADIR = 92
 export const ALTO_PIE = 34
-export const ALTO_SUBGRUPO = 40
+export const ALTO_SUBGRUPO = 32
 
 /** Una columna ya colocada: su campo, su ancho y dónde empieza (contando la columna de la izquierda). */
 export type Columna<T> = { campo: DefCampo<T>; ancho: number; x: number; fija: boolean }
