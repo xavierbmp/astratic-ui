@@ -1,6 +1,7 @@
 // El presupuesto de una propuesta: líneas por formato a sus tarifas, extras que suben el fee y el
 // aviso cuando lo que ofrece la marca queda por debajo de su mínimo pactado.
-import { EXTRAS, type ExtraId, type LineaPresupuesto, type PiezaPedida, type Presupuesto, type Tarifa } from "@/lib/influencer/modelo"
+import { EXTRAS, type ExtraId, type LineaPresupuesto, type PiezaPedida, type Presupuesto, type Propuesta, type Tarifa } from "@/lib/influencer/modelo"
+import { numeroDeImporte } from "@/lib/influencer/formularios"
 import { PARTE_RED } from "@/lib/influencer/collabs"
 
 export function tarifaDe(formato: LineaPresupuesto["formato"], tarifas: Tarifa[]) {
@@ -10,6 +11,19 @@ export function tarifaDe(formato: LineaPresupuesto["formato"], tarifas: Tarifa[]
 /** Las líneas de salida: cada pieza pedida a su precio de tarifa. */
 export function lineasDesdePiezas(piezas: PiezaPedida[], tarifas: Tarifa[]): LineaPresupuesto[] {
   return piezas.map((p) => ({ formato: p.formato, cantidad: p.cantidad, precio: tarifaDe(p.formato, tarifas)?.precio ?? 0 }))
+}
+
+/**
+ * Las líneas con las que arranca el presupuesto de una propuesta. Si se rellenó con el formulario de
+ * collab, cada formato sale al importe que ella le puso a sus entregables (la media, si son varios):
+ * el precio que ya decidió manda sobre la tarifa. Lo que no tiene importe, a su tarifa.
+ */
+export function lineasDePropuesta(p: Pick<Propuesta, "piezas" | "borrador">, tarifas: Tarifa[]): LineaPresupuesto[] {
+  const entregables = p.borrador?.piezas ?? []
+  return lineasDesdePiezas(p.piezas, tarifas).map((l) => {
+    const importes = entregables.filter((e) => e.formato === l.formato).flatMap((e) => numeroDeImporte(e.importe) || [])
+    return importes.length ? { ...l, precio: Math.round(importes.reduce((a, b) => a + b, 0) / importes.length) } : l
+  })
 }
 
 export type Calculo = {

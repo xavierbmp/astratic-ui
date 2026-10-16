@@ -49,6 +49,8 @@ type Props = {
   onNuevaCondicion?: (nombre: string, usar: (tipo: TipoCondicion) => void) => void
   /** Cada entregable lleva su importe (en el alta de una collab; la marca no lo ve). */
   conImporte?: boolean
+  /** Con `conImporte`, lo que cobra por cada formato (por su id): el entregable nuevo nace con ese importe, que se cambia a mano. */
+  precios?: Partial<Record<string, number>>
   /** Sus packs de contenido: cada uno añade varios entregables de un clic. */
   packs?: PackContenido[]
   /** Guardar los entregables que hay como un pack nuevo (sin ella, no se ofrece). */
@@ -66,10 +68,15 @@ type Props = {
  * (varios entregables de un clic) y, con `onGuardarPack`, «Guardar como pack» los que hay. Lo usan el alta de una collab,
  * «Nueva pieza» y el formulario de la marca.
  */
-export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLLABS_DE_SERIE.formatos, plataformas = [], condiciones, hoy, campana = "", diasGuion = AJUSTES_COLLABS_DE_SERIE.diasGuion, onNuevoFormato, onEditarFormato, onNuevaCondicion, conImporte, packs = [], onGuardarPack, className }: Props) {
+export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLLABS_DE_SERIE.formatos, plataformas = [], condiciones, hoy, campana = "", diasGuion = AJUSTES_COLLABS_DE_SERIE.diasGuion, onNuevoFormato, onEditarFormato, onNuevaCondicion, conImporte, precios, packs = [], onGuardarPack, className }: Props) {
   const ctx = { campana, diasGuion, hoy }
   const cambiar = (i: number, pieza: PiezaPedidaForm) => onChange(value.map((p, j) => (j === i ? pieza : p)))
-  const anadir = (formato: FormatoPieza) => onChange([...value, piezaDeFormato(formato, "", ctx)])
+  /** El entregable recién añadido trae el precio de su formato, si ella lo tiene. */
+  const conPrecio = (p: PiezaPedidaForm): PiezaPedidaForm => {
+    const precio = conImporte && p.formato ? precios?.[p.formato] : undefined
+    return precio ? { ...p, importe: String(precio) } : p
+  }
+  const anadir = (formato: FormatoPieza) => onChange([...value, conPrecio(piezaDeFormato(formato, "", ctx))])
   const atajos = formatosDePlataformas(formatos, plataformas)
   const opciones: OpcionSelector[] = formatos.map((f) => ({ value: f.id, label: f.nombre, detalle: f.plataforma ? nombrePlataforma(f.plataforma) : "Cualquier plataforma", icono: <IconoTipoPieza tipo={f.tipo} />, editable: !!onEditarFormato }))
 
@@ -108,7 +115,7 @@ export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLL
               key={pack.id}
               type="button"
               title={describirPack(pack, formatos)}
-              onClick={() => onChange([...value, ...piezasDePack(pack, formatos, "", ctx)])}
+              onClick={() => onChange([...value, ...piezasDePack(pack, formatos, "", ctx).map(conPrecio)])}
               className="inline-flex h-8 items-center gap-1.5 rounded-md pr-2 pl-1 text-[13px] transition-colors hover:bg-muted"
             >
               <span className="grid size-6 flex-none place-items-center rounded-sm bg-brand-soft text-brand">
