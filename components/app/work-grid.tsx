@@ -12,10 +12,10 @@ const ANCHO_MINIMO_BLOQUE = 520
  * Rejilla de la página de operación: a la izquierda las cifras, la toolbar y el bloque; a la
  * derecha, el panel de información.
  *
- * Con `stats`, las cifras entran en la columna izquierda y el panel arranca a su misma altura y
- * baja hasta el pie del bloque: el panel habla de toda la página, igual que las cifras, así que
- * empiezan juntos. Sin `stats`, la fila de cifras va arriba a ancho completo y el panel empieza a
- * la altura del bloque. En las dos, por debajo de 1280 px todo se apila y el panel va el último.
+ * El panel ocupa la columna derecha entera: arranca a la altura de lo primero de la izquierda (las
+ * cifras, la toolbar o el bloque) y baja hasta el pie del bloque, porque habla de toda la página
+ * (con una toolbar suelta empezaba más abajo que en el resto de páginas: reporte cmvb1e5s). Por
+ * debajo de 1280 px todo se apila y el panel va el último.
  *
  * El panel se ensancha o estrecha arrastrando su borde izquierdo (de 280 a 560 px, doble clic vuelve
  * al de siempre) y cada persona lo encuentra como lo dejó en cada página.
@@ -77,14 +77,7 @@ export function WorkGrid({
       )}
       <div className={cn("flex min-h-0 min-w-0 flex-col xl:col-start-1", rowStart[filaBloque])}>{children}</div>
       {lateral && (
-        // Con cifras dentro, el panel las acompaña desde arriba; sin ellas, sigue empezando a la
-        // altura del bloque, que es como se comportan las páginas que no pasan `stats`.
-        <div
-          className={cn(
-            "relative min-h-80 min-w-0 xl:col-start-2 xl:min-h-0",
-            stats ? cn("xl:row-start-1", rowSpan[filaBloque]) : rowStart[filaBloque],
-          )}
-        >
+        <div className={cn("relative min-h-80 min-w-0 xl:col-start-2 xl:row-start-1 xl:min-h-0", rowSpan[filaBloque])}>
           <div className="flex min-h-0 flex-col xl:absolute xl:inset-0">{lateral}</div>
           {/* La ficha en el panel lleva su propio borde; el panel de información, este. */}
           {!conFicha && (
