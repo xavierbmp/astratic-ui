@@ -1,9 +1,9 @@
 // La biblioteca de contenidos: todas las piezas de todas las collabs como filas, con lo que hace falta
 // para agruparlas, filtrarlas y ordenarlas (a quién le toca, cuánto llevan esperando, si van tarde) y
 // el recordatorio que se le manda a la marca con lo que tiene pendiente de revisar.
-import type { Collab, Marca, Pieza, TipoVersion } from "@/lib/influencer/modelo"
+import type { Collab, Marca, Pieza, TipoVersion, Version } from "@/lib/influencer/modelo"
 import type { Evento } from "@/lib/influencer/agenda"
-import { diasEsperando, marcaDe, nombreDeParte, partesDePieza, tituloCorto, ultimaVersion } from "@/lib/influencer/collabs"
+import { diasEsperando, marcaDe, nombreDeParte, parteInicial, partesDePieza, tituloCorto, ultimaVersion } from "@/lib/influencer/collabs"
 import { diasEntre, soloFecha } from "@/lib/influencer/fechas"
 
 /** A quién le toca mover la pieza: a ella, a la marca (está revisando) o a nadie (ya tiene resultados). */
@@ -112,4 +112,58 @@ export function recordatorioDeRevision({ filas, marcas, origen }: { filas: FilaP
   }
   if (!porMarca.size) return null
   return [...porMarca.entries()].map(([marca, lineas]) => `${marca}\nHola, te recuerdo que tienes pendiente de revisar:\n${lineas.join("\n")}\n¡Gracias!`).join("\n\n")
+}
+
+// ───────────────────────── Bandeja de revisión ─────────────────────────
+
+/**
+ * La bandeja de la revisión de contenido (Xavier, 2026-10-16: «en un mismo lugar ves rápido lo que
+ * requiere atención»): cada contenido sin aprobar, en uno de tres montones.
+ */
+export type BandejaRevision = "feedback" | "en-revision" | "por-hacer"
+
+export const BANDEJAS_REVISION: { id: BandejaRevision; label: string; descripcion: string; vacio: string }[] = [
+  { id: "feedback", label: "Nuevo feedback", descripcion: "La marca ha comentado o pedido cambios y aún no lo has resuelto", vacio: "Ningún feedback pendiente" },
+  { id: "en-revision", label: "En revisión", descripcion: "Enviado a la marca, sin respuesta todavía", vacio: "Nada esperando a la marca" },
+  { id: "por-hacer", label: "Por hacer", descripcion: "Aún sin contenido enviado", vacio: "Nada por empezar" },
+]
+
+const notasAbiertas = (v: Version | null | undefined) => (v ? v.notas.filter((n) => !n.resuelta).length : 0)
+
+/**
+ * En qué montón va una pieza, mirando la parte que toca (el guion o el vídeo o las fotos) y su última
+ * versión: con cambios pedidos o notas sin resolver, «Nuevo feedback» (también mientras prepara la
+ * versión que los resuelve); enviada y sin notas, «En revisión»; sin nada enviado, «Por hacer». Nada
+ * si ya está aprobada o publicada.
+ */
+export function bandejaDe(p: Pieza): { bandeja: BandejaRevision; parte: TipoVersion; notas: number } | null {
+  if (p.publicada || p.estado === "aprobado" || p.estado === "programado" || p.estado === "publicado" || p.estado === "resultados") return null
+  const parte = parteInicial(p)
+  const versiones = p[parte]
+  const v = ultimaVersion(versiones)
+  const anterior = versiones.length > 1 ? versiones[versiones.length - 2] : null
+  if (!v) return { bandeja: "por-hacer", parte, notas: 0 }
+  if (v.estado === "aprobada") return null
+  if (v.estado === "cambios" || (v.estado === "en-revision" && notasAbiertas(v) > 0)) return { bandeja: "feedback", parte, notas: notasAbiertas(v) }
+  if (v.estado === "borrador" && anterior?.estado === "cambios") return { bandeja: "feedback", parte, notas: notasAbiertas(anterior) }
+  if (v.estado === "en-revision") return { bandeja: "en-revision", parte, notas: 0 }
+  return { bandeja: "por-hacer", parte, notas: 0 }
+}
+
+export type FilaBandeja = FilaPieza & { bandeja: BandejaRevision; parte: TipoVersion; notas: number }
+
+/**
+ * Los tres montones con sus piezas: el feedback y lo por hacer por fecha de publicación (lo que va
+ * tarde arriba) y lo que espera a la marca, lo que más lleva esperando primero.
+ */
+export function bandejaRevision(collabs: Collab[], hoy: string): Record<BandejaRevision, FilaBandeja[]> {
+  const montones: Record<BandejaRevision, FilaBandeja[]> = { feedback: [], "en-revision": [], "por-hacer": [] }
+  for (const f of filasDePiezas(collabs.filter((c) => c.estado !== "cerrada"), hoy)) {
+    const b = bandejaDe(f.pieza)
+    if (b) montones[b.bandeja].push({ ...f, ...b })
+  }
+  montones.feedback.sort((a, b) => a.fecha.localeCompare(b.fecha))
+  montones["por-hacer"].sort((a, b) => a.fecha.localeCompare(b.fecha))
+  montones["en-revision"].sort((a, b) => b.esperando - a.esperando || a.fecha.localeCompare(b.fecha))
+  return montones
 }
