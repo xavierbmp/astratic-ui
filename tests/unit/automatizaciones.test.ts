@@ -14,6 +14,7 @@ import {
   planificar,
   reglasDe,
   restaurarDeSerie,
+  tareasSuperadas,
   type Automatizacion,
   type Ocurrido,
 } from "@/lib/influencer/automatizaciones"
@@ -171,5 +172,18 @@ describe("de propuesta a collab", () => {
     const v = valoresAltaDePropuesta({ ...propuesta, presupuesto: undefined, ofrecen: 600 }, AJUSTES_COLLABS_DE_SERIE, HOY)
     expect(v.piezas.map((p) => [p.titulo, p.importe])).toEqual([["Reel · Otoño", undefined]])
     expect(v.importe).toBe(600)
+  })
+})
+
+describe("lo que ya no toca", () => {
+  const tarea = (clave: string, estado: Tarea["estado"] = "por-hacer"): Tarea => ({ id: clave, titulo: clave, estado, prioridad: "normal", donde: { tipo: "crm" }, etiquetas: [], orden: 0, origen: "auto", clave, actividad: [], creadaEl: HOY })
+  const tareas = [tarea("serie-propuesta-nueva:p1"), tarea("serie-propuesta-enviada:p1"), tarea("serie-propuesta-nueva:p2"), tarea("serie-propuesta-negociando:p1", "hecha")]
+  it("al avanzar, las abiertas de los estados anteriores de esa propuesta", () => {
+    expect(tareasSuperadas(tareas, AUTOMATIZACIONES_DE_SERIE, "p1", "enviada").map((t) => t.id)).toEqual(["serie-propuesta-nueva:p1"])
+    expect(tareasSuperadas(tareas, AUTOMATIZACIONES_DE_SERIE, "p1", "ganada").map((t) => t.id)).toEqual(["serie-propuesta-nueva:p1", "serie-propuesta-enviada:p1"])
+  })
+  it("al perderla, todas las abiertas; en la nueva, ninguna", () => {
+    expect(tareasSuperadas(tareas, AUTOMATIZACIONES_DE_SERIE, "p1", "perdida")).toHaveLength(2)
+    expect(tareasSuperadas(tareas, AUTOMATIZACIONES_DE_SERIE, "p1", "nueva")).toEqual([])
   })
 })

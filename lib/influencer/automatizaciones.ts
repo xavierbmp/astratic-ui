@@ -5,7 +5,7 @@
 import { z } from "zod"
 import { ESTADOS_COLLAB, ESTADOS_PROPUESTA, LISTA_TIPOS_TAREA, type Collab, type DondeTarea, type EstadoCollab, type EstadoPropuesta, type PrioridadTarea, type Propuesta, type Tarea, type TipoTarea, type TipoVersion } from "@/lib/influencer/modelo"
 import { soloFecha, sumarDias } from "@/lib/influencer/fechas"
-import { conEstado, nuevaTarea } from "@/lib/influencer/tareas"
+import { conEstado, estaCerrada, nuevaTarea } from "@/lib/influencer/tareas"
 import { crearTareas, type Reloj } from "@/lib/influencer/tareas-cambios"
 
 // ─────────────── Qué puede pasar ───────────────
@@ -346,4 +346,21 @@ export const AUTOMATIZACIONES_DE_SERIE: Automatizacion[] = [
 /** Una regla nueva de un bloque, para empezar a editarla: una tarea en el primer evento del bloque. */
 export function reglaNueva(bloque: BloqueAutomatizable, id: string): Automatizacion {
   return { id, evento: eventosDelBloque(bloque)[0], activa: true, accion: tarea("", HOY(), "normal") }
+}
+
+// ─────────────── Lo que ya no toca ───────────────
+
+/** El camino de una propuesta: cada paso deja atrás las tareas de los anteriores. */
+const CAMINO_PROPUESTA: EstadoPropuesta[] = ["nueva", "hablando", "enviada", "negociando", "ganada"]
+
+/**
+ * Las tareas automáticas de una propuesta que ya no tocan al pasar a `estado` (Xavier, 2026-10-16,
+ * auditoría: «Contestar a …» seguía abierta con la propuesta ya enviada): las abiertas de las reglas
+ * de sus estados anteriores. Al perderla, todas. Las de una regla suya, igual que las de serie.
+ */
+export function tareasSuperadas(tareas: Tarea[], reglas: Pick<Automatizacion, "id" | "evento">[], propuestaId: string, estado: EstadoPropuesta): Tarea[] {
+  const hasta = estado === "perdida" ? CAMINO_PROPUESTA.length : CAMINO_PROPUESTA.indexOf(estado)
+  const anteriores = new Set(CAMINO_PROPUESTA.slice(0, Math.max(hasta, 0)).map((e) => `propuesta:${e}`))
+  const claves = new Set(reglas.filter((r) => anteriores.has(r.evento)).map((r) => `${r.id}:${propuestaId}`))
+  return tareas.filter((t) => !t.padreId && !!t.clave && claves.has(t.clave) && !estaCerrada(t))
 }
