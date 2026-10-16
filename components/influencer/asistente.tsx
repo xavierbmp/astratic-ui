@@ -59,7 +59,7 @@ export function AsistenteMarco({ logo, pasos, salida, children }: { logo: React.
       <header className="relative flex items-center justify-between gap-4 px-4 py-4 md:px-8">
         {logo}
         <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground tabular-nums lg:hidden">
+          <span className="hidden text-xs whitespace-nowrap text-muted-foreground tabular-nums sm:inline lg:hidden">
             Paso {actual + 1} de {pasos.length}
           </span>
           {salida}
