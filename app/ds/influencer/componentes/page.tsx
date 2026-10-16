@@ -23,6 +23,12 @@ import { LinkGridExample, LinkRowExample, ProfilePanelExample, TaskBlockExample,
 import { EditorGuionExample, FotosExample, ReproductorNotasExample, SugerenciasGuionExample, GanttExample, PiezasEditorExample, RevisionExample } from "@/components/docs/examples/collabs-examples"
 import { AgendaContenidosExample, CalendarioContenidosExample, CapturaIdeaExample, CaptionExample, GaleriaIdeasExample } from "@/components/docs/examples/contenidos-examples"
 import { DocPage, DocSection, Example, NextLinks, Prose, Rules } from "@/components/docs/doc"
+import { primerosPasos } from "@/lib/influencer/primeros-pasos"
+import { demoAcuerdo, demoDatosFiscales, demoDatosPersonales } from "@/lib/influencer/demo-documentos"
+import { demoCapitulosBiblia, demoLecturasBiblia } from "@/lib/influencer/demo-biblia"
+import { CompletarPerfil } from "@/components/influencer/completar-perfil"
+import { AsistenteMarco, AsistentePaso } from "@/components/influencer/asistente"
+import { PildorasEjemplo } from "@/components/docs/examples/influencer-examples"
 
 export const metadata = { title: "Componentes · Influencer Workspace" }
 
@@ -483,6 +489,54 @@ const [editing, setEditing] = useState(false)
             <><code>CalendarioContenidos</code> (mes o semana, sobre el <code>CalendarioPeriodo</code> del madre) y <code>AgendaContenidos</code> (lista con los huecos libres): pintan <code>EntradaCalendario</code> de <code>lib/influencer/planificacion.ts</code>, sea contenido propio, pieza de collab (con candado: fecha pactada), hito, tarea, cobro o fecha clave. El calendario no pone su <code>DndContext</code>: lo pone la página para poder soltar ideas de fuera.</>,
             <><code>EditorCaption</code>: un solo texto con los hashtags dentro; cuenta lo que admite cada red (Instagram, 2.200 caracteres y 5 hashtags), enseña lo que se ve antes de «más» y avisa de la publicidad sin marcar. <code>AntesDePublicar</code>: lo que falta, poco y útil.</>,
             <><code>Teleprompter</code>: el guion a pantalla completa, con velocidad, tamaño de letra y espejo, para leerlo desde otro dispositivo al grabar.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="completar-perfil" title="Completar el perfil" lead="Fijo al pie de la sidebar (prop sidebarExtra de AppShell) hasta que esté todo: el progreso, el siguiente paso a un clic y, al pulsar el progreso, todos los pasos. No se puede quitar: se va solo al acabar. Con la sidebar plegada, un anillo con el mismo desplegable.">
+        <Example className={EXAMPLE} code={`<AppShell … sidebarExtra={<CompletarPerfil pasos={primerosPasos(datos)} />}>`}>
+          <div className="w-64">
+            <CompletarPerfil
+              pasos={primerosPasos({ perfil: demoPerfil, acuerdo: demoAcuerdo, fiscales: demoDatosFiscales, envio: demoDatosPersonales.envio, capitulos: demoCapitulosBiblia, lecturas: demoLecturasBiblia, tieneTarifas: true, marcasPropias: 0, instagramConectado: false, trabajoContado: false })}
+            />
+          </div>
+        </Example>
+        <Rules
+          items={[
+            <>Cada paso sale hecho o no <strong>de los datos</strong> (<code>primerosPasos</code>), nunca se marca a mano. Los que se hacen en la bienvenida llevan a su paso (<code>/bienvenida?paso=…</code>); el resto, a su página.</>,
+            <>Sustituye a los primeros pasos que iban arriba del Inicio (Xavier, 2026-10-16: «que salga en el sidebar propio, así lo tiene siempre ahí»). No sale en el workspace propio de Astratic, sí en un perfil de prueba.</>,
+          ]}
+        />
+      </DocSection>
+
+      <DocSection id="asistente" title="Asistente por pasos" lead="El marco de la bienvenida: ocupa la pantalla, con el logotipo y la salida arriba, los pasos en vertical a la izquierda (hecho, para más tarde, el de ahora, pendiente) y cada paso en un bloque con su título, una frase de por qué y la fila de botones. En el móvil, una barra de progreso por tramos.">
+        <Example className={EXAMPLE} code={`<AsistenteMarco logo={<DocLogo devs={false} />} pasos={pasos} salida={<Button variant="ghost" size="sm">Ir a mi workspace</Button>}>
+  <AsistentePaso etiqueta="Cómo trabajas" titulo="Qué collabs te encajan" descripcion="…" pie={<PiePaso … />}>
+    <PildorasMultiples opciones={…} valores={…} onChange={…} />
+  </AsistentePaso>
+</AsistenteMarco>`}>
+          <div className="max-h-[560px] overflow-hidden rounded-xl border">
+            <AsistenteMarco
+              logo={<span className="text-sm font-semibold">Astratic</span>}
+              pasos={[
+                { id: "inicio", titulo: "Bienvenida", estado: "hecho", href: "#" },
+                { id: "perfil", titulo: "Tu perfil", estado: "saltado", href: "#" },
+                { id: "trabajo", titulo: "Cómo trabajas", estado: "actual", href: "#" },
+                { id: "tarifas", titulo: "Tus tarifas", estado: "pendiente", href: "#" },
+              ]}
+              salida={<Button variant="ghost" size="sm">Ir a mi workspace</Button>}
+            >
+              <AsistentePaso etiqueta="Cómo trabajas" titulo="Qué collabs te encajan" descripcion="Con esto te proponemos solo campañas que aceptarías." pie={<><span /><Button>Continuar</Button></>}>
+                <PildorasEjemplo />
+              </AsistentePaso>
+            </AsistenteMarco>
+          </div>
+        </Example>
+        <Rules
+          items={[
+            <>Un paso, una pregunta grande: lo que se pide se entiende sin explicación y nada es obligatorio. Lo que se puede dejar lleva «Lo haré más tarde» y sale «Para más tarde» en el riel.</>,
+            <>Al continuar se guarda lo del paso con las acciones de siempre de su página (perfil, tarifas, CRM, ajustes): el asistente no tiene datos propios salvo lo que no vive en otro sitio.</>,
+            <>Opciones cortas en píldoras (<code>PildorasOpcion</code> y <code>PildorasMultiples</code> del madre); lo elegido, con filo y en negrita, y con su check si se eligen varias.</>,
           ]}
         />
       </DocSection>

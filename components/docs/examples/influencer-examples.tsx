@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Block, BlockHeader } from "@/components/influencer/block"
 import { TaskCard } from "@/components/influencer/task-card"
 import { LinkGrid, LinkRow, type QuickLink } from "@/components/app/link-grid"
+import { PildorasMultiples } from "@/components/app/formulario/opciones-visuales"
 import { ProfilePanel, ProfileTile } from "@/components/influencer/profile-panel"
 import { TaskTable } from "@/components/influencer/task-table"
 import { HOY, demoContactos, demoEnlaces, demoPerfil, demoEtiquetasTarea, demoMarcas, demoPropuestas, demoTareas } from "@/lib/influencer/demo-data"
@@ -133,6 +134,24 @@ export function ProfilePanelExample() {
           <a href="#" />
         </ProfileTile>
       }
+    />
+  )
+}
+
+/** Píldoras de varias opciones, como en «Cómo trabajas» de la bienvenida. */
+export function PildorasEjemplo() {
+  const [valores, setValores] = React.useState<string[]>(["pagadas"])
+  return (
+    <PildorasMultiples
+      aria-label="Collabs que aceptas"
+      opciones={[
+        { value: "pagadas", label: "Pagadas" },
+        { value: "canje", label: "Canje (producto a cambio)" },
+        { value: "afiliacion", label: "Afiliación o código" },
+        { value: "ugc", label: "UGC (contenido sin publicar)" },
+      ]}
+      valores={valores}
+      onChange={setValores}
     />
   )
 }
