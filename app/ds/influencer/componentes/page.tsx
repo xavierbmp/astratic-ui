@@ -337,8 +337,8 @@ const [editing, setEditing] = useState(false)
       </DocSection>
 
       <DocSection id="media-kit" title="Media kit" lead="El media kit en hojas A4, con los bloques que ella elige y en su orden, repartidos sin partir ninguno. Es el mismo en el editor, en /media-kit y en cada propuesta.">
-        <Example className={EXAMPLE} code={`<DocViewer pages={hojasMediaKit(bloques)}>
-  <MediaKitHojas perfil={perfil} kit={kit} bloques={bloquesVisibles(kit, { conPrecios })} marcasTrabajadas={marcas} pie="Marta Albiol · Media kit" />
+        <Example className={EXAMPLE} code={`<DocViewer pages={hojasMediaKit(bloques, { perfil, kit, marcasTrabajadas: marcas })}>
+  <MediaKitHojas perfil={perfil} kit={kit} bloques={bloquesVisibles(kit, { conPrecios })} marcasTrabajadas={marcas} logos={logos} pie="Marta Albiol · Media kit" />
 </DocViewer>`}>
           <div className="theme-light flex w-full justify-center overflow-hidden rounded-xl bg-muted p-4">
             <div className="flex flex-col gap-4 [zoom:0.45]">

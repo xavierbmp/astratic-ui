@@ -626,6 +626,7 @@ export const demoMediaKit: MediaKit = {
     { id: "destacados", visible: true },
     { id: "marcas", visible: true },
     { id: "tarifas", visible: true },
+    { id: "presupuesto", visible: false },
     { id: "contacto", visible: true },
   ],
   titular: "Skincare honesto y maquillaje de diario para mujeres de 25 a 34 años",

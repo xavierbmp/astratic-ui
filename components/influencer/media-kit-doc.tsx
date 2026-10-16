@@ -1,13 +1,15 @@
 import Image from "next/image"
-import { BadgeCheckIcon, MailIcon, MapPinIcon, ShieldCheckIcon } from "lucide-react"
+import { BadgeCheckIcon, EyeIcon, HeartIcon, MailIcon, MapPinIcon, ShieldCheckIcon, UsersIcon, type LucideIcon } from "lucide-react"
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { FORMATOS, type BloqueMediaKit, type MediaKit, type Perfil } from "@/lib/influencer/modelo"
-import { cifrasDelPerfil, hojasDelMediaKit } from "@/lib/influencer/media-kit"
+import { cifrasDelPerfil, hojasDelMediaKit, presupuestoDelKit, type ContextoHojas } from "@/lib/influencer/media-kit"
+import { tintClass, tintFor, tintSoftClass, tintTextClass, type Tint } from "@/lib/influencer/tints"
+import { BrandMark } from "@/components/influencer/brand-mark"
 import { seVe } from "@/lib/bloques"
 import { nombreMes, soloFecha } from "@/lib/influencer/fechas"
 import { SocialIcon, socialLabel } from "@/components/app/social-icons"
-import { DocKeyFacts, DocNotice, DocSimpleSection, DocTable, DocText } from "@/components/document/simple"
+import { DocNotice, DocSimpleSection, DocTable, DocText } from "@/components/document/simple"
 import { DocInfluencerSheet } from "@/components/influencer/doc-sheet"
 import { AvatarInitials } from "@/components/app/avatar-initials"
 
@@ -17,9 +19,14 @@ type Props = {
   /** Los bloques a enseñar, en orden (`bloquesVisibles`). */
   bloques: BloqueMediaKit[]
   marcasTrabajadas: string[]
+  /** El logo de cada marca con la que ha trabajado, por su nombre (las que no lo tienen, con sus iniciales). */
+  logos?: Record<string, string | undefined>
   /** Texto del pie de cada hoja. */
   pie: string
 }
+
+/** El color de cada red en su tarjeta, como en el Inicio. */
+const TINTE_RED: Record<string, Tint> = { instagram: "lavender", youtube: "rose", tiktok: "sky", linkedin: "sky" }
 
 /**
  * El media kit en hojas A4, como un documento de diseño (Xavier, 2026-10-14): la portada con su imagen ancha y la
@@ -27,13 +34,13 @@ type Props = {
  * Cada bloque visible va en el orden elegido, repartido en hojas sin partir ninguno. Lo usan el editor (vista previa),
  * `/media-kit` y el documento de cada propuesta.
  */
-export function MediaKitHojas({ perfil, kit, bloques, marcasTrabajadas, pie }: Props) {
+export function MediaKitHojas({ perfil, kit, bloques, marcasTrabajadas, logos, pie }: Props) {
   return (
     <>
-      {hojasDelMediaKit(bloques).map((hoja, i) => (
+      {hojasDelMediaKit(bloques, { perfil, kit, marcasTrabajadas }).map((hoja, i) => (
         <DocInfluencerSheet key={i} nombre={perfil.nombre} handle={perfil.handle} footer={pie}>
           {hoja.map((b) => (
-            <BloqueDoc key={b} bloque={b} perfil={perfil} kit={kit} marcasTrabajadas={marcasTrabajadas} />
+            <BloqueDoc key={b} bloque={b} perfil={perfil} kit={kit} marcasTrabajadas={marcasTrabajadas} logos={logos} />
           ))}
         </DocInfluencerSheet>
       ))}
@@ -42,11 +49,11 @@ export function MediaKitHojas({ perfil, kit, bloques, marcasTrabajadas, pie }: P
 }
 
 /** Cuántas hojas ocupa, para la numeración del pie y la barra del documento. */
-export function hojasMediaKit(bloques: BloqueMediaKit[]) {
-  return hojasDelMediaKit(bloques).length
+export function hojasMediaKit(bloques: BloqueMediaKit[], ctx: ContextoHojas) {
+  return hojasDelMediaKit(bloques, ctx).length
 }
 
-function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMediaKit; perfil: Perfil; kit: MediaKit; marcasTrabajadas: string[] }) {
+function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas, logos }: { bloque: BloqueMediaKit; perfil: Perfil; kit: MediaKit; marcasTrabajadas: string[]; logos?: Record<string, string | undefined> }) {
   const cifras = cifrasDelPerfil(perfil)
   const ver = (clave: string) => seVe(kit, clave)
   switch (bloque) {
@@ -66,9 +73,9 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
           )}
           <div className={cn("flex items-end gap-5", conImagen ? "-mt-[48px] px-5" : "")}>
             {ver("portada.foto") &&
-              (perfil.fotoUrl ? (
+              (kit.fotoUrl || perfil.fotoUrl ? (
                 <span className="relative size-[112px] flex-none overflow-hidden rounded-full bg-muted ring-[5px] ring-card">
-                  <Image src={perfil.fotoUrl} alt={perfil.nombre} fill sizes="112px" className="object-cover" />
+                  <Image src={kit.fotoUrl || perfil.fotoUrl || ""} alt={perfil.nombre} fill sizes="112px" className="object-cover" />
                 </span>
               ) : (
                 <AvatarInitials name={perfil.nombre} size="xl" className="size-[112px] flex-none rounded-full text-4xl ring-[5px] ring-card" />
@@ -99,12 +106,18 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
     }
     case "cifras": {
       const items = [
-        ver("cifras.seguidores") && { label: "Seguidores", value: fmt.compact(cifras.seguidores) },
-        ver("cifras.visualizaciones") && { label: "Visualizaciones medias", value: fmt.compact(cifras.visualizaciones) },
-        ver("cifras.interaccion") && { label: "Interacción media", value: fmt.pct(cifras.interaccion) },
-        ver("cifras.espana") && { label: "Audiencia en España", value: fmt.pct(perfil.audiencia.espana) },
+        ver("cifras.seguidores") && { label: "Seguidores", value: fmt.compact(cifras.seguidores), icono: UsersIcon, tint: "lavender" as const },
+        ver("cifras.visualizaciones") && { label: "Visualizaciones medias", value: fmt.compact(cifras.visualizaciones), icono: EyeIcon, tint: "sky" as const },
+        ver("cifras.interaccion") && { label: "Interacción media", value: fmt.pct(cifras.interaccion), icono: HeartIcon, tint: "rose" as const },
+        ver("cifras.espana") && { label: "Audiencia en España", value: fmt.pct(perfil.audiencia.espana), icono: MapPinIcon, tint: "mint" as const },
       ].filter((x) => x !== false)
-      return items.length ? <DocKeyFacts className="mt-[22px]" items={items} /> : null
+      return items.length ? (
+        <dl className="mt-[22px] grid grid-cols-4 gap-2.5">
+          {items.map((c) => (
+            <CifraColor key={c.label} {...c} />
+          ))}
+        </dl>
+      ) : null
     }
     case "redes": {
       const cuentas = perfil.cuentas.filter((c) => ver(`redes.${c.red}`))
@@ -113,15 +126,15 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
         <DocSimpleSection title="Mis redes">
           <div className="mt-2.5 grid grid-cols-3 gap-3">
             {cuentas.map((c) => (
-              <div key={c.red} className="rounded-xl border p-3.5">
+              <div key={c.red} className={cn("rounded-xl p-3.5", tintSoftClass[TINTE_RED[c.red] ?? "peach"])}>
                 <p className="flex items-center gap-1.5 text-[12px] font-semibold">
-                  <SocialIcon network={c.red} className="size-3.5" /> {socialLabel[c.red]}
+                  <SocialIcon network={c.red} className={cn("size-3.5", tintTextClass[TINTE_RED[c.red] ?? "peach"])} /> {socialLabel[c.red]}
                 </p>
                 <p className="truncate text-[10.5px] text-muted-foreground">{c.handle}</p>
                 <p className="mt-2.5 text-[24px] leading-none font-semibold tracking-[-0.02em] tabular-nums">{fmt.compact(c.seguidores)}</p>
                 <p className="mt-1 text-[10.5px] text-muted-foreground">{c.red === "youtube" ? "suscriptores" : "seguidores"}</p>
                 {(ver("redes.visualizaciones") || ver("redes.interaccion")) && (
-                  <dl className="mt-3 grid grid-cols-2 gap-2 border-t pt-2.5">
+                  <dl className="mt-3 grid grid-cols-2 gap-2 border-t border-foreground/10 pt-2.5">
                     {ver("redes.visualizaciones") && (
                       <div>
                         <dt className="text-[10px] text-muted-foreground">Views medias</dt>
@@ -145,8 +158,8 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
     }
     case "audiencia": {
       const partes = [
-        ver("audiencia.mujeres") && <Barra key="m" label="Mujeres" valor={perfil.audiencia.mujeres} />,
-        ver("audiencia.espana") && <Barra key="e" label="En España" valor={perfil.audiencia.espana} />,
+        ver("audiencia.mujeres") && <Barra key="m" label="Mujeres" valor={perfil.audiencia.mujeres} tint="rose" />,
+        ver("audiencia.espana") && <Barra key="e" label="En España" valor={perfil.audiencia.espana} tint="mint" />,
         ver("audiencia.edades") && (
           <div key="a">
             <p className="text-[11px] text-muted-foreground">Edad principal</p>
@@ -189,10 +202,11 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
       if (!marcas.length) return null
       return (
         <DocSimpleSection title="Marcas con las que he trabajado">
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <div className="mt-2.5 grid grid-cols-4 gap-2">
             {marcas.map((m) => (
-              <span key={m} className="rounded-md border px-2 py-0.5 text-[11.5px] font-medium">
-                {m}
+              <span key={m} className="flex min-w-0 items-center gap-2 rounded-xl border px-2.5 py-2">
+                <BrandMark name={m} tint={tintFor(m)} logoUrl={logos?.[m]} size="sm" className="rounded-lg" />
+                <span className="truncate text-[11.5px] font-medium">{m}</span>
               </span>
             ))}
           </div>
@@ -209,6 +223,37 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
             rows={tarifas.map((t) => [FORMATOS[t.formato].label, <span key="p" className="block text-right tabular-nums">{fmt.eur(t.precio)}</span>])}
           />
           {ver("tarifas.nota") && <DocText muted className="mt-2">IVA aparte. Packs, derechos de uso, exclusividad y paid se presupuestan según la campaña.</DocText>}
+        </DocSimpleSection>
+      )
+    }
+    case "presupuesto": {
+      const { lineas, pack, descuento } = presupuestoDelKit(kit, perfil)
+      if (!lineas.length && !pack) return null
+      const precio = (antes: number, final: number) =>
+        descuento ? (
+          <span className="block text-right tabular-nums">
+            <span className="mr-1.5 text-muted-foreground line-through">{fmt.eur(antes)}</span>
+            {fmt.eur(final)}
+          </span>
+        ) : (
+          <span className="block text-right tabular-nums">{fmt.eur(final)}</span>
+        )
+      return (
+        <DocSimpleSection title="Presupuesto">
+          {lineas.length > 0 && (
+            <DocTable
+              columns={[{ label: "Entregable" }, { label: "Precio", className: "w-[150px] text-right" }]}
+              rows={lineas.map((l) => [FORMATOS[l.formato].label, <span key="p">{precio(l.precio, l.final)}</span>])}
+            />
+          )}
+          {pack && (
+            <div className={cn("mt-3 flex items-center justify-between gap-4 rounded-xl px-4 py-3", tintClass.lavender)}>
+              <span className="text-[13px] font-semibold">{pack.nombre}</span>
+              <span className="text-[16px] font-semibold tracking-[-0.01em]">{precio(pack.precio, pack.final)}</span>
+            </div>
+          )}
+          {descuento && <p className={cn("mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold", tintClass.mint)}>{fmt.pct(descuento)} de descuento</p>}
+          {ver("presupuesto.nota") && <DocText muted className="mt-2">IVA aparte. Derechos de uso, exclusividad y paid se presupuestan según la campaña.</DocText>}
         </DocSimpleSection>
       )
     }
@@ -231,14 +276,26 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas }: { bloque: BloqueMe
   }
 }
 
-function Barra({ label, valor }: { label: string; valor: number }) {
+function Barra({ label, valor, tint }: { label: string; valor: number; tint: Tint }) {
   return (
-    <div>
+    <div className={tintTextClass[tint]}>
       <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-[15px] font-semibold tracking-[-0.01em] tabular-nums">{fmt.pct(valor)}</p>
-      <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-muted">
-        <span className="block h-full rounded-full bg-foreground" style={{ width: `${valor}%` }} />
+      <p className="mt-0.5 text-[15px] font-semibold tracking-[-0.01em] text-foreground tabular-nums">{fmt.pct(valor)}</p>
+      <span className="mt-1.5 block h-2 overflow-hidden rounded-full bg-current/15">
+        <span className="block h-full rounded-full bg-current" style={{ width: `${valor}%` }} />
       </span>
+    </div>
+  )
+}
+
+/** Una cifra clave en su tarjeta de color, con su icono (Xavier, 2026-10-16: «más color, como en el Inicio»). */
+function CifraColor({ label, value, icono: Icono, tint }: { label: string; value: string; icono: LucideIcon; tint: Tint }) {
+  return (
+    <div className={cn("rounded-xl px-3.5 py-3", tintSoftClass[tint])}>
+      <dt className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <Icono className={cn("size-3.5", tintTextClass[tint])} aria-hidden /> {label}
+      </dt>
+      <dd className="mt-1 text-[20px] leading-none font-semibold tracking-[-0.02em] tabular-nums">{value}</dd>
     </div>
   )
 }

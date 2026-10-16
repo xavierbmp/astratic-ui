@@ -1106,7 +1106,7 @@ export type Plantilla = {
 // ───────────────────────── Media kit ─────────────────────────
 
 /** Las partes del media kit: se ordenan arrastrando y cada una se enseña o se esconde. */
-export type BloqueMediaKit = "portada" | "cifras" | "redes" | "audiencia" | "destacados" | "marcas" | "tarifas" | "contacto"
+export type BloqueMediaKit = "portada" | "cifras" | "redes" | "audiencia" | "destacados" | "marcas" | "tarifas" | "presupuesto" | "contacto"
 
 export const BLOQUES_MEDIA_KIT: Record<BloqueMediaKit, { label: string; descripcion: string }> = {
   portada: { label: "Portada", descripcion: "Imagen de portada, foto, nombre, titular y bio" },
@@ -1116,7 +1116,22 @@ export const BLOQUES_MEDIA_KIT: Record<BloqueMediaKit, { label: string; descripc
   destacados: { label: "Contenidos destacados", descripcion: "Tus tres mejores publicaciones" },
   marcas: { label: "Marcas con las que he trabajado", descripcion: "Salen solas de tus collabs" },
   tarifas: { label: "Tarifas", descripcion: "Precio de salida por formato" },
+  presupuesto: { label: "Presupuesto", descripcion: "Tus tarifas ajustadas, un pack y un descuento" },
   contacto: { label: "Contacto", descripcion: "Cómo escribirte" },
+}
+
+/**
+ * El bloque de presupuesto del media kit (Xavier, 2026-10-16): parte de sus tarifas de salida; cada precio se cambia o
+ * se esconde (en `ocultos`), se puede ofrecer un pack con su precio (o solo el pack) y un descuento en %.
+ */
+export type PresupuestoMediaKit = {
+  /** El precio de cada formato si no es el de su tarifa. */
+  precios?: Partial<Record<Formato, number>>
+  pack?: { nombre: string; precio: number }
+  /** Enseñar solo el pack, sin los precios sueltos. */
+  soloPack?: boolean
+  /** % de descuento sobre todo lo de arriba. */
+  descuento?: number
 }
 
 export type Destacado = {
@@ -1134,6 +1149,9 @@ export type MediaKit = {
   bloques: { id: BloqueMediaKit; visible: boolean }[]
   /** La imagen ancha de arriba, como la de LinkedIn; sin ella, un fondo de color. */
   portadaUrl?: string
+  /** La foto del media kit si no es la de su perfil (Xavier, 2026-10-16: «poder subir imagen»). */
+  fotoUrl?: string
+  presupuesto?: PresupuestoMediaKit
   /** Lo que se esconde dentro de los bloques visibles, por clave «bloque.dato» (`datosDelBloque`). Xavier, 2026-10-14. */
   ocultos?: string[]
   /** La frase de la portada: qué haces y para quién. */
