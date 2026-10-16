@@ -108,6 +108,9 @@ export function DataTable<T>({
 
   const padY = dense ? "py-1.5" : "py-2.5"
 
+  // Vacía, sin la tabla: con columnas anchas, el aviso quedaba dentro de una tabla que se desbordaba y se cortaba.
+  if (sorted.length === 0 && emptyState && !loading) return <div className={cn("w-full", className)}>{emptyState}</div>
+
   return (
     <div className={cn("relative w-full overflow-auto", loading && "pointer-events-none opacity-60", className)}>
       <Table className="text-[13.5px]">
