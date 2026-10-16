@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { LucideIcon } from "lucide-react"
+import { CheckIcon, type LucideIcon } from "lucide-react"
 import { cn } from "cn"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -106,7 +106,7 @@ export function CasillasOpcion<V extends string>({ opciones, valores, onChange, 
 export type OpcionPildora<V extends string> = { value: V; label: string; icono?: React.ReactNode }
 
 const PILDORA = "inline-flex h-8 items-center gap-1.5 rounded-full border border-input px-3 text-sm transition-colors outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-3.5 [&_svg]:text-muted-foreground"
-const PILDORA_ELEGIDA = "border-brand bg-brand-soft text-foreground hover:bg-brand-soft [&_svg]:text-brand"
+const PILDORA_ELEGIDA = "border-brand bg-brand-soft font-medium text-foreground ring-1 ring-brand hover:bg-brand-soft [&_svg]:text-brand"
 
 /**
  * Elegir una entre opciones cortas que se leen de un vistazo (un tramo de seguidores, cuántas collabs al mes): una
@@ -138,7 +138,7 @@ export function PildorasMultiples<V extends string>({ opciones, valores, onChang
         const marcada = valores.includes(o.value)
         return (
           <button key={o.value} type="button" aria-pressed={marcada} onClick={() => alternar(o.value)} className={cn(PILDORA, marcada && PILDORA_ELEGIDA)}>
-            {o.icono}
+            {marcada ? <CheckIcon strokeWidth={3} aria-hidden /> : o.icono}
             {o.label}
           </button>
         )
