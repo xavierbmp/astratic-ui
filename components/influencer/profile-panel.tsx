@@ -166,7 +166,8 @@ function Cifra({ label, value, network }: { label: string; value: string; networ
  * Una ficha del pie de la tarjeta del perfil: arriba su icono y su nombre, abajo la cifra (o lo que hace).
  * Las redes son fichas; una acción como el media kit, también, con `asChild` sobre su enlace.
  * Con `tint` (las redes, Xavier 2026-10-16, a partir de una referencia): un leve color de la red, la cifra grande con su
- * gráfico al lado (la tendencia de seguidores o, sin ella, la interacción en un anillo) y, abajo y en pequeño, el cambio en %.
+ * gráfico al lado (la evolución de sus seguidores, solo donde la red la da) y, abajo y en pequeño, el cambio en % o, sin él, la
+ * interacción (Xavier, 2026-10-16: nada de anillos que no dicen nada; un gráfico solo cuando tiene sentido).
  */
 export function ProfileTile({
   icon,
@@ -186,7 +187,7 @@ export function ProfileTile({
   value?: string
   detail?: string
   trend?: Tendencia
-  /** Interacción en %: con `tint` y sin tendencia, se dibuja en un anillo. */
+  /** Interacción en %: con `tint` y sin cambio de seguidores, va al pie. */
   engagement?: number
   tint?: Tint
   asChild?: boolean
@@ -195,8 +196,6 @@ export function ProfileTile({
   const grafico =
     trend && trend.serie.length > 1 ? (
       <MiniTendencia serie={trend.serie} className={tint ? tintTextClass[tint] : (trend.cambio ?? 0) >= 0 ? "text-success" : "text-danger"} grande={!!tint} />
-    ) : tint && engagement !== undefined && engagement > 0 ? (
-      <Anillo pct={engagement} className={tintTextClass[tint]} />
     ) : null
   return (
     <Comp
@@ -225,8 +224,8 @@ export function ProfileTile({
         <CambioPie valor={trend.cambio} />
       ) : (
         tint &&
-        grafico &&
-        engagement !== undefined && <span className="-mt-1.5 text-[11px] text-muted-foreground">{pct(engagement)} de interacción</span>
+        engagement !== undefined &&
+        engagement > 0 && <span className="-mt-1.5 text-[11px] text-muted-foreground">{pct(engagement)} de interacción</span>
       )}
       <Slot.Slottable>{children}</Slot.Slottable>
     </Comp>
@@ -265,29 +264,16 @@ function CambioPie({ valor }: { valor: number }) {
   )
 }
 
-/** Un % en un anillo fino del color de la red: la pista suave y el arco lleno hasta su valor (topado a 100). */
-function Anillo({ pct: valor, className }: { pct: number; className?: string }) {
-  const r = 15
-  const largo = 2 * Math.PI * r
-  const lleno = (Math.min(valor, 100) / 100) * largo
-  return (
-    <svg viewBox="0 0 40 40" className={cn("size-10 flex-none -rotate-90", className)} aria-label={`Interacción ${pct(valor)}`} role="img">
-      <circle cx="20" cy="20" r={r} className="fill-none stroke-current opacity-15" strokeWidth={5} />
-      <circle cx="20" cy="20" r={r} className="fill-none stroke-current" strokeWidth={5} strokeLinecap="round" strokeDasharray={`${lleno} ${largo}`} />
-    </svg>
-  )
-}
-
-/** La serie en una línea pequeña con su área, sin ejes: solo la forma de cómo va. */
+/** La serie en una línea pequeña con su área, sin ejes: solo la forma de cómo va. Con `grande`, la de la ficha de una red. */
 function MiniTendencia({ serie, className, grande = false }: { serie: number[]; className?: string; grande?: boolean }) {
-  const ancho = 64
-  const alto = grande ? 32 : 26
+  const ancho = grande ? 96 : 64
+  const alto = grande ? 40 : 26
   const min = Math.min(...serie)
   const rango = Math.max(...serie) - min || 1
   const puntos = serie.map((v, i) => [(i / (serie.length - 1)) * ancho, alto - 2 - ((v - min) / rango) * (alto - 4)] as const)
   const linea = puntos.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ")
   return (
-    <svg viewBox={`0 0 ${ancho} ${alto}`} className={cn("w-16 flex-none overflow-visible", grande ? "h-8 w-20" : "h-[26px]", className)} aria-hidden>
+    <svg viewBox={`0 0 ${ancho} ${alto}`} className={cn("w-16 flex-none overflow-visible", grande ? "h-10 w-24" : "h-[26px]", className)} aria-hidden>
       <path d={`${linea} L${ancho} ${alto} L0 ${alto} Z`} className="fill-current opacity-10" />
       <path d={linea} className="fill-none stroke-current" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
     </svg>
