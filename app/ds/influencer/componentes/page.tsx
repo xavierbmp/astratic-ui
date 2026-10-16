@@ -198,7 +198,7 @@ export default function InfluencerComponentesPage() {
       <DocSection id="notice" title="Avisos" lead="El que más importa va en una tarjeta del acento con su acción; los demás, en lista, con el punto y la negrita si no están leídos.">
         <Example className={EXAMPLE} code={`<NoticeHighlight
   eyebrow="Red Astratic" title="Nueva oportunidad de la red: Nuura"
-  description="1 reel + 3 stories · 1.100 € (880 € para ti)"
+  description="1 reel + 3 stories · 880 € para ti"
   action={<Button size="sm" variant="secondary">Ver la propuesta</Button>}
 />
 <NoticeItem icon={MessageSquareWarningIcon} title="Maison Vero ha pedido cambios" meta="hace 1 hora" unread href="…" />`}>
@@ -207,7 +207,7 @@ export default function InfluencerComponentesPage() {
             <NoticeHighlight
               eyebrow="Red Astratic"
               title="Nueva oportunidad de la red: Nuura"
-              description="1 reel + 3 stories · 1.100 € (880 € para ti)"
+              description="1 reel + 3 stories · 880 € para ti"
               action={
                 <Button size="sm" variant="secondary" className="w-fit">
                   Ver la propuesta

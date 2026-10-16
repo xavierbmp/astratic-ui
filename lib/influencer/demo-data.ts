@@ -378,7 +378,7 @@ export const demoAvisoDestacado: Aviso = {
   id: "n0",
   tipo: "oportunidad",
   titulo: "Nueva oportunidad de la red: Nuura",
-  descripcion: "1 reel + 3 stories · 1.100 € (880 € para ti) · del 20 al 31 de octubre",
+  descripcion: "1 reel + 3 stories · 880 € para ti · del 20 al 31 de octubre",
   el: "2026-10-06T09:40:00",
   leido: false,
   href: "/workspace/crm?registro=p-nuura",

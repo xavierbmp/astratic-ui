@@ -3,12 +3,13 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { MapPinIcon } from "lucide-react"
+import { ArrowDownRightIcon, ArrowUpRightIcon, MapPinIcon } from "lucide-react"
 import { Slot } from "radix-ui"
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { SocialIcon, socialLabel, type SocialNetwork } from "@/components/app/social-icons"
 import { AvatarInitials } from "@/components/app/avatar-initials"
+import { tintSoftClass, tintTextClass, type Tint } from "@/lib/influencer/tints"
 
 export type ProfileAccount = {
   network: SocialNetwork
@@ -23,6 +24,9 @@ export type ProfileAccount = {
 }
 
 export type Tendencia = { serie: number[]; cambio?: number }
+
+/** El leve color de cada red en su ficha (Xavier, 2026-10-16): Instagram morado, YouTube rojo suave, TikTok y LinkedIn azul. */
+const TINTE_RED: Record<SocialNetwork, Tint> = { instagram: "lavender", youtube: "rose", tiktok: "sky", linkedin: "sky" }
 
 /** La red con más seguidores: la que se enseña al abrir. */
 function principal(accounts: ProfileAccount[]) {
@@ -131,9 +135,11 @@ export function ProfilePanel({
                 value={fmt.compact(a.followers)}
                 detail={a.network === "youtube" ? "suscriptores" : "seguidores"}
                 trend={a.trend}
+                engagement={a.network === "youtube" ? undefined : a.engagement}
+                tint={TINTE_RED[a.network]}
                 aria-pressed={a.network === elegida?.network}
                 onClick={() => setRed(a.network)}
-                className={cn(a.network === elegida?.network && "bg-brand-soft ring-1 ring-brand/40 hover:bg-brand-soft")}
+                className={cn(a.network === elegida?.network && "ring-2 ring-current/25")}
               />
             ))}
           </div>
@@ -159,6 +165,8 @@ function Cifra({ label, value, network }: { label: string; value: string; networ
 /**
  * Una ficha del pie de la tarjeta del perfil: arriba su icono y su nombre, abajo la cifra (o lo que hace).
  * Las redes son fichas; una acción como el media kit, también, con `asChild` sobre su enlace.
+ * Con `tint` (las redes, Xavier 2026-10-16, a partir de una referencia): un leve color de la red, la cifra grande con su
+ * gráfico al lado (la tendencia de seguidores o, sin ella, la interacción en un anillo) y, abajo y en pequeño, el cambio en %.
  */
 export function ProfileTile({
   icon,
@@ -166,63 +174,120 @@ export function ProfileTile({
   value,
   detail,
   trend,
+  engagement,
+  tint,
   asChild = false,
   className,
   children,
   ...props
-}: React.ComponentProps<"button"> & { icon: React.ReactNode; label: string; value?: string; detail?: string; trend?: Tendencia; asChild?: boolean }) {
+}: React.ComponentProps<"button"> & {
+  icon: React.ReactNode
+  label: string
+  value?: string
+  detail?: string
+  trend?: Tendencia
+  /** Interacción en %: con `tint` y sin tendencia, se dibuja en un anillo. */
+  engagement?: number
+  tint?: Tint
+  asChild?: boolean
+}) {
   const Comp = asChild ? Slot.Root : "button"
+  const grafico =
+    trend && trend.serie.length > 1 ? (
+      <MiniTendencia serie={trend.serie} className={tint ? tintTextClass[tint] : (trend.cambio ?? 0) >= 0 ? "text-success" : "text-danger"} grande={!!tint} />
+    ) : tint && engagement !== undefined && engagement > 0 ? (
+      <Anillo pct={engagement} className={tintTextClass[tint]} />
+    ) : null
   return (
     <Comp
       data-slot="ws-profile-tile"
       {...(asChild ? {} : { type: "button" as const })}
       className={cn(
-        "flex min-h-24 min-w-0 flex-col justify-between gap-3 rounded-xl bg-background/70 p-3 text-left outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50",
+        "flex min-h-24 min-w-0 flex-col justify-between gap-3 rounded-xl p-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
+        tint ? cn(tintSoftClass[tint], tintTextClass[tint]) : "bg-background/70 hover:bg-muted",
         className,
       )}
       {...props}
     >
       <span className="flex min-w-0 items-center gap-2">
-        <span className="grid size-8 flex-none place-items-center rounded-lg bg-card shadow-xs [&_svg]:size-4">{icon}</span>
-        <span className="truncate text-xs font-medium text-muted-foreground">{label}</span>
-        {trend?.cambio !== undefined && <Cambio valor={trend.cambio} />}
+        <span className={cn("grid flex-none place-items-center [&_svg]:size-4", tint ? "size-5" : "size-8 rounded-lg bg-card shadow-xs")}>{icon}</span>
+        <span className={cn("truncate font-medium", tint ? "text-sm text-foreground" : "text-xs text-muted-foreground")}>{label}</span>
+        {!tint && trend?.cambio !== undefined && <Cambio valor={trend.cambio} />}
       </span>
       <span className="flex min-w-0 items-end justify-between gap-2">
-        <span className="min-w-0">
-          {value && <span className="block text-xl leading-tight font-semibold tracking-tight tabular-nums">{value}</span>}
+        <span className="min-w-0 text-foreground">
+          {value && <span className={cn("block leading-tight font-semibold tracking-tight tabular-nums", tint ? "text-2xl" : "text-xl")}>{value}</span>}
           {detail && <span className={cn("block truncate", value ? "text-[11px] text-muted-foreground" : "text-sm font-medium")}>{detail}</span>}
         </span>
-        {trend && trend.serie.length > 1 && <MiniTendencia serie={trend.serie} sube={(trend.cambio ?? 0) >= 0} />}
+        {grafico}
       </span>
+      {tint && trend?.cambio !== undefined ? (
+        <CambioPie valor={trend.cambio} />
+      ) : (
+        tint &&
+        grafico &&
+        engagement !== undefined && <span className="-mt-1.5 text-[11px] text-muted-foreground">{pct(engagement)} de interacción</span>
+      )}
       <Slot.Slottable>{children}</Slot.Slottable>
     </Comp>
   )
 }
 
+const pct = (valor: number) => `${Math.abs(valor).toLocaleString("es-ES", { maximumFractionDigits: 1 })} %`
+
 /** «+3,2 %» en verde o «−1,1 %» en rojo, junto al nombre de la red. */
 function Cambio({ valor }: { valor: number }) {
   const sube = valor >= 0
-  const texto = `${sube ? "+" : "−"}${Math.abs(valor).toLocaleString("es-ES", { maximumFractionDigits: 1 })} %`
   return (
     <span
       title="Cambio de seguidores en el periodo de la gráfica"
       className={cn("ml-auto flex-none rounded-full px-1.5 py-px text-[11px] font-semibold tabular-nums", sube ? "bg-success-soft text-success" : "bg-danger-soft text-danger")}
     >
-      {texto}
+      {sube ? "+" : "−"}
+      {pct(valor)}
     </span>
   )
 }
 
+/** El cambio de seguidores al pie de la ficha de una red, pequeño: la flecha y el % en verde o rojo. */
+function CambioPie({ valor }: { valor: number }) {
+  const sube = valor >= 0
+  const Flecha = sube ? ArrowUpRightIcon : ArrowDownRightIcon
+  return (
+    <span title="Cambio de seguidores en el periodo de la gráfica" className="-mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+      <span className={cn("inline-flex items-center font-semibold tabular-nums", sube ? "text-success" : "text-danger")}>
+        <Flecha className="size-3" aria-hidden />
+        {sube ? "+" : "−"}
+        {pct(valor)}
+      </span>
+      en seguidores
+    </span>
+  )
+}
+
+/** Un % en un anillo fino del color de la red: la pista suave y el arco lleno hasta su valor (topado a 100). */
+function Anillo({ pct: valor, className }: { pct: number; className?: string }) {
+  const r = 15
+  const largo = 2 * Math.PI * r
+  const lleno = (Math.min(valor, 100) / 100) * largo
+  return (
+    <svg viewBox="0 0 40 40" className={cn("size-10 flex-none -rotate-90", className)} aria-label={`Interacción ${pct(valor)}`} role="img">
+      <circle cx="20" cy="20" r={r} className="fill-none stroke-current opacity-15" strokeWidth={5} />
+      <circle cx="20" cy="20" r={r} className="fill-none stroke-current" strokeWidth={5} strokeLinecap="round" strokeDasharray={`${lleno} ${largo}`} />
+    </svg>
+  )
+}
+
 /** La serie en una línea pequeña con su área, sin ejes: solo la forma de cómo va. */
-function MiniTendencia({ serie, sube }: { serie: number[]; sube: boolean }) {
+function MiniTendencia({ serie, className, grande = false }: { serie: number[]; className?: string; grande?: boolean }) {
   const ancho = 64
-  const alto = 26
+  const alto = grande ? 32 : 26
   const min = Math.min(...serie)
   const rango = Math.max(...serie) - min || 1
   const puntos = serie.map((v, i) => [(i / (serie.length - 1)) * ancho, alto - 2 - ((v - min) / rango) * (alto - 4)] as const)
   const linea = puntos.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ")
   return (
-    <svg viewBox={`0 0 ${ancho} ${alto}`} className={cn("h-[26px] w-16 flex-none overflow-visible", sube ? "text-success" : "text-danger")} aria-hidden>
+    <svg viewBox={`0 0 ${ancho} ${alto}`} className={cn("w-16 flex-none overflow-visible", grande ? "h-8 w-20" : "h-[26px]", className)} aria-hidden>
       <path d={`${linea} L${ancho} ${alto} L0 ${alto} Z`} className="fill-current opacity-10" />
       <path d={linea} className="fill-none stroke-current" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
     </svg>

@@ -14,6 +14,26 @@ export const tintClass: Record<Tint, string> = {
   peach: "bg-tint-peach text-tint-peach-foreground",
 }
 
+/** El tinte de fondo, más suave, para una tarjeta entera (las de cada red del perfil): un leve color, no un bloque pintado. */
+export const tintSoftClass: Record<Tint, string> = {
+  lime: "bg-linear-to-b from-tint-lime/80 to-tint-lime/30 hover:from-tint-lime hover:to-tint-lime/50",
+  mint: "bg-linear-to-b from-tint-mint/80 to-tint-mint/30 hover:from-tint-mint hover:to-tint-mint/50",
+  rose: "bg-linear-to-b from-tint-rose/80 to-tint-rose/30 hover:from-tint-rose hover:to-tint-rose/50",
+  lavender: "bg-linear-to-b from-tint-lavender/80 to-tint-lavender/30 hover:from-tint-lavender hover:to-tint-lavender/50",
+  sky: "bg-linear-to-b from-tint-sky/80 to-tint-sky/30 hover:from-tint-sky hover:to-tint-sky/50",
+  peach: "bg-linear-to-b from-tint-peach/80 to-tint-peach/30 hover:from-tint-peach hover:to-tint-peach/50",
+}
+
+/** Solo el color del texto de un tinte: para trazos y gráficos sobre su fondo suave. */
+export const tintTextClass: Record<Tint, string> = {
+  lime: "text-tint-lime-foreground",
+  mint: "text-tint-mint-foreground",
+  rose: "text-tint-rose-foreground",
+  lavender: "text-tint-lavender-foreground",
+  sky: "text-tint-sky-foreground",
+  peach: "text-tint-peach-foreground",
+}
+
 export const tintLabel: Record<Tint, string> = {
   lime: "Lima",
   mint: "Menta",
