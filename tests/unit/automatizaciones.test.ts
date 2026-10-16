@@ -14,6 +14,7 @@ import {
   planificar,
   reglasDe,
   restaurarDeSerie,
+  tareasCumplidas,
   tareasSuperadas,
   type Automatizacion,
   type Ocurrido,
@@ -185,5 +186,20 @@ describe("lo que ya no toca", () => {
   it("al perderla, todas las abiertas; en la nueva, ninguna", () => {
     expect(tareasSuperadas(tareas, AUTOMATIZACIONES_DE_SERIE, "p1", "perdida")).toHaveLength(2)
     expect(tareasSuperadas(tareas, AUTOMATIZACIONES_DE_SERIE, "p1", "nueva")).toEqual([])
+  })
+})
+
+describe("lo que ya está hecho con un contenido", () => {
+  const tarea = (clave: string, padreId?: string): Tarea => ({ id: `${clave}${padreId ? "-sub" : ""}`, titulo: clave, estado: "por-hacer", prioridad: "normal", donde: { tipo: "collabs" }, etiquetas: [], orden: 0, origen: "auto", clave: padreId ? undefined : clave, padreId, actividad: [], creadaEl: HOY })
+  const v = (id: string, numero: number) => ({ id, numero, tipo: "guion" as const, estado: "borrador" as const, creadaEl: HOY, notas: [], mensajes: [] })
+  const pieza = { id: "pz1", guion: [v("g1", 1), v("g2", 2)], media: [v("m1", 1)] }
+  const tareas = [tarea("serie-collab-guion:pz1"), tarea("serie-marca-feedback:g1"), tarea("x", "serie-marca-feedback:g1"), tarea("serie-marca-aprueba-guion:g2"), tarea("serie-collab-publicar:pz1"), tarea("serie-collab-guion:pz2")]
+  const ids = (h: Parameters<typeof tareasCumplidas>[3]) => tareasCumplidas(tareas, AUTOMATIZACIONES_DE_SERIE, pieza, h).map((t) => t.id)
+  it("al mandar la v2 del guion: la de mandarlo y el feedback de la v1, con sus comentarios", () => {
+    expect(ids({ que: "envia", parte: "guion", numero: 2 })).toEqual(["serie-collab-guion:pz1", "serie-marca-feedback:g1", "x-sub"])
+  })
+  it("al mandar el vídeo, la de grabar; al publicar, la de publicar", () => {
+    expect(ids({ que: "envia", parte: "media", numero: 1 })).toEqual(["serie-marca-aprueba-guion:g2"])
+    expect(ids({ que: "publica" })).toEqual(["serie-collab-publicar:pz1"])
   })
 })

@@ -364,3 +364,30 @@ export function tareasSuperadas(tareas: Tarea[], reglas: Pick<Automatizacion, "i
   const claves = new Set(reglas.filter((r) => anteriores.has(r.evento)).map((r) => `${r.id}:${propuestaId}`))
   return tareas.filter((t) => !t.padreId && !!t.clave && claves.has(t.clave) && !estaCerrada(t))
 }
+
+/** Lo que ella acaba de hacer con un contenido: mandar una versión a la marca o publicarlo. */
+export type HechoPieza = { que: "envia"; parte: TipoVersion; numero: number } | { que: "publica" }
+
+/**
+ * Las tareas automáticas de un contenido que quedan hechas con lo que ella acaba de hacer (auditoría,
+ * 2026-10-16: seguían abiertas con el trabajo ya hecho). Al mandar el guion, la de mandarlo; al mandar
+ * una versión nueva, el feedback de las anteriores de esa parte; al mandar el vídeo o las fotos, la de
+ * grabar que nació al aprobar el guion; al publicar, la de publicar y la de programar. Con sus
+ * subtareas (los comentarios de la marca), que quedan resueltos con la versión nueva.
+ */
+export function tareasCumplidas(tareas: Tarea[], reglas: Automatizacion[], pieza: Pick<Pieza, "id" | "guion" | "media">, hecho: HechoPieza): Tarea[] {
+  const claves = new Set<string>()
+  const deLaPieza = (desde: FechaBase) => reglas.filter((r) => r.evento === "collab:creada" && r.accion.tipo === "tarea" && r.accion.porCadaPieza && r.accion.cuando.desde === desde).forEach((r) => claves.add(`${r.id}:${pieza.id}`))
+  const deVersiones = (evento: EventoAutomatizacion, versiones: { id: string }[]) => reglas.filter((r) => r.evento === evento).forEach((r) => versiones.forEach((v) => claves.add(`${r.id}:${v.id}`)))
+  if (hecho.que === "publica") {
+    deLaPieza("publicacion")
+    deVersiones("marca:aprueba-contenido", pieza.media)
+  } else {
+    if (hecho.parte === "guion") deLaPieza("guion")
+    if (hecho.parte === "media") deVersiones("marca:aprueba-guion", pieza.guion)
+    deVersiones("marca:feedback", pieza[hecho.parte].filter((v) => v.numero < hecho.numero))
+  }
+  const madres = tareas.filter((t) => !t.padreId && !!t.clave && claves.has(t.clave) && !estaCerrada(t))
+  const ids = new Set(madres.map((t) => t.id))
+  return [...madres, ...tareas.filter((t) => !!t.padreId && ids.has(t.padreId) && !estaCerrada(t))]
+}
