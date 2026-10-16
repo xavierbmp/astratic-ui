@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronDownIcon, SlidersHorizontalIcon, type LucideIcon } from "lucide-react"
+import { CheckIcon, ChevronDownIcon, ListFilterIcon, type LucideIcon } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { contarCondiciones, type GrupoCondiciones } from "@/lib/filtros/core"
@@ -66,7 +66,7 @@ export function BarraFiltros({
       <div className="ml-auto flex min-w-0 items-center gap-0.5">
         <Popover open={abierto} onOpenChange={setAbierto}>
           <PopoverTrigger asChild>
-            <BotonBarra icono={SlidersHorizontalIcon} texto={n ? `Filtrado por ${n} ${n === 1 ? "condición" : "condiciones"}` : "Filtro"} activo={n > 0} />
+            <BotonBarra icono={ListFilterIcon} texto={n ? `Filtrado por ${n} ${n === 1 ? "condición" : "condiciones"}` : "Filtro"} activo={n > 0} />
           </PopoverTrigger>
           <PopoverContent align="end" className="w-auto p-0">
             <PanelFiltro campos={campos} value={filtro} onChange={onFiltro} objeto={objeto} />

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowUpDownIcon, CalendarDaysIcon, Columns3Icon, EyeOffIcon, PaletteIcon, PanelLeftIcon, PanelRightIcon, Rows3Icon, SlidersHorizontalIcon, type LucideIcon } from "lucide-react"
+import { ArrowUpDownIcon, CalendarDaysIcon, Columns3Icon, EyeOffIcon, PaletteIcon, PanelLeftIcon, PanelRightIcon, Rows3Icon, ListFilterIcon, type LucideIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { contarCondiciones } from "@/lib/filtros/core"
 import type { DefCampo } from "@/lib/base/campos"
@@ -120,7 +120,7 @@ export function BarraBase<T>({
             <MenuCampos vista={vista} campos={campos} onCambiar={(lista) => onCambiar({ campos: lista })} />
           </MenuBarra>
         )}
-        <MenuBarra icono={SlidersHorizontalIcon} texto={filtrado ?? "Filtro"} activo={contarCondiciones(vista.filtro) > 0} {...de("filtro")}>
+        <MenuBarra icono={ListFilterIcon} texto={filtrado ?? "Filtro"} activo={contarCondiciones(vista.filtro) > 0} {...de("filtro")}>
           <PanelFiltro campos={camposMenu} value={vista.filtro} onChange={(filtro) => onCambiar({ filtro })} objeto={objeto} otrasVistas={otras} />
         </MenuBarra>
         {tiene("grupos") && (
