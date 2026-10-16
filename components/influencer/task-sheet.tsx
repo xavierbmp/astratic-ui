@@ -17,7 +17,8 @@ import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, Deta
 import type { PanelFicha } from "@/components/app/detail-panel"
 import { InlineField } from "@/components/app/inline-field"
 import { EditorTexto } from "@/components/influencer/editor-texto"
-import { CasillaTarea, EstadoTareaBadge, EtiquetasTarea, FechaTarea, PrioridadBandera } from "@/components/influencer/task-cells"
+import { CasillaTarea, EstadoTareaBadge, EtiquetasTarea, FechaTarea, PrioridadIcono } from "@/components/influencer/task-cells"
+import { SelectorIconoTarea } from "@/components/influencer/task-icono"
 import { TareaContexto, tieneContexto } from "@/components/influencer/task-contexto"
 import { SelectorDeQue, SelectorTipo, etiquetaDeQue } from "@/components/influencer/task-tipo"
 import { CampoPropioInline } from "@/components/influencer/task-campos-propios"
@@ -141,7 +142,7 @@ export function TareaDetalle({
               required
               opciones={PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label }))}
               onSave={async (v) => guardar({ prioridad: String(v) as PrioridadTarea })}
-              render={() => <PrioridadBandera prioridad={tarea.prioridad} conTexto />}
+              render={() => <PrioridadIcono prioridad={tarea.prioridad} conTexto />}
             />
           </DetailField>
           <DetailField key="fecha" label="Fecha" empty={!tarea.fecha}>
@@ -344,7 +345,12 @@ export function TaskSheet({
       {tarea && (
         <>
           <DetailHeader
-            leading={<span className="pt-0.5"><CasillaTarea tarea={tarea} onToggle={() => acciones.onToggle(tarea)} /></span>}
+            leading={
+              <span className="flex items-center gap-2 pt-0.5">
+                <CasillaTarea tarea={tarea} onToggle={() => acciones.onToggle(tarea)} />
+                <SelectorIconoTarea tarea={tarea} onCambiar={(icono) => acciones.onGuardar({ ...tarea, icono })} />
+              </span>
+            }
             title={
               <InlineField
                 value={tarea.titulo}

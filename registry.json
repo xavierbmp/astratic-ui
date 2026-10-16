@@ -680,6 +680,8 @@
         { "path": "components/influencer/task-cells.tsx", "type": "registry:component" },
         { "path": "components/influencer/task-list.tsx", "type": "registry:component" },
         { "path": "components/influencer/task-hoy.tsx", "type": "registry:component" },
+        { "path": "components/influencer/task-icono.tsx", "type": "registry:component" },
+        { "path": "components/influencer/task-filtro-rapido.tsx", "type": "registry:component" },
         { "path": "components/influencer/task-calendar.tsx", "type": "registry:component" },
         { "path": "components/influencer/task-sheet.tsx", "type": "registry:component" },
         { "path": "components/influencer/task-contexto.tsx", "type": "registry:component" },

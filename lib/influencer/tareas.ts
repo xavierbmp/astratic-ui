@@ -12,6 +12,7 @@ import {
   type EntradaTarea,
   type EstadoTarea,
   type GrupoEstadoTarea,
+  type IconoTarea,
   type Marca,
   type Propuesta,
   type RegistroTarea,
@@ -461,6 +462,58 @@ export function cambiarTipo(donde: DondeTarea, tipo: TipoTarea): DondeTarea {
   if (tipo === "collabs" || tipo === "cobros") return collabId ? { tipo, collabId } : { tipo }
   return { tipo }
 }
+
+// ───────────────────────── Filtro rápido e icono ─────────────────────────
+
+/**
+ * El filtro rápido de arriba de la página de Tareas (Xavier, 2026-10-16): de qué página son (todas, o
+ * solo las generales, las del CRM, las de Collabs…) y, dentro, sus etiquetas (cualquiera de las
+ * elegidas). Recorta Hoy y la base a la vez.
+ */
+export type FiltroRapidoTareas = { tipo: TipoTarea | "todas"; etiquetas: string[] }
+
+export const SIN_FILTRO_RAPIDO: FiltroRapidoTareas = { tipo: "todas", etiquetas: [] }
+
+export function pasaFiltroRapido(t: Pick<Tarea, "donde" | "etiquetas">, f: FiltroRapidoTareas): boolean {
+  if (f.tipo !== "todas" && t.donde.tipo !== f.tipo) return false
+  return f.etiquetas.length === 0 || f.etiquetas.some((id) => t.etiquetas.includes(id))
+}
+
+/** Las etiquetas que llevan las tareas abiertas de un tipo, de la más usada a la menos, con cuántas. */
+export function etiquetasEnUso(tareas: Tarea[], tipo: FiltroRapidoTareas["tipo"]): { id: string; n: number }[] {
+  const cuenta = new Map<string, number>()
+  for (const t of tareas) {
+    if (estaCerrada(t) || (tipo !== "todas" && t.donde.tipo !== tipo)) continue
+    for (const id of t.etiquetas) cuenta.set(id, (cuenta.get(id) ?? 0) + 1)
+  }
+  return [...cuenta].map(([id, n]) => ({ id, n })).sort((a, b) => b.n - a.n)
+}
+
+/** El icono de serie según la automatización que la creó (la regla va antes de «:» en su `clave`). */
+const ICONO_DE_REGLA: Record<string, IconoTarea> = {
+  "serie-propuesta-nueva": "email",
+  "serie-propuesta-enviada": "email",
+  "serie-propuesta-negociando": "dinero",
+  "serie-propuesta-perdida": "email",
+  "serie-collab-publicar": "publicar",
+  "serie-collab-guion": "guion",
+  "serie-collab-tarea-contrato": "contrato",
+  "serie-collab-factura": "factura",
+  "serie-collab-resultados": "resultados",
+  "serie-marca-feedback": "feedback",
+  "serie-marca-aprueba-guion": "grabar",
+  "serie-marca-aprueba-contenido": "publicar",
+  "serie-marca-brief": "brief",
+}
+
+export const ICONO_DE_TIPO: Record<TipoTarea, IconoTarea> = { "sin-tipo": "general", crm: "crm", collabs: "collabs", contenidos: "contenido", cobros: "cobros" }
+
+/** El que lleva si ella no elige otro: el de la automatización que la creó o, si no, el de su tipo. */
+export function iconoDeSerie(t: Pick<Tarea, "donde" | "clave">): IconoTarea {
+  return (t.clave && ICONO_DE_REGLA[t.clave.split(":")[0]]) || ICONO_DE_TIPO[t.donde.tipo]
+}
+
+export const iconoDeTarea = (t: Pick<Tarea, "donde" | "clave" | "icono">): IconoTarea => t.icono ?? iconoDeSerie(t)
 
 // ───────────────────────── Nueva y actividad ─────────────────────────
 

@@ -26,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { CampoFormulario, Formulario, FormularioCabecera, FormularioCuerpo, FormularioPie } from "@/components/app/formulario/formulario-dialog"
 import { SelectorBuscable } from "@/components/app/formulario/selector-buscable"
 import { TarjetasOpcion } from "@/components/app/formulario/opciones-visuales"
-import { PrioridadBandera } from "@/components/influencer/task-cells"
+import { PrioridadIcono } from "@/components/influencer/task-cells"
 import { EditorSubtareas } from "@/components/influencer/task-subtareas"
 
 const esquema = z.object({
@@ -95,7 +95,7 @@ function aRegla(v: Valores, r: Automatizacion): Automatizacion {
   }
 }
 
-const OPCIONES_PRIORIDAD = PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label, icono: <PrioridadBandera prioridad={p.id} /> }))
+const OPCIONES_PRIORIDAD = PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label, icono: <PrioridadIcono prioridad={p.id} /> }))
 const OPCIONES_PAGINA = LISTA_TIPOS_TAREA.map((t) => ({ value: t, label: t === "sin-tipo" ? "Solo en Tareas" : TIPOS_TAREA[t] }))
 const OPCIONES_SENTIDO = [
   { value: "despues", label: "después de" },

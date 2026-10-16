@@ -714,6 +714,38 @@ export type TipoTarea = "sin-tipo" | "crm" | "collabs" | "contenidos" | "cobros"
 export const TIPOS_TAREA: Record<TipoTarea, string> = { "sin-tipo": "Sin tipo", crm: "CRM", collabs: "Collabs", contenidos: "Contenido", cobros: "Cobros" }
 export const LISTA_TIPOS_TAREA = Object.keys(TIPOS_TAREA) as TipoTarea[]
 
+/**
+ * Los iconos que puede llevar una tarea (Xavier, 2026-10-16). De serie, el de la automatización que la
+ * creó (feedback, guion, publicar…) o el de su tipo; ella puede elegir otro en su ficha.
+ */
+export const ICONOS_TAREA = [
+  "general",
+  "crm",
+  "collabs",
+  "contenido",
+  "cobros",
+  "email",
+  "llamada",
+  "reunion",
+  "brief",
+  "guion",
+  "grabar",
+  "foto",
+  "publicar",
+  "feedback",
+  "contrato",
+  "factura",
+  "dinero",
+  "resultados",
+  "idea",
+  "envio",
+  "compras",
+  "viaje",
+  "estrella",
+  "alarma",
+] as const
+export type IconoTarea = (typeof ICONOS_TAREA)[number]
+
 /** La ficha del CRM de la que es una tarea del CRM. */
 export type RegistroTarea = { tipo: "propuesta" | "marca" | "contacto"; id: string }
 
@@ -824,6 +856,8 @@ export type Tarea = {
   origen: OrigenTarea
   /** La de una automatización: qué regla y de qué registro («serie-marca-feedback:v-12»). Con ella no se repite. */
   clave?: string
+  /** El icono que ella ha elegido; sin él, el de serie (`iconoDeTarea`). */
+  icono?: IconoTarea
   /** La descripción (HTML del editor). */
   notas?: string
   /** Los valores de los campos que ha creado ella, por id de campo. */

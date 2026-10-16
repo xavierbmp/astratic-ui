@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ArrastreFilas, FinDeGrupo, GrupoArrastrable, useFilaArrastrable, type Soltar } from "@/components/app/arrastre-filas"
-import { CasillaTarea, DondeChip, EsperandoDias, EstadoTareaBadge, EtiquetasTarea, FechaTarea, PrioridadBandera, ProgresoSubtareas, RepiteIcono } from "@/components/influencer/task-cells"
+import { CasillaTarea, DondeChip, EsperandoDias, EstadoTareaBadge, EtiquetasTarea, FechaTarea, PrioridadIcono, ProgresoSubtareas, RepiteIcono } from "@/components/influencer/task-cells"
 
 /** Propiedades que la lista enseña a la derecha de cada tarea, en este orden si se eligen. */
 export type PropiedadFila = "donde" | "estado" | "prioridad" | "fecha" | "fechaLimite" | "etiquetas" | "repite" | "subtareas"
@@ -108,7 +108,7 @@ export function FilaTarea({
         {ver("etiquetas") && <span className="hidden lg:inline-flex"><EtiquetasTarea ids={tarea.etiquetas} etiquetas={etiquetas} max={2} /></span>}
         {ver("estado") ? <EstadoTareaBadge tarea={tarea} hoy={hoy} /> : <EsperandoDias tarea={tarea} hoy={hoy} />}
         {ver("repite") && <RepiteIcono repetir={tarea.repetir} fecha={diaDeTarea(tarea)} />}
-        {ver("prioridad") && <PrioridadBandera prioridad={tarea.prioridad} soloSiImporta />}
+        {ver("prioridad") && <PrioridadIcono prioridad={tarea.prioridad} soloSiImporta />}
         {ver("donde") && <DondeChip donde={tarea.donde} ctx={ctx} className="hidden max-w-56 md:inline-flex" />}
         {ver("fecha") && <FechaTarea tarea={tarea} hoy={hoy} />}
         {ver("fechaLimite") && tarea.fechaLimite && <FechaTarea tarea={tarea} hoy={hoy} campo="fechaLimite" />}

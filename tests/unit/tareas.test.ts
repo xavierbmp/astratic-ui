@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import type { CampoTarea, Tarea } from "@/lib/influencer/modelo"
 import { asignarCampo, camposTarea } from "@/lib/influencer/campos-tareas"
-import { cambiarTipo, cuandoDe, migasDonde, nuevaTarea, ordenarHoy, perteneceA, siguienteFecha, siguienteRepeticion, tareasDeHoy, textoDonde, describirRepeticion, describirDiaDelMes } from "@/lib/influencer/tareas"
+import { cambiarTipo, cuandoDe, etiquetasEnUso, iconoDeTarea, pasaFiltroRapido, migasDonde, nuevaTarea, ordenarHoy, perteneceA, siguienteFecha, siguienteRepeticion, tareasDeHoy, textoDonde, describirRepeticion, describirDiaDelMes } from "@/lib/influencer/tareas"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
 import { demoContactos, demoMarcas, demoPropuestas, demoTareas, demoEtiquetasTarea } from "@/lib/influencer/demo-data"
 import { SIN_VALOR, agruparFilas } from "@/lib/vistas/core"
@@ -159,5 +159,25 @@ describe("los campos de tareas agrupan bien la demo", () => {
     const campos = camposTarea({ ctx, etiquetas: demoEtiquetasTarea, hoy: HOY, tareas: demoTareas })
     const grupos = agruparFilas(demoTareas.filter((x) => !x.padreId), { campo: "cuando", ocultarVacios: true }, campos, { hoy: HOY })
     expect(grupos.map((g) => g.id)).toEqual(["vencidas", "hoy", "manana", "semana", "proxima", "despues", "sin-fecha", "hechas"])
+  })
+})
+
+describe("filtro rápido e icono", () => {
+  it("recorta por página y, dentro, por cualquiera de las etiquetas elegidas", () => {
+    const crm = t({ donde: { tipo: "crm" }, etiquetas: ["a"] })
+    expect(pasaFiltroRapido(crm, { tipo: "todas", etiquetas: [] })).toBe(true)
+    expect(pasaFiltroRapido(crm, { tipo: "collabs", etiquetas: [] })).toBe(false)
+    expect(pasaFiltroRapido(crm, { tipo: "crm", etiquetas: ["b", "a"] })).toBe(true)
+    expect(pasaFiltroRapido(crm, { tipo: "crm", etiquetas: ["b"] })).toBe(false)
+  })
+  it("las etiquetas en uso de un tipo, solo de las abiertas y de la más usada a la menos", () => {
+    const lista = [t({ donde: { tipo: "crm" }, etiquetas: ["a", "b"] }), t({ donde: { tipo: "crm" }, etiquetas: ["b"] }), t({ donde: { tipo: "crm" }, etiquetas: ["c"], estado: "hecha" }), t({ etiquetas: ["d"] })]
+    expect(etiquetasEnUso(lista, "crm")).toEqual([{ id: "b", n: 2 }, { id: "a", n: 1 }])
+  })
+  it("el icono: el elegido, si no el de su automatización y si no el de su tipo", () => {
+    expect(iconoDeTarea(t({ donde: { tipo: "collabs" } }))).toBe("collabs")
+    expect(iconoDeTarea(t({ donde: { tipo: "collabs" }, clave: "serie-marca-feedback:v-12" }))).toBe("feedback")
+    expect(iconoDeTarea(t({ donde: { tipo: "collabs" }, clave: "serie-marca-feedback:v-12", icono: "estrella" }))).toBe("estrella")
+    expect(iconoDeTarea(t({ clave: "regla-propia:x" }))).toBe("general")
   })
 })

@@ -18,7 +18,7 @@ import { CampoFormulario, Formulario, FormularioCabecera, FormularioCuerpo, Form
 import { SelectorBuscable } from "@/components/app/formulario/selector-buscable"
 import { CampoFecha } from "@/components/app/formulario/campo-fecha"
 import { claveDe, etiquetaDeQue, opcionesDeQue } from "@/components/influencer/task-tipo"
-import { ICONO_TIPO_TAREA, PrioridadBandera } from "@/components/influencer/task-cells"
+import { ICONO_TIPO_TAREA, PrioridadIcono } from "@/components/influencer/task-cells"
 import { SelectorRepeticion } from "@/components/influencer/task-repeticion"
 import { EditorSubtareas } from "@/components/influencer/task-subtareas"
 
@@ -61,7 +61,7 @@ const OPCIONES_TIPO = LISTA_TIPOS_TAREA.map((t) => {
   const Icono = t === "sin-tipo" ? CircleDashedIcon : ICONO_TIPO_TAREA[t]
   return { value: t, label: TIPOS_TAREA[t], icono: <Icono className="size-4 text-muted-foreground" /> }
 })
-const OPCIONES_PRIORIDAD = PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label, icono: <PrioridadBandera prioridad={p.id} /> }))
+const OPCIONES_PRIORIDAD = PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label, icono: <PrioridadIcono prioridad={p.id} /> }))
 /** Los selectores que son un botón, con la cara de los demás campos del formulario (40 px, sin relleno). */
 const CONTROL_BOTON = "h-10 rounded-md bg-transparent font-normal hover:bg-muted/50 dark:bg-input/30"
 const esTipo = (v: string) => LISTA_TIPOS_TAREA.find((t) => t === v)

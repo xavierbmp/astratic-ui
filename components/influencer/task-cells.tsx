@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { CheckIcon, ClapperboardIcon, FlagIcon, KanbanSquareIcon, ListChecksIcon, ReceiptEuroIcon, RepeatIcon, SparklesIcon, XIcon } from "lucide-react"
+import { CheckIcon, ClapperboardIcon, KanbanSquareIcon, ListChecksIcon, ReceiptEuroIcon, RepeatIcon, SparklesIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { tintClass } from "@/lib/influencer/tints"
 import { ESTADOS_TAREA, PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type PrioridadTarea, type Repeticion, type Tarea, type TipoTarea } from "@/lib/influencer/modelo"
@@ -42,20 +42,35 @@ export function CasillaTarea({ tarea, onToggle, size = "md" }: { tarea: Pick<Tar
   )
 }
 
-const TONO_PRIORIDAD: Record<PrioridadTarea, string> = {
-  urgente: "fill-danger text-danger",
-  alta: "fill-warning text-warning",
-  normal: "text-muted-foreground",
-  baja: "text-muted-foreground/50",
+const TONO_PRIORIDAD: Record<Exclude<PrioridadTarea, "urgente">, string> = {
+  alta: "text-warning",
+  normal: "text-foreground/60",
+  baja: "text-muted-foreground",
 }
 
-/** La bandera de la prioridad. En las listas solo se enseña si es urgente o alta: lo normal no hace ruido. */
-export function PrioridadBandera({ prioridad, conTexto, soloSiImporta }: { prioridad: PrioridadTarea; conTexto?: boolean; soloSiImporta?: boolean }) {
+const BARRAS_PRIORIDAD: Record<Exclude<PrioridadTarea, "urgente">, number> = { alta: 3, normal: 2, baja: 1 }
+
+/**
+ * La prioridad como las barras de cobertura (Xavier, 2026-10-16: fuera la bandera): tres barras en
+ * naranja si es alta, dos si es normal y una si es baja; urgente, un aviso rojo. En las listas solo se
+ * enseña si es urgente o alta: lo normal no hace ruido.
+ */
+export function PrioridadIcono({ prioridad, conTexto, soloSiImporta }: { prioridad: PrioridadTarea; conTexto?: boolean; soloSiImporta?: boolean }) {
   if (soloSiImporta && (prioridad === "normal" || prioridad === "baja")) return null
   const label = PRIORIDADES_TAREA.find((p) => p.id === prioridad)?.label ?? prioridad
   return (
-    <span className="inline-flex items-center gap-1 text-xs" title={conTexto ? undefined : `Prioridad ${label.toLowerCase()}`}>
-      <FlagIcon className={cn("size-3.5 flex-none", TONO_PRIORIDAD[prioridad])} aria-hidden />
+    <span className="inline-flex items-center gap-1.5 text-xs" title={conTexto ? undefined : `Prioridad ${label.toLowerCase()}`}>
+      {prioridad === "urgente" ? (
+        <span className="grid size-4 flex-none place-items-center rounded-[5px] bg-danger text-[11px] leading-none font-bold text-background" aria-hidden>
+          !
+        </span>
+      ) : (
+        <svg viewBox="0 0 16 16" className={cn("size-4 flex-none", TONO_PRIORIDAD[prioridad])} aria-hidden>
+          {[0, 1, 2].map((i) => (
+            <rect key={i} x={2 + i * 4.5} y={10 - i * 3.5} width={3} height={4 + i * 3.5} rx={1} className={cn("fill-current", i >= BARRAS_PRIORIDAD[prioridad] && "opacity-20")} />
+          ))}
+        </svg>
+      )}
       {conTexto ? <span>{label}</span> : <span className="sr-only">Prioridad {label.toLowerCase()}</span>}
     </span>
   )
@@ -193,7 +208,7 @@ export function HoraTarea({ tarea }: { tarea: Pick<Tarea, "fecha"> }) {
 
 /**
  * El nombre de un grupo de tareas como se ve en su cabecera: el estado con su insignia, la
- * prioridad con su bandera, una campaña o un registro con el logo de su marca, una etiqueta con su
+ * prioridad con sus barras, una campaña o un registro con el logo de su marca, una etiqueta con su
  * tinte y «Vencidas» en rojo.
  */
 export function NombreGrupoTarea({ campo, grupo, ctx, etiquetas }: { campo?: string; grupo: { id: string; label: string }; ctx: ContextoTareas; etiquetas: EtiquetaTarea[] }) {
@@ -203,7 +218,7 @@ export function NombreGrupoTarea({ campo, grupo, ctx, etiquetas }: { campo?: str
       return e ? <StatusBadge tone={e.tone}>{e.label}</StatusBadge> : <span>{grupo.label}</span>
     }
     case "prioridad":
-      return PRIORIDADES_TAREA.some((p) => p.id === grupo.id) ? <PrioridadBandera prioridad={grupo.id as PrioridadTarea} conTexto /> : <span>{grupo.label}</span> // id de PRIORIDADES_TAREA
+      return PRIORIDADES_TAREA.some((p) => p.id === grupo.id) ? <PrioridadIcono prioridad={grupo.id as PrioridadTarea} conTexto /> : <span>{grupo.label}</span> // id de PRIORIDADES_TAREA
     case "etiquetas": {
       const e = etiquetas.find((x) => x.id === grupo.id)
       return e ? <span className={cn("rounded-full px-2 py-px text-xs font-medium", tintClass[e.tint])}>{e.nombre}</span> : <span>{grupo.label}</span>
