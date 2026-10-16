@@ -72,6 +72,7 @@ export function BaseDatos<T>({
   onAbrirVinculo,
   onNuevo,
   onImportar,
+  crearCamposAlImportar,
   ajustesTabla,
   portada,
   lateral: lateralPropio,
@@ -110,11 +111,14 @@ export function BaseDatos<T>({
   onNuevo?: () => void
   /**
    * Importar desde un Excel o un CSV (o lo pegado de una hoja de cálculo), con qué columna va a qué campo: «Importar»
-   * junto a la acción principal. La página crea un registro por fila con los valores de sus campos (por id). Con
-   * `onGuardarCampo`, una columna también puede crear su campo: la base lo da de alta antes y la página lo recibe en
-   * `nuevos` para escribir sus valores (`registrosDeFilas(filas, [...campos, ...nuevos], …)`).
+   * junto a la acción principal. La página crea un registro por fila con los valores de sus campos (por id).
    */
   onImportar?: (filas: ValoresFormulario[], nuevos: DefCampo<T>[]) => void
+  /**
+   * Al importar, una columna también puede crear su campo (con `onGuardarCampo`): la base lo da de alta antes y la
+   * página lo recibe en `nuevos` de `onImportar` para escribir sus valores (`registrosDeFilas(filas, [...campos, ...nuevos], …)`).
+   */
+  crearCamposAlImportar?: boolean
   /** Los ajustes de la tabla (valores por defecto, opciones y su orden): un engranaje junto a la acción principal. */
   ajustesTabla?: { label: string; onAbrir: () => void }
   /** La imagen de cada registro en las tarjetas del kanban y la galería. */
@@ -458,7 +462,7 @@ export function BaseDatos<T>({
         />
       )}
 
-      {onImportar && <ImportarDialog open={importando} onOpenChange={setImportando} campos={campos} objeto={objeto} crearCampos={!!onGuardarCampo} onImportar={importar} />}
+      {onImportar && <ImportarDialog open={importando} onOpenChange={setImportando} campos={campos} objeto={objeto} crearCampos={!!onGuardarCampo && crearCamposAlImportar} onImportar={importar} />}
 
       {children?.(registros, ficha)}
 
