@@ -397,7 +397,7 @@ export function BaseDatos<T>({
           />
         )}
         <div className="flex min-w-0 flex-1 flex-col">{cuerpo()}</div>
-        {ficha.activa && !fichaPagina && children && <PanelFichaBase ficha={ficha} objeto={objeto.singular} />}
+        {ficha.activa && !fichaPagina && children && <PanelFichaBase ficha={ficha} />}
       </div>
 
       <Popover open={!!editor} onOpenChange={(abierto) => !abierto && setEditor(null)}>

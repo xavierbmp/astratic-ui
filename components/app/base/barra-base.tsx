@@ -144,8 +144,8 @@ export function BarraBase<T>({
         <button
           type="button"
           aria-pressed={panelFicha.activo}
-          aria-label={panelFicha.activo ? "Abrir la ficha encima" : "Ficha integrada a la derecha"}
-          title={panelFicha.activo ? "Abrir la ficha encima" : "Ficha integrada a la derecha"}
+          aria-label={panelFicha.activo ? "Plegar el panel" : "Desplegar el panel"}
+          title={panelFicha.activo ? "Plegar el panel (la ficha se abre encima)" : "Desplegar el panel (la ficha se ve en él)"}
           onClick={panelFicha.onAlternar}
           className="ml-0.5 hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground aria-pressed:bg-brand-soft aria-pressed:text-brand xl:inline-flex"
         >

@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { PanelRightIcon } from "lucide-react"
 import { ANCHO_FICHA, type PanelFicha } from "@/components/app/detail-panel"
 import { ResizeHandle } from "@/components/app/resize-handle"
 
@@ -9,20 +8,15 @@ import { ResizeHandle } from "@/components/app/resize-handle"
 const ANCHO_MINIMO_BASE = 420
 
 /**
- * La ficha integrada a la derecha de la base: `DetailSheet` (con `ficha`) pinta aquí el registro
- * abierto y, sin ninguno, se explica cómo elegirlo. El borde izquierdo se arrastra para cambiar el
+ * La ficha integrada a la derecha de la base (con el panel desplegado): `DetailSheet` (con `ficha`) pinta aquí el
+ * registro abierto; sin ninguno, no ocupa sitio y la base usa todo el ancho. El borde izquierdo se arrastra para cambiar el
  * ancho (doble clic vuelve al de siempre), y la base se ajusta sola.
  */
-export function PanelFichaBase({ ficha, objeto }: { ficha: PanelFicha; objeto: string }) {
+export function PanelFichaBase({ ficha }: { ficha: PanelFicha }) {
   return (
-    <aside data-slot="detail-panel" className="group/panel relative flex w-[var(--ficha-w)] min-w-0 flex-none flex-col border-l bg-card">
+    <aside data-slot="detail-panel" className="relative hidden w-[var(--ficha-w)] min-w-0 flex-none flex-col border-l bg-card has-[[data-slot=detail-panel-content]]:flex">
       <Borde ficha={ficha} />
       <Destino setNodo={ficha.setNodo} />
-      <div className="flex flex-1 flex-col items-center gap-2 px-8 pt-24 text-center group-has-[[data-slot=detail-panel-content]]/panel:hidden">
-        <PanelRightIcon className="size-5 text-muted-foreground" aria-hidden />
-        <p className="text-sm font-medium">Ningún {objeto} abierto</p>
-        <p className="text-xs text-muted-foreground">Pulsa una fila o una tarjeta para verlo aquí.</p>
-      </div>
     </aside>
   )
 }

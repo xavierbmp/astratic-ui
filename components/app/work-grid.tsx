@@ -20,8 +20,9 @@ const ANCHO_MINIMO_BLOQUE = 520
  * El panel se ensancha o estrecha arrastrando su borde izquierdo (de 280 a 560 px, doble clic vuelve
  * al de siempre) y cada persona lo encuentra como lo dejó en cada página.
  *
- * Con `ficha` activa (ver `usePanelFicha`), la columna derecha deja de ser el panel de información
- * y pasa a ser la ficha del registro abierto, con el ancho que haya elegido la persona.
+ * Con `ficha` (ver `usePanelFicha`), el panel se pliega y se despliega: desplegado, la ficha del registro
+ * abierto ocupa su sitio (con el ancho que haya elegido la persona) y al cerrarla vuelve la información;
+ * plegado, la lista ocupa todo el ancho y la ficha se abre encima.
  */
 export function WorkGrid({
   stats,
@@ -43,9 +44,11 @@ export function WorkGrid({
   ficha?: PanelFicha
 }) {
   const conFicha = ficha?.activa === true
+  // Plegado: en dos columnas no hay panel; en una, sigue debajo del bloque (allí no hay botón para desplegarlo).
+  const plegado = ficha !== undefined && !ficha.preferida
   const limites = { min: 280, porDefecto: asideWidth, max: 560 }
   const panel = useAnchoGuardado(`panel:${usePathname()}`, limites)
-  const lateral = conFicha ? <DetailPanelHost ficha={ficha} /> : aside
+  const lateral = conFicha ? <DetailPanelHost ficha={ficha} aside={aside} /> : aside
   const filas = [stats && "auto", toolbar && "auto", "minmax(0,1fr)"].filter(Boolean)
   const filaBloque = filas.length
   const rowStart = ["", "xl:row-start-1", "xl:row-start-2", "xl:row-start-3"]
@@ -53,10 +56,12 @@ export function WorkGrid({
   return (
     <div
       data-slot="work-grid"
-      style={{ "--aside-w": `${conFicha ? ficha.ancho : panel.ancho}px`, "--work-rows": filas.join(" ") } as React.CSSProperties}
+      style={{ "--aside-w": `${panel.ancho}px`, "--ficha-w": `${ficha?.ancho ?? panel.ancho}px`, "--work-rows": filas.join(" ") } as React.CSSProperties}
       className={cn(
         "grid min-h-0 flex-1 grid-cols-1 gap-4",
-        lateral && "xl:grid-cols-[minmax(0,1fr)_var(--aside-w)]",
+        lateral && !plegado && "xl:grid-cols-[minmax(0,1fr)_var(--aside-w)]",
+        // Con un registro abierto en el panel, la columna toma el ancho de la ficha; al cerrarlo, el de la información.
+        conFicha && "xl:has-[[data-slot=detail-panel-content]]:grid-cols-[minmax(0,1fr)_var(--ficha-w)]",
         "xl:grid-rows-(--work-rows)",
         className
       )}
@@ -77,11 +82,10 @@ export function WorkGrid({
       )}
       <div className={cn("flex min-h-0 min-w-0 flex-col xl:col-start-1", rowStart[filaBloque])}>{children}</div>
       {lateral && (
-        <div className={cn("relative min-h-80 min-w-0 xl:col-start-2 xl:row-start-1 xl:min-h-0", rowSpan[filaBloque])}>
+        <div className={cn("group/lado relative min-h-80 min-w-0 xl:col-start-2 xl:row-start-1 xl:min-h-0", rowSpan[filaBloque], plegado && "xl:hidden")}>
           <div className="flex min-h-0 flex-col xl:absolute xl:inset-0">{lateral}</div>
-          {/* La ficha en el panel lleva su propio borde; el panel de información, este. */}
-          {!conFicha && (
-            <ResizeHandle
+          {/* El ancho del panel de información; con una ficha abierta se esconde, porque ella lleva el suyo (suele querer más). */}
+          <ResizeHandle
               ancho={panel.ancho}
               onAncho={panel.setAncho}
               limites={limites}
@@ -90,9 +94,8 @@ export function WorkGrid({
               destino={(borde) => borde.closest<HTMLElement>("[data-slot=work-grid]")}
               variable="--aside-w"
               label="Ancho del panel"
-              className="hidden xl:block"
+              className="hidden xl:block xl:group-has-[[data-slot=detail-panel-content]]/lado:hidden"
             />
-          )}
         </div>
       )}
     </div>
