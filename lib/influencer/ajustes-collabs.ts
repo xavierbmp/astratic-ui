@@ -207,13 +207,29 @@ export function piezasDePack(pack: PackContenido, formatos: FormatoPieza[], publ
 }
 
 /** «1 reel · 3 stories»: lo que lleva un pack, contado por formato. */
+/** Las palabras inglesas de los formatos hacen el plural a su manera. */
+const PLURALES: Record<string, string> = { story: "stories", reel: "reels", short: "shorts", post: "posts", pin: "pins" }
+
+/**
+ * El nombre de un formato en plural («3 stories», «2 vídeos de TikTok»): cambia la primera palabra (las
+ * inglesas, como se dicen; en español, -s tras vocal y -es tras consonante) y deja el resto.
+ */
+export function pluralDeFormato(nombre: string): string {
+  const [primera, ...resto] = nombre.split(" ")
+  const baja = primera.toLocaleLowerCase("es")
+  // «Mención» → «menciones»: la tilde de la última sílaba se va al crecer la palabra.
+  const sinTilde = (p: string) => p.replace(/([áéíóú])([ns])$/, (_, v: string, c: string) => `${"aeiou"["áéíóú".indexOf(v)]}${c}`)
+  const plural = PLURALES[baja] ?? (/[aeiouáéíóú]$/.test(baja) ? `${primera}s` : /z$/.test(baja) ? `${primera.slice(0, -1)}ces` : `${sinTilde(primera)}es`)
+  return [plural, ...resto].join(" ")
+}
+
 export function describirPack(pack: PackContenido, formatos: FormatoPieza[]): string {
   const cuenta = new Map<string, number>()
   for (const id of pack.formatos) cuenta.set(id, (cuenta.get(id) ?? 0) + 1)
   return [...cuenta]
     .flatMap(([id, n]) => {
       const f = formatos.find((x) => x.id === id)
-      return f ? [`${n} ${f.nombre.toLocaleLowerCase("es")}`] : []
+      return f ? [`${n} ${(n === 1 ? f.nombre : pluralDeFormato(f.nombre)).toLocaleLowerCase("es")}`] : []
     })
     .join(" · ")
 }

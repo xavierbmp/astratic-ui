@@ -7,7 +7,7 @@ import { cn } from "cn"
  * una raya fina. Las grandes (`StatRow` + `StatTile`) quedan para el Inicio (Xavier, 2026-10-14).
  */
 export function CifrasCabecera({ className, ...props }: React.ComponentProps<"div">) {
-  return <div role="group" aria-label="Cifras clave" data-slot="ws-cifras-cabecera" className={cn("flex flex-wrap items-stretch gap-y-2 divide-x divide-border", className)} {...props} />
+  return <div role="group" aria-label="Cifras clave" data-slot="ws-cifras-cabecera" className={cn("flex flex-wrap items-stretch gap-y-2 divide-x divide-border max-sm:grid max-sm:w-full max-sm:grid-cols-2 max-sm:gap-x-4 max-sm:gap-y-3 max-sm:divide-x-0", className)} {...props} />
 }
 
 /**
@@ -42,7 +42,8 @@ export function CifraCabecera({
       )}
     </>
   )
-  const caja = cn("flex min-w-0 flex-col px-4 first:pl-0 last:pr-0", className)
+  // En el móvil van en rejilla de dos (ver `CifrasCabecera`): sin el aire de los lados, que quedaba sangrado.
+  const caja = cn("flex min-w-0 flex-col px-4 first:pl-0 last:pr-0 max-sm:px-0", className)
   const pulsable = cn(
     // Lo pulsable sale un poco de su hueco para que el fondo al pasar no pegue el texto al borde.
     "-mx-2 -my-1 rounded-lg px-2 py-1 text-left outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50",

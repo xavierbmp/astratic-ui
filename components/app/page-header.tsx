@@ -28,7 +28,8 @@ export function PageHeader({
           <h1 className="text-[27px] leading-tight font-semibold tracking-tight">{title}</h1>
           {description && <p className="mt-1 truncate text-sm text-muted-foreground">{description}</p>}
         </div>
-        {stats && <div className="flex min-w-0 flex-none items-end">{stats}</div>}
+        {/* En el móvil, a todo el ancho: si no, las cifras empujaban la página de lado. */}
+        {stats && <div className="flex min-w-0 flex-none items-end max-sm:w-full">{stats}</div>}
         {actions && <div className="flex flex-none flex-wrap items-center gap-2.5 whitespace-nowrap">{actions}</div>}
       </div>
       {tabs}

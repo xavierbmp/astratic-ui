@@ -7,6 +7,7 @@ import {
   cambiarFormatoDePieza,
   cambiarPublicacion,
   describirPack,
+  pluralDeFormato,
   conCampana,
   condicionDeTipo,
   condicionesDeLasPiezas,
@@ -241,11 +242,17 @@ describe("packs de contenido", () => {
   })
 
   it("se describe contando cada formato", () => {
-    expect(describirPack(pack, FORMATOS_PIEZA_DE_SERIE)).toBe("1 reel · 2 story")
+    expect(describirPack(pack, FORMATOS_PIEZA_DE_SERIE)).toBe("1 reel · 2 stories")
   })
 
   it("los ajustes guardados antes de los packs traen los de serie, y un pack vacío no vale", () => {
     expect(ajustesDe({ diasGuion: 3 }).packs.length).toBeGreaterThan(0)
     expect(esquemaAjustesCollabs.safeParse({ ...AJUSTES_COLLABS_DE_SERIE, packs: [{ id: "x", nombre: "Vacío", formatos: [] }] }).success).toBe(false)
+  })
+})
+
+describe("plural de un formato", () => {
+  it("las inglesas a su manera y las españolas por la última letra de la primera palabra", () => {
+    expect(["Story", "Reel", "Vídeo de TikTok", "Carrusel", "Mención en el podcast", "Short"].map(pluralDeFormato)).toEqual(["stories", "reels", "Vídeos de TikTok", "Carruseles", "Menciones en el podcast", "shorts"])
   })
 })
