@@ -3,7 +3,6 @@
 import * as React from "react"
 import Link from "next/link"
 import { CopyIcon, EllipsisIcon, ExternalLinkIcon, PlusIcon, Trash2Icon } from "lucide-react"
-import { toast } from "sonner"
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { ESTADOS_TAREA, ORIGENES_TAREA, PRIORIDADES_TAREA, type CampoTarea, type EstadoTarea, type EtiquetaTarea, type PrioridadTarea, type Tarea } from "@/lib/influencer/modelo"
@@ -24,6 +23,7 @@ import { SelectorDeQue, SelectorTipo, etiquetaDeQue } from "@/components/influen
 import { CampoPropioInline } from "@/components/influencer/task-campos-propios"
 import { CampoTareaDialog } from "@/components/influencer/task-campo-dialog"
 import { SelectorRepeticion } from "@/components/influencer/task-repeticion"
+import { copiarTexto } from "@/lib/portapapeles"
 
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/
 const fechaHora = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
@@ -378,7 +378,7 @@ export function TaskSheet({
                   onClick={() => {
                     // La página de Tareas abre la ficha con ?tarea=id, venga de donde venga el enlace.
                     const url = new URL(`/workspace/tareas?tarea=${tarea.id}`, window.location.origin)
-                    void navigator.clipboard.writeText(url.toString()).then(() => toast.success("Enlace copiado"))
+                    void copiarTexto(url.toString(), "Enlace copiado")
                   }}
                 >
                   <CopyIcon /> Copiar enlace

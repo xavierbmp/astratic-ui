@@ -31,6 +31,7 @@ import { EmptyState } from "@/components/app/states"
 import { InsightList, InsightsPanel } from "@/components/app/insights-panel"
 import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, DetailSection, DetailSheet } from "@/components/app/detail-sheet"
 import { facturacionTabs } from "../nav"
+import { copiarTexto } from "@/lib/portapapeles"
 
 const MONTH = "2026-09"
 
@@ -177,8 +178,7 @@ export function FacturasView({
                     variant="outline"
                     size="sm"
                     onClick={async () => {
-                      await navigator.clipboard.writeText(`${window.location.origin}/demo/facturacion?factura=${open.id}`)
-                      toast.success("Enlace copiado")
+                      await copiarTexto(`${window.location.origin}/demo/facturacion?factura=${open.id}`, "Enlace copiado")
                     }}
                   >
                     <CopyIcon /> Copiar enlace

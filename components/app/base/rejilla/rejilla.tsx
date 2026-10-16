@@ -17,6 +17,7 @@ import { FilaRegistro, tintesDeColumnas } from "@/components/app/base/rejilla/fi
 import { Pie } from "@/components/app/base/rejilla/pie"
 import type { AccionesCampo } from "@/components/app/base/rejilla/menu-campo"
 import { ALTO_PIE, ALTO_SUBGRUPO, ANCHO_ANADIR, anchoTotal, colocarColumnas, type Columna } from "@/components/app/base/rejilla/medidas"
+import { copiarTexto } from "@/lib/portapapeles"
 
 export type CambioCelda<T> = { fila: T; campo: DefCampo<T>; valor: ValorCampo }
 
@@ -575,7 +576,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
                 <ContextMenuItem onSelect={() => p.onAbrir(p.getId(filaObjetivo))}>
                   <PanelRightOpenIcon /> Abrir la ficha <ContextMenuShortcut>⇧␣</ContextMenuShortcut>
                 </ContextMenuItem>
-                <ContextMenuItem onSelect={() => void navigator.clipboard.writeText(aTsv(matrizSeleccion())).then(() => toast.success("Copiado"))}>
+                <ContextMenuItem onSelect={() => void copiarTexto(aTsv(matrizSeleccion()), "Copiado")}>
                   <CopyIcon /> Copiar las celdas <ContextMenuShortcut>⌘C</ContextMenuShortcut>
                 </ContextMenuItem>
                 {p.onDuplicar && (

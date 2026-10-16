@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { SocialIcon, socialLabel } from "@/components/app/social-icons"
+import { copiarTexto } from "@/lib/portapapeles"
 
 export type DatosCaption = Pick<Contenido, "caption" | "publicidad" | "redes">
 
@@ -32,8 +33,7 @@ export function EditorCaption({ valor, onCambiar, className }: { valor: DatosCap
 
   const copiar = async () => {
     try {
-      await navigator.clipboard.writeText(texto)
-      toast.success("Caption copiado: pégalo en la red")
+      await copiarTexto(texto, "Caption copiado: pégalo en la red")
     } catch {
       toast.error("No se ha podido copiar: selecciona el texto y cópialo a mano")
     }

@@ -2,13 +2,13 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { toast } from "sonner"
 import { CopyIcon, ExternalLinkIcon, MailIcon, MessageCircleIcon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useOrigen } from "@/hooks/use-origen"
+import { copiarTexto } from "@/lib/portapapeles"
 
 type Envio = {
   /** Ruta del enlace, sin dominio: `/revisar/rv-…`. */
@@ -39,8 +39,7 @@ export function CompartirEnlace({ ruta, mensaje, asunto, email, verComo = "Abrir
           variant="outline"
           size="sm"
           onClick={async () => {
-            await navigator.clipboard.writeText(completo)
-            toast.success("Enlace copiado")
+            await copiarTexto(completo, "Enlace copiado")
           }}
         >
           <CopyIcon /> Copiar

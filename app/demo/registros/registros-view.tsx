@@ -48,6 +48,7 @@ import { BaseDatos } from "@/components/app/base/base-datos"
 import { RecordActions, type BotonAccion, type OperacionBoton } from "@/components/app/record-actions"
 import { InlineField, InlineTitle, type ValorInline } from "@/components/app/inline-field"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
+import { copiarTexto } from "@/lib/portapapeles"
 
 export function RegistrosView({
   initialRecords,
@@ -148,8 +149,7 @@ export function RegistrosView({
                     variant="outline"
                     size="sm"
                     onClick={async () => {
-                      await navigator.clipboard.writeText(`${window.location.origin}/demo/registros?registro=${open.id}`)
-                      toast.success("Enlace copiado")
+                      await copiarTexto(`${window.location.origin}/demo/registros?registro=${open.id}`, "Enlace copiado")
                     }}
                   >
                     <CopyIcon /> Copiar enlace
