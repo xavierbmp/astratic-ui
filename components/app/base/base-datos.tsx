@@ -14,7 +14,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import type { BaseApi } from "@/hooks/use-base"
 import { filtrarFilas, operadorPorDefecto } from "@/lib/filtros/core"
 import { ordenarFilas, valoresDeFiltro } from "@/lib/vistas/core"
-import { TIPOS_CAMPO, aFiltrable, colorPorDefecto, textoDeValor, type CampoPropio, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
+import { TIPOS_CAMPO, aFiltrable, campoDePropio, colorPorDefecto, textoDeValor, type CampoPropio, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
 import { agruparEnNiveles, aplicarAjustes, clavesDeGrupos, coloresDeRegistro, columnasDeVista, idBase, lineasDeRejilla, type VistaBase } from "@/lib/base/vistas"
 import { BarraBase, type MenuDeBarra } from "@/components/app/base/barra-base"
 import { LateralVistas } from "@/components/app/base/lateral-vistas"
@@ -110,9 +110,11 @@ export function BaseDatos<T>({
   onNuevo?: () => void
   /**
    * Importar desde un Excel o un CSV (o lo pegado de una hoja de cálculo), con qué columna va a qué campo: «Importar»
-   * junto a la acción principal. La página crea un registro por fila con los valores de sus campos (por id).
+   * junto a la acción principal. La página crea un registro por fila con los valores de sus campos (por id). Con
+   * `onGuardarCampo`, una columna también puede crear su campo: la base lo da de alta antes y la página lo recibe en
+   * `nuevos` para escribir sus valores (`registrosDeFilas(filas, [...campos, ...nuevos], …)`).
    */
-  onImportar?: (filas: ValoresFormulario[]) => void
+  onImportar?: (filas: ValoresFormulario[], nuevos: DefCampo<T>[]) => void
   /** Los ajustes de la tabla (valores por defecto, opciones y su orden): un engranaje junto a la acción principal. */
   ajustesTabla?: { label: string; onAbrir: () => void }
   /** La imagen de cada registro en las tarjetas del kanban y la galería. */
@@ -222,6 +224,13 @@ export function BaseDatos<T>({
     onGuardarCampo?.(campo)
     setAjustes(null)
     toast.success("Campo guardado")
+  }
+
+  // Los campos nuevos de una importación se crean antes que sus registros y salen visibles al final de la vista.
+  const importar = (filas: ValoresFormulario[], nuevos: CampoPropio[]) => {
+    nuevos.forEach((c) => onGuardarCampo?.(c))
+    if (nuevos.length) base.cambiar((v) => ({ campos: [...v.campos.filter((c) => !nuevos.some((n) => n.id === c.id)), ...nuevos.map((n) => ({ id: n.id, visible: true }))] }))
+    onImportar?.(filas, nuevos.map((n) => campoDePropio<T>(n, () => undefined)))
   }
 
   const crearCampo = (campo: CampoPropio) => {
@@ -449,7 +458,7 @@ export function BaseDatos<T>({
         />
       )}
 
-      {onImportar && <ImportarDialog open={importando} onOpenChange={setImportando} campos={campos} objeto={objeto} onImportar={onImportar} />}
+      {onImportar && <ImportarDialog open={importando} onOpenChange={setImportando} campos={campos} objeto={objeto} crearCampos={!!onGuardarCampo} onImportar={importar} />}
 
       {children?.(registros, ficha)}
 

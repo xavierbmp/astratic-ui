@@ -74,6 +74,7 @@ export function AppShell({
   userMenu,
   report,
   notifications,
+  sidebarExtra,
 }: {
   brand: Brand
   /** Logotipo de la marca: con la sidebar abierta sustituye al monograma y el nombre; plegada, sigue el monograma. */
@@ -88,6 +89,11 @@ export function AppShell({
   report?: React.ReactNode
   /** Botón de notificaciones ya montado; si no se pasa, se muestra el icono sin punto. */
   notifications?: React.ReactNode
+  /**
+   * Un bloque fijo al pie de la sidebar, encima del usuario: lo que la persona tiene que tener a mano en todas las
+   * páginas (los pasos para completar su perfil). Se encarga él de verse bien con la sidebar plegada.
+   */
+  sidebarExtra?: React.ReactNode
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -194,6 +200,7 @@ export function AppShell({
             {alPie.map((g, i) => grupo(g, g.label ?? `pie-${i}`, i === 0 ? "mt-auto" : undefined))}
           </SidebarContent>
           <SidebarFooter className="border-t p-2">
+            {sidebarExtra}
             <SidebarMenu>
               <SidebarMenuItem>
                 {userMenu ? (

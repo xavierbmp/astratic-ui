@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { filasParaImportar, leerCsv, registrosDeFilas, sugerirMapeo } from "@/lib/base/importar"
+import { CAMPO_NUEVO, camposNuevosDelMapeo, filasParaImportar, leerCsv, nombreLibre, registrosDeFilas, sugerirMapeo, tipoSugerido } from "@/lib/base/importar"
 import type { DefCampo } from "@/lib/base/campos"
 
 type Fila = { id: string }
@@ -53,5 +53,43 @@ describe("registros de las filas", () => {
       (fila, campo, valor) => ({ ...fila, [campo.id]: valor }),
     )
     expect(r).toEqual([{ id: "n1", nombre: "Ana", email: "ana@x.com" }, { id: "n2", nombre: "Luis" }])
+  })
+})
+
+describe("columnas que crean su campo", () => {
+  it("el tipo sale de lo que llevan todas sus celdas", () => {
+    expect(tipoSugerido(["ana@marca.com", " luis@otra.es ", ""])).toBe("email")
+    expect(tipoSugerido(["https://marca.com", "www.otra.es"])).toBe("url")
+    expect(tipoSugerido(["Sí", "no", "x"])).toBe("casilla")
+    expect(tipoSugerido(["12/03/2026", "2026-04-01"])).toBe("fecha")
+    expect(tipoSugerido(["+34 600 000 000", "(91) 123 45 67"])).toBe("telefono")
+    expect(tipoSugerido(["1.200", "350,5"])).toBe("numero")
+    expect(tipoSugerido(["Skincare", "ana@marca.com"])).toBe("texto")
+    expect(tipoSugerido(["Hicimos un reel y tres stories con código de descuento; repitieron en verano con un pack más grande"])).toBe("texto_largo")
+    expect(tipoSugerido([])).toBe("texto")
+  })
+
+  it("el nombre no repite uno que ya existe", () => {
+    expect(nombreLibre("Notas", ["Nombre", "notas"])).toBe("Notas 2")
+    expect(nombreLibre("  ", [])).toBe("Campo nuevo")
+  })
+
+  it("crea un campo por columna marcada y sus valores se importan con él", () => {
+    const tabla = [
+      ["Nombre", "Código", "Última campaña"],
+      ["Ana", "ANA10", "12/03/2026"],
+      ["Luis", "", "01/04/2026"],
+    ]
+    const { nuevos, mapeo, campos: todos } = camposNuevosDelMapeo(tabla, ["nombre", CAMPO_NUEVO, CAMPO_NUEVO], campos, true)
+    expect(nuevos.map((c) => [c.nombre, c.tipo])).toEqual([
+      ["Código", "texto"],
+      ["Última campaña", "fecha"],
+    ])
+    expect(mapeo[1]).toBe(nuevos[0].id)
+    const { filas } = filasParaImportar(tabla, mapeo, todos, true)
+    expect(filas).toEqual([
+      { nombre: "Ana", [nuevos[0].id]: "ANA10", [nuevos[1].id]: "2026-03-12" },
+      { nombre: "Luis", [nuevos[1].id]: "2026-04-01" },
+    ])
   })
 })

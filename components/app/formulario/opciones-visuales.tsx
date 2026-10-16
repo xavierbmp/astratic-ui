@@ -102,3 +102,47 @@ export function CasillasOpcion<V extends string>({ opciones, valores, onChange, 
     </div>
   )
 }
+
+export type OpcionPildora<V extends string> = { value: V; label: string; icono?: React.ReactNode }
+
+const PILDORA = "inline-flex h-8 items-center gap-1.5 rounded-full border border-input px-3 text-sm transition-colors outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-3.5 [&_svg]:text-muted-foreground"
+const PILDORA_ELEGIDA = "border-brand bg-brand-soft text-foreground hover:bg-brand-soft [&_svg]:text-brand"
+
+/**
+ * Elegir una entre opciones cortas que se leen de un vistazo (un tramo de seguidores, cuántas collabs al mes): una
+ * fila de píldoras que salta de línea. Con `opcional`, volver a pulsar la elegida la quita. Para varias,
+ * `PildorasMultiples`.
+ */
+export function PildorasOpcion<V extends string>({ opciones, valor, onChange, opcional, className, "aria-label": ariaLabel, id }: { opciones: OpcionPildora<V>[]; valor: V | undefined; onChange: (valor: V | undefined) => void; opcional?: boolean; className?: string; "aria-label"?: string; id?: string }) {
+  return (
+    <div id={id} role="radiogroup" aria-label={ariaLabel} className={cn("flex flex-wrap gap-1.5", className)}>
+      {opciones.map((o) => {
+        const elegida = o.value === valor
+        return (
+          <button key={o.value} type="button" role="radio" aria-checked={elegida} onClick={() => onChange(elegida && opcional ? undefined : o.value)} className={cn(PILDORA, elegida && PILDORA_ELEGIDA)}>
+            {o.icono}
+            {o.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/** Elegir varias entre opciones cortas (los tipos de collab que acepta, los idiomas): píldoras que se marcan y se quitan. */
+export function PildorasMultiples<V extends string>({ opciones, valores, onChange, className, "aria-label": ariaLabel, id }: { opciones: OpcionPildora<V>[]; valores: V[]; onChange: (valores: V[]) => void; className?: string; "aria-label"?: string; id?: string }) {
+  const alternar = (v: V) => onChange(valores.includes(v) ? valores.filter((x) => x !== v) : [...valores, v])
+  return (
+    <div id={id} role="group" aria-label={ariaLabel} className={cn("flex flex-wrap gap-1.5", className)}>
+      {opciones.map((o) => {
+        const marcada = valores.includes(o.value)
+        return (
+          <button key={o.value} type="button" aria-pressed={marcada} onClick={() => alternar(o.value)} className={cn(PILDORA, marcada && PILDORA_ELEGIDA)}>
+            {o.icono}
+            {o.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}

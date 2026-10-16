@@ -2,7 +2,8 @@
 // Excel o un CSV con mapeo de campos»). Lo puro: leer el CSV, sugerir qué columna va a qué campo y convertir cada
 // fila en los valores de sus campos, leídos como al pegar en la cuadrícula (`valorDeTexto`). El Excel lo lee el
 // diálogo (`ImportarDialog`) y llega aquí como tabla de textos.
-import { valorDeTexto, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { campoDePropio, leerFecha, leerNumero, valorDeTexto, type CampoPropio, type DefCampo, type TipoCampoPropio, type ValorCampo } from "@/lib/base/campos"
+import { idBase } from "@/lib/base/vistas"
 
 /** Lo leído del archivo: filas de celdas en texto. */
 export type Tabla = string[][]
@@ -143,4 +144,62 @@ export function registrosDeFilas<T>(filas: Record<string, ValorCampo>[], campos:
       return campo ? escribir(registro, campo, valor) : registro
     }, vacio()),
   )
+}
+
+// ─────────────── Campos nuevos desde el archivo ───────────────
+// Una columna que no va a ningún campo puede crear el suyo (Xavier, 2026-10-16: «sincronizar los campos y crear nuevos
+// si su base de datos lo necesita»): con el nombre de la columna y el tipo que mejor lee lo que lleva.
+
+/** Lo que se marca en el mapeo de una columna que crea su campo. */
+export const CAMPO_NUEVO = "__nuevo__"
+
+const URL = /^(https?:\/\/|www\.)\S+$/i
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const TELEFONO = /^\+?[\d\s().-]{7,20}$/
+const CASILLA = new Set(["sí", "si", "no", "x", "true", "false", "yes", "✓"])
+/** Con más letras que esto de media, es una nota y no un texto de una línea. */
+const LARGO_TEXTO_CORTO = 80
+
+/** El tipo que mejor lee todos los valores de una columna; si no hay ninguno claro, texto. */
+export function tipoSugerido(valores: string[]): TipoCampoPropio {
+  const llenos = valores.map((v) => v.trim()).filter(Boolean)
+  if (!llenos.length) return "texto"
+  const todos = (prueba: (v: string) => boolean) => llenos.every(prueba)
+  if (todos((v) => EMAIL.test(v))) return "email"
+  if (todos((v) => URL.test(v))) return "url"
+  if (todos((v) => CASILLA.has(v.toLowerCase()))) return "casilla"
+  if (todos((v) => /\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}/.test(v) && leerFecha(v) !== null)) return "fecha"
+  if (todos((v) => /[\s+()]/.test(v) && TELEFONO.test(v))) return "telefono"
+  if (todos((v) => leerNumero(v) !== null)) return "numero"
+  const media = llenos.reduce((n, v) => n + v.length, 0) / llenos.length
+  return media > LARGO_TEXTO_CORTO ? "texto_largo" : "texto"
+}
+
+/** El nombre de una columna como nombre de campo: sin repetir uno que ya existe («Notas» → «Notas 2»). */
+export function nombreLibre(nombre: string, usados: string[]): string {
+  const base = nombre.trim() || "Campo nuevo"
+  const ocupados = new Set(usados.map((u) => u.trim().toLowerCase()))
+  if (!ocupados.has(base.toLowerCase())) return base
+  let n = 2
+  while (ocupados.has(`${base} ${n}`.toLowerCase())) n++
+  return `${base} ${n}`
+}
+
+/**
+ * Los campos propios que crean las columnas marcadas con `CAMPO_NUEVO`, y el mapeo con sus ids en su lugar, listo para
+ * `filasParaImportar` junto a los campos de siempre (`campos`).
+ */
+export function camposNuevosDelMapeo<T>(tabla: Tabla, mapeo: (string | null)[], campos: DefCampo<T>[], conCabecera: boolean): { nuevos: CampoPropio[]; mapeo: (string | null)[]; campos: DefCampo<T>[] } {
+  const datos = conCabecera ? tabla.slice(1) : tabla
+  const usados = campos.map((c) => c.nombre)
+  const nuevos: CampoPropio[] = []
+  const final = mapeo.map((m, col) => {
+    if (m !== CAMPO_NUEVO) return m
+    const nombre = nombreLibre(conCabecera ? (tabla[0]?.[col] ?? "") : `Columna ${col + 1}`, usados)
+    usados.push(nombre)
+    const campo: CampoPropio = { id: idBase("f"), nombre, tipo: tipoSugerido(datos.map((f) => f[col] ?? "")) }
+    nuevos.push(campo)
+    return campo.id
+  })
+  return { nuevos, mapeo: final, campos: [...campos, ...nuevos.map((p) => campoDePropio<T>(p, () => undefined))] }
 }
