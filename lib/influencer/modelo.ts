@@ -6,6 +6,7 @@ import type { Tint } from "@/lib/influencer/tints"
 import type { SocialNetwork } from "@/components/app/social-icons"
 import type { ValorCampo } from "@/lib/base/campos"
 import type { Ancla, ArchivoRevision, DecisionSugerencia, Mensaje, SugerenciaRevision } from "@/lib/revision-notas"
+import type { PiezaPedidaForm } from "@/lib/influencer/formularios"
 
 /** Un estado con su etiqueta y el tono de `StatusBadge`. */
 export type Estado<T extends string> = { id: T; label: string; tone: StatusTone }
@@ -204,6 +205,21 @@ export type Propuesta = {
   creadaEl: string
   /** Los valores de los campos que ha creado ella en esta base, por id de campo. */
   valores?: Record<string, ValorCampo>
+  /** Lo que se rellenó con el formulario de collab (plataformas, brief, entregables, condiciones): al ganarla, la collab nace con esto. */
+  borrador?: BorradorCollab
+}
+
+/**
+ * La collab que se está proponiendo (Xavier, 2026-10-16: «el form de propuestas, el mismo que el de collab»): lo del
+ * alta de collab que no cabe en la propuesta. Los entregables van tal como se rellenan en el formulario.
+ */
+export type BorradorCollab = {
+  plataformas: string[]
+  brief: string
+  briefAdjunto?: { nombre: string; tamano: number; tipo: string; url: string }
+  coverUrl?: string
+  piezas: PiezaPedidaForm[]
+  condiciones: Condicion[]
 }
 
 // ───────────────────────── Collabs ─────────────────────────

@@ -1,7 +1,7 @@
 // El alta de una collab a mano: de lo que se ha rellenado (nada es obligatorio) sale la collab con
 // sus piezas, el enlace para la marca si se le pide algo y el brief adjunto en sus materiales. Lo que
 // falta se completa con su valor de serie.
-import { CONDICIONES_POR_DEFECTO, type AjustesCollabs, type CampoBrief, type Collab, type Condicion, type Contacto, type ExtraId, type FormularioMarca, type Marca, type Material, type Propuesta } from "@/lib/influencer/modelo"
+import { CONDICIONES_POR_DEFECTO, LISTA_FORMATOS, type AjustesCollabs, type BorradorCollab, type Formato, type OrigenPropuesta, type PiezaPedida, type CampoBrief, type Collab, type Condicion, type Contacto, type ExtraId, type FormularioMarca, type Marca, type Material, type Propuesta } from "@/lib/influencer/modelo"
 import { caducidad, piezaDeFormulario, tokenNuevo, type PiezaPedidaForm } from "@/lib/influencer/formularios"
 import { camposEnOrden, condicionDeTipo, fechasDeLasPiezas, nombreDePieza, piezaDeFormato } from "@/lib/influencer/ajustes-collabs"
 import { calcularPresupuesto } from "@/lib/influencer/presupuesto"
@@ -124,6 +124,7 @@ const CONDICION_DE_EXTRA: Partial<Record<ExtraId, string>> = { derechos: "derech
  * que ofrece la marca), sus condiciones (los extras pactados) y sus rondas y su pago.
  */
 export function valoresAltaDePropuesta(p: Propuesta, ajustes: AjustesCollabs, hoy: string): ValoresAlta {
+  if (p.borrador) return valoresDeBorrador(p, p.borrador)
   const ctx = { campana: p.campana, diasGuion: ajustes.diasGuion, hoy }
   const lineas = p.presupuesto?.lineas.length ? p.presupuesto.lineas : p.piezas.map((x) => ({ ...x, precio: undefined }))
   const piezas = lineas.flatMap((linea) => {
@@ -164,4 +165,75 @@ export function valoresAltaDePropuesta(p: Propuesta, ajustes: AjustesCollabs, ho
 /** La collab que nace de una propuesta ganada, con lo de la propuesta (`valoresAltaDePropuesta`) y su persona de contacto. */
 export function collabDePropuesta(p: Propuesta, { marca, contacto, ajustes, hoy }: { marca: Marca; contacto?: Contacto; ajustes: AjustesCollabs; hoy: string }): Collab {
   return collabDeAlta(valoresAltaDePropuesta(p, ajustes, hoy), { marca, principal: contacto, hoy }).collab
+}
+
+/** Lo que se cobra de una propuesta: su presupuesto si lo tiene; si no, lo que ofrece la marca. NaN si no hay nada. */
+function importeDePropuesta(p: Propuesta) {
+  const total = p.presupuesto ? calcularPresupuesto(p.presupuesto, []).total : (p.ofrecen ?? Number.NaN)
+  return total > 0 ? total : Number.NaN
+}
+
+/** El alta de una propuesta que se rellenó con el formulario de collab: tal cual, con lo de la propuesta que pudo cambiar después. */
+function valoresDeBorrador(p: Propuesta, b: BorradorCollab): ValoresAlta {
+  return {
+    modo: "yo",
+    campana: p.campana,
+    plataformas: b.plataformas,
+    brief: b.brief,
+    briefAdjunto: b.briefAdjunto ?? null,
+    coverUrl: b.coverUrl ?? "",
+    importe: importeDePropuesta(p),
+    desde: p.desde ?? "",
+    hasta: p.hasta ?? "",
+    piezas: b.piezas,
+    condiciones: b.condiciones,
+    para: { nombre: "", email: "" },
+    campos: [],
+    mensaje: "",
+    rondas: p.presupuesto?.rondas,
+    pago: p.presupuesto?.pago,
+  }
+}
+
+const esFormato = (id: string | undefined): id is Formato => LISTA_FORMATOS.some((f) => f === id)
+
+/** «1 reel + 3 stories» de los entregables: los de los formatos de siempre, contados (los demás quedan solo en el borrador). */
+function piezasPedidasDe(piezas: PiezaPedidaForm[]): PiezaPedida[] {
+  const cuenta = new Map<Formato, number>()
+  for (const p of piezas) if (esFormato(p.formato)) cuenta.set(p.formato, (cuenta.get(p.formato) ?? 0) + 1)
+  return [...cuenta].map(([formato, cantidad]) => ({ formato, cantidad }))
+}
+
+/**
+ * Una propuesta rellenada con el formulario de collab (Xavier, 2026-10-16): la misma forma de rellenarla siempre; lo que
+ * no cabe en la propuesta va en su `borrador` y, al ganarla, la collab nace con todo. Sin campaña, «Campaña de …».
+ */
+export function propuestaDeAlta(
+  v: ValoresAlta,
+  { marca, contactoId, origen, hoy, antes }: { marca: Marca; contactoId?: string; origen: OrigenPropuesta; hoy: string; antes?: Propuesta },
+): Propuesta {
+  const borrador: BorradorCollab = {
+    plataformas: v.plataformas,
+    brief: v.brief,
+    briefAdjunto: v.briefAdjunto ?? undefined,
+    coverUrl: v.coverUrl || undefined,
+    piezas: v.piezas,
+    condiciones: v.condiciones,
+  }
+  return {
+    ...antes,
+    id: antes?.id ?? idNuevo("p"),
+    marcaId: marca.id,
+    contactoId,
+    campana: v.campana.trim() || `Campaña de ${marca.nombre}`,
+    estado: antes?.estado ?? "nueva",
+    origen: antes?.origen ?? origen,
+    piezas: piezasPedidasDe(v.piezas),
+    ofrecen: Number.isFinite(v.importe) && v.importe > 0 ? v.importe : undefined,
+    desde: v.desde || undefined,
+    hasta: v.hasta || undefined,
+    ultimoContacto: antes?.ultimoContacto ?? hoy,
+    creadaEl: antes?.creadaEl ?? hoy,
+    borrador,
+  }
 }

@@ -62,42 +62,42 @@ export function InsightsPanel({
         title={title}
         action={
           <div className="flex items-center gap-0.5">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Personalizar panel">
-                <SlidersHorizontalIcon />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-64 p-2">
-              <p className="px-2 pt-1 pb-2 text-xs font-medium text-muted-foreground">Bloques del panel</p>
-              <ul className="flex flex-col">
-                {order.map((id, i) => {
-                  const b = blocks.find((x) => x.id === id)!
-                  const on = !prefs.hidden.includes(id)
-                  return (
-                    <li key={id} className="flex h-8 items-center gap-2 rounded-md px-2 hover:bg-muted">
-                      <Checkbox id={`ins-${id}`} checked={on} onCheckedChange={(c) => toggle(id, c === true)} />
-                      <label htmlFor={`ins-${id}`} className="flex-1 truncate text-sm">
-                        {b.title}
-                      </label>
-                      <Button variant="ghost" size="icon-xs" aria-label="Subir" disabled={i === 0} onClick={() => move(id, -1)}>
-                        <ChevronUpIcon />
-                      </Button>
-                      <Button variant="ghost" size="icon-xs" aria-label="Bajar" disabled={i === order.length - 1} onClick={() => move(id, 1)}>
-                        <ChevronDownIcon />
-                      </Button>
-                    </li>
-                  )
-                })}
-              </ul>
-              <div className="mt-1 border-t px-2 pt-2">
-                <Button variant="ghost" size="sm" className="h-7 w-full justify-start text-muted-foreground" onClick={() => setPrefs(defaults)}>
-                  Restablecer
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon-sm" aria-label="Personalizar panel">
+                  <SlidersHorizontalIcon />
                 </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-          {ficha && <PlegarPanel ficha={ficha} />}
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-64 p-2">
+                <p className="px-2 pt-1 pb-2 text-xs font-medium text-muted-foreground">Bloques del panel</p>
+                <ul className="flex flex-col">
+                  {order.map((id, i) => {
+                    const b = blocks.find((x) => x.id === id)!
+                    const on = !prefs.hidden.includes(id)
+                    return (
+                      <li key={id} className="flex h-8 items-center gap-2 rounded-md px-2 hover:bg-muted">
+                        <Checkbox id={`ins-${id}`} checked={on} onCheckedChange={(c) => toggle(id, c === true)} />
+                        <label htmlFor={`ins-${id}`} className="flex-1 truncate text-sm">
+                          {b.title}
+                        </label>
+                        <Button variant="ghost" size="icon-xs" aria-label="Subir" disabled={i === 0} onClick={() => move(id, -1)}>
+                          <ChevronUpIcon />
+                        </Button>
+                        <Button variant="ghost" size="icon-xs" aria-label="Bajar" disabled={i === order.length - 1} onClick={() => move(id, 1)}>
+                          <ChevronDownIcon />
+                        </Button>
+                      </li>
+                    )
+                  })}
+                </ul>
+                <div className="mt-1 border-t px-2 pt-2">
+                  <Button variant="ghost" size="sm" className="h-7 w-full justify-start text-muted-foreground" onClick={() => setPrefs(defaults)}>
+                    Restablecer
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+            {ficha && <PlegarPanel ficha={ficha} />}
           </div>
         }
       />
