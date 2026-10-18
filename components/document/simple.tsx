@@ -12,10 +12,13 @@ import { DocLogo, DocPageNumber, sheetBase } from "@/components/document/sheet"
 export function DocSimpleSheet({
   id,
   footer,
+  devs = true,
   className,
   children,
 }: {
   id?: string
+  /** `false` quita «Devs» del logo (documentos de Network, como los de influencers). */
+  devs?: boolean
   /** Texto izquierdo del pie («Visibilidad en Google · Cliente y Astratic Network Devs»). */
   footer?: React.ReactNode
   className?: string
@@ -28,7 +31,7 @@ export function DocSimpleSheet({
       className={cn(sheetBase, "px-[58px] pt-11 pb-[70px] text-[12px] leading-[1.65]", className)}
     >
       <header>
-        <DocLogo className="text-[17px]" />
+        <DocLogo devs={devs} className="text-[17px]" />
       </header>
       {children}
       <footer
