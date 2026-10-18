@@ -245,9 +245,12 @@ export function DocCover({
   actions,
   figure,
   footer,
+  devs = true,
   children,
 }: {
   id?: string
+  /** `false` quita «Devs» del logo (documentos de Network). */
+  devs?: boolean
   /** Marca del cliente arriba a la izquierda. */
   client: React.ReactNode
   eyebrow?: React.ReactNode
@@ -268,7 +271,7 @@ export function DocCover({
       <DocBackdrop />
       <div className="relative flex h-11 items-center justify-between">
         {client}
-        <DocLogo className="text-[17px]" />
+        <DocLogo devs={devs} className="text-[17px]" />
       </div>
 
       <div className="relative mt-12">
