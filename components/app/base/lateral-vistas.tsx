@@ -8,6 +8,7 @@ import { ResizeHandle, useAnchoGuardado } from "@/components/app/resize-handle"
 import { LISTA_TIPOS_VISTA, TIPOS_VISTA, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 import { ICONO_VISTA } from "@/components/app/base/apariencia"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
+import { ControlesLateral, type ControlLateral } from "@/components/app/controles-lateral"
 
 const ANCHO_LATERAL = { min: 200, porDefecto: 256, max: 440 }
 
@@ -16,8 +17,9 @@ const sinAcentos = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{D
 /**
  * El lateral de las vistas, con la colocación de Airtable: «Crear vista» (cuadrícula, kanban,
  * galería o calendario), «Encontrar una vista» y la lista, que se ordena arrastrando. Doble clic en
- * una vista para cambiarle el nombre; su «…» la duplica o la borra. Su borde derecho se arrastra para
- * ensancharlo, y cada persona lo encuentra como lo dejó.
+ * una vista para cambiarle el nombre; su «…» la duplica o la borra. Su borde se arrastra para
+ * ensancharlo, y cada persona lo encuentra como lo dejó; junto a «Crear vista», pasarlo al otro lado y
+ * plegarlo.
  */
 export function LateralVistas({
   clave,
@@ -29,7 +31,8 @@ export function LateralVistas({
   onDuplicar,
   onBorrar,
   onReordenar,
-}: {
+  ...control
+}: ControlLateral & {
   /** Para recordar su ancho en este navegador. */
   clave: string
   vistas: VistaBase[]
@@ -62,31 +65,34 @@ export function LateralVistas({
   )
 
   return (
-    <aside className="relative flex w-[var(--lateral-w)] flex-none flex-col border-r bg-card text-[13px]" style={{ "--lateral-w": `${ancho}px` } as React.CSSProperties}>
-      <ResizeHandle ancho={ancho} onAncho={setAncho} limites={ANCHO_LATERAL} lado="derecha" destino={(borde) => borde.parentElement} variable="--lateral-w" label="Ancho de las vistas" />
+    <aside className={cn("relative flex w-[var(--lateral-w)] flex-none flex-col bg-card text-[13px]", control.lado === "izquierda" ? "border-r" : "border-l")} style={{ "--lateral-w": `${ancho}px` } as React.CSSProperties}>
+      <ResizeHandle ancho={ancho} onAncho={setAncho} limites={ANCHO_LATERAL} lado={control.lado === "izquierda" ? "derecha" : "izquierda"} destino={(borde) => borde.parentElement} variable="--lateral-w" label="Ancho de las vistas" />
       <div className="flex flex-col gap-0.5 border-b p-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button type="button" className="flex h-8 items-center gap-2 rounded-md px-2 hover:bg-muted aria-expanded:bg-muted">
-              <PlusIcon className="size-4" /> Crear vista
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-72">
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Tipo de vista</DropdownMenuLabel>
-            {LISTA_TIPOS_VISTA.map((tipo) => {
-              const Icono = ICONO_VISTA[tipo]
-              return (
-                <DropdownMenuItem key={tipo} className="items-start" onSelect={() => setEditando(onCrear(tipo))}>
-                  <Icono className="mt-0.5 text-brand" />
-                  <span className="grid gap-0.5">
-                    <span>{TIPOS_VISTA[tipo].label}</span>
-                    <span className="text-xs text-muted-foreground">{TIPOS_VISTA[tipo].ayuda}</span>
-                  </span>
-                </DropdownMenuItem>
-              )
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button type="button" className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 hover:bg-muted aria-expanded:bg-muted">
+                <PlusIcon className="size-4" /> Crear vista
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-72">
+              <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Tipo de vista</DropdownMenuLabel>
+              {LISTA_TIPOS_VISTA.map((tipo) => {
+                const Icono = ICONO_VISTA[tipo]
+                return (
+                  <DropdownMenuItem key={tipo} className="items-start" onSelect={() => setEditando(onCrear(tipo))}>
+                    <Icono className="mt-0.5 text-brand" />
+                    <span className="grid gap-0.5">
+                      <span>{TIPOS_VISTA[tipo].label}</span>
+                      <span className="text-xs text-muted-foreground">{TIPOS_VISTA[tipo].ayuda}</span>
+                    </span>
+                  </DropdownMenuItem>
+                )
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <ControlesLateral {...control} nombre="las vistas" />
+        </div>
         <label className="flex h-8 items-center gap-2 rounded-md px-2 text-muted-foreground focus-within:bg-muted/60">
           <SearchIcon className="size-4" />
           <input className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground" placeholder="Encontrar una vista" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />

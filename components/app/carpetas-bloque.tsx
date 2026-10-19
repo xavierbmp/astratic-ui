@@ -3,7 +3,7 @@
 import * as React from "react"
 import { toast } from "sonner"
 import type { LucideIcon } from "lucide-react"
-import { ArrowLeftRightIcon, FolderPlusIcon, FolderTreeIcon, PanelLeftCloseIcon, PanelRightCloseIcon } from "lucide-react"
+import { FolderPlusIcon, FolderTreeIcon } from "lucide-react"
 import { cn } from "cn"
 import { hijasDe, type CarpetaArbol, type DestinoCarpeta } from "@/lib/carpetas"
 import { useLocalStorage } from "@/hooks/use-local-storage"
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Section, SectionHeader } from "@/components/app/section"
 import { ResizeHandle, useAnchoGuardado } from "@/components/app/resize-handle"
+import { ControlesLateral, type ControlLateral } from "@/components/app/controles-lateral"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
 import { ArbolCarpetas, type ColorCarpeta } from "@/components/app/arbol-carpetas"
 
@@ -112,16 +113,13 @@ function Directorio<C extends CarpetaArbol>({ props, creando, onCreando }: { pro
  */
 export function CarpetasBloque<C extends CarpetaArbol>({
   variante = "bloque",
-  onPlegar,
-  ladoDelBloque = "izquierda",
-  onCambiarLado,
+  control,
   ...props
 }: PropsCarpetas<C> & {
   /** `lateral`: en el sitio del lateral de vistas de la base, con su borde para ensancharlo. */
   variante?: "bloque" | "chips" | "lateral"
-  onPlegar?: () => void
-  ladoDelBloque?: "izquierda" | "derecha"
-  onCambiarLado?: () => void
+  /** Pasarlo al otro lado y plegarlo (en el lateral, el que da la base). */
+  control?: ControlLateral
 }) {
   const { carpetas, actual, cuentas, color, atajos = [], claves, onElegir } = props
   const [creando, setCreando] = React.useState<{ padreId?: string } | null>(null)
@@ -130,12 +128,13 @@ export function CarpetasBloque<C extends CarpetaArbol>({
 
   if (variante === "lateral")
     return (
-      <aside className="relative flex w-[var(--lateral-w)] flex-none flex-col border-r bg-card text-[13px]" style={{ "--lateral-w": `${ancho.ancho}px` } as React.CSSProperties}>
-        <ResizeHandle ancho={ancho.ancho} onAncho={ancho.setAncho} limites={ANCHO_LATERAL} lado="derecha" destino={(borde) => borde.parentElement} variable="--lateral-w" label="Ancho de las carpetas" />
-        <div className="flex flex-col gap-0.5 border-b p-2">
-          <button type="button" className="flex h-8 items-center gap-2 rounded-md px-2 hover:bg-muted" onClick={() => setCreando({})}>
+      <aside className={cn("relative flex w-[var(--lateral-w)] flex-none flex-col bg-card text-[13px]", control?.lado === "derecha" ? "border-l" : "border-r")} style={{ "--lateral-w": `${ancho.ancho}px` } as React.CSSProperties}>
+        <ResizeHandle ancho={ancho.ancho} onAncho={ancho.setAncho} limites={ANCHO_LATERAL} lado={control?.lado === "derecha" ? "izquierda" : "derecha"} destino={(borde) => borde.parentElement} variable="--lateral-w" label="Ancho de las carpetas" />
+        <div className="flex items-center gap-1 border-b p-2">
+          <button type="button" className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 hover:bg-muted" onClick={() => setCreando({})}>
             <FolderPlusIcon className="size-4" /> Nueva carpeta
           </button>
+          {control && <ControlesLateral {...control} nombre="las carpetas" />}
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
           <Directorio props={props} creando={creando} onCreando={setCreando} />
@@ -192,16 +191,7 @@ export function CarpetasBloque<C extends CarpetaArbol>({
           <Button variant="ghost" size="icon-sm" aria-label="Nueva carpeta" title="Nueva carpeta" onClick={() => setCreando({})}>
             <FolderPlusIcon />
           </Button>
-          {onCambiarLado && (
-            <Button variant="ghost" size="icon-sm" aria-label={ladoDelBloque === "izquierda" ? "Pasar este bloque a la derecha" : "Pasar este bloque a la izquierda"} onClick={onCambiarLado}>
-              <ArrowLeftRightIcon />
-            </Button>
-          )}
-          {onPlegar && (
-            <Button variant="ghost" size="icon-sm" aria-label="Plegar las carpetas" title="Plegar: las ideas ocupan todo" onClick={onPlegar}>
-              {ladoDelBloque === "izquierda" ? <PanelLeftCloseIcon /> : <PanelRightCloseIcon />}
-            </Button>
-          )}
+          {control && <ControlesLateral {...control} nombre="las carpetas" />}
         </div>
       </SectionHeader>
       <Directorio props={props} creando={creando} onCreando={setCreando} />

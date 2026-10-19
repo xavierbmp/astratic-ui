@@ -18,6 +18,7 @@ import { TIPOS_CAMPO, aFiltrable, colorPorDefecto, textoDeValor, type CampoPropi
 import { agruparEnNiveles, aplicarAjustes, clavesDeGrupos, coloresDeRegistro, columnasDeVista, idBase, lineasDeRejilla, type VistaBase } from "@/lib/base/vistas"
 import { BarraBase, type MenuDeBarra } from "@/components/app/base/barra-base"
 import { LateralVistas } from "@/components/app/base/lateral-vistas"
+import { useLadoLateral, type ControlLateral } from "@/components/app/controles-lateral"
 import { EditorCampo } from "@/components/app/base/editor-campo"
 import { AjustesCampo, type PestanaAjustes } from "@/components/app/base/ajustes-campo"
 import { FormularioBase, type ValoresFormulario } from "@/components/app/base/formulario-base"
@@ -119,9 +120,10 @@ export function BaseDatos<T>({
   portada?: (fila: T) => string | null | undefined
   /**
    * Un lateral propio en lugar del de las vistas (las carpetas de las ideas). Las vistas siguen en
-   * el menú del nombre de la vista. `nombre` es para el botón que lo abre y lo cierra.
+   * el menú del nombre de la vista. `nombre` es para el botón que lo abre y lo cierra. Si `contenido`
+   * es una función, recibe con qué pasarse al otro lado y plegarse (`ControlesLateral`).
    */
-  lateral?: { nombre: string; contenido: React.ReactNode }
+  lateral?: { nombre: string; contenido: React.ReactNode | ((control: ControlLateral) => React.ReactNode) }
   /**
    * La ficha integrada de la página (`usePanelFicha`) cuando la base va dentro de un `WorkGrid` con
    * panel: entonces la ficha ocupa la columna del panel y la base no pinta la suya.
@@ -146,6 +148,9 @@ export function BaseDatos<T>({
   const { vista } = base
   // Con el panel de la página al lado, el lateral de vistas empieza cerrado para dejar sitio a la base.
   const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, lateralInicial ?? !fichaPagina)
+  // Todo lateral se pasa al otro lado y se pliega desde su cabecera (Xavier, 2026-10-16).
+  const { lado, cambiarLado } = useLadoLateral(`base:${clave}`)
+  const control: ControlLateral = { lado, onCambiarLado: cambiarLado, onPlegar: () => setLateral(false) }
   const [busqueda, setBusqueda] = React.useState("")
   const [marcadas, setMarcadas] = React.useState<Set<string>>(new Set())
   const [menu, setMenu] = React.useState<MenuDeBarra | null>(null)
@@ -352,6 +357,25 @@ export function BaseDatos<T>({
     }
   }
 
+  const pintarLateral = () => {
+    if (!lateral || movil) return null
+    if (lateralPropio) return typeof lateralPropio.contenido === "function" ? lateralPropio.contenido(control) : lateralPropio.contenido
+    return (
+      <LateralVistas
+        clave={clave}
+        vistas={base.vistas}
+        activa={vista.id}
+        onActivar={base.activar}
+        onCrear={base.crear}
+        onRenombrar={base.renombrar}
+        onDuplicar={base.duplicar}
+        onBorrar={borrarVista}
+        onReordenar={base.reordenar}
+        {...control}
+      />
+    )
+  }
+
   return (
     <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-xl border bg-card">
       <BarraBase
@@ -361,6 +385,7 @@ export function BaseDatos<T>({
         camposMenu={camposMenu}
         objeto={objeto.plural}
         lateralAbierto={lateral && !movil}
+        ladoLateral={lado}
         onLateral={() => setLateral(!lateral)}
         nombreLateral={lateralPropio?.nombre}
         onCambiar={base.cambiar}
@@ -382,21 +407,9 @@ export function BaseDatos<T>({
         onMenu={setMenu}
       />
       <div data-slot="base-datos" className="flex min-h-0 flex-1" style={{ "--ficha-w": `${ficha.ancho}px` } as React.CSSProperties}>
-        {lateral && !movil && lateralPropio && lateralPropio.contenido}
-        {lateral && !movil && !lateralPropio && (
-          <LateralVistas
-            clave={clave}
-            vistas={base.vistas}
-            activa={vista.id}
-            onActivar={base.activar}
-            onCrear={base.crear}
-            onRenombrar={base.renombrar}
-            onDuplicar={base.duplicar}
-            onBorrar={borrarVista}
-            onReordenar={base.reordenar}
-          />
-        )}
+        {lado === "izquierda" && pintarLateral()}
         <div className="flex min-w-0 flex-1 flex-col">{cuerpo()}</div>
+        {lado === "derecha" && pintarLateral()}
         {ficha.activa && !fichaPagina && children && <PanelFichaBase ficha={ficha} />}
       </div>
 

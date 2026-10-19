@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { ArrowUpDownIcon, CheckIcon, ChevronDownIcon, ListFilterIcon, Rows3Icon, type LucideIcon } from "lucide-react"
+import { cn } from "cn"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { contarCondiciones, type GrupoCondiciones } from "@/lib/filtros/core"
@@ -23,6 +24,7 @@ export type MenuVistaPropia = { opciones: { id: string; label: string }[]; valor
  * calendario hecho a medida): la misma colocación y los mismos filtros que `BarraBase` (vista a la
  * izquierda; filtro, agrupar, ordenar y buscar a la derecha; la acción principal al final), sin campos. Agrupar y ordenar,
  * si la página los ofrece, son una lista corta de formas fijas (`MenuVistaPropia`), no por cualquier campo.
+ * Si su vista es un bloque, la barra va pegada encima, como la de una base (`pegada`: el bloque pone el borde).
  */
 export function BarraFiltros({
   campos,
@@ -35,6 +37,7 @@ export function BarraFiltros({
   grupos,
   orden,
   accion,
+  pegada,
 }: {
   campos: CampoMenu[]
   filtro: GrupoCondiciones
@@ -50,12 +53,14 @@ export function BarraFiltros({
   /** Cómo se ordena; la primera opción es la de serie. */
   orden?: MenuVistaPropia
   accion?: React.ReactNode
+  /** Dentro del mismo bloque que su vista, como la barra de una base: sin borde propio, con una raya debajo. */
+  pegada?: boolean
 }) {
   const [abierto, setAbierto] = React.useState(false)
   const n = contarCondiciones(filtro)
   const actual = vistas?.opciones.find((o) => o.id === vistas.valor) ?? vistas?.opciones[0]
   return (
-    <div className="@container/barra flex h-11 flex-none items-center gap-1 rounded-xl border bg-card px-2">
+    <div className={cn("@container/barra flex h-11 flex-none items-center gap-1 bg-card px-2", pegada ? "border-b" : "rounded-xl border")}>
       {vistas && actual && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

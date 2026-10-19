@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ArrowUpDownIcon, CalendarDaysIcon, Columns3Icon, EyeOffIcon, PaletteIcon, PanelLeftIcon, PanelRightIcon, Rows3Icon, ListFilterIcon, type LucideIcon } from "lucide-react"
+import { ArrowUpDownIcon, CalendarDaysIcon, Columns3Icon, EyeOffIcon, PaletteIcon, Rows3Icon, ListFilterIcon, type LucideIcon } from "lucide-react"
+import { IconoPlegarLateral, type LadoLateral } from "@/components/app/controles-lateral"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { contarCondiciones } from "@/lib/filtros/core"
 import type { DefCampo } from "@/lib/base/campos"
@@ -56,6 +57,7 @@ export function BarraBase<T>({
   camposMenu,
   objeto,
   lateralAbierto,
+  ladoLateral = "izquierda",
   onLateral,
   nombreLateral = "las vistas",
   onCambiar,
@@ -76,6 +78,8 @@ export function BarraBase<T>({
   /** «contactos»: para los textos. */
   objeto: string
   lateralAbierto: boolean
+  /** A qué lado va el lateral: el icono del botón apunta hacia allí. */
+  ladoLateral?: LadoLateral
   onLateral: () => void
   /** El texto del botón del lateral («las vistas», «las carpetas»). */
   nombreLateral?: string
@@ -104,7 +108,7 @@ export function BarraBase<T>({
   return (
     <div className="@container/barra flex h-11 flex-none items-center gap-1 border-b px-2">
       <button type="button" aria-label={lateralAbierto ? `Ocultar ${nombreLateral}` : `Ver ${nombreLateral}`} title={lateralAbierto ? `Ocultar ${nombreLateral}` : `Ver ${nombreLateral}`} aria-pressed={lateralAbierto} onClick={onLateral} className="hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
-        <PanelLeftIcon className="size-4" />
+        <IconoPlegarLateral lado={ladoLateral} abierto={lateralAbierto} className="size-4" />
       </button>
       <MenuNombreVista vista={vista} vistas={vistas} acciones={acciones} />
 
@@ -149,7 +153,7 @@ export function BarraBase<T>({
           onClick={panelFicha.onAlternar}
           className="ml-0.5 hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground aria-pressed:bg-brand-soft aria-pressed:text-brand xl:inline-flex"
         >
-          <PanelRightIcon className="size-4" />
+          <IconoPlegarLateral lado="derecha" abierto={panelFicha.activo} className="size-4" />
         </button>
       )}
     </div>

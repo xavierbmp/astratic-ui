@@ -66,7 +66,7 @@ export default function BaseDeDatosPage() {
           columns={["Parte", "Qué hace"]}
           rows={[
             ["Barra (BarraBase)", "Lateral, nombre de la vista con su menú (todas las vistas y «Crear vista»), y a la derecha lo que tiene su tipo: el campo del kanban o del calendario, ocultar campos, filtro, agrupar, ordenar, color, altura y buscar. Al final la acción principal y el botón de la ficha integrada."],
-            ["Lateral (LateralVistas)", "«Crear vista» por tipo, buscar una vista y la lista, que se ordena arrastrando. Se ensancha arrastrando su borde. Una página puede poner el suyo (`lateral`): las carpetas, un calendario."],
+            ["Lateral (LateralVistas)", "«Crear vista» por tipo, buscar una vista y la lista, que se ordena arrastrando. Se ensancha arrastrando su borde y, junto a «Crear vista», se pasa al otro lado o se pliega (`ControlesLateral`, con la flechita hacia donde se esconde; el lado se recuerda). Una página puede poner el suyo (`lateral`): las carpetas, un calendario; si `contenido` es una función, recibe esos mismos controles."],
             ["Vista", "Cuadrícula (Rejilla), kanban (el Kanban del kit), galería o calendario. En el móvil, una lista de tarjetas con los mismos filtros."],
             ["Pie", "En la cuadrícula: «+» para un registro nuevo, cuántos hay y el resumen de cada columna (suma, media, vacíos, únicos, fechas…)."],
             ["Ficha", "La de cada objeto (`DetailSheet`), encima o integrada a la derecha (ficha propia de la base o la columna del panel de `WorkGrid`)."],
