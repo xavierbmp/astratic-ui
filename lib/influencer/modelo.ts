@@ -1042,11 +1042,20 @@ export type Sesion = { id: string; dispositivo: string; lugar: string; ultimaVez
 /** Un trozo de un capítulo: texto, una lista, un consejo destacado o un enlace a una página del workspace. */
 export type BloqueBiblia =
   | { tipo: "parrafo"; texto: string }
-  | { tipo: "lista"; items: string[] }
-  | { tipo: "consejo"; texto: string }
+  | { tipo: "lista"; items: string[]; titulo?: string }
+  | { tipo: "consejo"; texto: string; titulo?: string }
+  /** Lo que hay que vigilar: un aviso o lo que dice la ley. */
+  | { tipo: "ojo"; texto: string; titulo?: string }
+  /** Una cifra o un ejemplo que se destaca. */
+  | { tipo: "dato"; texto: string; titulo?: string }
+  | { tipo: "tabla"; cabecera: string[]; filas: string[][] }
   | { tipo: "enlace"; texto: string; href: string }
 
-/** Un capítulo de la guía de la red. Lo escribe Astratic; ella lo lee y lo marca como leído. */
+/**
+ * Un capítulo de la guía de la red. Lo escribe Astratic; ella lo lee y lo marca como leído. En la Academia es una lección
+ * corta (Xavier, 2026-10-17, reporte cmvcqc2a): cada sección es una diapositiva, con la parte de la Biblia a la que
+ * pertenece, sus palabras clave para buscarla y la página del PDF donde está entero.
+ */
 export type CapituloBiblia = {
   id: string
   titulo: string
@@ -1056,6 +1065,14 @@ export type CapituloBiblia = {
   esencial?: boolean
   secciones: { titulo: string; bloques: BloqueBiblia[] }[]
   actualizadoEl: string
+  /** La parte de la Biblia («5 · Dinero: tarifas, extras y negociación»). */
+  parte?: { numero: string; titulo: string }
+  /** Su número en la Biblia («5.2»). */
+  numero?: string
+  /** Para buscarla: las ideas de las que habla. */
+  claves?: string[]
+  /** Dónde empieza en el PDF de la Biblia. */
+  pagina?: number
 }
 
 /** Cuándo leyó cada capítulo, por su id. */

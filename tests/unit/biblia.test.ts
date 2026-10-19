@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { capituloRecomendado, progresoBiblia, vecinosDe } from "@/lib/influencer/biblia"
+import { buscarLecciones, capituloRecomendado, progresoBiblia, textosDeBloque, vecinosDe } from "@/lib/influencer/biblia"
 import { demoCapitulosBiblia, demoLecturasBiblia } from "@/lib/influencer/demo-biblia"
 
 describe("biblia", () => {
@@ -16,8 +16,14 @@ describe("biblia", () => {
     const { anterior, siguiente, numero } = vecinosDe(demoCapitulosBiblia, demoCapitulosBiblia[1].id)
     expect([anterior?.id, siguiente?.id, numero]).toEqual([demoCapitulosBiblia[0].id, demoCapitulosBiblia[2].id, 2])
   })
+  it("busca por palabras sueltas, sin acentos, y pone delante lo que sale en el título", () => {
+    const [primera] = buscarLecciones(demoCapitulosBiblia, demoCapitulosBiblia[2].titulo.split(" ").slice(0, 2).join(" ").toUpperCase())
+    expect(primera?.id).toBe(demoCapitulosBiblia[2].id)
+    expect(buscarLecciones(demoCapitulosBiblia, "")).toHaveLength(demoCapitulosBiblia.length)
+    expect(buscarLecciones(demoCapitulosBiblia, "zzzqqq")).toEqual([])
+  })
   it("el texto de la guía no lleva guiones largos ni punto y coma", () => {
-    const textos = demoCapitulosBiblia.flatMap((c) => [c.titulo, c.resumen, ...c.secciones.flatMap((s) => s.bloques.flatMap((b) => ("items" in b ? b.items : [b.texto])))])
+    const textos = demoCapitulosBiblia.flatMap((c) => [c.titulo, c.resumen, ...c.secciones.flatMap((s) => s.bloques.flatMap(textosDeBloque))])
     expect(textos.filter((t) => /—|;/.test(t))).toEqual([])
   })
 })
