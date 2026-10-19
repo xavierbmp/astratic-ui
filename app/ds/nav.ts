@@ -4,6 +4,7 @@ import {
   BookTextIcon,
   BoxesIcon,
   CalendarDaysIcon,
+  ExternalLinkIcon,
   FolderTreeIcon,
   PaperclipIcon,
   MessagesSquareIcon,
@@ -121,6 +122,13 @@ export const dsNav: NavGroup[] = [
       { id: "doc-elaborada", label: "Propuesta elaborada", href: "/ds/documentos/elaborada", icon: BookOpenTextIcon },
       { id: "doc-simple", label: "Propuesta simple", href: "/ds/documentos/simple", icon: ScrollTextIcon },
       { id: "doc-guia", label: "Guía", href: "/ds/documentos/guia", icon: BookTextIcon },
+    ],
+  },
+  {
+    label: "Archivo",
+    items: [
+      // Demo archivada (sin servidor, otra app): se abre en su web y se vuelve con la flecha de atrás.
+      { id: "astratic-creators", label: "Astratic Creators (demo)", href: "https://astratic-creators.vercel.app", icon: ExternalLinkIcon },
     ],
   },
 ]
