@@ -207,7 +207,57 @@ export type Propuesta = {
   valores?: Record<string, ValorCampo>
   /** Lo que se rellenó con el formulario de collab (plataformas, brief, entregables, condiciones): al ganarla, la collab nace con esto. */
   borrador?: BorradorCollab
+  /** En una propuesta de Astratic (origen «red»): lo que Astratic le pregunta, además de si le interesa. */
+  preguntas?: PreguntaRed[]
+  /** En una propuesta de Astratic: lo que ella ha contestado. */
+  respuesta?: RespuestaRed
 }
+
+/**
+ * Las propuestas de Astratic (Xavier, 2026-10-19): las crea y las mueve Astratic, y ella solo dice si le interesa,
+ * contesta lo que se le pregunta (confirmar un día, si tiene perro…) y escribe a Astratic. Unas llegan muy cerradas y
+ * otras muy abiertas: las preguntas son las que pone Astratic en cada una.
+ */
+export type TipoPreguntaRed = "sino" | "texto" | "fecha" | "opciones"
+
+export const TIPOS_PREGUNTA_RED: Record<TipoPreguntaRed, string> = { sino: "Sí o no", texto: "Texto", fecha: "Fecha", opciones: "Elegir una opción" }
+
+export type PreguntaRed = {
+  id: string
+  texto: string
+  tipo: TipoPreguntaRed
+  /** Con `tipo: "opciones"`, de entre cuáles elige. */
+  opciones?: string[]
+  /** Una línea debajo de la pregunta, si hace falta explicarla. */
+  ayuda?: string
+}
+
+export type InteresRed = "si" | "no"
+
+export const INTERES_RED: Record<InteresRed, { label: string; tone: "success" | "danger" }> = {
+  si: { label: "Le interesa", tone: "success" },
+  no: { label: "No le interesa", tone: "danger" },
+}
+
+export type RespuestaRed = {
+  interes?: InteresRed
+  /** Lo contestado a cada pregunta, por su id («si»/«no», el texto, el día o la opción elegida). */
+  respuestas: Record<string, string>
+  /** Cuándo contestó por última vez. */
+  el?: string
+}
+
+/** Lo que se escriben ella y Astratic sobre una propuesta de Astratic. */
+export type MensajeRed = {
+  id: string
+  propuestaId: string
+  de: "influencer" | "astratic"
+  texto: string
+  el: string
+}
+
+/** Las propuestas de Astratic las mueve Astratic: ella no cambia su estado ni sus datos, solo contesta. */
+export const esDeAstratic = (p: Pick<Propuesta, "origen">) => p.origen === "red"
 
 /**
  * La collab que se está proponiendo (Xavier, 2026-10-16: «el form de propuestas, el mismo que el de collab»): lo del

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CopyIcon, EllipsisIcon, PencilIcon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react"
+import { CopyIcon, EllipsisIcon, LockIcon, PencilIcon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react"
 import { cn } from "cn"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ResizeHandle, useAnchoGuardado } from "@/components/app/resize-handle"
@@ -9,6 +9,7 @@ import { LISTA_TIPOS_VISTA, TIPOS_VISTA, type TipoVista, type VistaBase } from "
 import { ICONO_VISTA } from "@/components/app/base/apariencia"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { ControlesLateral, type ControlLateral } from "@/components/app/controles-lateral"
+import type { FijasDeBase } from "@/components/app/base/controles-barra"
 
 const ANCHO_LATERAL = { min: 200, porDefecto: 256, max: 440 }
 
@@ -31,6 +32,7 @@ export function LateralVistas({
   onDuplicar,
   onBorrar,
   onReordenar,
+  fijas,
   ...control
 }: ControlLateral & {
   /** Para recordar su ancho en este navegador. */
@@ -43,6 +45,8 @@ export function LateralVistas({
   onDuplicar: (id: string) => void
   onBorrar: (id: string) => void
   onReordenar: (ids: string[]) => void
+  /** Las vistas fijas de la página: arriba del todo, con su candado, sin menú ni arrastre. */
+  fijas?: FijasDeBase
 }) {
   const { ancho, setAncho } = useAnchoGuardado(`base-lateral:${clave}`, ANCHO_LATERAL)
   const [busqueda, setBusqueda] = React.useState("")
@@ -53,7 +57,7 @@ export function LateralVistas({
   const fila = (v: VistaBase, asa?: React.ReactNode) => (
     <FilaVista
       vista={v}
-      activa={v.id === activa}
+      activa={!fijas?.activa && v.id === activa}
       editando={editando === v.id}
       onEditar={(si) => setEditando(si ? v.id : null)}
       onActivar={() => onActivar(v.id)}
@@ -99,6 +103,26 @@ export function LateralVistas({
         </label>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
+        {!filtro && fijas && fijas.vistas.length > 0 && (
+          <div className="mb-1.5 flex flex-col gap-0.5 border-b pb-1.5">
+            {fijas.vistas.map((f) => {
+              const Icono = f.icono ?? LockIcon
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  title="Vista fija: la misma para todas, no se cambia"
+                  onClick={() => fijas.onActivar(f.id)}
+                  className={cn("flex h-8 items-center gap-2 rounded-md px-2 text-left hover:bg-muted", f.id === fijas.activa && "bg-muted font-medium")}
+                >
+                  <Icono className="size-4 flex-none text-brand" />
+                  <span className="min-w-0 flex-1 truncate">{f.nombre}</span>
+                  <LockIcon className="size-3 flex-none text-muted-foreground" aria-label="Vista fija" />
+                </button>
+              )
+            })}
+          </div>
+        )}
         {filtro ? (
           visibles.map((v) => <React.Fragment key={v.id}>{fila(v)}</React.Fragment>)
         ) : (

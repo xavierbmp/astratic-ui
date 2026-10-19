@@ -13,6 +13,7 @@ import {
   CANALES_PLANTILLA,
   ESTADOS_PROPUESTA,
   FORMATOS,
+  INTERES_RED,
   LISTA_FORMATOS,
   MOTIVOS_PERDIDA,
   ORIGENES,
@@ -111,6 +112,17 @@ export function camposBasePropuestas({ marcas, contactos, tarifas, propios }: { 
     { id: "motivoPerdida", nombre: "Motivo de pérdida", tipo: "select", ocultoDeSerie: true, opciones: deLista(MOTIVOS_PERDIDA), grupo: "Estado", valor: (p) => texto(p.motivoPerdida) },
     { id: "notas", nombre: "Notas", tipo: "texto_largo", ocultoDeSerie: true, grupo: "Datos", valor: (p) => texto(p.notas) },
     { id: "creadaEl", nombre: "Creada", tipo: "fecha", soloLectura: true, ocultoDeSerie: true, grupo: "Fechas", valor: (p) => soloFecha(p.creadaEl) },
+    {
+      id: "respuesta",
+      nombre: "Tu respuesta",
+      tipo: "select",
+      soloLectura: true,
+      ocultoDeSerie: true,
+      opciones: opcionesDeEstados([...Object.entries(INTERES_RED).map(([id, i]) => ({ id, label: i.label, tone: i.tone })), { id: "pendiente", label: "Sin responder", tone: "warning" as const }]),
+      grupo: "Estado",
+      descripcion: "En las propuestas de Astratic: si te interesa.",
+      valor: (p) => (p.origen === "red" ? (p.respuesta?.interes ?? "pendiente") : null),
+    },
     ...propios.map((x) => campoDePropio<Propuesta>(x, (p) => p.valores)),
   ]
 }
@@ -122,6 +134,17 @@ export function vistasDeSeriePropuestas(campos: DefCampo<Propuesta>[]): VistaBas
     vistaNueva("Todas las propuestas", campos, { id: "propuestas-todas" }),
     vistaNueva("Siguientes pasos", campos, { id: "propuestas-pasos", tipo: "calendario", fecha: "siguienteFecha" }),
   ]
+}
+
+/**
+ * La vista fija «Propuestas de Astratic» (Xavier, 2026-10-19): el kanban por estado de las que crea y mueve Astratic,
+ * igual para todas, que no se borra ni se configura. Cada tarjeta enseña la marca, lo que piden, desde cuándo y si ya
+ * ha contestado.
+ */
+export function vistaPropuestasAstratic(campos: DefCampo<Propuesta>[]): VistaBase {
+  const enTarjeta = ["marca", "piden", "desde", "respuesta"]
+  const vista = vistaNueva("Propuestas de Astratic", campos, { id: "propuestas-astratic", tipo: "kanban", apilar: "estado" })
+  return { ...vista, campos: [...enTarjeta.map((id) => ({ id, visible: true })), ...vista.campos.filter((c) => !enTarjeta.includes(c.id)).map((c) => ({ ...c, visible: campos.find((x) => x.id === c.id)?.principal ?? false }))] }
 }
 
 /**

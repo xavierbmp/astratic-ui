@@ -4,7 +4,7 @@
 // menú, el campo que manda en el kanban o el calendario, la altura de las filas y el buscador.
 
 import * as React from "react"
-import { CheckIcon, ChevronDownIcon, CopyIcon, PencilIcon, PlusIcon, SearchIcon, Trash2Icon, UnfoldVerticalIcon, WrapTextIcon, XIcon, type LucideIcon } from "lucide-react"
+import { CheckIcon, ChevronDownIcon, CopyIcon, LockIcon, PencilIcon, PlusIcon, SearchIcon, Trash2Icon, UnfoldVerticalIcon, WrapTextIcon, XIcon, type LucideIcon } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,13 +34,23 @@ export type AccionesVista = {
 }
 
 /**
+ * Una vista fija de la base, como la ve el menú y el lateral: la pone la página, va arriba del todo con su candado y no
+ * se borra, no cambia de nombre ni se configura (Xavier, 2026-10-19: «Propuestas de Astratic»).
+ */
+export type VistaFijaMenu = { id: string; nombre: string; icono?: LucideIcon }
+
+/** Las vistas fijas, para el menú y el lateral: cuál está abierta y cómo se abre una. */
+export type FijasDeBase = { vistas: VistaFijaMenu[]; activa: string | null; onActivar: (id: string) => void }
+
+/**
  * El nombre de la vista abierta con el icono de su tipo. Su menú lleva las demás vistas (para pasar
  * a otra sin abrir el lateral), «Crear vista» y lo de esta: renombrarla, duplicarla o borrarla.
  */
-export function MenuNombreVista({ vista, vistas, acciones }: { vista: VistaBase; vistas: VistaBase[]; acciones: AccionesVista }) {
+export function MenuNombreVista({ vista, vistas, acciones, fijas }: { vista: VistaBase; vistas: VistaBase[]; acciones: AccionesVista; fijas?: FijasDeBase }) {
   const [renombrando, setRenombrando] = React.useState(false)
   const [nombre, setNombre] = React.useState(vista.nombre)
-  const Icono = ICONO_VISTA[vista.tipo ?? "cuadricula"]
+  const fija = fijas?.vistas.find((f) => f.id === fijas.activa)
+  const Icono = fija?.icono ?? ICONO_VISTA[vista.tipo ?? "cuadricula"]
   return (
     <Popover open={renombrando} onOpenChange={setRenombrando}>
       <DropdownMenu>
@@ -49,6 +59,7 @@ export function MenuNombreVista({ vista, vistas, acciones }: { vista: VistaBase;
             <button type="button" className="inline-flex h-7 min-w-0 items-center gap-1.5 rounded-md px-2 text-[13px] font-medium hover:bg-muted">
               <Icono className="size-4 flex-none text-brand" />
               <span className="max-w-56 truncate">{vista.nombre}</span>
+              {fija && <LockIcon className="size-3 flex-none text-muted-foreground" aria-label="Vista fija" />}
               <ChevronDownIcon className="size-3.5 flex-none text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
@@ -56,13 +67,23 @@ export function MenuNombreVista({ vista, vistas, acciones }: { vista: VistaBase;
         <DropdownMenuContent align="start" className="w-60">
           <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Vistas</DropdownMenuLabel>
           <div className="max-h-64 overflow-y-auto">
+            {fijas?.vistas.map((f) => {
+              const IconoFija = f.icono ?? LockIcon
+              return (
+                <DropdownMenuItem key={f.id} onSelect={() => fijas.onActivar(f.id)}>
+                  <IconoFija className="text-brand" />
+                  <span className="flex-1 truncate">{f.nombre}</span>
+                  {f.id === fijas.activa ? <CheckIcon /> : <LockIcon className="size-3 text-muted-foreground" />}
+                </DropdownMenuItem>
+              )
+            })}
             {vistas.map((v) => {
               const IconoVista = ICONO_VISTA[v.tipo ?? "cuadricula"]
               return (
                 <DropdownMenuItem key={v.id} onSelect={() => acciones.activar(v.id)}>
                   <IconoVista className="text-brand" />
                   <span className="flex-1 truncate">{v.nombre}</span>
-                  {v.id === vista.id && <CheckIcon />}
+                  {!fija && v.id === vista.id && <CheckIcon />}
                 </DropdownMenuItem>
               )
             })}
@@ -82,7 +103,8 @@ export function MenuNombreVista({ vista, vistas, acciones }: { vista: VistaBase;
               })}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-          <DropdownMenuSeparator />
+          {!fija && <DropdownMenuSeparator />}
+          {!fija && (
           <DropdownMenuItem
             onSelect={() => {
               setNombre(vista.nombre)
@@ -92,10 +114,13 @@ export function MenuNombreVista({ vista, vistas, acciones }: { vista: VistaBase;
           >
             <PencilIcon /> Cambiar el nombre
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={acciones.duplicar}>
-            <CopyIcon /> Duplicar la vista
-          </DropdownMenuItem>
-          {acciones.borrar && (
+          )}
+          {!fija && (
+            <DropdownMenuItem onSelect={acciones.duplicar}>
+              <CopyIcon /> Duplicar la vista
+            </DropdownMenuItem>
+          )}
+          {!fija && acciones.borrar && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onSelect={acciones.borrar}>

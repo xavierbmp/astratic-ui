@@ -9,14 +9,14 @@ import type { DefCampo } from "@/lib/base/campos"
 import { camposApilables, camposDeFecha, camposOcultos, textoCampos, textoFiltro, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 import type { CampoMenu } from "@/components/app/base/selector-campo"
 import { BotonBarra } from "@/components/app/base/boton-barra"
-import { Buscador, MenuAltura, MenuNombreVista, SelectorCampoVista, type AccionesVista } from "@/components/app/base/controles-barra"
+import { Buscador, MenuAltura, MenuNombreVista, SelectorCampoVista, type AccionesVista, type FijasDeBase } from "@/components/app/base/controles-barra"
 import { PanelFiltro } from "@/components/app/base/panel-filtro"
 import { MenuCampos } from "@/components/app/base/menu-campos"
 import { MenuOrden } from "@/components/app/base/menu-orden"
 import { MenuGrupos } from "@/components/app/base/menu-grupos"
 import { MenuColor } from "@/components/app/base/menu-color"
 
-export type { AccionesVista }
+export type { AccionesVista, FijasDeBase }
 
 /** Los menús de la barra, para abrirlos desde fuera («Filtrar por este campo» abre el de filtro). */
 export type MenuDeBarra = "campos" | "filtro" | "grupos" | "orden" | "color"
@@ -70,6 +70,7 @@ export function BarraBase<T>({
   panelFicha,
   menu,
   onMenu,
+  fijas,
 }: {
   vista: VistaBase
   vistas: VistaBase[]
@@ -94,9 +95,12 @@ export function BarraBase<T>({
   panelFicha?: { activo: boolean; onAlternar: () => void }
   menu: MenuDeBarra | null
   onMenu: (m: MenuDeBarra | null) => void
+  /** Las vistas fijas de la página. Con una abierta, la barra solo deja buscar: la vista no se configura. */
+  fijas?: FijasDeBase
 }) {
   const tipo = vista.tipo ?? "cuadricula"
-  const tiene = (m: MenuDeBarra) => MENUS[tipo].includes(m)
+  const fija = !!fijas?.activa
+  const tiene = (m: MenuDeBarra) => !fija && MENUS[tipo].includes(m)
   const de = (m: MenuDeBarra) => ({ abierto: menu === m, onAbierto: (a: boolean) => onMenu(a ? m : null) })
   const otras = vistas.filter((v) => v.id !== vista.id)
   const ocultos = camposOcultos(vista)
@@ -110,13 +114,13 @@ export function BarraBase<T>({
       <button type="button" aria-label={lateralAbierto ? `Ocultar ${nombreLateral}` : `Ver ${nombreLateral}`} title={lateralAbierto ? `Ocultar ${nombreLateral}` : `Ver ${nombreLateral}`} aria-pressed={lateralAbierto} onClick={onLateral} className="hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
         <IconoPlegarLateral lado={ladoLateral} abierto={lateralAbierto} className="size-4" />
       </button>
-      <MenuNombreVista vista={vista} vistas={vistas} acciones={acciones} />
+      <MenuNombreVista vista={vista} vistas={vistas} acciones={acciones} fijas={fijas} />
 
       <div className="ml-auto flex min-w-0 items-center gap-0.5 overflow-x-auto">
-        {tipo === "kanban" && (
+        {!fija && tipo === "kanban" && (
           <SelectorCampoVista icono={Columns3Icon} texto={`Apilado por ${nombreDe(vista.apilar) ?? "…"}`} titulo="Las columnas salen de" campos={camposApilables(campos)} valor={vista.apilar} vacio="Crea un campo de selección única para repartir las tarjetas." onCambiar={(apilar) => onCambiar({ apilar })} />
         )}
-        {tipo === "calendario" && (
+        {!fija && tipo === "calendario" && (
           <SelectorCampoVista icono={CalendarDaysIcon} texto={`Fecha: ${nombreDe(vista.fecha) ?? "…"}`} titulo="Cada registro va en el día de" campos={camposDeFecha(campos)} valor={vista.fecha} vacio="Crea un campo de fecha para ver los registros en el calendario." onCambiar={(fecha) => onCambiar({ fecha })} />
         )}
         {tiene("campos") && (
@@ -124,9 +128,11 @@ export function BarraBase<T>({
             <MenuCampos vista={vista} campos={campos} onCambiar={(lista) => onCambiar({ campos: lista })} />
           </MenuBarra>
         )}
-        <MenuBarra icono={ListFilterIcon} texto={filtrado ?? "Filtro"} activo={contarCondiciones(vista.filtro) > 0} {...de("filtro")}>
-          <PanelFiltro campos={camposMenu} value={vista.filtro} onChange={(filtro) => onCambiar({ filtro })} objeto={objeto} otrasVistas={otras} />
-        </MenuBarra>
+        {!fija && (
+          <MenuBarra icono={ListFilterIcon} texto={filtrado ?? "Filtro"} activo={contarCondiciones(vista.filtro) > 0} {...de("filtro")}>
+            <PanelFiltro campos={camposMenu} value={vista.filtro} onChange={(filtro) => onCambiar({ filtro })} objeto={objeto} otrasVistas={otras} />
+          </MenuBarra>
+        )}
         {tiene("grupos") && (
           <MenuBarra icono={Rows3Icon} texto={vista.grupos.length ? textoCampos(vista.grupos.length, "Agrupados") : "Agrupar"} activo={vista.grupos.length > 0} {...de("grupos")}>
             <MenuGrupos campos={camposMenu} grupos={vista.grupos} otrasVistas={otras} onCambiar={(grupos) => onCambiar({ grupos, plegados: [] })} onContraer={onContraer} onExpandir={onExpandir} />
@@ -137,10 +143,12 @@ export function BarraBase<T>({
             <MenuOrden campos={camposMenu} orden={vista.orden} otrasVistas={otras} onCambiar={(orden) => onCambiar({ orden })} />
           </MenuBarra>
         )}
-        <MenuBarra icono={PaletteIcon} texto={coloreado ?? "Color"} activo={!!coloreado} align="end" {...de("color")}>
-          <MenuColor campos={camposMenu} color={vista.color} onCambiar={(color) => onCambiar({ color })} />
-        </MenuBarra>
-        {tipo === "cuadricula" && <MenuAltura altura={vista.altura} ajustarCabeceras={!!vista.ajustarCabeceras} onCambiar={onCambiar} />}
+        {!fija && (
+          <MenuBarra icono={PaletteIcon} texto={coloreado ?? "Color"} activo={!!coloreado} align="end" {...de("color")}>
+            <MenuColor campos={camposMenu} color={vista.color} onCambiar={(color) => onCambiar({ color })} />
+          </MenuBarra>
+        )}
+        {!fija && tipo === "cuadricula" && <MenuAltura altura={vista.altura} ajustarCabeceras={!!vista.ajustarCabeceras} onCambiar={onCambiar} />}
         <Buscador valor={busqueda} onCambiar={onBuscar} />
       </div>
       {accion && <div className="ml-1 flex-none">{accion}</div>}

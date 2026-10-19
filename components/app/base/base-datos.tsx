@@ -43,6 +43,23 @@ type EditorAbierto = { ancla: HTMLElement; lugar?: { antesDe?: string; despuesDe
 type AjustesAbiertos = { ancla: HTMLElement; campoId: string; pestana: PestanaAjustes }
 
 /**
+ * Una vista que pone la página, la misma para todas las personas (Xavier, 2026-10-19: «Propuestas de Astratic»): va
+ * arriba del todo con su candado y no se borra, no cambia de nombre ni se configura. Puede enseñar sus propios
+ * registros y abrirlos a su manera (en otra página); en ella no se escribe, no se arrastra, no se crea ni se borra.
+ */
+export type VistaFija<T> = {
+  vista: VistaBase
+  icono?: LucideIcon
+  /** Sus registros, si no son los de la base. */
+  filas?: T[]
+  /** Abrir uno de sus registros, si no es con la ficha de la base. */
+  onAbrir?: (id: string) => void
+  /** Su kanban: el resumen de cada columna, las plegadas y los botones de cada tarjeta. */
+  kanban?: { resumen?: (filas: T[]) => React.ReactNode; plegadas?: string[]; acciones?: (fila: T) => React.ReactNode }
+  vacio?: React.ReactNode
+}
+
+/**
  * Una base de datos con la colocación de Airtable y el aspecto del design system, entera: la barra
  * de la vista, el lateral de vistas (que se ensancha arrastrando), la vista (cuadrícula, kanban,
  * galería o calendario), el formulario de alta, los campos propios y la ficha, encima o integrada a
@@ -56,16 +73,16 @@ export function BaseDatos<T>({
   clave,
   base,
   campos: camposPagina,
-  filas,
+  filas: filasBase,
   getId,
   hoy,
   objeto,
   celdas,
   abiertoId,
-  onAbrir,
-  onEscribir,
+  onAbrir: onAbrirBase,
+  onEscribir: onEscribirBase,
   onCrear,
-  onBorrar,
+  onBorrar: onBorrarBase,
   onDuplicar,
   propios,
   onGuardarCampo,
@@ -77,12 +94,13 @@ export function BaseDatos<T>({
   portada,
   lateral: lateralPropio,
   ficha: fichaPagina,
-  kanban,
+  kanban: kanbanBase,
   lateralInicial,
-  accionesSeleccion,
+  accionesSeleccion: accionesSeleccionBase,
   formulario,
   nuevoInicial = false,
-  vacio,
+  vacio: vacioBase,
+  vistasFijas,
   children,
 }: {
   /** Para recordar en este navegador el lateral de vistas, su ancho y si la ficha va integrada. */
@@ -139,13 +157,34 @@ export function BaseDatos<T>({
   /** Llegar con el formulario abierto («Nuevo contacto» desde otra página). */
   nuevoInicial?: boolean
   vacio?: (hayFiltro: boolean, limpiar: () => void) => React.ReactNode
+  /** Las vistas fijas de la página, arriba de las de cada persona. */
+  vistasFijas?: VistaFija<T>[]
   /**
    * Lo que la página pinta con los registros que se ven, en su orden: la ficha y sus flechas. Se le
    * pasa `ficha` para su `DetailSheet`: con la ficha integrada, se pinta a la derecha de la base.
    */
   children?: (registros: T[], ficha: PanelFicha) => React.ReactNode
 }) {
-  const { vista } = base
+  // Una vista fija abierta manda sobre la de la persona: sus registros, cómo se abren y nada que escribir.
+  const [fijaId, setFijaId] = useLocalStorage<string | null>(`base-fija:${clave}`, null)
+  const fija = vistasFijas?.find((f) => f.vista.id === fijaId)
+  const vista = fija?.vista ?? base.vista
+  const filas = fija?.filas ?? filasBase
+  const onAbrir = fija?.onAbrir ?? onAbrirBase
+  const onEscribir = fija ? undefined : onEscribirBase
+  const onBorrar = fija ? undefined : onBorrarBase
+  const kanban = fija ? fija.kanban : kanbanBase
+  const accionesSeleccion = fija ? undefined : accionesSeleccionBase
+  const vacio = fija ? () => fija.vacio : vacioBase
+  const activarVista = (id: string) => {
+    setFijaId(null)
+    base.activar(id)
+  }
+  const crearVista = (tipo: Parameters<typeof base.crear>[0]) => {
+    setFijaId(null)
+    return base.crear(tipo)
+  }
+  const fijas = vistasFijas?.length ? { vistas: vistasFijas.map((f) => ({ id: f.vista.id, nombre: f.vista.nombre, icono: f.icono })), activa: fija?.vista.id ?? null, onActivar: setFijaId } : undefined
   // Con el panel de la página al lado, el lateral de vistas empieza cerrado para dejar sitio a la base.
   const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, lateralInicial ?? !fichaPagina)
   // Todo lateral se pasa al otro lado y se pliega desde su cabecera (Xavier, 2026-10-16).
@@ -187,7 +226,7 @@ export function BaseDatos<T>({
   const hayFiltro = busqueda.trim() !== "" || vista.filtro.condiciones.length > 0 || (vista.filtro.grupos ?? []).length > 0
   const limpiar = () => {
     setBusqueda("")
-    base.cambiar({ filtro: { union: "y", condiciones: [] } })
+    if (!fija) base.cambiar({ filtro: { union: "y", condiciones: [] } })
   }
   const nombres = campos.map((c) => c.nombre)
 
@@ -286,7 +325,7 @@ export function BaseDatos<T>({
   const marcadasVisibles = [...marcadas].filter((id) => registros.some((f) => getId(f) === id))
   const abrirNuevo = onNuevo ?? (onCrear ? () => setNuevo(true) : undefined)
   const accionNueva =
-    abrirNuevo || ajustesTabla || onImportar ? (
+    !fija && (abrirNuevo || ajustesTabla || onImportar) ? (
       <>
         {onImportar && (
           <Button variant="ghost" size="sm" onClick={() => setImportando(true)} aria-label={`Importar ${objeto.plural}`} title="Importar desde un Excel o un CSV">
@@ -334,7 +373,7 @@ export function BaseDatos<T>({
             onAbrir={onAbrir}
             onEscribir={onEscribir}
             onNuevo={abrirNuevo}
-            onCambiarVista={base.cambiar}
+            onCambiarVista={fija ? () => undefined : base.cambiar}
             accionesCampo={accionesCampo}
             onAnadirCampo={onGuardarCampo ? (ancla) => setEditor({ ancla }) : undefined}
             onEditarCampo={(id, ancla) => abrirAjustes(id, "campo", ancla)}
@@ -365,12 +404,13 @@ export function BaseDatos<T>({
         clave={clave}
         vistas={base.vistas}
         activa={vista.id}
-        onActivar={base.activar}
-        onCrear={base.crear}
+        onActivar={activarVista}
+        onCrear={crearVista}
         onRenombrar={base.renombrar}
         onDuplicar={base.duplicar}
         onBorrar={borrarVista}
         onReordenar={base.reordenar}
+        fijas={fijas}
         {...control}
       />
     )
@@ -393,8 +433,8 @@ export function BaseDatos<T>({
           renombrar: (n) => base.renombrar(vista.id, n),
           duplicar: () => base.duplicar(vista.id),
           borrar: base.vistas.length > 1 ? () => borrarVista(vista.id) : undefined,
-          activar: base.activar,
-          crear: base.crear,
+          activar: activarVista,
+          crear: crearVista,
         }}
         onContraer={() => base.cambiar({ plegados: clavesDeGrupos(nodos) })}
         onExpandir={() => base.cambiar({ plegados: [] })}
@@ -405,6 +445,7 @@ export function BaseDatos<T>({
         panelFicha={children ? { activo: ficha.preferida, onAlternar: () => ficha.alternar(!ficha.preferida) } : undefined}
         menu={menu}
         onMenu={setMenu}
+        fijas={fijas}
       />
       <div data-slot="base-datos" className="flex min-h-0 flex-1" style={{ "--ficha-w": `${ficha.ancho}px` } as React.CSSProperties}>
         {lado === "izquierda" && pintarLateral()}

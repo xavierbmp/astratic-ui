@@ -12,6 +12,7 @@ import type {
   Interaccion,
   Marca,
   MediaKit,
+  MensajeRed,
   Perfil,
   Plantilla,
   PlantillaTarea,
@@ -160,6 +161,30 @@ export const demoPropuestas: Propuesta[] = [
     siguienteFecha: "2026-10-09",
     notas: "Oportunidad de la red: la vende Astratic y cobro el 80 %. Producto en casa antes del 15.",
     creadaEl: "2026-10-06T09:40:00",
+    borrador: {
+      plataformas: ["instagram"],
+      coverUrl: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1600&q=80&fit=crop",
+      brief:
+        "<h3>Objetivo</h3><p>Presentar el champú sólido de Nuura a mujeres de 25 a 40 años que cuidan su pelo y quieren reducir plástico en el baño, enseñando cómo se usa de verdad en una ducha normal.</p>" +
+        "<h3>Mensajes clave</h3><ul><li><p>Una pastilla dura lo mismo que dos botes de champú.</p></li><li><p>Sin sulfatos ni siliconas, apto para pelo teñido.</p></li><li><p>Envase de cartón compostable.</p></li></ul>" +
+        "<h3>Claims prohibidos</h3><ul><li><p>No decir que frena la caída ni que hace crecer el pelo.</p></li><li><p>No compararlo con marcas concretas.</p></li></ul>" +
+        "<h3>Hay que</h3><ul><li><p>Enseñar la pastilla en la mano y cómo hace espuma.</p></li><li><p>Contar cómo queda el pelo después de una semana usándolo.</p></li><li><p>Mencionar @nuura.cosmetics y #publi en el copy.</p></li></ul>" +
+        "<h3>Evitar</h3><ul><li><p>Grabar con otros productos de pelo a la vista.</p></li></ul>",
+      piezas: [
+        { tipo: "video", titulo: "Reel · Primera ducha con Nuura", publicacion: "2026-10-24", red: "instagram", plataforma: "Instagram", formato: "reel", indicaciones: "Entre 30 y 45 segundos, con voz en off o hablando a cámara.", requiereGuion: true, fechaGuion: "2026-10-20" },
+        { tipo: "video", titulo: "Stories · Unboxing", publicacion: "2026-10-21", red: "instagram", plataforma: "Instagram", formato: "story", indicaciones: "Tres stories seguidas con el enlace de la marca en la última.", requiereGuion: false, fechaGuion: "" },
+      ],
+      condiciones: [
+        { id: "exclusividad", nombre: "Exclusividad en champús", dias: 30, icono: "candado" },
+        { id: "derechos", nombre: "Derechos de uso en sus redes", dias: 90, icono: "copyright" },
+      ],
+    },
+    preguntas: [
+      { id: "q-fecha", texto: "¿Puedes publicar el reel el 24 de octubre?", tipo: "sino", ayuda: "La marca lanza el champú ese día." },
+      { id: "q-pelo", texto: "¿Qué tipo de pelo tienes ahora?", tipo: "opciones", opciones: ["Liso", "Ondulado", "Rizado", "Teñido"] },
+      { id: "q-envio", texto: "¿Qué día te va bien recibir el producto?", tipo: "fecha" },
+      { id: "q-notas", texto: "¿Algo que la marca deba saber antes de mandarte el producto?", tipo: "texto" },
+    ],
   },
   {
     id: "p-kalma",
@@ -381,8 +406,13 @@ export const demoAvisoDestacado: Aviso = {
   descripcion: "1 reel + 3 stories · 880 € para ti · del 20 al 31 de octubre",
   el: "2026-10-06T09:40:00",
   leido: false,
-  href: "/workspace/crm?registro=p-nuura",
+  href: "/workspace/crm/astratic/p-nuura",
 }
+
+/** Lo que se han escrito ella y Astratic sobre sus propuestas de Astratic. */
+export const demoMensajesRed: MensajeRed[] = [
+  { id: "mr1", propuestaId: "p-nuura", de: "astratic", texto: "¡Hola Marta! Nuura nos ha pedido trabajar contigo para el lanzamiento. Si te encaja, contéstanos las preguntas y te mandamos el producto esta semana.", el: "2026-10-06T09:41:00" },
+]
 
 export const demoAvisos: Aviso[] = [
   { id: "n1", tipo: "cambios", titulo: "Maison Vero ha pedido cambios en el reel", descripcion: "2 notas en la V1", el: "2026-10-06T10:15:00", leido: false, href: "/workspace/collabs/vero/contenidos/vero-reel" },
