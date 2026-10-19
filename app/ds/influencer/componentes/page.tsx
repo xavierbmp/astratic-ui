@@ -195,11 +195,16 @@ export default function InfluencerComponentesPage() {
         />
       </DocSection>
 
-      <DocSection id="notice" title="Avisos" lead="El que más importa va en una tarjeta del acento con su acción; los demás, en lista, con el punto y la negrita si no están leídos.">
+      <DocSection id="notice" title="Avisos" lead="El que más importa va en una tarjeta blanca con el logotipo de Astratic, su acción y, a la derecha, tarjetas en abanico (la campaña con su imagen, lo que se pide, las fechas); los demás, en lista, con el punto y la negrita si no están leídos.">
         <Example className={EXAMPLE} code={`<NoticeHighlight
   eyebrow="Red Astratic" title="Nueva oportunidad de la red: Nuura"
   description="1 reel + 3 stories · 880 € para ti"
-  action={<Button size="sm" variant="secondary">Ver la propuesta</Button>}
+  action={<Button>Revisar la propuesta</Button>}
+  tarjetas={[
+    { id: "campana", titulo: "Champú sólido", detalle: "Nuura", color: "brand", icono: SparklesIcon },
+    { id: "reel", titulo: "1 reel", detalle: "Instagram", color: "sky", icono: ClapperboardIcon },
+    { id: "fechas", titulo: "20 al 31 oct", detalle: "Publicación", color: "oscura", icono: CalendarDaysIcon },
+  ]}
 />
 <NoticeItem icon={MessageSquareWarningIcon} title="Maison Vero ha pedido cambios" meta="hace 1 hora" unread href="…" />`}>
           <Block className="max-w-sm">
@@ -208,11 +213,7 @@ export default function InfluencerComponentesPage() {
               eyebrow="Red Astratic"
               title="Nueva oportunidad de la red: Nuura"
               description="1 reel + 3 stories · 880 € para ti"
-              action={
-                <Button size="sm" variant="secondary" className="w-fit">
-                  Ver la propuesta
-                </Button>
-              }
+              action={<Button size="sm">Revisar la propuesta</Button>}
             />
             <ul className="mt-3 flex flex-col">
               <li>

@@ -1,32 +1,92 @@
+import Image from "next/image"
 import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
 import { cn } from "cn"
+import { tintClass, type Tint } from "@/lib/influencer/tints"
+import { DocLogo } from "@/components/document/sheet"
 
-/** El aviso que más importa, en una tarjeta de color del acento con su acción. */
+/** Una de las tarjetas del abanico del aviso destacado: con imagen (la portada de la campaña) o de color, con su icono. */
+export type TarjetaAbanico = {
+  id: string
+  titulo: string
+  detalle?: string
+  imagenUrl?: string
+  icono?: LucideIcon
+  /** El color de la tarjeta: un tinte, la marca de la casa o la oscura. Las de imagen no lo usan. */
+  color?: Tint | "brand" | "oscura"
+}
+
+const COLOR_TARJETA: Record<NonNullable<TarjetaAbanico["color"]>, string> = { ...tintClass, brand: "bg-brand text-brand-foreground", oscura: "bg-foreground text-background" }
+
+/**
+ * El aviso que más importa, arriba del Inicio (Xavier, 2026-10-19, reporte cmvcm6ez, a partir de una referencia): una
+ * tarjeta blanca con el logotipo de Astratic arriba a la izquierda, lo que es escrito limpio y su acción, y a la
+ * derecha unas tarjetas que se pisan en abanico (`tarjetas`: la campaña con su imagen, la marca, lo que se pide).
+ */
 export function NoticeHighlight({
   eyebrow,
   title,
   description,
   action,
+  tarjetas,
   className,
 }: {
   eyebrow?: string
   title: string
   description?: React.ReactNode
   action?: React.ReactNode
+  /** De dos a cuatro; sin ninguna, la tarjeta va sola. En el móvil no salen. */
+  tarjetas?: TarjetaAbanico[]
   className?: string
 }) {
   return (
-    <div
-      data-slot="ws-notice-highlight"
-      className={cn("flex flex-col gap-3 rounded-2xl bg-brand p-4 text-brand-foreground", className)}
-    >
-      <div>
-        {eyebrow && <p className="text-[11px] font-medium tracking-wide uppercase opacity-80">{eyebrow}</p>}
-        <p className="mt-0.5 text-base leading-snug font-semibold">{title}</p>
-        {description && <p className="mt-1 text-sm opacity-90">{description}</p>}
+    <div data-slot="ws-notice-highlight" className={cn("relative flex flex-col gap-4 overflow-hidden rounded-2xl bg-card p-5 shadow-card md:flex-row md:items-center md:p-6", className)}>
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-4">
+        <DocLogo devs={false} className="text-[15px]" />
+        <div className="min-w-0">
+          {eyebrow && <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>}
+          <p className="mt-1 text-xl leading-tight font-semibold tracking-tight text-balance md:text-2xl">{title}</p>
+          {description && <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>}
+        </div>
+        {action}
       </div>
-      {action}
+      {tarjetas && tarjetas.length > 0 && <Abanico tarjetas={tarjetas.slice(0, 4)} />}
+    </div>
+  )
+}
+
+/**
+ * Las tarjetas que se pisan, giradas como un abanico, como en la referencia: cada una tapa la parte derecha de la
+ * anterior y deja a la vista su texto, que va a la izquierda.
+ */
+function Abanico({ tarjetas }: { tarjetas: TarjetaAbanico[] }) {
+  const n = tarjetas.length
+  const paso = 108
+  return (
+    <div aria-hidden className="relative -my-3 hidden h-48 flex-none md:block" style={{ width: `${176 + (n - 1) * paso}px` }}>
+      {tarjetas.map((t, i) => {
+        const Icono = t.icono
+        const giro = -9 + (n === 1 ? 9 : (18 / (n - 1)) * i)
+        return (
+          <div
+            key={t.id}
+            className={cn("absolute top-3 flex h-42 w-44 flex-col justify-between overflow-hidden rounded-2xl p-3.5 shadow-pop", t.imagenUrl ? "bg-muted text-white" : COLOR_TARJETA[t.color ?? "oscura"])}
+            style={{ left: `${i * paso}px`, transform: `rotate(${giro}deg) translateY(${Math.abs(giro) * 0.5}px)`, zIndex: i + 1 }}
+          >
+            {t.imagenUrl && (
+              <>
+                <Image src={t.imagenUrl} alt="" fill sizes="176px" unoptimized className="object-cover" />
+                <span className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
+              </>
+            )}
+            {Icono ? <Icono className="relative size-6 opacity-90" /> : <span />}
+            <span className="relative min-w-0" style={{ maxWidth: i < n - 1 ? `${paso - 20}px` : undefined }}>
+              <span className="block text-[15px] leading-tight font-semibold">{t.titulo}</span>
+              {t.detalle && <span className="mt-0.5 block truncate text-xs opacity-75">{t.detalle}</span>}
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }
