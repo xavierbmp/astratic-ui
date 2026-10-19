@@ -239,6 +239,7 @@
         { "path": "components/app/base/barra-filtros.tsx", "type": "registry:component" },
         { "path": "components/app/base/base-datos.tsx", "type": "registry:component" },
         { "path": "components/app/controles-lateral.tsx", "type": "registry:component" },
+        { "path": "components/app/menu-cambiar.tsx", "type": "registry:component" },
         { "path": "components/app/base/boton-barra.tsx", "type": "registry:component" },
         { "path": "components/app/base/calendario-base.tsx", "type": "registry:component" },
         { "path": "components/app/base/controles-barra.tsx", "type": "registry:component" },
