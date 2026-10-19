@@ -188,7 +188,7 @@ export const demoCapitulosBiblia: CapituloBiblia[] = [
       },
       { titulo: "La retención", bloques: [parrafo("Si tu actividad lleva retención, quien te paga se queda el 15 % para Hacienda, o el 7 % el año en que empiezas y los dos siguientes. Tu gestoría te dice si es tu caso.")] },
       { titulo: "Dónde se hacen", bloques: [parrafo("El workspace no emite facturas. Las haces con tu programa de facturación y aquí las apuntas con su PDF para seguirlas hasta cobrarlas. Desde 2027 esos programas tienen que cumplir Verifactu, las sociedades desde enero y las autónomas desde julio.")] },
-      { titulo: "Cuando no pagan", bloques: [parrafo("En Cobros ves lo vencido nada más entrar. «Reclamar el pago» te abre el email ya escrito, con la factura y el importe, y deja apuntado cuándo lo reclamaste."), consejo("Pon tus datos fiscales y tu IBAN en Ajustes una vez. Salen solos en los datos para copiar de cada factura."), enlace("Ir a Cobros", "/workspace/cobros")] },
+      { titulo: "Cuando no pagan", bloques: [parrafo("En Cobros ves lo vencido nada más entrar. «Reclamar el pago» te abre el email ya escrito, con la factura y el importe, y deja apuntado cuándo lo reclamaste."), consejo("Pon tus datos fiscales y tu IBAN en Ajustes una vez. Salen solos en los datos para copiar de cada factura."), enlace("Ir a Cobros", "/workspace/collabs/cobros")] },
     ],
   },
   {

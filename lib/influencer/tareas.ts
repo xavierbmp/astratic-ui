@@ -422,7 +422,7 @@ const HREF_TIPO: Record<TipoTarea, string | undefined> = {
   crm: "/workspace/crm",
   collabs: "/workspace/collabs",
   contenidos: "/workspace/contenidos",
-  cobros: "/workspace/cobros",
+  cobros: "/workspace/collabs/cobros",
 }
 
 /** Donde se trabaja la tarea: la campaña (su pieza o su facturación), la ficha del CRM o la página de su tipo. */
