@@ -387,7 +387,7 @@ export const demoAvisoDestacado: Aviso = {
 export const demoAvisos: Aviso[] = [
   { id: "n1", tipo: "cambios", titulo: "Maison Vero ha pedido cambios en el reel", descripcion: "2 notas en la V1", el: "2026-10-06T10:15:00", leido: false, href: "/workspace/collabs/vero/contenidos/vero-reel" },
   { id: "n2", tipo: "aprobado", titulo: "Lumea Skin ha aprobado el guion", el: "2026-10-05T18:20:00", leido: false, href: "/workspace/collabs/lumea/contenidos/lumea-reel" },
-  { id: "n11", tipo: "astratic", titulo: "Capítulo actualizado en la Academia: Facturar y cobrar", descripcion: "Con las fechas de Verifactu", el: "2026-10-05T12:00:00", leido: false, href: "/workspace/academia/facturar" },
+  { id: "n11", tipo: "astratic", titulo: "Capítulo actualizado en la Academia: Facturar y cobrar", descripcion: "Con las fechas de Verifactu", el: "2026-10-05T12:00:00", leido: false, href: "/workspace/academia/la-factura" },
   { id: "n5", tipo: "cobro", titulo: "Bloom Beauty te ha pagado", descripcion: "Factura 2026-015 · 1.800 €", el: "2026-10-05T10:30:00", leido: true, href: "/workspace/collabs/cobros?registro=bloom-delineador-p1" },
   { id: "n6", tipo: "aprobado", titulo: "Glow Studio ha aprobado la V2 del reel", el: "2026-10-04T12:10:00", leido: true, href: "/workspace/collabs/glow/contenidos/glow-reel" },
   { id: "n3", tipo: "cobro", titulo: "Cobro vencido: Botánica Lab", descripcion: "Factura 2026-014 · 760 € para ti", el: "2026-10-03T09:00:00", leido: true, href: "/workspace/collabs/cobros?registro=botanica-verano-p1" },
