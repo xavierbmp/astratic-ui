@@ -1007,6 +1007,11 @@ export const EVENTOS_AVISO: { id: EventoAviso; label: string; descripcion: strin
 
 export type CanalAviso = "email" | "movil"
 
+/** Los avisos por email están apagados de momento (Xavier, 2026-10-16): por email solo salen los básicos
+ *  (invitación, contraseña, código de firma, borrar la cuenta). Lo que ya tenga guardado se conserva, pero
+ *  ni se enseña en Ajustes ni se manda. */
+export const AVISOS_POR_EMAIL = false
+
 export type PreferenciasAvisos = {
   eventos: Record<EventoAviso, Record<CanalAviso, boolean>>
   /** Un email por la mañana con lo del día, en vez de uno por cosa. */
