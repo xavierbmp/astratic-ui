@@ -8,7 +8,6 @@ import { SIN_VALOR } from "@/lib/vistas/core"
 import {
   ESTADOS_TAREA,
   GRUPOS_ESTADO_TAREA,
-  LISTA_TIPOS_TAREA,
   ORIGENES_TAREA,
   PRIORIDADES_TAREA,
   TIPOS_TAREA,
@@ -29,12 +28,14 @@ import {
   collabIdDe,
   conEstado,
   cuandoDe,
+  esTipoConCreadora,
   estaVencida,
   grupoDeEstado,
   marcaIdDe,
   nombreDeCampana,
   proyectoDe,
   proyectosPosibles,
+  tiposDe,
   type ContextoTareas,
   type CuandoTarea,
 } from "@/lib/influencer/tareas"
@@ -74,7 +75,7 @@ export function camposTarea({ ctx, etiquetas, hoy, tareas, propios = [] }: Param
     { id: "esSubtarea", label: "Es subtarea", tipo: "booleano", grupo: "Tarea", valor: (t) => !!t.padreId },
   ]
   campos.push(
-    { id: "tipo", label: "Tipo", tipo: "select", grupo: "De qué es", opciones: LISTA_TIPOS_TAREA.map((t) => ({ value: t, label: TIPOS_TAREA[t] })), valor: (t) => t.donde.tipo },
+    { id: "tipo", label: "Tipo", tipo: "select", grupo: "De qué es", opciones: tiposDe(ctx).map((t) => ({ value: t, label: TIPOS_TAREA[t] })), valor: (t) => t.donde.tipo },
     {
       id: "campana",
       label: "Campaña",
@@ -194,6 +195,8 @@ export function asignarCampo(t: Tarea, a: Asignacion, ref: { hoy: string; ahora:
       const [clase, id] = a.valor.split(":")
       if (clase === "collab") return asignarCampo(t, { campo: "campana", valor: id }, ref)
       if (clase === "propuesta" || clase === "marca" || clase === "contacto") return { ...t, donde: { tipo: "crm", registro: { tipo: clase, id } } }
+      // Una influencer del admin: sigue en su tipo si ya la llevaba; si no, pasa a Influencers.
+      if (clase === "creadora") return { ...t, donde: { tipo: esTipoConCreadora(t.donde.tipo) ? t.donde.tipo : "influencers", creadoraId: id } }
       return null
     }
     default: {

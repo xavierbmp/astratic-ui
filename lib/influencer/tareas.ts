@@ -4,7 +4,9 @@ import {
   ESTADOS_TAREA,
   FRECUENCIAS_TAREA,
   PRIORIDADES_TAREA,
+  TIPOS_CON_CREADORA,
   TIPOS_TAREA,
+  TIPOS_TAREA_WORKSPACE,
   type Collab,
   type Contacto,
   type DiaDelMes,
@@ -18,6 +20,7 @@ import {
   type RegistroTarea,
   type Repeticion,
   type Tarea,
+  type TipoConCreadora,
   type TipoTarea,
 } from "@/lib/influencer/modelo"
 import { diaDeLaSemana, diasEntre, lunesDe, soloFecha, sumarDias, tramoDeFecha } from "@/lib/filtros/fechas"
@@ -316,7 +319,29 @@ export function siguienteRepeticion(t: Tarea, hoy: string, id: string): Tarea | 
 
 // ───────────────────────── Tipo y de qué es ─────────────────────────
 
-export type ContextoTareas = { collabs: Collab[]; propuestas: Propuesta[]; marcas: Marca[]; contactos: Contacto[] }
+/** Una influencer de la base del admin de la red, a la que puede ir una tarea del admin. */
+export type CreadoraTarea = { id: string; nombre: string }
+
+/**
+ * Lo que necesitan las tareas para nombrar de qué es cada una. `tipos` son los que ofrece este sitio (sin
+ * él, los del workspace) y `creadoras`, las influencers de la base del admin de la red.
+ */
+export type ContextoTareas = { collabs: Collab[]; propuestas: Propuesta[]; marcas: Marca[]; contactos: Contacto[]; tipos?: TipoTarea[]; creadoras?: CreadoraTarea[] }
+
+/** Los tipos que se eligen en este sitio. */
+export const tiposDe = (ctx: ContextoTareas): TipoTarea[] => ctx.tipos ?? TIPOS_TAREA_WORKSPACE
+
+export const esTipoConCreadora = (tipo: TipoTarea): tipo is TipoConCreadora => TIPOS_CON_CREADORA.some((t) => t === tipo)
+
+/** La influencer de una tarea del admin, si es de una. */
+export function creadoraIdDe(donde: DondeTarea): string | undefined {
+  return donde.tipo === "influencers" || donde.tipo === "outreach" || donde.tipo === "auditorias" ? donde.creadoraId : undefined
+}
+
+export function creadoraDe(donde: DondeTarea, ctx: ContextoTareas): CreadoraTarea | undefined {
+  const id = creadoraIdDe(donde)
+  return id ? ctx.creadoras?.find((c) => c.id === id) : undefined
+}
 
 /** Una tarea nueva, sin decir otra cosa, no tiene tipo: es general. */
 export const SIN_TIPO: DondeTarea = { tipo: "sin-tipo" }
@@ -372,13 +397,16 @@ export function nombreDeCampana(c: Collab, ctx: ContextoTareas) {
 export function proyectoDe(donde: DondeTarea, ctx: ContextoTareas): { id: string; label: string } | undefined {
   const collab = collabDe(donde, ctx)
   if (collab) return { id: `collab:${collab.id}`, label: nombreDeCampana(collab, ctx) }
+  const creadora = creadoraDe(donde, ctx)
+  if (creadora) return { id: `creadora:${creadora.id}`, label: creadora.nombre }
   const r = registroDe(donde, ctx)
   return r ? { id: `${r.tipo}:${r.id}`, label: r.nombre } : undefined
 }
 
-/** Todos los proyectos posibles: las campañas y las fichas del CRM, para los filtros. */
+/** Todos los proyectos posibles: las campañas, las fichas del CRM y las influencers del admin, para los filtros. */
 export function proyectosPosibles(ctx: ContextoTareas): { id: string; label: string; grupo: string }[] {
   return [
+    ...(ctx.creadoras ?? []).map((c) => ({ id: `creadora:${c.id}`, label: c.nombre, grupo: "Influencers" })),
     ...ctx.collabs.map((c) => ({ id: `collab:${c.id}`, label: nombreDeCampana(c, ctx), grupo: "Campañas" })),
     ...registrosPosibles(ctx).map((r) => ({ id: `${r.tipo}:${r.id}`, label: r.label, grupo: r.grupo })),
   ]
@@ -406,6 +434,8 @@ export function textoDonde(donde: DondeTarea, ctx: ContextoTareas): string {
   if (collab) return `${ctx.marcas.find((m) => m.id === collab.marcaId)?.nombre ?? collab.campana} · ${tipo}`
   const registro = registroDe(donde, ctx)
   if (registro) return `${registro.tipo === "propuesta" ? registro.nombre.split(" · ")[0] : registro.nombre} · ${tipo}`
+  const creadora = creadoraDe(donde, ctx)
+  if (creadora) return `${creadora.nombre} · ${tipo}`
   return donde.tipo === "sin-tipo" ? "" : tipo
 }
 
@@ -423,6 +453,10 @@ const HREF_TIPO: Record<TipoTarea, string | undefined> = {
   collabs: "/workspace/collabs",
   contenidos: "/workspace/contenidos",
   cobros: "/workspace/collabs/cobros",
+  influencers: "/admin/influencers",
+  outreach: "/admin/outreach",
+  auditorias: "/admin/auditorias",
+  usuarios: "/admin/usuarios",
 }
 
 /** Donde se trabaja la tarea: la campaña (su pieza o su facturación), la ficha del CRM o la página de su tipo. */
@@ -433,11 +467,14 @@ export function hrefDonde(donde: DondeTarea): string | undefined {
     const ruta = { propuesta: "/workspace/crm", marca: "/workspace/crm/marcas", contacto: "/workspace/crm/contactos" }[donde.registro.tipo]
     return `${ruta}?registro=${donde.registro.id}`
   }
+  // La ficha de la influencer lleva todo lo suyo (outreach y auditoría incluidos).
+  const creadoraId = creadoraIdDe(donde)
+  if (creadoraId) return `/admin/influencers?registro=${creadoraId}`
   return HREF_TIPO[donde.tipo]
 }
 
 /** Para las listas de cada página: las tareas de un tipo, de una campaña, de una pieza o de una ficha del CRM. */
-export type FiltroDonde = { tipo?: TipoTarea; collabId?: string; piezaId?: string; registro?: RegistroTarea }
+export type FiltroDonde = { tipo?: TipoTarea; collabId?: string; piezaId?: string; registro?: RegistroTarea; creadoraId?: string }
 
 export function perteneceA(t: Tarea, f: FiltroDonde): boolean {
   const d = t.donde
@@ -445,6 +482,7 @@ export function perteneceA(t: Tarea, f: FiltroDonde): boolean {
   if (f.collabId && collabIdDe(d) !== f.collabId) return false
   if (f.piezaId && (d.tipo !== "collabs" || d.piezaId !== f.piezaId)) return false
   if (f.registro && (d.tipo !== "crm" || d.registro?.tipo !== f.registro.tipo || d.registro.id !== f.registro.id)) return false
+  if (f.creadoraId && creadoraIdDe(d) !== f.creadoraId) return false
   return true
 }
 
@@ -453,13 +491,15 @@ export function tareasDe(tareas: Tarea[], f: FiltroDonde) {
 }
 
 /**
- * El mismo sitio con otro tipo: la campaña pasa de Collabs a Cobros (y al revés); lo demás no tiene
- * sentido en el tipo nuevo y se quita.
+ * El mismo sitio con otro tipo: la campaña pasa de Collabs a Cobros (y al revés) y la influencer, entre
+ * los tipos del admin que la llevan; lo demás no tiene sentido en el tipo nuevo y se quita.
  */
 export function cambiarTipo(donde: DondeTarea, tipo: TipoTarea): DondeTarea {
   if (donde.tipo === tipo) return donde
   const collabId = collabIdDe(donde)
   if (tipo === "collabs" || tipo === "cobros") return collabId ? { tipo, collabId } : { tipo }
+  const creadoraId = creadoraIdDe(donde)
+  if (esTipoConCreadora(tipo)) return creadoraId ? { tipo, creadoraId } : { tipo }
   return { tipo }
 }
 
@@ -495,7 +535,17 @@ const ICONO_DE_REGLA: Record<string, IconoTarea> = {
   "serie-marca-brief": "brief",
 }
 
-export const ICONO_DE_TIPO: Record<TipoTarea, IconoTarea> = { "sin-tipo": "general", crm: "crm", collabs: "collabs", contenidos: "contenido", cobros: "cobros" }
+export const ICONO_DE_TIPO: Record<TipoTarea, IconoTarea> = {
+  "sin-tipo": "general",
+  crm: "crm",
+  collabs: "collabs",
+  contenidos: "contenido",
+  cobros: "cobros",
+  influencers: "influencers",
+  outreach: "outreach",
+  auditorias: "auditorias",
+  usuarios: "usuarios",
+}
 
 /** El que lleva si ella no elige otro: el de la automatización que la creó o, si no, el de su tipo. */
 export function iconoDeSerie(t: Pick<Tarea, "donde" | "clave">): IconoTarea {

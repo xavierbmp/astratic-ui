@@ -6,7 +6,7 @@ import { CopyIcon, EllipsisIcon, ExternalLinkIcon, PlusIcon, Trash2Icon } from "
 import { cn } from "cn"
 import { fmt } from "@/lib/format"
 import { ESTADOS_TAREA, ORIGENES_TAREA, PRIORIDADES_TAREA, type CampoTarea, type EstadoTarea, type EtiquetaTarea, type PrioridadTarea, type Tarea } from "@/lib/influencer/modelo"
-import { conEstado, diaDeTarea, estaCerrada, migasDonde, type ContextoTareas } from "@/lib/influencer/tareas"
+import { conEstado, diaDeTarea, estaCerrada, migasDonde, tiposDe, type ContextoTareas } from "@/lib/influencer/tareas"
 import { soloFecha } from "@/lib/influencer/fechas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -111,7 +111,7 @@ export function TareaDetalle({
       <Campos>
         <DetailFields>
           <DetailField label="Tipo">
-            <SelectorTipo variant="inline" value={tarea.donde} onChange={(donde) => guardar({ donde })} />
+            <SelectorTipo variant="inline" value={tarea.donde} tipos={tiposDe(ctx)} onChange={(donde) => guardar({ donde })} />
           </DetailField>
           {deQue && (
             <DetailField label={deQue}>

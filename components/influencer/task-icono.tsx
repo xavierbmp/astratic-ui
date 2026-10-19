@@ -3,6 +3,10 @@
 import * as React from "react"
 import {
   AlarmClockIcon,
+  ClipboardCheckIcon,
+  ContactRoundIcon,
+  MegaphoneIcon,
+  UserCogIcon,
   CameraIcon,
   ChartLineIcon,
   CircleDotIcon,
@@ -62,10 +66,24 @@ export const ICONOS_TAREA_INFO: Record<IconoTarea, { icono: LucideIcon; label: s
   viaje: { icono: PlaneIcon, label: "Viaje" },
   estrella: { icono: StarIcon, label: "Importante" },
   alarma: { icono: AlarmClockIcon, label: "Recordatorio" },
+  influencers: { icono: ContactRoundIcon, label: "Influencers" },
+  outreach: { icono: MegaphoneIcon, label: "Outreach" },
+  auditorias: { icono: ClipboardCheckIcon, label: "Auditorías" },
+  usuarios: { icono: UserCogIcon, label: "Usuarios" },
 }
 
 /** El tinte de cada página, para reconocer de un vistazo de dónde es una tarea (por tipo de cosa, nunca por estado). */
-export const TINTE_DE_TIPO: Record<TipoTarea, Tint | null> = { "sin-tipo": null, crm: "lavender", collabs: "rose", contenidos: "peach", cobros: "mint" }
+export const TINTE_DE_TIPO: Record<TipoTarea, Tint | null> = {
+  "sin-tipo": null,
+  crm: "lavender",
+  collabs: "rose",
+  contenidos: "peach",
+  cobros: "mint",
+  influencers: "lavender",
+  outreach: "sky",
+  auditorias: "peach",
+  usuarios: "mint",
+}
 
 /** El icono de una tarea en su cuadradito, del tinte de su página. */
 export function IconoDeTarea({ tarea, className }: { tarea: Pick<Tarea, "donde" | "clave" | "icono">; className?: string }) {

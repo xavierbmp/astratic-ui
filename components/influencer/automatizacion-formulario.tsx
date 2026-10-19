@@ -5,7 +5,7 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { FilePlus2Icon, ListTodoIcon, Trash2Icon, ZapIcon } from "lucide-react"
-import { LISTA_TIPOS_TAREA, PRIORIDADES_TAREA, TIPOS_TAREA, type PrioridadTarea, type TipoTarea } from "@/lib/influencer/modelo"
+import { LISTA_TIPOS_TAREA, PRIORIDADES_TAREA, TIPOS_TAREA, TIPOS_TAREA_WORKSPACE, type PrioridadTarea, type TipoTarea } from "@/lib/influencer/modelo"
 import {
   EVENTOS,
   FECHAS_BASE,
@@ -96,7 +96,7 @@ function aRegla(v: Valores, r: Automatizacion): Automatizacion {
 }
 
 const OPCIONES_PRIORIDAD = PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label, icono: <PrioridadIcono prioridad={p.id} /> }))
-const OPCIONES_PAGINA = LISTA_TIPOS_TAREA.map((t) => ({ value: t, label: t === "sin-tipo" ? "Solo en Tareas" : TIPOS_TAREA[t] }))
+const OPCIONES_PAGINA = TIPOS_TAREA_WORKSPACE.map((t) => ({ value: t, label: t === "sin-tipo" ? "Solo en Tareas" : TIPOS_TAREA[t] }))
 const OPCIONES_SENTIDO = [
   { value: "despues", label: "después de" },
   { value: "antes", label: "antes de" },

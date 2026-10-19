@@ -6,8 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { CircleDashedIcon, ListTodoIcon } from "lucide-react"
 import { cn } from "cn"
-import { LISTA_TIPOS_TAREA, PRIORIDADES_TAREA, TIPOS_TAREA, type DondeTarea, type EtiquetaTarea, type PlantillaTarea, type PrioridadTarea, type Repeticion, type Tarea } from "@/lib/influencer/modelo"
-import { SIN_TIPO, cambiarTipo, idNuevo, migasDonde, nuevaTarea, type ContextoTareas } from "@/lib/influencer/tareas"
+import { LISTA_TIPOS_TAREA, PRIORIDADES_TAREA, TIPOS_TAREA, type DondeTarea, type EtiquetaTarea, type PlantillaTarea, type PrioridadTarea, type Repeticion, type Tarea, type TipoTarea } from "@/lib/influencer/modelo"
+import { SIN_TIPO, cambiarTipo, idNuevo, migasDonde, nuevaTarea, tiposDe, type ContextoTareas } from "@/lib/influencer/tareas"
 import { lunesDe, sumarDias } from "@/lib/influencer/fechas"
 import { tintFor } from "@/lib/influencer/tints"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,7 @@ import { MultiSelect } from "@/components/app/multi-select"
 import { CampoFormulario, Formulario, FormularioCabecera, FormularioCuerpo, FormularioDialog, FormularioPie } from "@/components/app/formulario/formulario-dialog"
 import { SelectorBuscable } from "@/components/app/formulario/selector-buscable"
 import { CampoFecha } from "@/components/app/formulario/campo-fecha"
-import { claveDe, etiquetaDeQue, opcionesDeQue } from "@/components/influencer/task-tipo"
+import { buscarDe, claveDe, etiquetaDeQue, opcionesDeQue } from "@/components/influencer/task-tipo"
 import { ICONO_TIPO_TAREA, PrioridadIcono } from "@/components/influencer/task-cells"
 import { SelectorRepeticion } from "@/components/influencer/task-repeticion"
 import { EditorSubtareas } from "@/components/influencer/task-subtareas"
@@ -57,10 +57,11 @@ const notasATexto = (html?: string) =>
         .replace(/&amp;/g, "&")
     : ""
 
-const OPCIONES_TIPO = LISTA_TIPOS_TAREA.map((t) => {
-  const Icono = t === "sin-tipo" ? CircleDashedIcon : ICONO_TIPO_TAREA[t]
-  return { value: t, label: TIPOS_TAREA[t], icono: <Icono className="size-4 text-muted-foreground" /> }
-})
+const opcionesDeTipo = (tipos: TipoTarea[]) =>
+  tipos.map((t) => {
+    const Icono = t === "sin-tipo" ? CircleDashedIcon : ICONO_TIPO_TAREA[t]
+    return { value: t, label: TIPOS_TAREA[t], icono: <Icono className="size-4 text-muted-foreground" /> }
+  })
 const OPCIONES_PRIORIDAD = PRIORIDADES_TAREA.map((p) => ({ value: p.id, label: p.label, icono: <PrioridadIcono prioridad={p.id} /> }))
 /** Los selectores que son un botón, con la cara de los demás campos del formulario (40 px, sin relleno). */
 const CONTROL_BOTON = "h-10 rounded-md bg-transparent font-normal hover:bg-muted/50 dark:bg-input/30"
@@ -160,6 +161,7 @@ export function TaskDialog({
   ]
   const etiquetaQue = etiquetaDeQue(donde.tipo)
   const opcionesQue = etiquetaQue ? opcionesDeQue(donde.tipo, ctx) : []
+  const opcionesTipo = opcionesDeTipo(tiposDe(ctx))
 
   return (
     <FormularioDialog open={open} onOpenChange={onOpenChange}>
@@ -185,7 +187,7 @@ export function TaskDialog({
               <CampoFormulario etiqueta="Tipo" htmlFor="tarea-tipo" ancho={etiquetaQue ? "mitad" : "completo"}>
                 <SelectorBuscable
                   id="tarea-tipo"
-                  opciones={OPCIONES_TIPO}
+                  opciones={opcionesTipo}
                   valor={donde.tipo}
                   onChange={(v) => {
                     const tipo = esTipo(v)
@@ -205,7 +207,7 @@ export function TaskDialog({
                       const elegida = opcionesQue.find((o) => o.clave === clave)
                       if (elegida) setValue("donde", elegida.donde)
                     }}
-                    placeholder={donde.tipo === "crm" ? "Busca una propuesta, marca o contacto" : "Busca una campaña o una marca"}
+                    placeholder={buscarDe(donde.tipo)}
                     vacio="Nada se llama así"
                   />
                 </CampoFormulario>

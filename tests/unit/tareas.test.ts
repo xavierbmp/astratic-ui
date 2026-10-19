@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
-import type { CampoTarea, Tarea } from "@/lib/influencer/modelo"
+import { TIPOS_TAREA_RED, TIPOS_TAREA_WORKSPACE, type CampoTarea, type Tarea } from "@/lib/influencer/modelo"
 import { asignarCampo, camposTarea } from "@/lib/influencer/campos-tareas"
-import { cambiarTipo, cuandoDe, iconoDeTarea, pasaFiltroRapido, migasDonde, nuevaTarea, ordenarHoy, perteneceA, siguienteFecha, siguienteRepeticion, tareasDeHoy, textoDonde, describirRepeticion, describirDiaDelMes } from "@/lib/influencer/tareas"
+import { cambiarTipo, cuandoDe, iconoDeTarea, pasaFiltroRapido, migasDonde, nuevaTarea, ordenarHoy, perteneceA, siguienteFecha, siguienteRepeticion, tareasDeHoy, textoDonde, tiposDe, describirRepeticion, describirDiaDelMes } from "@/lib/influencer/tareas"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
 import { demoContactos, demoMarcas, demoPropuestas, demoTareas, demoEtiquetasTarea } from "@/lib/influencer/demo-data"
 import { SIN_VALOR, agruparFilas } from "@/lib/vistas/core"
@@ -174,5 +174,30 @@ describe("filtro rápido e icono", () => {
     expect(iconoDeTarea(t({ donde: { tipo: "collabs" }, clave: "serie-marca-feedback:v-12" }))).toBe("feedback")
     expect(iconoDeTarea(t({ donde: { tipo: "collabs" }, clave: "serie-marca-feedback:v-12", icono: "estrella" }))).toBe("estrella")
     expect(iconoDeTarea(t({ clave: "regla-propia:x" }))).toBe("general")
+  })
+})
+
+describe("tareas del admin de la red", () => {
+  const ctxRed = { collabs: [], propuestas: [], marcas: [], contactos: [], tipos: TIPOS_TAREA_RED, creadoras: [{ id: "c1", nombre: "Lucía Ferrer" }] }
+  it("cada sitio ofrece sus tipos: el workspace los suyos de serie y el admin los de la red", () => {
+    expect(tiposDe(ctx)).toEqual(TIPOS_TAREA_WORKSPACE)
+    expect(tiposDe(ctxRed)).toEqual(TIPOS_TAREA_RED)
+    const tipo = camposTarea({ ctx: ctxRed, etiquetas: [], hoy: HOY, tareas: [] }).find((c) => c.id === "tipo")
+    expect(tipo?.opciones?.map((o) => o.value)).toEqual(TIPOS_TAREA_RED)
+  })
+  it("una tarea de una influencer se nombra, enlaza y filtra por ella", () => {
+    const donde = { tipo: "outreach" as const, creadoraId: "c1" }
+    expect(textoDonde(donde, ctxRed)).toBe("Lucía Ferrer · Outreach")
+    expect(migasDonde(donde, ctxRed)).toEqual([
+      { label: "Outreach", href: "/admin/outreach" },
+      { label: "Lucía Ferrer", href: "/admin/influencers?registro=c1" },
+    ])
+    expect(perteneceA(t({ donde }), { creadoraId: "c1" })).toBe(true)
+    expect(perteneceA(t({ donde: { tipo: "usuarios" } }), { creadoraId: "c1" })).toBe(false)
+  })
+  it("la influencer se conserva entre los tipos que la llevan y se quita en los demás", () => {
+    expect(cambiarTipo({ tipo: "influencers", creadoraId: "c1" }, "auditorias")).toEqual({ tipo: "auditorias", creadoraId: "c1" })
+    expect(cambiarTipo({ tipo: "influencers", creadoraId: "c1" }, "usuarios")).toEqual({ tipo: "usuarios" })
+    expect(asignarCampo(t({ donde: { tipo: "sin-tipo" } }), { campo: "proyecto", valor: "creadora:c1" }, ref)?.donde).toEqual({ tipo: "influencers", creadoraId: "c1" })
   })
 })

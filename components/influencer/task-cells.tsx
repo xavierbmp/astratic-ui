@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { CheckIcon, ClapperboardIcon, KanbanSquareIcon, ListChecksIcon, ReceiptEuroIcon, RepeatIcon, SparklesIcon, XIcon } from "lucide-react"
+import { CheckIcon, ClapperboardIcon, ClipboardCheckIcon, ContactRoundIcon, KanbanSquareIcon, ListChecksIcon, MegaphoneIcon, ReceiptEuroIcon, RepeatIcon, SparklesIcon, UserCogIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { tintClass } from "@/lib/influencer/tints"
 import { ESTADOS_TAREA, PRIORIDADES_TAREA, type DondeTarea, type EtiquetaTarea, type PrioridadTarea, type Repeticion, type Tarea, type TipoTarea } from "@/lib/influencer/modelo"
@@ -93,6 +93,10 @@ export const ICONO_TIPO_TAREA: Record<Exclude<TipoTarea, "sin-tipo">, typeof Kan
   collabs: SparklesIcon,
   contenidos: ClapperboardIcon,
   cobros: ReceiptEuroIcon,
+  influencers: ContactRoundIcon,
+  outreach: MegaphoneIcon,
+  auditorias: ClipboardCheckIcon,
+  usuarios: UserCogIcon,
 }
 
 /**

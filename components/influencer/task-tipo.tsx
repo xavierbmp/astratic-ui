@@ -8,21 +8,44 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command"
 import { InlineField, inlineRestClass } from "@/components/app/inline-field"
-import { COLLABS_ACTIVAS, LISTA_TIPOS_TAREA, TIPOS_TAREA, type DondeTarea, type TipoTarea } from "@/lib/influencer/modelo"
-import { cambiarTipo, collabDe, nombreDeCampana, registroDe, registrosPosibles, type ContextoTareas } from "@/lib/influencer/tareas"
+import { COLLABS_ACTIVAS, TIPOS_TAREA, TIPOS_TAREA_WORKSPACE, type DondeTarea, type TipoTarea } from "@/lib/influencer/modelo"
+import { cambiarTipo, collabDe, creadoraDe, creadoraIdDe, esTipoConCreadora, nombreDeCampana, registroDe, registrosPosibles, type ContextoTareas } from "@/lib/influencer/tareas"
 
-/** Las tareas de Collabs y Cobros concretan una campaña; las del CRM, una ficha. Las de sin tipo, nada. */
+/**
+ * Las tareas de Collabs y Cobros concretan una campaña; las del CRM, una ficha; las de Influencers,
+ * Outreach y Auditorías del admin, una influencer. Las de sin tipo, nada.
+ */
 export function etiquetaDeQue(tipo: TipoTarea): string | null {
   if (tipo === "collabs" || tipo === "cobros") return "Campaña"
+  if (esTipoConCreadora(tipo)) return "Influencer"
   return tipo === "crm" ? "Ficha del CRM" : null
 }
 
+/** Lo que se dice cuando no es de ninguna. */
+const ningunaDe = (tipo: TipoTarea) => (tipo === "crm" ? "Sin ficha" : esTipoConCreadora(tipo) ? "Sin influencer" : "Sin campaña")
+
+const BUSCAR: Partial<Record<TipoTarea, string>> = { crm: "Busca una propuesta, una marca o un contacto…", collabs: "Busca una campaña o una marca…", cobros: "Busca una campaña o una marca…" }
+export const buscarDe = (tipo: TipoTarea) => BUSCAR[tipo] ?? "Busca una influencer…"
+
 /**
- * El tipo de una tarea: Sin tipo, CRM, Collabs o Cobros, las páginas en las que sale. Al cambiarlo,
- * la campaña se conserva entre Collabs y Cobros y lo demás se quita.
+ * El tipo de una tarea: las páginas en las que sale (Sin tipo, CRM, Collabs o Cobros en el workspace;
+ * los suyos con `tipos` en el admin de la red). Al cambiarlo, la campaña se conserva entre Collabs y
+ * Cobros, la influencer entre los tipos que la llevan, y lo demás se quita.
  */
-export function SelectorTipo({ value, onChange, id, variant = "outline" }: { value: DondeTarea; onChange: (d: DondeTarea) => void; id?: string; variant?: "outline" | "inline" }) {
-  const opciones = LISTA_TIPOS_TAREA.map((t) => ({ value: t, label: TIPOS_TAREA[t] }))
+export function SelectorTipo({
+  value,
+  onChange,
+  id,
+  variant = "outline",
+  tipos = TIPOS_TAREA_WORKSPACE,
+}: {
+  value: DondeTarea
+  onChange: (d: DondeTarea) => void
+  id?: string
+  variant?: "outline" | "inline"
+  tipos?: TipoTarea[]
+}) {
+  const opciones = tipos.map((t) => ({ value: t, label: TIPOS_TAREA[t] }))
   if (variant === "inline")
     return (
       <InlineField
@@ -30,7 +53,7 @@ export function SelectorTipo({ value, onChange, id, variant = "outline" }: { val
         tipo="select"
         required
         opciones={opciones}
-        onSave={async (v) => onChange(cambiarTipo(value, String(v) as TipoTarea))} // valor de LISTA_TIPOS_TAREA
+        onSave={async (v) => onChange(cambiarTipo(value, String(v) as TipoTarea))} // valor de `tipos`
         render={() => <span className={cn("text-sm", value.tipo === "sin-tipo" && "text-muted-foreground")}>{TIPOS_TAREA[value.tipo]}</span>}
       />
     )
@@ -71,7 +94,7 @@ function filtrar(valor: string, busqueda: string) {
     : 0
 }
 
-/** Las campañas (las que están en marcha primero) o las fichas del CRM, según el tipo. */
+/** Las campañas (las que están en marcha primero), las fichas del CRM o las influencers, según el tipo. */
 function gruposDe(tipo: TipoTarea, ctx: ContextoTareas): { titulo: string; opciones: Opcion[] }[] {
   if (tipo === "collabs" || tipo === "cobros") {
     const opcion = (c: (typeof ctx.collabs)[number]): Opcion => ({ clave: c.id, label: nombreDeCampana(c, ctx), donde: { tipo, collabId: c.id } })
@@ -87,6 +110,10 @@ function gruposDe(tipo: TipoTarea, ctx: ContextoTareas): { titulo: string; opcio
     for (const r of registrosPosibles(ctx)) grupos.set(r.grupo, [...(grupos.get(r.grupo) ?? []), { clave: `${r.tipo}:${r.id}`, label: r.label, donde: { tipo: "crm", registro: { tipo: r.tipo, id: r.id } } }])
     return [...grupos].map(([titulo, opciones]) => ({ titulo, opciones }))
   }
+  if (esTipoConCreadora(tipo)) {
+    const opciones = (ctx.creadoras ?? []).map((c): Opcion => ({ clave: c.id, label: c.nombre, donde: { tipo, creadoraId: c.id } }))
+    return opciones.length ? [{ titulo: "Influencers", opciones }] : []
+  }
   return []
 }
 
@@ -95,14 +122,14 @@ function gruposDe(tipo: TipoTarea, ctx: ContextoTareas): { titulo: string; opcio
  * campañas o las fichas con su grupo, para el selector del alta de una tarea.
  */
 export function opcionesDeQue(tipo: TipoTarea, ctx: ContextoTareas): { clave: string; label: string; grupo?: string; donde: DondeTarea }[] {
-  const ninguna = { clave: SIN, label: tipo === "crm" ? "Sin ficha" : "Sin campaña", donde: { tipo } }
+  const ninguna = { clave: SIN, label: ningunaDe(tipo), donde: { tipo } }
   return [ninguna, ...gruposDe(tipo, ctx).flatMap((g) => g.opciones.map((o) => ({ ...o, grupo: g.titulo })))]
 }
 
 export function claveDe(d: DondeTarea): string {
   if (d.tipo === "collabs" || d.tipo === "cobros") return d.collabId ?? SIN
   if (d.tipo === "crm") return d.registro ? `${d.registro.tipo}:${d.registro.id}` : SIN
-  return SIN
+  return creadoraIdDe(d) ?? SIN
 }
 
 /** «Lumea Skin · Rutina de noche», con la pieza si la tiene; «Sin campaña» si no es de ninguna. */
@@ -112,7 +139,7 @@ function textoDeQue(d: DondeTarea, ctx: ContextoTareas): string | null {
     const pieza = d.tipo === "collabs" && d.piezaId ? collab.piezas.find((p) => p.id === d.piezaId) : undefined
     return `${nombreDeCampana(collab, ctx)}${pieza ? ` › ${pieza.titulo}` : ""}`
   }
-  return registroDe(d, ctx)?.nombre ?? null
+  return registroDe(d, ctx)?.nombre ?? creadoraDe(d, ctx)?.nombre ?? null
 }
 
 /**
@@ -139,7 +166,7 @@ export function SelectorDeQue({
   const grupos = React.useMemo(() => gruposDe(value.tipo, ctx), [value.tipo, ctx])
   const etiqueta = etiquetaDeQue(value.tipo)
   if (!etiqueta) return null
-  const ninguna = value.tipo === "crm" ? "Sin ficha" : "Sin campaña"
+  const ninguna = ningunaDe(value.tipo)
   const actual = claveDe(value)
   const texto = textoDeQue(value, ctx)
   const elegir = (d: DondeTarea) => {
@@ -162,7 +189,7 @@ export function SelectorDeQue({
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[min(92vw,24rem)] p-0">
         <Command filter={filtrar}>
-          <CommandInput placeholder={value.tipo === "crm" ? "Busca una propuesta, una marca o un contacto…" : "Busca una campaña o una marca…"} />
+          <CommandInput placeholder={buscarDe(value.tipo)} />
           <CommandList className="max-h-72">
             <CommandEmpty>Nada coincide</CommandEmpty>
             <CommandGroup>

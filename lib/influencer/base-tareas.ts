@@ -8,9 +8,9 @@ import { opcionesDeEstados, textoLimpio, type ColorOpcion, type DefCampo, type T
 import { vistaNueva, type VistaDeSerie } from "@/lib/base/vistas"
 import { soloFecha } from "@/lib/influencer/fechas"
 import { asignarCampo, conValor, idCampoPropio } from "@/lib/influencer/campos-tareas"
-import { CUANDO_TAREA, collabIdDe, cuandoDe, estaVencida, marcaIdDe, nombreDeCampana, proyectoDe, proyectosPosibles, type ContextoTareas } from "@/lib/influencer/tareas"
+import { CUANDO_TAREA, collabIdDe, cuandoDe, estaVencida, marcaIdDe, nombreDeCampana, proyectoDe, proyectosPosibles, tiposDe, type ContextoTareas } from "@/lib/influencer/tareas"
 import { opcionesDeMarcas } from "@/lib/influencer/base-contactos"
-import { ESTADOS_TAREA, LISTA_TIPOS_TAREA, ORIGENES_TAREA, PRIORIDADES_TAREA, TIPOS_TAREA, type CampoTarea, type EtiquetaTarea, type PrioridadTarea, type Tarea, type TipoCampoTarea } from "@/lib/influencer/modelo"
+import { ESTADOS_TAREA, ORIGENES_TAREA, PRIORIDADES_TAREA, TIPOS_TAREA, type CampoTarea, type EtiquetaTarea, type PrioridadTarea, type Tarea, type TipoCampoTarea } from "@/lib/influencer/modelo"
 
 const COLOR_PRIORIDAD: Record<PrioridadTarea, ColorOpcion> = { urgente: "rojo", alta: "naranja", normal: "gris", baja: "azul" }
 const TIPO_PROPIO: Record<TipoCampoTarea, TipoCampo> = { texto: "texto", url: "url", numero: "numero", fecha: "fecha", select: "select", multiselect: "multiselect", casilla: "casilla" }
@@ -32,7 +32,7 @@ export function camposBaseTareas({ ctx, etiquetas, hoy, tareas, propios }: Param
     { id: "cuando", nombre: "Cuándo", tipo: "select", obligatorio: true, opciones: CUANDO_TAREA.map((c) => ({ id: c.id, label: c.label, color: c.id === "vencidas" ? "rojo" : c.id === "hoy" ? "verde" : "gris" })), grupo: "Fechas", descripcion: "Sale de su fecha. Al moverla a «Hoy» o «Mañana» le pone ese día.", valor: (t) => cuandoDe(t, dia) },
     { id: "fecha", nombre: "Fecha", tipo: "fecha", grupo: "Fechas", valor: (t) => (t.fecha ? soloFecha(t.fecha) : null) },
     { id: "prioridad", nombre: "Prioridad", tipo: "select", obligatorio: true, opciones: PRIORIDADES_TAREA.map((p) => ({ id: p.id, label: p.label, color: COLOR_PRIORIDAD[p.id] })), grupo: "Tarea", valor: (t) => t.prioridad },
-    { id: "tipo", nombre: "Tipo", tipo: "select", obligatorio: true, opciones: LISTA_TIPOS_TAREA.map((t) => ({ id: t, label: TIPOS_TAREA[t] })), grupo: "De qué es", valor: (t) => t.donde.tipo },
+    { id: "tipo", nombre: "Tipo", tipo: "select", obligatorio: true, opciones: tiposDe(ctx).map((t) => ({ id: t, label: TIPOS_TAREA[t] })), grupo: "De qué es", valor: (t) => t.donde.tipo },
     { id: "proyecto", nombre: "De qué es", tipo: "select", opciones: proyectosPosibles(ctx).map((p) => ({ id: p.id, label: p.label })), grupo: "De qué es", valor: (t) => proyectoDe(t.donde, ctx)?.id ?? null },
     { id: "etiquetas", nombre: "Etiquetas", tipo: "multiselect", opciones: etiquetas.map((e) => ({ id: e.id, label: e.nombre })), grupo: "Tarea", valor: (t) => t.etiquetas },
     { id: "fechaLimite", nombre: "Fecha límite", tipo: "fecha", grupo: "Fechas", valor: (t) => t.fechaLimite ?? null },

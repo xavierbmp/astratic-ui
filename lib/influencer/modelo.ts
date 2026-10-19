@@ -772,13 +772,31 @@ export type PlantillaGuion = { id: string; nombre: string; descripcion: string; 
 // ───────────────────────── Tareas ─────────────────────────
 
 /**
- * El tipo de una tarea es la página del workspace en la que sale, además de en Tareas. Sin tipo es
- * una tarea general: solo sale en Tareas y en el Inicio. Lo que se hace lo dice el título.
+ * El tipo de una tarea es la página en la que sale, además de en Tareas. Sin tipo es una tarea
+ * general: solo sale en Tareas y en el Inicio. Lo que se hace lo dice el título. El workspace de una
+ * influencer y el admin de la red tienen sus páginas y cada uno ofrece sus tipos (`ContextoTareas.tipos`).
  */
-export type TipoTarea = "sin-tipo" | "crm" | "collabs" | "contenidos" | "cobros"
+export type TipoTarea = "sin-tipo" | "crm" | "collabs" | "contenidos" | "cobros" | "influencers" | "outreach" | "auditorias" | "usuarios"
 
-export const TIPOS_TAREA: Record<TipoTarea, string> = { "sin-tipo": "Sin tipo", crm: "CRM", collabs: "Collabs", contenidos: "Contenido", cobros: "Cobros" }
+export const TIPOS_TAREA: Record<TipoTarea, string> = {
+  "sin-tipo": "Sin tipo",
+  crm: "CRM",
+  collabs: "Collabs",
+  contenidos: "Contenido",
+  cobros: "Cobros",
+  influencers: "Influencers",
+  outreach: "Outreach",
+  auditorias: "Auditorías",
+  usuarios: "Usuarios",
+}
 export const LISTA_TIPOS_TAREA = Object.keys(TIPOS_TAREA) as TipoTarea[]
+/** Los del workspace de una influencer (los de serie). */
+export const TIPOS_TAREA_WORKSPACE: TipoTarea[] = ["sin-tipo", "crm", "collabs", "contenidos", "cobros"]
+/** Los del admin de la red, donde Astratic trabaja la base de influencers. */
+export const TIPOS_TAREA_RED: TipoTarea[] = ["sin-tipo", "influencers", "outreach", "auditorias", "usuarios"]
+/** Los tipos del admin que concretan una influencer de la base. */
+export const TIPOS_CON_CREADORA = ["influencers", "outreach", "auditorias"] as const
+export type TipoConCreadora = (typeof TIPOS_CON_CREADORA)[number]
 
 /**
  * Los iconos que puede llevar una tarea (Xavier, 2026-10-16). De serie, el de la automatización que la
@@ -809,6 +827,10 @@ export const ICONOS_TAREA = [
   "viaje",
   "estrella",
   "alarma",
+  "influencers",
+  "outreach",
+  "auditorias",
+  "usuarios",
 ] as const
 export type IconoTarea = (typeof ICONOS_TAREA)[number]
 
@@ -817,8 +839,8 @@ export type RegistroTarea = { tipo: "propuesta" | "marca" | "contacto"; id: stri
 
 /**
  * De qué es una tarea: su tipo y, dentro, lo que concreta. En Collabs y Cobros, la campaña (y, si
- * nace de un contenido, su pieza); en el CRM, la propuesta, la marca o el contacto. Lo de dentro es
- * opcional: una tarea de Cobros puede no ser de ninguna campaña.
+ * nace de un contenido, su pieza); en el CRM, la propuesta, la marca o el contacto; en el admin de la
+ * red, la influencer. Lo de dentro es opcional: una tarea de Cobros puede no ser de ninguna campaña.
  */
 export type DondeTarea =
   | { tipo: "sin-tipo" }
@@ -826,6 +848,8 @@ export type DondeTarea =
   | { tipo: "contenidos" }
   | { tipo: "cobros"; collabId?: string }
   | { tipo: "crm"; registro?: RegistroTarea }
+  | { tipo: TipoConCreadora; creadoraId?: string }
+  | { tipo: "usuarios" }
 
 export type EstadoTarea = "por-hacer" | "en-curso" | "esperando" | "hecha" | "cancelada"
 
