@@ -74,7 +74,7 @@ export const demoCapitulosBiblia: CapituloBiblia[] = [
     actualizadoEl: "2026-10-01",
     secciones: [
       { titulo: "Tus tarifas", bloques: [parrafo("En Perfil y tarifas tienes tu precio de salida y tu mínimo por formato, pactados con Astratic. El de salida es lo que pides de entrada. El mínimo es lo más bajo que aceptas, y el portal te avisa si una propuesta se queda por debajo.")] },
-      { titulo: "El CPM", bloques: [parrafo("Es lo que paga la marca por cada mil visualizaciones. Un reel de 600 € con 20.000 visualizaciones de media sale a 30 € de CPM. En la pestaña Tarifas ves el de cada formato al lado del CPM de referencia de tu tramo, y así sabes si estás cara o barata.")] },
+      { titulo: "El CPM", bloques: [parrafo("Es lo que paga la marca por cada mil visualizaciones. Un reel de 600 € con 20.000 visualizaciones de media sale a 30 € de CPM. En la pestaña Tarifas ves el de cada formato al lado de lo que paga el mercado con tus cifras, y así sabes si estás cara o barata.")] },
       {
         titulo: "Lo que se cobra aparte",
         bloques: [
@@ -200,7 +200,7 @@ export const demoCapitulosBiblia: CapituloBiblia[] = [
     secciones: [
       { titulo: "Cómo funciona", bloques: [parrafo("Astratic presenta perfiles de la red a marcas. Cuando una te elige, la collab entra en tu workspace como «De la red». Astratic factura a la marca y tú le facturas a Astratic tu 80 %.")] },
       { titulo: "Tus marcas siguen siendo tuyas", bloques: [parrafo("Las marcas que traes tú quedan registradas a tu nombre durante 12 meses, y lo ves en la ficha de cada una en el CRM. Además, no hay exclusiva. Puedes trabajar con quien quieras, también fuera de la red.")] },
-      { titulo: "La auditoría", bloques: [parrafo("Cada pocos meses Astratic revisa tu perfil, te pone un tramo y un CPM de referencia y te deja una lista de mejoras. La tienes en Perfil y tarifas, y cada mejora se marca al hacerla."), consejo("Si tus cifras cambian mucho, pide que te adelanten la auditoría. Con un tramo nuevo se revisan tus tarifas."), enlace("Ver tu auditoría", "/workspace/perfil/auditoria")] },
+      { titulo: "La auditoría", bloques: [parrafo("Cada pocos meses Astratic revisa tu perfil, calcula lo que vale tu reel en el mercado y a qué CPM, y te deja una lista de mejoras. La tienes en Perfil y tarifas, y cada mejora se marca al hacerla."), consejo("Si tus cifras cambian mucho, pide que te adelanten la auditoría. Con cifras nuevas se revisan tus tarifas."), enlace("Ver tu auditoría", "/workspace/perfil/auditoria")] },
     ],
   },
 ]
