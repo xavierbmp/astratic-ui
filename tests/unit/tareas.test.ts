@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import type { CampoTarea, Tarea } from "@/lib/influencer/modelo"
 import { asignarCampo, camposTarea } from "@/lib/influencer/campos-tareas"
-import { cambiarTipo, cuandoDe, etiquetasEnUso, iconoDeTarea, pasaFiltroRapido, migasDonde, nuevaTarea, ordenarHoy, perteneceA, siguienteFecha, siguienteRepeticion, tareasDeHoy, textoDonde, describirRepeticion, describirDiaDelMes } from "@/lib/influencer/tareas"
+import { cambiarTipo, cuandoDe, iconoDeTarea, pasaFiltroRapido, migasDonde, nuevaTarea, ordenarHoy, perteneceA, siguienteFecha, siguienteRepeticion, tareasDeHoy, textoDonde, describirRepeticion, describirDiaDelMes } from "@/lib/influencer/tareas"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
 import { demoContactos, demoMarcas, demoPropuestas, demoTareas, demoEtiquetasTarea } from "@/lib/influencer/demo-data"
 import { SIN_VALOR, agruparFilas } from "@/lib/vistas/core"
@@ -163,16 +163,11 @@ describe("los campos de tareas agrupan bien la demo", () => {
 })
 
 describe("filtro rápido e icono", () => {
-  it("recorta por página y, dentro, por cualquiera de las etiquetas elegidas", () => {
-    const crm = t({ donde: { tipo: "crm" }, etiquetas: ["a"] })
-    expect(pasaFiltroRapido(crm, { tipo: "todas", etiquetas: [] })).toBe(true)
-    expect(pasaFiltroRapido(crm, { tipo: "collabs", etiquetas: [] })).toBe(false)
-    expect(pasaFiltroRapido(crm, { tipo: "crm", etiquetas: ["b", "a"] })).toBe(true)
-    expect(pasaFiltroRapido(crm, { tipo: "crm", etiquetas: ["b"] })).toBe(false)
-  })
-  it("las etiquetas en uso de un tipo, solo de las abiertas y de la más usada a la menos", () => {
-    const lista = [t({ donde: { tipo: "crm" }, etiquetas: ["a", "b"] }), t({ donde: { tipo: "crm" }, etiquetas: ["b"] }), t({ donde: { tipo: "crm" }, etiquetas: ["c"], estado: "hecha" }), t({ etiquetas: ["d"] })]
-    expect(etiquetasEnUso(lista, "crm")).toEqual([{ id: "b", n: 2 }, { id: "a", n: 1 }])
+  it("recorta por la página de la que es", () => {
+    const crm = t({ donde: { tipo: "crm" } })
+    expect(pasaFiltroRapido(crm, { tipo: "todas" })).toBe(true)
+    expect(pasaFiltroRapido(crm, { tipo: "collabs" })).toBe(false)
+    expect(pasaFiltroRapido(crm, { tipo: "crm" })).toBe(true)
   })
   it("el icono: el elegido, si no el de su automatización y si no el de su tipo", () => {
     expect(iconoDeTarea(t({ donde: { tipo: "collabs" } }))).toBe("collabs")

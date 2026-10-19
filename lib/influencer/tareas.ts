@@ -467,26 +467,15 @@ export function cambiarTipo(donde: DondeTarea, tipo: TipoTarea): DondeTarea {
 
 /**
  * El filtro rápido de arriba de la página de Tareas (Xavier, 2026-10-16): de qué página son (todas, o
- * solo las generales, las del CRM, las de Collabs…) y, dentro, sus etiquetas (cualquiera de las
- * elegidas). Recorta Hoy y la base a la vez.
+ * solo las generales, las del CRM, las de Collabs…). Recorta Hoy y la base a la vez. Sin etiquetas
+ * desde el 2026-10-19 (reporte cmvcm86w): esas se filtran en la base.
  */
-export type FiltroRapidoTareas = { tipo: TipoTarea | "todas"; etiquetas: string[] }
+export type FiltroRapidoTareas = { tipo: TipoTarea | "todas" }
 
-export const SIN_FILTRO_RAPIDO: FiltroRapidoTareas = { tipo: "todas", etiquetas: [] }
+export const SIN_FILTRO_RAPIDO: FiltroRapidoTareas = { tipo: "todas" }
 
-export function pasaFiltroRapido(t: Pick<Tarea, "donde" | "etiquetas">, f: FiltroRapidoTareas): boolean {
-  if (f.tipo !== "todas" && t.donde.tipo !== f.tipo) return false
-  return f.etiquetas.length === 0 || f.etiquetas.some((id) => t.etiquetas.includes(id))
-}
-
-/** Las etiquetas que llevan las tareas abiertas de un tipo, de la más usada a la menos, con cuántas. */
-export function etiquetasEnUso(tareas: Tarea[], tipo: FiltroRapidoTareas["tipo"]): { id: string; n: number }[] {
-  const cuenta = new Map<string, number>()
-  for (const t of tareas) {
-    if (estaCerrada(t) || (tipo !== "todas" && t.donde.tipo !== tipo)) continue
-    for (const id of t.etiquetas) cuenta.set(id, (cuenta.get(id) ?? 0) + 1)
-  }
-  return [...cuenta].map(([id, n]) => ({ id, n })).sort((a, b) => b.n - a.n)
+export function pasaFiltroRapido(t: Pick<Tarea, "donde">, f: FiltroRapidoTareas): boolean {
+  return f.tipo === "todas" || t.donde.tipo === f.tipo
 }
 
 /** El icono de serie según la automatización que la creó (la regla va antes de «:» en su `clave`). */
