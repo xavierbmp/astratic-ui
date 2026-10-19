@@ -551,6 +551,22 @@ export type Material = {
   descripcion?: string
 }
 
+/**
+ * Un material suyo que no es de ninguna collab (su logo, fotos, su media kit…), en sus carpetas o suelto: el bloque
+ * «Mis materiales» de Collabs › Materiales (Xavier, 2026-10-17, reporte cmvcq0lc). Sus carpetas son `Carpeta`.
+ */
+export type MaterialPropio = {
+  id: string
+  carpetaId?: string
+  nombre: string
+  tipo: TipoMaterial
+  tamano?: number
+  url: string
+  previewUrl?: string
+  subidoEl: string
+  descripcion?: string
+}
+
 // ───────────────────────── Facturación ─────────────────────────
 
 /** Cómo factura: como autónoma, con una sociedad o aún sin darse de alta. */
