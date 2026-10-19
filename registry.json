@@ -676,6 +676,7 @@
         { "path": "components/influencer/task-card.tsx", "type": "registry:component" },
         { "path": "components/influencer/profile-panel.tsx", "type": "registry:component" },
         { "path": "components/influencer/notice-card.tsx", "type": "registry:component" },
+        { "path": "components/influencer/panel-avisos.tsx", "type": "registry:component" },
         { "path": "components/influencer/mobile-tab-bar.tsx", "type": "registry:component" },
         { "path": "components/influencer/brand-mark.tsx", "type": "registry:component" },
         { "path": "components/influencer/task-table.tsx", "type": "registry:component" },

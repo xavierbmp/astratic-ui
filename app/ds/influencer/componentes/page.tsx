@@ -195,7 +195,7 @@ export default function InfluencerComponentesPage() {
         />
       </DocSection>
 
-      <DocSection id="notice" title="Avisos" lead="El que más importa va en una tarjeta blanca con el logotipo de Astratic, su acción y, a la derecha, tarjetas en abanico (la campaña con su imagen, lo que se pide, las fechas); los demás, en lista, con el punto y la negrita si no están leídos.">
+      <DocSection id="notice" title="Avisos" lead="El que más importa va en una tarjeta blanca con el logotipo de Astratic, su acción y, a la derecha, tarjetas en abanico (la campaña con su imagen, lo que se pide, las fechas); los demás, en el desplegable de la campana (`PanelAvisos`: sin leer y todos, marcar todo como leído y el engranaje) o en lista, con el punto y la negrita si no están leídos.">
         <Example className={EXAMPLE} code={`<NoticeHighlight
   eyebrow="Red Astratic" title="Nueva oportunidad de la red: Nuura"
   description="1 reel + 3 stories · 880 € para ti"
