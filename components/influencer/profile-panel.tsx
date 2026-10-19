@@ -222,10 +222,11 @@ export function ProfileTile({
       </span>
       {tint && trend?.cambio !== undefined ? (
         <CambioPie valor={trend.cambio} />
+      ) : tint && engagement !== undefined && engagement > 0 ? (
+        <span className="-mt-1.5 text-[11px] text-muted-foreground">{pct(engagement)} de interacción</span>
       ) : (
-        tint &&
-        engagement !== undefined &&
-        engagement > 0 && <span className="-mt-1.5 text-[11px] text-muted-foreground">{pct(engagement)} de interacción</span>
+        // Sin pie, su línea se guarda igual: así la cifra queda a la misma altura que en las fichas de al lado (reporte cmvdz7jg).
+        tint && <span aria-hidden className="invisible -mt-1.5 text-[11px]">&nbsp;</span>
       )}
       <Slot.Slottable>{children}</Slot.Slottable>
     </Comp>
