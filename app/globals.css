@@ -365,6 +365,30 @@
   .theme-influencer :is([data-slot="ws-block"], [data-slot="ws-stat-tile"], [data-slot="ws-profile"], [data-slot="ws-notice-highlight"], [data-slot="ws-cifras-cabecera"]) {
     animation: ws-aparecer 0.35s cubic-bezier(0.25, 0.1, 0.25, 1) backwards;
   }
+  /* El aviso destacado: su punto verde late y la tarjeta del producto y la cifra suben a su sitio, la cifra después. */
+  [data-slot="ws-notice-pulso"] {
+    animation: ws-pulso 1.6s ease-out infinite;
+  }
+  [data-slot="ws-notice-flotante"] {
+    animation: ws-flotar 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+  [data-slot="ws-notice-flotante"] + [data-slot="ws-notice-flotante"] {
+    animation-delay: 80ms;
+  }
+}
+@keyframes ws-pulso {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--success) 50%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+@keyframes ws-flotar {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
 }
 
 @layer base {
