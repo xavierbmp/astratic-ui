@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import { toast } from "sonner"
-import { ArrowLeftIcon, ArrowRightIcon, FileSpreadsheetIcon, TriangleAlertIcon } from "lucide-react"
-import type { DefCampo, ValorCampo } from "@/lib/base/campos"
-import { MAXIMO_FILAS_IMPORTAR, camposImportables, filasParaImportar, leerCsv, limpiarTabla, sugerirMapeo, type Tabla } from "@/lib/base/importar"
+import { ArrowLeftIcon, ArrowRightIcon, FileSpreadsheetIcon, PlusIcon, TriangleAlertIcon } from "lucide-react"
+import { TIPOS_CAMPO, type CampoPropio, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { CAMPO_NUEVO, MAXIMO_FILAS_IMPORTAR, camposImportables, camposNuevosDelMapeo, filasParaImportar, leerCsv, limpiarTabla, sugerirMapeo, type Tabla } from "@/lib/base/importar"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
@@ -39,7 +39,8 @@ async function leerArchivo(archivo: File): Promise<Tabla> {
  * Importar registros a una base desde un CSV o un Excel (o lo copiado de una hoja de cálculo): el archivo, después qué
  * columna va a qué campo (sugerido por su nombre) con un ejemplo de cada una, y cuántos registros salen. Cada celda se
  * lee como al pegarla en la cuadrícula; lo que no se puede leer se queda vacío y se avisa. Crear los registros es cosa
- * de la página (`onImportar`).
+ * de la página (`onImportar`). Con `crearCampos`, una columna que no va a ningún campo puede crear el suyo (con su
+ * nombre y el tipo que mejor lee lo que lleva): la página recibe esos campos nuevos para darlos de alta antes.
  */
 export function ImportarDialog<T>({
   open,
@@ -47,13 +48,16 @@ export function ImportarDialog<T>({
   campos,
   objeto,
   onImportar,
+  crearCampos,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
   campos: DefCampo<T>[]
   objeto: { singular: string; plural: string }
-  /** Crea un registro por fila con los valores de sus campos. */
-  onImportar: (filas: Record<string, ValorCampo>[]) => void
+  /** Crea un registro por fila con los valores de sus campos (por id), y antes los campos nuevos si los hay. */
+  onImportar: (filas: Record<string, ValorCampo>[], nuevos: CampoPropio[]) => void
+  /** Deja que una columna cree su propio campo. */
+  crearCampos?: boolean
 }) {
   const [tabla, setTabla] = React.useState<Tabla | null>(null)
   const [archivo, setArchivo] = React.useState("")
@@ -94,15 +98,18 @@ export function ImportarDialog<T>({
 
   const cabeceras = tabla ? (conCabecera ? tabla[0] : tabla[0].map((_, i) => `Columna ${i + 1}`)) : []
   const datos = tabla ? (conCabecera ? tabla.slice(1) : tabla) : []
-  const resultado = tabla ? filasParaImportar(tabla, mapeo, importables, conCabecera) : null
+  const conNuevos = tabla ? camposNuevosDelMapeo(tabla, mapeo, importables, conCabecera) : null
+  const resultado = tabla && conNuevos ? filasParaImportar(tabla, conNuevos.mapeo, conNuevos.campos, conCabecera) : null
   const n = resultado?.filas.length ?? 0
   const recortado = datos.length > MAXIMO_FILAS_IMPORTAR
 
   const importar = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!resultado || !n) return
-    onImportar(resultado.filas)
-    toast.success(`Se ${n === 1 ? "ha" : "han"} importado ${n} ${n === 1 ? objeto.singular : objeto.plural}`, { description: resultado.avisos.length ? `${resultado.avisos.length} celdas se han quedado vacías porque no se podían leer.` : undefined })
+    if (!resultado || !conNuevos || !n) return
+    onImportar(resultado.filas, conNuevos.nuevos)
+    const creados = conNuevos.nuevos.length
+    const avisos = [creados ? `${creados} ${creados === 1 ? "campo nuevo" : "campos nuevos"}.` : "", resultado.avisos.length ? `${resultado.avisos.length} celdas se han quedado vacías porque no se podían leer.` : ""].filter(Boolean).join(" ")
+    toast.success(`Se ${n === 1 ? "ha" : "han"} importado ${n} ${n === 1 ? objeto.singular : objeto.plural}`, { description: avisos || undefined })
     cerrar(false)
   }
 
@@ -169,14 +176,24 @@ export function ImportarDialog<T>({
                           <span className="block truncate text-xs text-muted-foreground">{ejemplos.length ? ejemplos.join(" · ") : "Vacía"}</span>
                         </span>
                         <ArrowRightIcon className="size-4 text-muted-foreground" />
-                        <SelectorBuscable
-                          tamano="sm"
-                          aria-label={`Campo de la columna ${cabecera || i + 1}`}
-                          opciones={opciones.filter((o) => !o.value || o.value === mapeo[i] || !mapeo.includes(o.value))}
-                          valor={mapeo[i] ?? ""}
-                          onChange={(v) => setMapeo((m) => m.map((x, j) => (j === i ? v || null : x)))}
-                          placeholder="No importar"
-                        />
+                        <span className="min-w-0">
+                          <SelectorBuscable
+                            tamano="sm"
+                            aria-label={`Campo de la columna ${cabecera || i + 1}`}
+                            opciones={[
+                              ...opciones.filter((o) => !o.value || o.value === mapeo[i] || !mapeo.includes(o.value)),
+                              ...(crearCampos ? [{ value: CAMPO_NUEVO, label: `Campo nuevo «${cabecera || `Columna ${i + 1}`}»`, icono: <PlusIcon className="size-3.5 text-muted-foreground" /> }] : []),
+                            ]}
+                            valor={mapeo[i] ?? ""}
+                            onChange={(v) => setMapeo((m) => m.map((x, j) => (j === i ? v || null : x)))}
+                            placeholder="No importar"
+                          />
+                          {mapeo[i] === CAMPO_NUEVO && conNuevos && (
+                            <span className="mt-1 block truncate text-xs text-muted-foreground">
+                              Se crea como {TIPOS_CAMPO[conNuevos.nuevos.find((c) => c.id === conNuevos.mapeo[i])?.tipo ?? "texto"].label.toLowerCase()}
+                            </span>
+                          )}
+                        </span>
                       </li>
                     )
                   })}
