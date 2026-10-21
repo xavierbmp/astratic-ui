@@ -88,7 +88,7 @@ export type PropsConversacion<L extends string> = {
   /** Quien hace la pieza acepta o rechaza una sugerencia de cambio (una vez: decidida ya no se reabre). */
   onDecidir?: (notaId: string, decision: DecisionSugerencia) => void
   onResponder?: (notaId: string, texto: string) => void
-  /** Quien revisa borra una nota suya mientras la versión está abierta y nadie la ha resuelto (las sugerencias se retiran deshaciendo el cambio). */
+  /** Quien revisa borra una nota suya mientras la versión está abierta y nadie la ha resuelto ni contestado (las sugerencias se retiran deshaciendo el cambio). */
   onBorrar?: (notaId: string) => void
   /** Quien hace la pieza: un mensaje. Quien revisa: una nota, anclada si ha marcado un sitio. */
   onEnviar?: (texto: string, ancla?: Ancla) => void
@@ -225,7 +225,7 @@ export function Conversacion<L extends string>({ notas, mensajes, lado, ladoAuto
                           <CheckIcon /> {e.n.resuelta ? "Reabrir" : "Hecha"}
                         </Button>
                       )}
-                      {!esAutor && onBorrar && !cerrada && !e.n.resuelta && !e.n.sugerencia && (
+                      {!esAutor && onBorrar && !cerrada && !e.n.resuelta && !e.n.sugerencia && !e.n.respuestas.some((r) => r.lado === ladoAutor) && (
                         <Button variant="ghost" size="sm" className="h-7 text-muted-foreground hover:text-destructive" onClick={() => onBorrar(e.n.id)}>
                           <Trash2Icon /> Eliminar
                         </Button>
