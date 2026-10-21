@@ -623,7 +623,7 @@ export type MaterialPropio = {
 export type FormaFiscal = "autonoma" | "sociedad" | "sin-alta"
 
 export const FORMAS_FISCALES: Record<FormaFiscal, { label: string; descripcion: string }> = {
-  autonoma: { label: "Autónoma", descripcion: "Facturas con tu NIF, con IVA y retención de IRPF" },
+  autonoma: { label: "Autónomo", descripcion: "Facturas con tu NIF, con IVA y retención de IRPF" },
   sociedad: { label: "Sociedad", descripcion: "Facturas con el CIF de tu sociedad, sin retención" },
   "sin-alta": { label: "Aún sin dar de alta", descripcion: "Para cobrar collabs es necesario facturar. Astratic te asesora sobre las opciones" },
 }
