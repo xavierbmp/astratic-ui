@@ -5,8 +5,11 @@ import { ArrowUpRightIcon, CheckIcon, LayoutGridIcon, Undo2Icon } from "lucide-r
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu"
 import { StatusBadge } from "@/components/app/status-badge"
 
-/** Un portal de la casa o una página de este portal en el menú: el actual lleva la marca; uno que aún no existe, «Pronto». */
-export type PortalDestino = { id: string; nombre: string; descripcion: string; href: string; monograma: string; disponible?: boolean; actual?: boolean }
+/**
+ * Un portal de la casa o una página de este portal en el menú: el actual lleva la marca; uno que aún no existe,
+ * «Pronto». Con `alElegir`, al pulsarlo se hace eso en vez de seguir el enlace (abrir su propio workspace).
+ */
+export type PortalDestino = { id: string; nombre: string; descripcion: string; href: string; monograma: string; disponible?: boolean; actual?: boolean; alElegir?: () => void }
 
 /** Una cuenta a la que un administrador puede pasar (las suyas de administrador o las de prueba). */
 export type UsuarioCambiable = { id: string; nombre: string; email: string; actual?: boolean }
@@ -33,6 +36,7 @@ function ItemDestino({ p }: { p: PortalDestino }) {
         {contenido}
       </DropdownMenuItem>
     )
+  if (p.alElegir) return <DropdownMenuItem onSelect={p.alElegir}>{contenido}</DropdownMenuItem>
   return (
     <DropdownMenuItem asChild>
       {p.href.startsWith("/") ? <Link href={p.href}>{contenido}</Link> : <a href={p.href}>{contenido}</a>}
