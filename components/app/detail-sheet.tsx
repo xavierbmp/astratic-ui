@@ -144,8 +144,9 @@ export function DetailHeader({
   )
 }
 
+/** El cuerpo de la ficha. Unos campos sueltos, sin `DetailSection` alrededor, llevan el mismo aire que un bloque (reporte cmvi14e5: «salen pegados al límite»). */
 export function DetailBody({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("min-h-0 flex-1 overflow-y-auto", className)} {...props} />
+  return <div className={cn("min-h-0 flex-1 overflow-y-auto [&>[data-slot=detail-fields]]:px-4 [&>[data-slot=detail-fields]]:py-3", className)} {...props} />
 }
 
 /**
@@ -254,7 +255,7 @@ export function DetailFields({ children, columns = 1, className }: { children: R
   })
 
   return (
-    <div className={cn("flex flex-col gap-2", columns === 2 && "@container", className)}>
+    <div data-slot="detail-fields" className={cn("flex flex-col gap-2", columns === 2 && "@container", className)}>
       {filas.length > 0 && (
         <dl
           className={cn(
