@@ -688,7 +688,8 @@ export const ESTADOS_CONTRATO: Estado<EstadoContrato>[] = [
 ]
 
 /** Aceptación con registro: quién, cuándo y desde qué enlace. Es firma electrónica simple. */
-export type Firma = { lado: "influencer" | "marca"; nombre: string; el: string }
+/** Quién firmó y cuándo; `imagen`, su firma dibujada, escrita o subida (data URL), si la puso. */
+export type Firma = { lado: "influencer" | "marca"; nombre: string; el: string; imagen?: string }
 
 export type Contrato = {
   id: string
