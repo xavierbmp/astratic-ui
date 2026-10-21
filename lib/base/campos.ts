@@ -22,6 +22,7 @@ export type TipoCampo =
   | "email"
   | "telefono"
   | "calificacion"
+  | "progreso"
   | "vinculo"
 
 /** Los tipos que se pueden crear: el vínculo a otra base solo lo pone la página en sus campos de serie. */
@@ -42,6 +43,7 @@ export const TIPOS_CAMPO: Record<TipoCampo, { label: string; ayuda: string; filt
   moneda: { label: "Moneda", ayuda: "Un importe en euros.", filtro: "numero" },
   porcentaje: { label: "Porcentaje", ayuda: "Un tanto por ciento.", filtro: "numero" },
   calificacion: { label: "Calificación", ayuda: "De una a cinco estrellas.", filtro: "numero" },
+  progreso: { label: "Progreso", ayuda: "Cuánto lleva hecho, en una barra: de 0 al total que elijas (100 de serie, en %).", filtro: "numero" },
   vinculo: { label: "Registro vinculado", ayuda: "Un registro de otra base, que se abre con un clic (la marca de un contacto).", filtro: "select" },
 }
 
@@ -92,6 +94,15 @@ export type FormatoCampo = { decimales?: number; maximo?: number }
 export const DECIMALES_MAX = 4
 export const ESTRELLAS_POR_DEFECTO = 5
 export const ESTRELLAS_MAX = 10
+/** Un progreso sin total se lee en %; con total, «2 de 3». */
+export const PROGRESO_POR_DEFECTO = 100
+
+/** Lo que se ve de un progreso: «40 %» o «2 de 3», y cuánto de la barra se llena (de 0 a 1). */
+export function lecturaProgreso(valor: number, maximo = PROGRESO_POR_DEFECTO): { texto: string; parte: number } {
+  const total = maximo > 0 ? maximo : PROGRESO_POR_DEFECTO
+  const n = Math.max(0, Math.min(total, valor))
+  return { texto: total === PROGRESO_POR_DEFECTO ? `${Math.round(n)} %` : `${Math.round(n)} de ${total}`, parte: n / total }
+}
 
 /** El valor de un campo en una fila. Las fechas van como día ISO (AAAA-MM-DD); las listas, por id de opción. */
 export type ValorCampo = string | number | boolean | string[] | null
@@ -206,6 +217,8 @@ export function textoDeValor<T>(campo: Pick<DefCampo<T>, "tipo" | "opciones" | "
       return typeof valor === "number" ? `${formatoNumero(campo.formato?.decimales).format(valor)} %` : String(valor)
     case "calificacion":
       return typeof valor === "number" && valor > 0 ? "★".repeat(Math.round(valor)) : ""
+    case "progreso":
+      return typeof valor === "number" ? lecturaProgreso(valor, campo.formato?.maximo).texto : String(valor)
     case "fecha": {
       const dia = String(valor).slice(0, 10)
       return /^\d{4}-\d{2}-\d{2}$/.test(dia) ? formatoDia.format(new Date(`${dia}T12:00:00`)).replace(/\./g, "") : String(valor)
@@ -286,6 +299,14 @@ export function valorDeTexto<T>(campo: Pick<DefCampo<T>, "tipo" | "opciones" | "
       const maximo = campo.formato?.maximo ?? ESTRELLAS_POR_DEFECTO
       if (estrellas === null) return mal("No es una calificación")
       return ok(Math.max(0, Math.min(maximo, Math.round(estrellas))))
+    }
+    case "progreso": {
+      // «40 %», «40», «2 de 3» o «2/3» (sobre el total del campo).
+      const maximo = campo.formato?.maximo ?? PROGRESO_POR_DEFECTO
+      const fraccion = /^(\d+(?:[.,]\d+)?)\s*(?:de|\/)\s*(\d+(?:[.,]\d+)?)$/i.exec(t)
+      const n = fraccion ? (leerNumero(fraccion[1]) ?? 0) * (maximo / (leerNumero(fraccion[2]) || maximo)) : leerNumero(t)
+      if (n === null) return mal("No es un progreso")
+      return ok(Math.max(0, Math.min(maximo, n)))
     }
     case "casilla":
       return ok(["checked", "true", "sí", "si", "x", "1", "yes", "✓"].includes(t.toLowerCase()))

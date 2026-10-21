@@ -14,6 +14,7 @@ import {
   ESTRELLAS_MAX,
   ESTRELLAS_POR_DEFECTO,
   LISTA_TIPOS_CAMPO,
+  PROGRESO_POR_DEFECTO,
   TIPOS_CAMPO,
   TIPOS_CON_OPCIONES,
   colorPorDefecto,
@@ -30,7 +31,7 @@ import { SelectorColor } from "@/components/app/base/menu-color"
 /** Los tipos entre los que se puede cambiar un campo ya creado sin tocar sus valores. */
 const FAMILIAS: TipoCampoPropio[][] = [
   ["texto", "texto_largo", "email", "url", "telefono"],
-  ["numero", "moneda", "porcentaje", "calificacion"],
+  ["numero", "moneda", "porcentaje", "calificacion", "progreso"],
 ]
 const tiposPosibles = (tipo: TipoCampoPropio) => FAMILIAS.find((f) => f.includes(tipo)) ?? [tipo]
 
@@ -144,6 +145,12 @@ export function EditorCampo({
               ))}
             </SelectContent>
           </Select>
+        </div>
+      )}
+      {tipo === "progreso" && (
+        <div className="flex items-center justify-between gap-2">
+          <span>Total</span>
+          <Input type="number" min={1} className="h-8 w-24" value={formato.maximo ?? PROGRESO_POR_DEFECTO} onChange={(e) => setFormato({ maximo: Math.max(1, Math.round(Number(e.target.value)) || PROGRESO_POR_DEFECTO) })} aria-label="Total del progreso" />
         </div>
       )}
       {tipo === "calificacion" && (

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { CheckIcon, StarIcon } from "lucide-react"
 import { cn } from "cn"
-import { ESTRELLAS_POR_DEFECTO, opcionDe, textoDeValor, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { ESTRELLAS_POR_DEFECTO, lecturaProgreso, opcionDe, textoDeValor, type DefCampo, type ValorCampo } from "@/lib/base/campos"
 import { ALTURAS_FILA, type AlturaFila } from "@/lib/base/vistas"
 import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
 
@@ -84,6 +84,18 @@ export function ValorCelda<T>({
               <StarIcon className="size-3.5" fill="currentColor" strokeWidth={0} />
             </button>
           ))}
+        </span>
+      )
+    }
+    case "progreso": {
+      if (typeof valor !== "number") return null
+      const { texto, parte } = lecturaProgreso(valor, campo.formato?.maximo)
+      return (
+        <span className="flex w-full min-w-0 items-center gap-2" title={texto}>
+          <span className="h-1.5 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
+            <span className={cn("block h-full rounded-full", parte >= 1 ? "bg-success" : "bg-brand")} style={{ width: `${parte * 100}%` }} />
+          </span>
+          <span className="flex-none text-xs text-muted-foreground tabular-nums">{texto}</span>
         </span>
       )
     }

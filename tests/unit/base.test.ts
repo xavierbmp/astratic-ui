@@ -57,6 +57,12 @@ describe("valores de los campos", () => {
     expect(valorDeTexto({ tipo: "email" }, "no-es-email").ok).toBe(false)
     expect(valorDeTexto({ tipo: "casilla" }, "checked")).toEqual({ ok: true, valor: true })
     expect(valorDeTexto({ tipo: "calificacion", formato: { maximo: 5 } }, "★★★")).toEqual({ ok: true, valor: 3 })
+    expect(valorDeTexto({ tipo: "progreso" }, "40 %")).toEqual({ ok: true, valor: 40 })
+    expect(valorDeTexto({ tipo: "progreso", formato: { maximo: 3 } }, "2 de 3")).toEqual({ ok: true, valor: 2 })
+    expect(valorDeTexto({ tipo: "progreso" }, "1/4")).toEqual({ ok: true, valor: 25 })
+    expect(valorDeTexto({ tipo: "progreso", formato: { maximo: 3 } }, "9")).toEqual({ ok: true, valor: 3 })
+    expect(textoDeValor({ tipo: "progreso", formato: { maximo: 3 } }, 1)).toBe("1 de 3")
+    expect(textoDeValor({ tipo: "progreso" }, 40)).toBe("40 %")
   })
 })
 

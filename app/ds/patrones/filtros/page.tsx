@@ -31,7 +31,7 @@ export default function FiltrosPage() {
           columns={["Tipo", "Operadores"]}
           rows={[
             ["Texto, email, URL, teléfono", "contiene · no contiene · es · no es · está vacío · no está vacío"],
-            ["Número, moneda, porcentaje, calificación", "= · ≠ · < · > · ≤ · ≥ · está vacío · no está vacío"],
+            ["Número, moneda, porcentaje, calificación, progreso", "= · ≠ · < · > · ≤ · ≥ · está vacío · no está vacío"],
             ["Fecha", "es · está dentro de · es antes de · es después de · es el mismo día o antes · es el mismo día o después · no es · vacíos. El valor puede ser un día o relativo: hoy, mañana, ayer, hace N días, dentro de N días, la semana pasada, los últimos N días…"],
             ["Selección única y vínculo", "es · no es · es cualquiera de · no es ninguno de · vacíos"],
             ["Selección múltiple", "tiene cualquiera de · tiene todos los · es exactamente · no tiene ninguno de · vacíos"],

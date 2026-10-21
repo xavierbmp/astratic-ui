@@ -67,7 +67,7 @@ function EditorTexto<T>({ campo, valor, inicial, onGuardar, onCancelar, error }:
     hecho.current = true
     onGuardar(lectura.valor, salida)
   }
-  const numero = campo.tipo === "numero" || campo.tipo === "moneda" || campo.tipo === "porcentaje" || campo.tipo === "calificacion"
+  const numero = campo.tipo === "numero" || campo.tipo === "moneda" || campo.tipo === "porcentaje" || campo.tipo === "calificacion" || campo.tipo === "progreso"
   return (
     <input
       autoFocus

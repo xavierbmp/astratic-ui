@@ -10,6 +10,7 @@ import {
   CircleDotIcon,
   Columns3Icon,
   EuroIcon,
+  GaugeIcon,
   GlobeIcon,
   HashIcon,
   LayoutGridIcon,
@@ -45,6 +46,7 @@ export const ICONO_TIPO: Record<TipoCampo, LucideIcon> = {
   moneda: EuroIcon,
   porcentaje: PercentIcon,
   calificacion: StarIcon,
+  progreso: GaugeIcon,
   vinculo: Link2Icon,
 }
 

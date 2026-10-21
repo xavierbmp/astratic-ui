@@ -275,7 +275,7 @@ function Control<T>({
         <Input
           id={id}
           type={campo.tipo === "email" ? "email" : campo.tipo === "url" ? "url" : campo.tipo === "telefono" ? "tel" : "text"}
-          inputMode={campo.tipo === "numero" ? "decimal" : undefined}
+          inputMode={campo.tipo === "numero" || campo.tipo === "progreso" ? "decimal" : undefined}
           placeholder={campo.tipo === "url" ? "https://" : undefined}
           value={textoActual}
           onChange={(e) => onTexto(e.target.value)}

@@ -86,7 +86,7 @@ export default function BaseDeDatosPage() {
         <CodeBlock code={CAMPO} lang="ts" />
         <Rules
           items={[
-            <>Tipos que se crean: texto, texto largo, número, moneda, porcentaje, fecha, selección única y múltiple, casilla, URL, email, teléfono y calificación. Nada de fórmulas, adjuntos ni búsquedas.</>,
+            <>Tipos que se crean: texto, texto largo, número, moneda, porcentaje, fecha, selección única y múltiple, casilla, URL, email, teléfono, calificación y progreso (una barra de 0 a su total: «40 %» o «2 de 3»). Nada de fórmulas, adjuntos ni búsquedas.</>,
             <>
               <strong>Registro vinculado</strong> (<code>vinculo</code>): otro registro (la marca de un contacto). Se ve como ficha con sus iniciales, se elige
               de una lista con buscador y al pulsarlo abre su ficha (<code>onAbrirVinculo</code>). Solo lo ponen las páginas en sus campos de serie.
