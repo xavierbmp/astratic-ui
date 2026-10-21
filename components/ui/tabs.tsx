@@ -18,8 +18,11 @@ export const navTabsListClass =
 export const navTabClass =
   "relative inline-flex flex-none items-center justify-center gap-2 rounded-t-md px-4 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset disabled:pointer-events-none disabled:opacity-50 data-active:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-foreground after:opacity-0 after:transition-opacity data-active:after:opacity-100"
 
+/** La caja gris del control segmentado. */
+export const segmentedListClass = "inline-flex w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground"
+
 /** Control segmentado: para elegir un valor o filtrar dentro de un bloque (Mes · Trimestre · Año, Email · Llamadas). */
-const segmentedTabClass =
+export const segmentedTabClass =
   "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-active:bg-background data-active:text-foreground data-active:shadow-sm dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground"
 
 function Tabs({
@@ -43,8 +46,7 @@ function Tabs({
 const tabsListVariants = cva("group/tabs-list", {
   variants: {
     variant: {
-      default:
-        "inline-flex w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground group-data-horizontal/tabs:h-8 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
+      default: cn(segmentedListClass, "group-data-horizontal/tabs:h-8 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col"),
       // Navegación: cambia de página dentro de una ficha, un diálogo o un bloque. Igual que PageTabs.
       line: navTabsListClass,
     },

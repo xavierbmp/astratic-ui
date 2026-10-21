@@ -100,12 +100,15 @@ export function AppShell({
   const [extra, setExtra] = React.useState<Crumb[]>([])
   const [paletteOpen, setPaletteOpen] = React.useState(false)
 
+  // El módulo activo: el de la ruta más larga que contiene a `pathname`, contando también sus subpáginas, que
+  // pueden vivir en otra ruta (una página que agrupa módulos que ya existían, como el IRM del admin de la red).
   const current = React.useMemo(() => {
-    let best: { group: NavGroup; item: NavGroup["items"][number] } | null = null
+    let best: { group: NavGroup; item: NavGroup["items"][number]; largo: number } | null = null
+    const contiene = (href: string) => pathname === href || pathname.startsWith(href + "/")
     for (const g of nav) {
       for (const it of g.items) {
-        const match = pathname === it.href || pathname.startsWith(it.href + "/")
-        if (match && (!best || it.href.length > best.item.href.length)) best = { group: g, item: it }
+        const largo = Math.max(...[it.href, ...(it.tabs ?? []).map((t) => t.href)].map((h) => (contiene(h) ? h.length : -1)))
+        if (largo >= 0 && (!best || largo > best.largo)) best = { group: g, item: it, largo }
       }
     }
     return best

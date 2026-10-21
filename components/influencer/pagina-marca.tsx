@@ -25,7 +25,8 @@ export function PaginaMarca({
 }: {
   seccion: string
   marca: string
-  perfil: Perfil
+  /** Quién se la manda: la influencer o, en lo que manda Astratic (una propuesta de perfiles), Astratic. */
+  perfil: Pick<Perfil, "nombre" | "fotoUrl">
   pie?: React.ReactNode
   /** Botones de la cabecera junto al tema (la bombilla de sugerencias, solo para la gente de Astratic). */
   acciones?: React.ReactNode
