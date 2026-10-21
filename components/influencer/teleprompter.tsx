@@ -59,7 +59,7 @@ export function Teleprompter({ open, onOpenChange, titulo, guion }: { open: bool
     >
       <DialogContent onKeyDown={alTeclado} className="flex h-dvh w-screen max-w-none flex-col gap-0 rounded-none border-0 bg-foreground p-0 text-background sm:max-w-none">
         <DialogTitle className="sr-only">Teleprompter: {titulo}</DialogTitle>
-        <DialogDescription className="sr-only">Espacio para empezar o parar y flechas para la velocidad.</DialogDescription>
+        <DialogDescription className="sr-only">Espacio para iniciar o pausar. Flechas para ajustar la velocidad.</DialogDescription>
         <div ref={caja} className="relative min-h-0 flex-1 overflow-y-auto px-6 md:px-24">
           {/* La línea de lectura: lo que hay que decir ahora va a la altura de los ojos, cerca de la cámara. */}
           <div className="pointer-events-none sticky top-[28%] z-10 -mb-px h-px bg-background/30" aria-hidden />

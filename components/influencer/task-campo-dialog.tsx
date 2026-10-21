@@ -39,7 +39,7 @@ export function CampoTareaDialog({
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[420px]">
         <DialogHeader>
           <DialogTitle>{campo ? "Editar el campo" : "Nuevo campo"}</DialogTitle>
-          <DialogDescription>Sale en la ficha de todas las tareas y se puede usar para filtrar, ordenar, agrupar y como columna.</DialogDescription>
+          <DialogDescription>Se muestra en todas las tareas y se puede usar para filtrar, ordenar, agrupar y como columna.</DialogDescription>
         </DialogHeader>
         {/* El formulario se monta al abrir: arranca con los datos del campo, sin efectos que lo rellenen. */}
         <FormularioCampo key={campo?.id ?? "nuevo"} campo={campo} nombresUsados={nombresUsados} onGuardar={onGuardar} onBorrar={onBorrar} onCerrar={() => onOpenChange(false)} />
@@ -99,7 +99,7 @@ function FormularioCampo({
             ))}
           </SelectContent>
         </Select>
-        {campo && <p className="text-xs text-muted-foreground">El tipo no se cambia una vez creado.</p>}
+        {campo && <p className="text-xs text-muted-foreground">El tipo no se puede cambiar después.</p>}
       </Field>
       {conOpciones && (
         <div className="grid gap-1.5">

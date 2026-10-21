@@ -12,5 +12,5 @@ export function Agenda({ eventos, hoy, onSelect, className }: { eventos: Evento[
     const evento = eventos.find((e) => e.id === id)
     if (evento) onSelect?.(evento)
   }
-  return <AgendaBase eventos={eventos.map(eventoDeCalendario)} hoy={hoy} onSelect={onSelect && elegir} vacio={{ title: "Nada este mes", description: "Los hitos salen de las fechas de publicación de cada pieza." }} className={className} />
+  return <AgendaBase eventos={eventos.map(eventoDeCalendario)} hoy={hoy} onSelect={onSelect && elegir} vacio={{ title: "Nada este mes", description: "Los hitos se calculan a partir de las fechas de publicación." }} className={className} />
 }

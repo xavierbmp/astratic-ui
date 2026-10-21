@@ -152,7 +152,7 @@ function BloqueDoc({ bloque, perfil, kit, marcasTrabajadas, logos }: { bloque: B
               </div>
             ))}
           </div>
-          {ver("redes.visualizaciones") && <DocText muted className="mt-2">Visualizaciones medias de las últimas publicaciones, sin contar las promocionadas.</DocText>}
+          {ver("redes.visualizaciones") && <DocText muted className="mt-2">Visualizaciones medias de las últimas publicaciones orgánicas.</DocText>}
         </DocSimpleSection>
       )
     }

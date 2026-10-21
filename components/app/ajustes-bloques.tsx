@@ -81,7 +81,7 @@ function FilaBloque({ bloque, abierto, onAbrir, onVisible }: { bloque: BloqueEnL
 }
 
 /** Qué se enseña de un bloque: un interruptor por dato (cada red, cada marca, cada campo…). */
-export function DatosBloque({ datos, visible, onCambiar, vacio = "Nada que elegir: sale de tus datos tal cual." }: { datos: DatoBloque[]; visible: (clave: string) => boolean; onCambiar: (clave: string, ver: boolean) => void; vacio?: string }) {
+export function DatosBloque({ datos, visible, onCambiar, vacio = "Sin opciones. Se muestra a partir de tus datos." }: { datos: DatoBloque[]; visible: (clave: string) => boolean; onCambiar: (clave: string, ver: boolean) => void; vacio?: string }) {
   if (!datos.length) return <p className="text-xs text-muted-foreground">{vacio}</p>
   return (
     <ul className="grid gap-1">

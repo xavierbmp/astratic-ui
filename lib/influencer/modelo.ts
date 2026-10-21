@@ -277,10 +277,10 @@ export type BorradorCollab = {
 export type TipoCollab = "directa" | "red" | "regalo" | "ugc"
 
 export const TIPOS_COLLAB: Record<TipoCollab, { label: string; descripcion: string }> = {
-  directa: { label: "Directa", descripcion: "La trae ella y factura ella" },
-  red: { label: "De la red", descripcion: "La vende Astratic: factura Astratic y ella cobra el 80 %" },
-  regalo: { label: "Regalo", descripcion: "Producto sin fee; si lo publica, también es publicidad" },
-  ugc: { label: "UGC", descripcion: "Entrega los archivos y no publica" },
+  directa: { label: "Directa", descripcion: "Collab propia, con facturación directa" },
+  red: { label: "De la red", descripcion: "Gestionada por Astratic, que factura a la marca. Recibes el 80 %" },
+  regalo: { label: "Regalo", descripcion: "Producto sin fee. Si se publica, se identifica como publicidad" },
+  ugc: { label: "UGC", descripcion: "Se entregan los archivos sin publicar" },
 }
 
 export type EstadoCollab = "por-empezar" | "en-curso" | "publicada" | "por-cobrar" | "cerrada" | "cancelada"
@@ -625,7 +625,7 @@ export type FormaFiscal = "autonoma" | "sociedad" | "sin-alta"
 export const FORMAS_FISCALES: Record<FormaFiscal, { label: string; descripcion: string }> = {
   autonoma: { label: "Autónoma", descripcion: "Facturas con tu NIF, con IVA y retención de IRPF" },
   sociedad: { label: "Sociedad", descripcion: "Facturas con el CIF de tu sociedad, sin retención" },
-  "sin-alta": { label: "Aún sin dar de alta", descripcion: "Para cobrar collabs hay que facturar: Astratic te cuenta las opciones" },
+  "sin-alta": { label: "Aún sin dar de alta", descripcion: "Para cobrar collabs es necesario facturar. Astratic te asesora sobre las opciones" },
 }
 
 /** Sus datos para facturar: salen en cada factura y en el contrato. */
@@ -1070,8 +1070,8 @@ export type DatosPersonales = {
 export type PlanAstratic = "red" | "representacion"
 
 export const PLANES_ASTRATIC: Record<PlanAstratic, { label: string; descripcion: string }> = {
-  red: { label: "Red Astratic", descripcion: "Llevas tus collabs con el workspace y Astratic te trae oportunidades de la red." },
-  representacion: { label: "Representación", descripcion: "Además, un gestor de Astratic lleva el trato con la marca en tus collabs." },
+  red: { label: "Red Astratic", descripcion: "Gestiona tus collabs en el workspace y recibe oportunidades de Astratic." },
+  representacion: { label: "Representación", descripcion: "Incluye un gestor de Astratic que se ocupa de la relación con la marca." },
 }
 
 /** Su acuerdo con Astratic: el plan, la mención en la bio y la versión de las condiciones que aceptó. */
@@ -1089,9 +1089,9 @@ export type EventoAviso = "cambios" | "aprobado" | "oportunidad" | "cobro" | "ta
 export const EVENTOS_AVISO: { id: EventoAviso; label: string; descripcion: string }[] = [
   { id: "cambios", label: "La marca pide cambios", descripcion: "En un guion, un vídeo o unas fotos" },
   { id: "aprobado", label: "La marca aprueba", descripcion: "Un guion o un contenido, listo para el siguiente paso" },
-  { id: "oportunidad", label: "Oportunidad de la red", descripcion: "Astratic te propone una collab" },
+  { id: "oportunidad", label: "Oportunidad de Astratic", descripcion: "Astratic te propone una collab" },
   { id: "cobro", label: "Cobros", descripcion: "Una factura vence o te la pagan" },
-  { id: "tareas", label: "Tareas del día", descripcion: "Lo que vence hoy y lo que se te ha pasado" },
+  { id: "tareas", label: "Tareas del día", descripcion: "Vencimientos de hoy y tareas atrasadas" },
   { id: "propuesta", label: "Propuestas sin respuesta", descripcion: "Una marca lleva días sin contestar" },
 ]
 
@@ -1260,7 +1260,7 @@ export const BLOQUES_MEDIA_KIT: Record<BloqueMediaKit, { label: string; descripc
   redes: { label: "Mis redes", descripcion: "Cada cuenta con sus números" },
   audiencia: { label: "Audiencia", descripcion: "Género, edades y países" },
   destacados: { label: "Contenidos destacados", descripcion: "Tus tres mejores publicaciones" },
-  marcas: { label: "Marcas con las que he trabajado", descripcion: "Salen solas de tus collabs" },
+  marcas: { label: "Marcas con las que he trabajado", descripcion: "Se completan a partir de tus collabs" },
   tarifas: { label: "Tarifas", descripcion: "Precio de salida por formato" },
   presupuesto: { label: "Presupuesto", descripcion: "Tus tarifas ajustadas, un pack y un descuento" },
   contacto: { label: "Contacto", descripcion: "Cómo escribirte" },

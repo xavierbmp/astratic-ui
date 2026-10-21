@@ -17,7 +17,7 @@ export function CapturaIdea({
   className,
 }: {
   onApuntar: (texto: string) => void
-  /** Apuntar con una captura del móvil. */
+  /** Añadir desde una captura del móvil. */
   onImagen?: (archivo: File) => void
   /** Empezar una nota en blanco. */
   onNota?: () => void
@@ -49,7 +49,7 @@ export function CapturaIdea({
         ref={campo}
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
-        placeholder="Apunta una idea o pega un enlace de Instagram, TikTok o YouTube…"
+        placeholder="Escribe una idea o pega un enlace de Instagram, TikTok o YouTube…"
         aria-label="Apuntar una idea"
         className="h-9 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
@@ -68,7 +68,7 @@ export function CapturaIdea({
               e.target.value = ""
             }}
           />
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Apuntar con una captura" title="Apuntar con una captura" onClick={() => archivo.current?.click()}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label="Añadir desde una captura" title="Añadir desde una captura" onClick={() => archivo.current?.click()}>
             <ImageIcon />
           </Button>
         </>

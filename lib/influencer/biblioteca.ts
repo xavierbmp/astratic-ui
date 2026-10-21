@@ -9,7 +9,7 @@ import { diasEntre, soloFecha } from "@/lib/influencer/fechas"
 /** A quién le toca mover la pieza: a ella, a la marca (está revisando) o a nadie (ya tiene resultados). */
 export type TurnoPieza = "ti" | "marca" | "nadie"
 
-export const TURNOS_PIEZA: Record<TurnoPieza, string> = { ti: "Te toca", marca: "Esperando a la marca", nadie: "Terminada" }
+export const TURNOS_PIEZA: Record<TurnoPieza, string> = { ti: "Pendiente", marca: "Esperando a la marca", nadie: "Terminada" }
 
 /** Los grupos de la vista de tarjetas, en el orden del trabajo. */
 export type GrupoBiblioteca = "te-toca" | "en-revision" | "listo" | "publicado"
@@ -123,9 +123,9 @@ export function recordatorioDeRevision({ filas, marcas, origen }: { filas: FilaP
 export type BandejaRevision = "feedback" | "en-revision" | "por-hacer"
 
 export const BANDEJAS_REVISION: { id: BandejaRevision; label: string; descripcion: string; vacio: string }[] = [
-  { id: "feedback", label: "Nuevo feedback", descripcion: "La marca ha comentado o pedido cambios y aún no lo has resuelto", vacio: "Ningún feedback pendiente" },
-  { id: "en-revision", label: "En revisión", descripcion: "Enviado a la marca, sin respuesta todavía", vacio: "Nada esperando a la marca" },
-  { id: "por-hacer", label: "Por hacer", descripcion: "Aún sin contenido enviado", vacio: "Nada por empezar" },
+  { id: "feedback", label: "Nuevo feedback", descripcion: "Comentarios o cambios de la marca pendientes", vacio: "Ningún feedback pendiente" },
+  { id: "en-revision", label: "En revisión", descripcion: "Enviado a la marca, pendiente de respuesta", vacio: "Sin envíos pendientes" },
+  { id: "por-hacer", label: "Por hacer", descripcion: "Sin contenido enviado", vacio: "Nada por empezar" },
 ]
 
 const notasAbiertas = (v: Version | null | undefined) => (v ? v.notas.filter((n) => !n.resuelta).length : 0)

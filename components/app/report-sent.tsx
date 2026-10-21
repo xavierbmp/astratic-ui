@@ -75,7 +75,7 @@ export function SentReports({ load }: { load: () => Promise<ReportItem[]> }) {
         className="py-8"
         icon={LightbulbIcon}
         title="Aún no has enviado nada"
-        description="Cuando envíes una sugerencia o un problema, aquí verás si está pendiente, en curso o resuelto."
+        description="Aquí aparecerá el estado de tus sugerencias y problemas."
       />
     )
   return (

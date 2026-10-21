@@ -34,7 +34,7 @@ const esquema = z.object({
   tipo: z.enum(["tarea", "registro"]),
   registro: z.enum(["collab", "contrato"]),
   titulo: z.string().trim().max(160, "Máximo 160 caracteres"),
-  dias: z.number({ error: "Escribe un número de días" }).int("Días enteros").min(0, "Pon 0 o más días").max(365, "Como mucho, un año"),
+  dias: z.number({ error: "Introduce un número de días" }).int("Días enteros").min(0, "Pon 0 o más días").max(365, "Como mucho, un año"),
   sentido: z.enum(["despues", "antes"]),
   desde: z.enum(["hoy", "inicio", "fin", "ultima-publicacion", "publicacion", "guion"]),
   prioridad: z.enum(["urgente", "alta", "normal", "baja"]),
@@ -138,7 +138,7 @@ export function AutomatizacionFormulario({ regla, bloque, nueva, onGuardar, onCa
 
   return (
     <>
-      <FormularioCabecera icono={ZapIcon} titulo={nueva ? "Nueva automatización" : "Automatización"} descripcion="Cuando pasa algo en este bloque, se crea sola una tarea o un registro." />
+      <FormularioCabecera icono={ZapIcon} titulo={nueva ? "Nueva automatización" : "Automatización"} descripcion="Crea una tarea o un registro automáticamente cuando ocurre un evento en este bloque." />
       <Formulario onSubmit={handleSubmit((v) => onGuardar(aRegla(v, regla)))}>
         <FormularioCuerpo>
           <CampoFormulario etiqueta="Cuando" htmlFor="auto-evento">
@@ -233,7 +233,7 @@ export function AutomatizacionFormulario({ regla, bloque, nueva, onGuardar, onCa
                       <Checkbox checked={field.value} onCheckedChange={(v) => field.onChange(v === true)} className="mt-0.5" />
                       <span>
                         <span className="block font-medium">Una tarea por versión, con cada comentario como subtarea</span>
-                        <span className="block text-xs text-muted-foreground">Si la marca sigue comentando, se añaden a la misma tarea; desde la v2, una tarea nueva.</span>
+                        <span className="block text-xs text-muted-foreground">Los comentarios nuevos se añaden a la misma tarea. Cada versión desde la v2 crea una tarea nueva.</span>
                       </span>
                     </label>
                   )}
@@ -253,7 +253,7 @@ export function AutomatizacionFormulario({ regla, bloque, nueva, onGuardar, onCa
               <CampoFormulario etiqueta="Prioridad" htmlFor="auto-prioridad" ancho="mitad">
                 <Controller control={control} name="prioridad" render={({ field }) => <SelectorBuscable id="auto-prioridad" opciones={OPCIONES_PRIORIDAD} valor={field.value} onChange={(v) => esPrioridad(v) && field.onChange(esPrioridad(v))} />} />
               </CampoFormulario>
-              <CampoFormulario etiqueta="Sale en" htmlFor="auto-pagina" ancho="mitad" ayuda="Además de en Tareas.">
+              <CampoFormulario etiqueta="Sale en" htmlFor="auto-pagina" ancho="mitad" ayuda="También aparece en Tareas.">
                 <Controller control={control} name="pagina" render={({ field }) => <SelectorBuscable id="auto-pagina" opciones={OPCIONES_PAGINA} valor={field.value} onChange={(v) => esTipo(v) && field.onChange(esTipo(v))} />} />
               </CampoFormulario>
 

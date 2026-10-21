@@ -139,7 +139,7 @@ export function AjustesCollabsFormulario({
 
   return (
     <>
-      {!enPagina && <FormularioCabecera icono={Settings2Icon} titulo="Ajustes de las collabs" descripcion="Lo que sale de serie al crear una collab. Todo se cambia después en cada una." migas={migas} onVolver={onVolver} />}
+      {!enPagina && <FormularioCabecera icono={Settings2Icon} titulo="Ajustes de las collabs" descripcion="Valores predeterminados de las collabs nuevas. Se pueden cambiar en cada collab." migas={migas} onVolver={onVolver} />}
       <Formulario
         onSubmit={(e) => {
           e.preventDefault()
@@ -155,14 +155,14 @@ export function AjustesCollabsFormulario({
         }}
       >
         <FormularioCuerpo>
-          <CampoFormulario etiqueta="Script" htmlFor="aj-dias" ayuda="Cuántos días antes de publicar va el script, de serie. Si ya no da tiempo, el entregable sale sin fecha de script y la pones tú.">
+          <CampoFormulario etiqueta="Script" htmlFor="aj-dias" ayuda="Días entre el script y la publicación. Si no hay margen suficiente, el entregable se crea sin fecha de script.">
             <div className="flex items-center gap-2 text-sm">
               <Input id="aj-dias" type="number" min={0} max={90} inputMode="numeric" value={a.diasGuion} onChange={(e) => cambiar({ diasGuion: Math.max(0, Math.round(Number(e.target.value) || 0)) })} className="h-10 w-24" />
               días antes de publicar
             </div>
           </CampoFormulario>
 
-          <CampoFormulario etiqueta="Formatos de pieza" ayuda="Los atajos para añadir piezas, en este orden. Arrastra para ordenarlos; la flecha cambia qué se entrega y dónde se publica.">
+          <CampoFormulario etiqueta="Formatos de pieza" ayuda="Atajos para añadir piezas, en este orden. Arrastra para reordenarlos.">
             <ListaOrdenable items={a.formatos} clave={(f) => f.id} onReordenar={(formatos) => cambiar({ formatos })} className="flex flex-col gap-1.5">
               {(f, asa) => <FilaFormato formato={f} asa={asa} onCambiar={cambiarFormato} onQuitar={() => cambiar({ formatos: a.formatos.filter((x) => x.id !== f.id) })} />}
             </ListaOrdenable>
@@ -171,7 +171,7 @@ export function AjustesCollabsFormulario({
             </Button>
           </CampoFormulario>
 
-          <CampoFormulario etiqueta="Condiciones" ayuda="Las que eliges en cada collab o en cada pieza: en los entregables se ven con su icono y sus días. Con días, los que salen de serie al añadirla.">
+          <CampoFormulario etiqueta="Condiciones" ayuda="Condiciones disponibles para collabs y piezas, con su duración predeterminada.">
             <ListaOrdenable items={a.condiciones} clave={(c) => c.id} onReordenar={(condiciones) => cambiar({ condiciones })} className="flex flex-col gap-1.5">
               {(c, asa) => (
                 <div className="flex items-center gap-2 rounded-lg border bg-card p-1.5">
@@ -190,7 +190,7 @@ export function AjustesCollabsFormulario({
                         value={c.dias ?? ""}
                         placeholder="—"
                         onChange={(e) => cambiarCondicion({ ...c, dias: e.target.value ? Math.max(1, Math.round(Number(e.target.value))) : undefined })}
-                        aria-label={`Días de serie de ${c.nombre}`}
+                        aria-label={`Días por defecto de ${c.nombre}`}
                         className="h-8 w-16 text-right tabular-nums"
                       />
                       días
@@ -207,7 +207,7 @@ export function AjustesCollabsFormulario({
             </Button>
           </CampoFormulario>
 
-          <CampoFormulario etiqueta="Packs de contenido" ayuda="Varios entregables que se añaden de un clic al crear la collab o al añadir piezas. También se guardan desde ahí, con «Guardar como pack».">
+          <CampoFormulario etiqueta="Packs de contenido" ayuda="Conjuntos de entregables que se añaden de una vez. También se crean con «Guardar como pack».">
             <ListaOrdenable items={a.packs} clave={(p) => p.id} onReordenar={(packs) => cambiar({ packs })} className="flex flex-col gap-1.5">
               {(p, asa) => <FilaPack pack={p} formatos={a.formatos} asa={asa} onCambiar={cambiarPack} onQuitar={() => cambiar({ packs: a.packs.filter((x) => x.id !== p.id) })} />}
             </ListaOrdenable>
@@ -216,7 +216,7 @@ export function AjustesCollabsFormulario({
             </Button>
           </CampoFormulario>
 
-          <CampoFormulario etiqueta="Lo que le pides a la marca, de serie" ayuda="Al pedirle el brief, salen marcados; en cada collab quitas o añades.">
+          <CampoFormulario etiqueta="Datos solicitados a la marca" ayuda="Aparecen marcados al solicitar el brief y se pueden cambiar en cada collab.">
             <CasillasOpcion aria-label="Apartados del brief" opciones={OPCIONES_BRIEF} valores={a.camposBrief} onChange={(camposBrief) => cambiar({ camposBrief })} />
           </CampoFormulario>
         </FormularioCuerpo>

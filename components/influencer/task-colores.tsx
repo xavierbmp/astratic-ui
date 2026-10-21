@@ -118,7 +118,7 @@ export function ColoresTareasDialog({ open, onOpenChange, colores, onChange }: {
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle>Colores de las tareas</DialogTitle>
-          <DialogDescription>Elige qué pinta el color de cada tarea en el calendario y de qué color van las fechas según lo que corren.</DialogDescription>
+          <DialogDescription>Criterio de color de las tareas en el calendario y color de las fechas según su urgencia.</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-5">
@@ -179,7 +179,7 @@ export function ColoresTareasDialog({ open, onOpenChange, colores, onChange }: {
           )}
           {(colores.por === "etiqueta" || colores.por === "marca") && (
             <p className="text-xs text-muted-foreground">
-              {colores.por === "etiqueta" ? "Cada tarea lleva el color de su primera etiqueta; el de cada etiqueta se cambia en la etiqueta." : "Cada tarea de una campaña lleva el color de su marca; las demás, sin color."}
+              {colores.por === "etiqueta" ? "Cada tarea usa el color de su primera etiqueta." : "Las tareas de una campaña usan el color de su marca."}
             </p>
           )}
         </div>

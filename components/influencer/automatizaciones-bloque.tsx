@@ -43,18 +43,18 @@ export function AutomatizacionesBloque({ bloque, reglas, onCambiar, className }:
     const antes = reglas
     onCambiar(reglas.filter((x) => x.id !== r.id))
     setEditando(null)
-    toast.success("Automatización eliminada", { description: esDeSerie(r) ? "Es de serie: vuelve con «Restaurar por defecto»." : undefined, action: { label: "Deshacer", onClick: () => onCambiar(antes) } })
+    toast.success("Automatización eliminada", { description: esDeSerie(r) ? "Predeterminada. Se recupera con «Restaurar por defecto»." : undefined, action: { label: "Deshacer", onClick: () => onCambiar(antes) } })
   }
   const restaurar = () => {
     const antes = reglas
     onCambiar(restaurarDeSerie(reglas, bloque))
-    toast.success("Automatizaciones de serie restauradas", { action: { label: "Deshacer", onClick: () => onCambiar(antes) } })
+    toast.success("Automatizaciones predeterminadas restauradas", { action: { label: "Deshacer", onClick: () => onCambiar(antes) } })
   }
 
   return (
     <div data-slot="automatizaciones-bloque" className={cn("flex flex-col gap-2", className)}>
       {suyas.length === 0 ? (
-        <p className="rounded-xl bg-background/70 px-3 py-4 text-center text-sm text-muted-foreground">Ninguna automatización en este bloque. Crea una o restaura las de serie.</p>
+        <p className="rounded-xl bg-background/70 px-3 py-4 text-center text-sm text-muted-foreground">Sin automatizaciones. Crea una o restaura las predeterminadas.</p>
       ) : (
         <ul className="flex flex-col gap-1.5">
           {suyas.map((r) => {

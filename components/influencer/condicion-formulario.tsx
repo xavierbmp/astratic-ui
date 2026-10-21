@@ -48,7 +48,7 @@ export function CondicionFormulario({ nombreInicial = "", tipos, migas, onGuarda
 
   return (
     <>
-      <FormularioCabecera icono={FileSignatureIcon} titulo="Nueva condición" descripcion="En los entregables se ve su icono y sus días. Queda en tu lista para la próxima vez." migas={migas} onVolver={onVolver} />
+      <FormularioCabecera icono={FileSignatureIcon} titulo="Nueva condición" descripcion="Se muestra en los entregables con su icono y su duración, y se guarda en tu lista." migas={migas} onVolver={onVolver} />
       <Formulario onSubmit={handleSubmit(guardar)}>
         <FormularioCuerpo>
           <CampoFormulario etiqueta="Nombre" htmlFor="cd-nombre" error={errors.nombre?.message}>
@@ -79,7 +79,7 @@ export function CondicionFormulario({ nombreInicial = "", tipos, migas, onGuarda
               )}
             />
           </CampoFormulario>
-          <CampoFormulario etiqueta="Días" htmlFor="cd-dias" ayuda="Si dura un tiempo (30 días de exclusividad). Los de serie salen al añadirla y se cambian en cada entregable." error={errors.dias?.message}>
+          <CampoFormulario etiqueta="Días" htmlFor="cd-dias" ayuda="Duración predeterminada, por ejemplo 30 días de exclusividad. Se puede cambiar en cada entregable." error={errors.dias?.message}>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <Controller
                 control={control}

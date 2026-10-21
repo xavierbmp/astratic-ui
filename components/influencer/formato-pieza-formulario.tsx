@@ -29,7 +29,7 @@ const QUE_SE_REVISA: Record<TipoPieza, string> = {
   video: "La marca revisa el script y el vídeo",
   foto: "El script o el texto y la foto",
   carrusel: "El texto y las fotos del carrusel",
-  texto: "Solo el texto: una mención, una newsletter",
+  texto: "Solo texto (mención, newsletter…)",
 }
 
 const OPCIONES_TIPO = LISTA_TIPOS_PIEZA.map((t) => ({ value: t, label: TIPOS_PIEZA[t].label, descripcion: QUE_SE_REVISA[t], icono: ICONOS_PIEZA[t] }))
@@ -57,20 +57,20 @@ export function FormatoPiezaFormulario({ formato, nombreInicial = "", formatos, 
 
   return (
     <>
-      <FormularioCabecera icono={ShapesIcon} titulo={formato ? `Cambiar «${formato.nombre}»` : "Nuevo formato de pieza"} descripcion="Para todo lo que no es un reel ni una story: una mención en la bio, un podcast, una newsletter. Queda en tu lista para la próxima vez." migas={migas} onVolver={onVolver} />
+      <FormularioCabecera icono={ShapesIcon} titulo={formato ? `Cambiar «${formato.nombre}»` : "Nuevo formato de pieza"} descripcion="Para otros formatos, como una mención en la bio, un podcast o una newsletter. Se guarda en tu lista." migas={migas} onVolver={onVolver} />
       <Formulario onSubmit={handleSubmit(guardar)}>
         <FormularioCuerpo>
           <CampoFormulario etiqueta="Nombre" htmlFor="fp-nombre" error={errors.nombre?.message}>
             <Input id="fp-nombre" autoFocus placeholder="Mención en la bio" aria-invalid={!!errors.nombre} {...register("nombre")} />
           </CampoFormulario>
-          <CampoFormulario etiqueta="Qué entregas" ayuda="Decide qué te revisa la marca antes de publicar.">
+          <CampoFormulario etiqueta="Qué entregas" ayuda="Determina qué revisa la marca antes de publicar.">
             <Controller control={control} name="tipo" render={({ field }) => <TarjetasOpcion aria-label="Qué entregas" opciones={OPCIONES_TIPO} valor={field.value} onChange={field.onChange} />} />
           </CampoFormulario>
-          <CampoFormulario etiqueta="Dónde se publica" ayuda="Sale como atajo cuando la collab es de esa plataforma.">
+          <CampoFormulario etiqueta="Dónde se publica" ayuda="Aparece como atajo en las collabs de esa plataforma.">
             <Controller control={control} name="plataforma" render={({ field }) => <SelectorPlataforma aria-label="Dónde se publica" value={field.value} onChange={field.onChange} />} />
           </CampoFormulario>
           {tipo !== "texto" && (
-            <CampoFormulario etiqueta="Script" ayuda="Si se manda el script a la marca antes de grabar. Se cambia en cada entregable.">
+            <CampoFormulario etiqueta="Script" ayuda="Indica si el script se envía a la marca antes de grabar. Se puede cambiar en cada entregable.">
               <Controller
                 control={control}
                 name="conGuion"

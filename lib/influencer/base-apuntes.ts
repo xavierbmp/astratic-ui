@@ -22,7 +22,7 @@ export function camposBaseApuntes({ contenidos, pilares, carpetas, marcas, fecha
   return [
     { id: "titulo", nombre: "Título", tipo: "texto", principal: true, obligatorio: true, grupo: "Datos", valor: (a) => a.titulo },
     { id: "tipo", nombre: "Tipo", tipo: "select", obligatorio: true, opciones: Object.entries(TIPOS_APUNTE).map(([id, label], i) => ({ id, label, color: i === 0 ? "amarillo" : "gris" })), grupo: "Datos", valor: (a) => a.tipo },
-    { id: "estado", nombre: "Estado", tipo: "select", opciones: opcionesDeEstados(ESTADOS_IDEA), grupo: "Datos", descripcion: "Planificada y publicada salen solas del contenido que nace de la idea.", valor: (a) => estadoDeIdea(a, contenidos) },
+    { id: "estado", nombre: "Estado", tipo: "select", opciones: opcionesDeEstados(ESTADOS_IDEA), grupo: "Datos", descripcion: "«Planificada» y «Publicada» se asignan automáticamente desde el contenido.", valor: (a) => estadoDeIdea(a, contenidos) },
     { id: "pilar", nombre: "Pilar", tipo: "select", opciones: pilares.map((p) => ({ id: p.id, label: p.nombre, color: COLOR_DE_TINTE[p.tint] })), grupo: "Contenido", valor: (a) => a.pilarId ?? null },
     { id: "formato", nombre: "Formato", tipo: "select", opciones: FORMATOS_PROPIOS.map((f) => ({ id: f, label: FORMATOS[f].label })), grupo: "Contenido", valor: (a) => a.formato ?? null },
     { id: "redes", nombre: "Redes", tipo: "multiselect", opciones: REDES.map((r) => ({ id: r, label: socialLabel[r] })), grupo: "Contenido", valor: (a) => a.redes },
@@ -32,7 +32,7 @@ export function camposBaseApuntes({ contenidos, pilares, carpetas, marcas, fecha
     { id: "carpeta", nombre: "Carpeta", tipo: "select", ocultoDeSerie: true, opciones: opcionesDeCarpetas(carpetas).map((o) => ({ id: o.value, label: o.label })), grupo: "Datos", valor: (a) => a.carpetaId ?? null },
     { id: "fechaClave", nombre: "Fecha clave", tipo: "select", ocultoDeSerie: true, opciones: fechasClave.map((f) => ({ id: f.id, label: f.nombre })), grupo: "Contenido", valor: (a) => a.fechaClaveId ?? null },
     { id: "caducaPronto", nombre: "Caduca pronto", tipo: "casilla", soloLectura: true, ocultoDeSerie: true, grupo: "Fechas", valor: (a) => caducaPronto(a, hoy) },
-    { id: "texto", nombre: "Texto", tipo: "texto_largo", soloLectura: true, ocultoDeSerie: true, grupo: "Datos", descripcion: "Se escribe en la ficha de la idea o en la página de la nota.", valor: (a) => textoPlano(a.texto) || null },
+    { id: "texto", nombre: "Texto", tipo: "texto_largo", soloLectura: true, ocultoDeSerie: true, grupo: "Datos", descripcion: "Se edita en la ficha de la idea o en la página de la nota.", valor: (a) => textoPlano(a.texto) || null },
     { id: "referencias", nombre: "Referencias", tipo: "numero", soloLectura: true, ocultoDeSerie: true, grupo: "Datos", valor: (a) => a.referencias.length },
     { id: "actualizadoEl", nombre: "Editado", tipo: "fecha", soloLectura: true, grupo: "Fechas", valor: (a) => soloFecha(a.actualizadoEl) },
     { id: "creadoEl", nombre: "Creado", tipo: "fecha", soloLectura: true, ocultoDeSerie: true, grupo: "Fechas", valor: (a) => soloFecha(a.creadoEl) },

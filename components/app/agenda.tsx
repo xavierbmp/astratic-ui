@@ -97,7 +97,7 @@ export function Agenda({
   eventos,
   hoy,
   onSelect,
-  vacio = { title: "Nada este mes", description: "Lo que tenga fecha sale aquí, en su día." },
+  vacio = { title: "Nada este mes", description: "Los elementos con fecha aparecerán aquí." },
   className,
 }: {
   eventos: EventoCalendario[]

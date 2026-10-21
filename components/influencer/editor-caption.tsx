@@ -33,15 +33,15 @@ export function EditorCaption({ valor, onCambiar, className }: { valor: DatosCap
 
   const copiar = async () => {
     try {
-      await copiarTexto(texto, "Caption copiado: pégalo en la red")
+      await copiarTexto(texto, "Caption copiado")
     } catch {
-      toast.error("No se ha podido copiar: selecciona el texto y cópialo a mano")
+      toast.error("No se ha podido copiar")
     }
   }
 
   return (
     <div data-slot="ws-editor-caption" className={cn("grid gap-3", className)}>
-      <Textarea id={id} value={valor.caption} onChange={(e) => onCambiar({ caption: e.target.value })} placeholder="Escribe el texto de la publicación, con sus hashtags. La primera línea es la que se ve." aria-label="Caption" className="min-h-40 resize-y text-sm leading-relaxed" />
+      <Textarea id={id} value={valor.caption} onChange={(e) => onCambiar({ caption: e.target.value })} placeholder="Texto de la publicación con sus hashtags. La primera línea es la visible." aria-label="Caption" className="min-h-40 resize-y text-sm leading-relaxed" />
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
         {redes.map((r) => {
           const max = LIMITES_CAPTION[r]?.max ?? 0
@@ -75,7 +75,7 @@ export function EditorCaption({ valor, onCambiar, className }: { valor: DatosCap
         <Switch checked={valor.publicidad} onCheckedChange={(v) => onCambiar({ publicidad: v })} className="mt-0.5" />
         <span className="grid gap-0.5">
           <span className="text-sm font-medium">Es publicidad</span>
-          <span className="text-xs text-muted-foreground">Si el producto te lo han regalado o llevas enlace de afiliado, también hay que marcarlo con #publi o «publicidad».</span>
+          <span className="text-xs text-muted-foreground">Los productos regalados y los enlaces de afiliado también se identifican con #publi o «publicidad».</span>
         </span>
       </label>
 

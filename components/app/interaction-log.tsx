@@ -35,7 +35,7 @@ export function InteractionLog({
   onSaveNote,
   onDelete,
   autoEditId,
-  empty = "Todavía no hay nada apuntado.",
+  empty = "Sin actividad registrada.",
   notePlaceholder = "Añadir nota",
   className,
 }: {

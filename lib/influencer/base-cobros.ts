@@ -14,7 +14,7 @@ export const nombreDeLinea = (l: LineaCobro) => (l.plazo && l.plazo.porcentaje <
 export function camposBaseCobros({ marcas }: { marcas: Marca[] }): DefCampo<LineaCobro>[] {
   return [
     { id: "cobro", nombre: "Cobro", tipo: "texto", principal: true, soloLectura: true, grupo: "Datos", valor: nombreDeLinea },
-    { id: "estado", nombre: "Estado", tipo: "select", obligatorio: true, opciones: opcionesDeEstados(ESTADOS_LINEA_COBRO), grupo: "Estado", descripcion: "Se mueve con la factura: facturar, enviar y cobrar. «Vencida» sale sola de la fecha.", valor: (l) => l.estado },
+    { id: "estado", nombre: "Estado", tipo: "select", obligatorio: true, opciones: opcionesDeEstados(ESTADOS_LINEA_COBRO), grupo: "Estado", descripcion: "Cambia con las acciones de la factura. «Vencida» se asigna automáticamente según la fecha.", valor: (l) => l.estado },
     { id: "marca", nombre: "Marca", tipo: "vinculo", vinculo: { objeto: "marca" }, soloLectura: true, opciones: opcionesDeMarcas(marcas), grupo: "Datos", valor: (l) => l.collab.marcaId },
     { id: "base", nombre: "Base", tipo: "moneda", soloLectura: true, grupo: "Dinero", valor: (l) => l.base },
     { id: "previsto", nombre: "Cobro previsto", tipo: "fecha", soloLectura: true, grupo: "Fechas", valor: (l) => l.previsto },

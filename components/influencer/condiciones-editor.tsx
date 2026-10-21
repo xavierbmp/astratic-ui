@@ -137,7 +137,7 @@ export function CondicionesEditor({
   }, [medir, value.length])
   const sueltas = value.filter((c) => !tipos.some((t) => t.id === c.id))
   const opciones: OpcionSelector[] = [
-    ...tipos.map((t) => ({ value: t.id, label: t.nombre, detalle: t.conDias ? (t.dias ? `${t.dias} días de serie` : "Con días") : undefined, icono: <IconoOpcion icono={t.icono} nombre={t.nombre} /> })),
+    ...tipos.map((t) => ({ value: t.id, label: t.nombre, detalle: t.conDias ? (t.dias ? `${t.dias} días por defecto` : "Con días") : undefined, icono: <IconoOpcion icono={t.icono} nombre={t.nombre} /> })),
     ...sueltas.map((c) => ({ value: c.id, label: c.nombre, icono: <IconoOpcion icono={c.icono} nombre={c.nombre} /> })),
   ]
   const alternar = (id: string) => {
@@ -204,7 +204,7 @@ export function CondicionesEditor({
         valor={undefined}
         marcados={value.map((c) => c.id)}
         placeholder="Busca o escribe una condición"
-        vacio="Ninguna se llama así: escribe para crearla"
+        vacio="Sin coincidencias. Escribe para crearla"
         onChange={alternar}
         onCrear={onNuevoTipo ? (nombre) => onNuevoTipo(nombre, (tipo) => onChange([...value, condicionDeTipo(tipo)])) : undefined}
       />

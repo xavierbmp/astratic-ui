@@ -89,8 +89,8 @@ export function PanelAvisos({
         ) : lista.length === 0 ? (
           <div className="grid place-items-center gap-1 px-6 py-10 text-center">
             <BellRingIcon className="size-5 text-muted-foreground" aria-hidden />
-            <p className="text-sm font-medium">{actual === "sin-leer" ? "Lo tienes todo leído" : "Ningún aviso por aquí"}</p>
-            <p className="text-xs text-muted-foreground">Cuando una marca pida cambios o apruebe, te paguen o la red te traiga algo, aparece aquí.</p>
+            <p className="text-sm font-medium">{actual === "sin-leer" ? "Sin avisos pendientes" : "Sin avisos"}</p>
+            <p className="text-xs text-muted-foreground">Aquí aparecerán los avisos de tus collabs, cobros y propuestas.</p>
           </div>
         ) : (
           <ul className="divide-y">

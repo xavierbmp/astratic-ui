@@ -29,7 +29,7 @@ export function camposBaseTareas({ ctx, etiquetas, hoy, tareas, propios }: Param
     { id: "titulo", nombre: "Tarea", tipo: "texto", principal: true, obligatorio: true, grupo: "Tarea", valor: (t) => t.titulo },
     { id: "hecha", nombre: "Hecha", tipo: "casilla", grupo: "Tarea", valor: (t) => t.estado === "hecha" },
     { id: "estado", nombre: "Estado", tipo: "select", obligatorio: true, opciones: opcionesDeEstados(ESTADOS_TAREA), grupo: "Tarea", valor: (t) => t.estado },
-    { id: "cuando", nombre: "Cuándo", tipo: "select", obligatorio: true, opciones: CUANDO_TAREA.map((c) => ({ id: c.id, label: c.label, color: c.id === "vencidas" ? "rojo" : c.id === "hoy" ? "verde" : "gris" })), grupo: "Fechas", descripcion: "Sale de su fecha. Al moverla a «Hoy» o «Mañana» le pone ese día.", valor: (t) => cuandoDe(t, dia) },
+    { id: "cuando", nombre: "Cuándo", tipo: "select", obligatorio: true, opciones: CUANDO_TAREA.map((c) => ({ id: c.id, label: c.label, color: c.id === "vencidas" ? "rojo" : c.id === "hoy" ? "verde" : "gris" })), grupo: "Fechas", descripcion: "Se calcula a partir de la fecha. Al moverla a «Hoy» o «Mañana», la fecha se actualiza.", valor: (t) => cuandoDe(t, dia) },
     { id: "fecha", nombre: "Fecha", tipo: "fecha", grupo: "Fechas", valor: (t) => (t.fecha ? soloFecha(t.fecha) : null) },
     { id: "prioridad", nombre: "Prioridad", tipo: "select", obligatorio: true, opciones: PRIORIDADES_TAREA.map((p) => ({ id: p.id, label: p.label, color: COLOR_PRIORIDAD[p.id] })), grupo: "Tarea", valor: (t) => t.prioridad },
     { id: "tipo", nombre: "Tipo", tipo: "select", obligatorio: true, opciones: tiposDe(ctx).map((t) => ({ id: t, label: TIPOS_TAREA[t] })), grupo: "De qué es", valor: (t) => t.donde.tipo },

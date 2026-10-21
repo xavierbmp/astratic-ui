@@ -71,7 +71,7 @@ export function TaskTable({
   return (
     <div className={cn("flex flex-col", className)}>
       {grupos.length === 0 ? (
-        <EmptyState icon={CircleCheckIcon} title="Nada pendiente aquí" description="Añade una tarea abajo: sale también en la página de Tareas." />
+        <EmptyState icon={CircleCheckIcon} title="Nada pendiente aquí" description="Las tareas añadidas aquí también aparecen en Tareas." />
       ) : (
         <TareasLista
           grupos={grupos}
