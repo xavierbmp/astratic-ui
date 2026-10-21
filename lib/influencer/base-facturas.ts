@@ -21,7 +21,7 @@ export function camposBaseFacturas({ marcas }: { marcas: Marca[] }): DefCampo<Li
   const calculo = (l: LineaCobro) => (l.factura ? calcularFactura(l.factura) : null)
   return [
     { id: "numero", nombre: "Factura", tipo: "texto", principal: true, soloLectura: true, grupo: "Factura", valor: (l) => l.factura?.numero ?? null },
-    { id: "estado", nombre: "Estado", tipo: "select", obligatorio: true, opciones: opcionesDeEstados(ESTADOS_LINEA_COBRO.filter((e) => e.id !== "por-facturar")), grupo: "Estado", descripcion: "Se mueve con la factura: enviar y cobrar. «Vencida» sale sola de la fecha.", valor: (l) => l.estado },
+    { id: "estado", nombre: "Estado", tipo: "select", obligatorio: true, opciones: opcionesDeEstados(ESTADOS_LINEA_COBRO.filter((e) => e.id !== "por-facturar")), grupo: "Estado", descripcion: "Cambia con las acciones de la factura. «Vencida» se asigna automáticamente según la fecha.", valor: (l) => l.estado },
     { id: "marca", nombre: "Marca", tipo: "vinculo", vinculo: { objeto: "marca" }, soloLectura: true, opciones: opcionesDeMarcas(marcas), grupo: "Datos", valor: (l) => l.collab.marcaId },
     { id: "collab", nombre: "Collab", tipo: "texto", soloLectura: true, grupo: "Datos", valor: (l) => l.collab.campana },
     { id: "concepto", nombre: "Concepto", tipo: "texto", soloLectura: true, ocultoDeSerie: true, grupo: "Factura", valor: (l) => l.factura?.concepto ?? null },

@@ -29,7 +29,7 @@ export function camposBaseContactos({ marcas, interacciones, propios }: { marcas
     { id: "email", nombre: "Email", tipo: "email", grupo: "Cómo escribirle", valor: (c) => texto(c.email) },
     { id: "telefono", nombre: "Teléfono", tipo: "telefono", grupo: "Cómo escribirle", valor: (c) => texto(c.telefono) },
     { id: "instagram", nombre: "Instagram", tipo: "texto", grupo: "Cómo escribirle", valor: (c) => texto(c.instagram) },
-    { id: "principal", nombre: "Contacto principal", tipo: "casilla", grupo: "Datos", descripcion: "Quien lleva la relación con la marca: hay uno por marca.", valor: (c) => !!c.principal },
+    { id: "principal", nombre: "Contacto principal", tipo: "casilla", grupo: "Datos", descripcion: "Contacto principal de la marca (uno por marca).", valor: (c) => !!c.principal },
     { id: "notas", nombre: "Notas", tipo: "texto_largo", grupo: "Datos", ocultoDeSerie: true, valor: (c) => texto(c.notas) },
     {
       id: "ultimoContacto",
@@ -37,7 +37,7 @@ export function camposBaseContactos({ marcas, interacciones, propios }: { marcas
       tipo: "fecha",
       soloLectura: true,
       grupo: "Seguimiento",
-      descripcion: "Sale del seguimiento: la última vez que apuntaste un email, mensaje o llamada con esta persona.",
+      descripcion: "Fecha del último email, mensaje o llamada registrado en el seguimiento.",
       valor: (c) => {
         const u = ultimoContactoDe(c.id, interacciones)
         return u ? soloFecha(u) : null

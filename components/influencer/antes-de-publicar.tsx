@@ -29,7 +29,7 @@ export function AntesDePublicar({ pasos, onIr, className }: { pasos: PasoPublica
       <div className="flex items-center gap-3">
         <Anillo hechos={hechos} total={pasos.length} />
         <div className="grid gap-0.5">
-          <span className="text-sm font-semibold">{faltan === 0 ? "Todo listo para publicar" : faltan === 1 ? "Te falta 1 cosa" : `Te faltan ${faltan} cosas`}</span>
+          <span className="text-sm font-semibold">{faltan === 0 ? "Todo listo para publicar" : faltan === 1 ? "Te falta 1 cosa" : `${faltan} pendientes`}</span>
           <span className="text-xs text-muted-foreground tabular-nums">
             {hechos} de {pasos.length} hechas
           </span>

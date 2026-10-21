@@ -24,18 +24,18 @@ export function validarDocumento(texto: string): Documento {
     const ok = v[8] === String(control) || v[8] === LETRAS_CONTROL_CIF[control]
     return ok ? { ok: true, tipo: "CIF" } : { ok: false, error: "El dígito de control del CIF no cuadra" }
   }
-  return { ok: false, error: "Escribe un DNI (12345678Z), un NIE (X1234567L) o un CIF (B12345678)" }
+  return { ok: false, error: "Introduce un DNI (12345678Z), un NIE (X1234567L) o un CIF (B12345678)" }
 }
 
 /** Comprueba un IBAN con su código de control (módulo 97). Los españoles tienen 24 caracteres. */
 export function validarIban(texto: string): string | null {
   const v = limpiar(texto)
-  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(v)) return "Escribe el IBAN entero, empezando por el país (ES…)"
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(v)) return "Introduce el IBAN completo, con el código de país (ES…)"
   if (v.startsWith("ES") && v.length !== 24) return "Un IBAN español tiene 24 caracteres"
   const reordenado = `${v.slice(4)}${v.slice(0, 4)}`.replace(/[A-Z]/g, (l) => String(l.charCodeAt(0) - 55))
   let resto = 0
   for (const digito of reordenado) resto = (resto * 10 + Number(digito)) % 97
-  return resto === 1 ? null : "El IBAN no es correcto: revisa los números"
+  return resto === 1 ? null : "IBAN no válido"
 }
 
 /** «ES12 3456 7890 1234 5678 9012». */
@@ -50,10 +50,10 @@ export function retencionSugerida(forma: FormaFiscal, primerosAnos = false) {
 /** Lo que le falta para poder hacer una factura: vacío si está todo. */
 export function faltaParaFacturar(d: DatosFiscales) {
   const faltan: string[] = []
-  if (d.forma === "sin-alta") faltan.push("darte de alta como autónoma o con una sociedad")
+  if (d.forma === "sin-alta") faltan.push("darte de alta para facturar")
   if (!d.nombre.trim()) faltan.push("el nombre o la razón social")
   if (!d.nif.trim()) faltan.push("el NIF")
   if (!d.direccion.trim()) faltan.push("la dirección fiscal")
-  if (!d.iban.trim()) faltan.push("el IBAN para que te paguen")
+  if (!d.iban.trim()) faltan.push("el IBAN")
   return faltan
 }

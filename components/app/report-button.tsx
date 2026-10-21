@@ -74,7 +74,7 @@ export function ReportTrigger({ className }: { className?: string }) {
 export function ReportButton({
   onSubmit,
   loadReports,
-  description = "Cuéntanos qué cambiarías o qué falla y, si quieres, señálalo en la página. Lo revisamos y aquí verás cuándo está resuelto.",
+  description = "Describe el problema o la sugerencia y, si quieres, señálalo en la página. El estado de cada reporte aparece en Enviados.",
   shortcut = true,
 }: {
   /** Guarda el reporte. Devuelve el mensaje de error, o nada si ha ido bien. */

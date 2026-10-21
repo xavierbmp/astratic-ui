@@ -101,7 +101,7 @@ export function ResizeHandle({
       aria-valuemax={limites.max}
       aria-valuenow={ancho}
       tabIndex={0}
-      title="Arrastra para cambiar el ancho · doble clic para volver al de siempre"
+      title="Arrastra para cambiar el ancho · doble clic para restablecerlo"
       onPointerDown={onPointerDown}
       onKeyDown={onKeyDown}
       onDoubleClick={() => onAncho(limites.porDefecto)}

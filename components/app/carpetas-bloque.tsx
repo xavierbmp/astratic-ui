@@ -165,7 +165,7 @@ export function CarpetasBloque<C extends CarpetaArbol>({
           <SheetContent side="bottom" className="max-h-[85vh] gap-0 overflow-y-auto rounded-t-2xl pb-6">
             <SheetHeader>
               <SheetTitle>Carpetas</SheetTitle>
-              <SheetDescription>Elige dónde mirar. Desde el «…» de cada una, crea subcarpetas o muévelas.</SheetDescription>
+              <SheetDescription>Desde el menú «…» de cada carpeta puedes crear subcarpetas o moverla.</SheetDescription>
             </SheetHeader>
             <Directorio
               props={{

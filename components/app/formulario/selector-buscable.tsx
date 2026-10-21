@@ -236,7 +236,7 @@ export function SelectorBuscable({
               <span className="truncate">Crear «{busqueda}»</span>
             </button>
           )}
-          {total === 0 && <p className="px-2 py-3 text-center text-sm text-muted-foreground">{opciones.length ? vacio : "Aún no hay ninguna: escribe para crearla"}</p>}
+          {total === 0 && <p className="px-2 py-3 text-center text-sm text-muted-foreground">{opciones.length ? vacio : "Sin opciones. Escribe para crear una"}</p>}
         </div>
       </PopoverContent>
     </Popover>

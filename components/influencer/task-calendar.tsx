@@ -86,7 +86,7 @@ function NuevaEnDia({ dia, onCrear }: { dia: string; onCrear: (titulo: string) =
           className="grid gap-1.5"
         >
           <span className="text-xs text-muted-foreground first-letter:uppercase">{diaLargo(dia)}</span>
-          <Input autoFocus value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Qué hay que hacer… (Enter)" className="h-8 text-sm" />
+          <Input autoFocus value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Nueva tarea… (Enter)" className="h-8 text-sm" />
         </form>
       </PopoverContent>
     </Popover>
@@ -200,7 +200,7 @@ export function CalendarioTareas({
           </div>
           <Dia dia={SIN_FECHA} className="flex w-full flex-none flex-col gap-1.5 rounded-lg border bg-muted/30 p-2 @3xl:w-56">
             <span className="text-xs font-semibold text-muted-foreground">Sin {campo === "fecha" ? "fecha" : "fecha límite"} · {sinFecha.length}</span>
-            <span className="text-[11px] text-muted-foreground">Arrástralas a un día para darles fecha.</span>
+            <span className="text-[11px] text-muted-foreground">Arrástralas al calendario para asignarles fecha.</span>
             {sinFecha.map((t) => (
               <Chip key={`sin-${t.id}`} tarea={t} dia={SIN_FECHA} hoy={hoy} ctx={ctx} activa={activaId === t.id} onAbrir={() => onAbrir(t)} />
             ))}

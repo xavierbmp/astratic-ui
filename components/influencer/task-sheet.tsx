@@ -169,7 +169,7 @@ export function TareaDetalle({
                 placeholder="10:00"
                 onSave={async (v) => {
                   const texto = String(v ?? "").trim()
-                  if (texto && !HORA.test(texto)) return "Escribe la hora como 10:00"
+                  if (texto && !HORA.test(texto)) return "Formato de hora: 10:00"
                   guardar({ fecha: `${soloFecha(tarea.fecha ?? hoy)}${texto ? `T${texto}` : ""}` })
                 }}
               />
@@ -181,7 +181,7 @@ export function TareaDetalle({
                 value={tarea.fechaFin ?? null}
                 tipo="fecha"
                 onSave={async (v) => {
-                  if (v && String(v) < soloFecha(tarea.fecha ?? "")) return "Tiene que ser después de la fecha"
+                  if (v && String(v) < soloFecha(tarea.fecha ?? "")) return "Debe ser posterior a la fecha"
                   guardar({ fechaFin: v ? String(v) : undefined })
                 }}
               />

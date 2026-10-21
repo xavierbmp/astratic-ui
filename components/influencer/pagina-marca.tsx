@@ -59,7 +59,7 @@ export function PaginaMarca({
       </header>
       <main className={cn("mx-auto flex flex-col gap-6 px-4 py-6 md:px-8 md:py-8 print:px-0", ancho === "ancho" ? "max-w-[1440px]" : "max-w-[1100px]")}>{children}</main>
       <footer className="flex flex-col items-center gap-2 px-4 pb-8 text-center text-xs text-muted-foreground">
-        <p>{pie ?? `Enlace privado para ${marca}, sin cuenta.`}</p>
+        <p>{pie ?? `Enlace privado para ${marca}.`}</p>
         <SelloAstratic />
       </footer>
     </div>

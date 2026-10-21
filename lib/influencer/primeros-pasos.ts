@@ -32,15 +32,15 @@ const bienvenida = (paso: string) => `/bienvenida?paso=${paso}`
 /** Los pasos, en el orden en que conviene hacerlos. */
 export function primerosPasos(d: DatosPrimerosPasos): PasoAlta[] {
   return [
-    { id: "perfil", label: "Completa tu perfil", descripcion: "Foto, bio, nicho y tus redes: es lo que ven las marcas.", hecho: perfilCompleto(d.perfil), href: bienvenida("perfil") },
-    { id: "trabajo", label: "Cuéntanos cómo trabajas", descripcion: "Qué collabs aceptas y qué marcas no, para proponerte las que te encajan.", hecho: d.trabajoContado, href: bienvenida("trabajo") },
-    { id: "tarifas", label: "Pon tus tarifas", descripcion: "Lo que cobras por cada formato, con el precio del mercado al lado.", hecho: d.tieneTarifas, href: bienvenida("tarifas") },
-    { id: "marcas", label: "Añade tus marcas", descripcion: "Con las que has trabajado: les escribimos para que repitan contigo.", hecho: d.marcasPropias > 0, href: bienvenida("marcas") },
-    { id: "cobros", label: "Tus datos para cobrar", descripcion: "Datos fiscales, IBAN y la dirección a la que te mandan producto.", hecho: datosDeCobroCompletos(d.fiscales, d.envio), href: bienvenida("cobros") },
-    { id: "instagram", label: "Conecta tu Instagram", descripcion: "Tus cifras y tu audiencia se ponen al día solas.", hecho: d.instagramConectado, href: bienvenida("conexiones") },
-    { id: "biblia", label: "Lee lo esencial de la Academia", descripcion: "Cómo trabajamos, cómo negociar y cómo marcar la publicidad.", hecho: d.capitulos.filter((c) => c.esencial).every((c) => d.lecturas[c.id]), href: "/workspace/academia" },
-    { id: "autocontrol", label: "Aprueba el curso de Autocontrol", descripcion: "El sello sale en tu perfil y en tu media kit.", hecho: !!d.perfil.autocontrol, href: "/workspace/academia/autocontrol" },
-    { id: "bio", label: "Pon la mención de la red en tu bio", descripcion: "Astratic la comprueba y la marca como hecha.", hecho: !!d.acuerdo.mencionComprobadaEl, href: "/workspace/ajustes/plan" },
+    { id: "perfil", label: "Completa tu perfil", descripcion: "Foto, bio, nicho y redes de tu perfil.", hecho: perfilCompleto(d.perfil), href: bienvenida("perfil") },
+    { id: "trabajo", label: "Cuéntanos cómo trabajas", descripcion: "Tipos de collab y sectores excluidos.", hecho: d.trabajoContado, href: bienvenida("trabajo") },
+    { id: "tarifas", label: "Pon tus tarifas", descripcion: "Tarifas por formato y referencia de mercado.", hecho: d.tieneTarifas, href: bienvenida("tarifas") },
+    { id: "marcas", label: "Añade tus marcas", descripcion: "Marcas con las que has trabajado.", hecho: d.marcasPropias > 0, href: bienvenida("marcas") },
+    { id: "cobros", label: "Datos de cobro", descripcion: "Datos fiscales, IBAN y dirección de envío.", hecho: datosDeCobroCompletos(d.fiscales, d.envio), href: bienvenida("cobros") },
+    { id: "instagram", label: "Conecta tu Instagram", descripcion: "Cifras y audiencia actualizadas automáticamente.", hecho: d.instagramConectado, href: bienvenida("conexiones") },
+    { id: "biblia", label: "Lee lo esencial de la Academia", descripcion: "Forma de trabajo, negociación e identificación de la publicidad.", hecho: d.capitulos.filter((c) => c.esencial).every((c) => d.lecturas[c.id]), href: "/workspace/academia" },
+    { id: "autocontrol", label: "Aprueba el curso de Autocontrol", descripcion: "El sello se muestra en tu perfil y en tu media kit.", hecho: !!d.perfil.autocontrol, href: "/workspace/academia/autocontrol" },
+    { id: "bio", label: "Añade la mención de Astratic en tu bio", descripcion: "Astratic la verifica y marca el paso como completado.", hecho: !!d.acuerdo.mencionComprobadaEl, href: "/workspace/ajustes/plan" },
   ]
 }
 

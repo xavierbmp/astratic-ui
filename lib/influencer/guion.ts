@@ -69,7 +69,7 @@ export function comprobarGuion(html: string, brief: Pick<Brief, "menciones" | "h
   ]
   if (brief.codigo) lista.push({ id: "codigo", label: `Código ${brief.codigo}`, ok: contiene(brief.codigo) })
   const { ok: publicidad, soloAd } = marcaDePublicidad(texto)
-  lista.push({ id: "publi", label: "Marcado como publicidad", ok: publicidad, detalle: soloAd ? "«#ad» no vale en español: usa #publi o «publicidad»" : undefined })
+  lista.push({ id: "publi", label: "Marcado como publicidad", ok: publicidad, detalle: soloAd ? "En España, usa #publi o «publicidad» en lugar de #ad" : undefined })
   return lista
 }
 

@@ -217,7 +217,7 @@ export function TareasHoy({
                 {vencidas.length > 0 && deHoy.length > 0 && <span className="px-2 pt-1 text-xs font-semibold text-muted-foreground">Para hoy, por importancia</span>}
                 {deHoy.length === 0 && vencidas.length === 0 ? (
                   <>
-                    <p className="px-2 py-2 text-sm text-muted-foreground">{siguientes.length ? "Nada para hoy." : "Nada para hoy. Mira lo de mañana o planifica la semana."}</p>
+                    <p className="px-2 py-2 text-sm text-muted-foreground">{siguientes.length ? "Nada para hoy." : "Sin tareas para hoy."}</p>
                     {siguientes.length > 0 && (
                       <>
                         <span className="px-2 pt-1 text-xs font-semibold text-muted-foreground">Lo siguiente</span>

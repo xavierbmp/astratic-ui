@@ -129,7 +129,7 @@ export function PiezasEditor({ value, onChange, errores, formatos = AJUSTES_COLL
         </div>
       )}
 
-      {value.length === 0 && <p className="rounded-lg border border-dashed px-3 py-5 text-center text-sm text-muted-foreground">Pulsa un formato o un pack para añadir los entregables.</p>}
+      {value.length === 0 && <p className="rounded-lg border border-dashed px-3 py-5 text-center text-sm text-muted-foreground">Elige un formato o un pack para añadir entregables.</p>}
 
       {value.map((p, i) => (
         <TarjetaEntregable
@@ -305,7 +305,7 @@ function TarjetaEntregable({ numero, pieza: p, error, formatos, opciones, condic
       {error && <p className="border-t px-3 py-1.5 text-xs text-danger">{error}</p>}
       {indicaciones && (
         <div className="border-t px-3 py-2.5">
-          <Textarea autoFocus={!p.indicaciones} value={p.indicaciones} onChange={(e) => onCambiar({ ...p, indicaciones: e.target.value })} rows={2} placeholder="Lo que debe tener: duración, qué enseñar, texto en pantalla…" aria-label={`Indicaciones del entregable ${numero}`} className="rounded-md" />
+          <Textarea autoFocus={!p.indicaciones} value={p.indicaciones} onChange={(e) => onCambiar({ ...p, indicaciones: e.target.value })} rows={2} placeholder="Duración, contenido, texto en pantalla…" aria-label={`Indicaciones del entregable ${numero}`} className="rounded-md" />
         </div>
       )}
     </div>

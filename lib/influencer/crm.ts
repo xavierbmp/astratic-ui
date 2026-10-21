@@ -126,7 +126,7 @@ export function diasDeAtribucion(marca: Marca, hoy: string) {
 }
 
 export function textoAtribucion(marca: Marca) {
-  if (marca.atribucion === "red") return "Marca de la red"
+  if (marca.atribucion === "red") return "Marca de Astratic"
   return marca.atribucionHasta ? `Tuya hasta el ${fmt.date(marca.atribucionHasta)}` : "Tuya durante 12 meses"
 }
 

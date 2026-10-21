@@ -36,7 +36,7 @@ const esquema = z
     notas: z.string().trim().max(2000, "Máximo 2.000 caracteres"),
     subtareas: z.array(z.string()),
   })
-  .refine((v) => !v.fechaLimite || !v.fecha || v.fechaLimite >= v.fecha, { message: "Es antes del día en que la haces", path: ["fechaLimite"] })
+  .refine((v) => !v.fechaLimite || !v.fecha || v.fechaLimite >= v.fecha, { message: "Es anterior a la fecha de la tarea", path: ["fechaLimite"] })
 
 type Valores = z.infer<typeof esquema>
 
@@ -173,7 +173,7 @@ export function TaskDialog({
             ? `Es de ${migasDonde(dondeFijo, ctx)
                 .map((m) => m.label)
                 .join(" › ")} y sale también en Tareas.`
-            : "Con un tipo, sale en esa página además de en Tareas. Sin tipo, solo en Tareas."
+            : "Con un tipo, la tarea aparece también en esa página."
         }
       />
       <Formulario onSubmit={handleSubmit(guardar)}>
@@ -194,7 +194,7 @@ export function TaskDialog({
                     if (tipo) setValue("donde", cambiarTipo(donde, tipo))
                   }}
                   placeholder="Escribe o elige el tipo"
-                  vacio="Ningún tipo se llama así"
+                  vacio="Sin coincidencias"
                 />
               </CampoFormulario>
               {etiquetaQue && (
@@ -251,7 +251,7 @@ export function TaskDialog({
                     const prioridad = esPrioridad(v)
                     if (prioridad) field.onChange(prioridad)
                   }}
-                  vacio="Ninguna prioridad se llama así"
+                  vacio="Sin coincidencias"
                 />
               )}
             />

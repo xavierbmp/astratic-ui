@@ -73,7 +73,7 @@ export type PropuestaTarifa = { precio: number; minimo: number; motivo?: string 
 /** Lo que falla en una propuesta de tarifa, o nada si se puede mandar. */
 export function errorDePropuesta(tarifa: Tarifa, p: PropuestaTarifa) {
   if (!(p.precio > 0) || !(p.minimo > 0)) return "El precio y el mínimo tienen que ser mayores que 0"
-  if (p.minimo > p.precio) return "El mínimo no puede pasar del precio de salida"
+  if (p.minimo > p.precio) return "El mínimo no puede superar el precio de salida"
   if (p.precio === tarifa.precio && p.minimo === tarifa.minimo) return "Es la tarifa que ya tienes"
   return null
 }

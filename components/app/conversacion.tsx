@@ -67,10 +67,10 @@ export type TextosConversacion = {
 }
 
 const TEXTOS: TextosConversacion = {
-  vacioRevisor: "Aún no hay notas. Pulsa en el contenido o selecciona texto para dejar una justo ahí.",
-  vacioNotas: "No hay notas en esta versión.",
-  vacioAutor: "Cuando lo revisen, sus notas aparecen aquí, cada una en su sitio.",
-  placeholderRevisor: "Escribe o pulsa en el contenido para dejar una nota…",
+  vacioRevisor: "Sin notas. Haz clic en el contenido o selecciona texto para añadir una.",
+  vacioNotas: "Sin notas en esta versión.",
+  vacioAutor: "Aquí aparecerán las notas de la revisión.",
+  placeholderRevisor: "Escribe una nota o haz clic en el contenido…",
   placeholderAutor: "Escribe un mensaje…",
   mensajeAutor: "Mensaje",
 }

@@ -40,19 +40,19 @@ export const FECHAS_BASE: Record<FechaBase, string> = {
 export type RegistroAutomatico = "collab" | "contrato"
 
 export const REGISTROS_AUTOMATICOS: Record<RegistroAutomatico, { label: string; descripcion: string }> = {
-  collab: { label: "La collab", descripcion: "Con la marca, la persona, la campaña, las fechas, el importe y los entregables de la propuesta." },
-  contrato: { label: "El contrato", descripcion: "En borrador, con la plantilla de contrato que tocaste por última vez (si tienes alguna), listo para revisarlo y mandarlo a firmar." },
+  collab: { label: "La collab", descripcion: "Incluye la marca, el contacto, la campaña, las fechas, el importe y los entregables de la propuesta." },
+  contrato: { label: "El contrato", descripcion: "En borrador, con tu última plantilla de contrato utilizada, listo para revisar y enviar a firmar." },
 }
 
 /** Dónde se ajustan: una página, su subpágina y el bloque. Cada evento es de un bloque. */
 export type BloqueAutomatizable = "crm-pipeline" | "collabs-directorio" | "collab-contenidos" | "collab-brief" | "collab-contrato"
 
 export const BLOQUES_AUTOMATIZABLES: { id: BloqueAutomatizable; pagina: string; subpagina: string; bloque: string; descripcion: string }[] = [
-  { id: "crm-pipeline", pagina: "CRM", subpagina: "Pipeline", bloque: "Propuestas", descripcion: "Lo que pasa cuando una propuesta cambia de estado." },
-  { id: "collabs-directorio", pagina: "Collabs", subpagina: "Directorio", bloque: "Collabs", descripcion: "Lo que pasa al crear una collab y cuando cambia de estado." },
-  { id: "collab-contenidos", pagina: "Collabs", subpagina: "Ficha de una collab", bloque: "Contenidos", descripcion: "Lo que pasa cuando la marca revisa un guion o un contenido." },
-  { id: "collab-brief", pagina: "Collabs", subpagina: "Ficha de una collab", bloque: "Brief y materiales", descripcion: "Lo que pasa cuando la marca manda el brief o los materiales por su formulario." },
-  { id: "collab-contrato", pagina: "Collabs", subpagina: "Ficha de una collab", bloque: "Contrato", descripcion: "Lo que pasa cuando la marca firma el contrato." },
+  { id: "crm-pipeline", pagina: "CRM", subpagina: "Pipeline", bloque: "Propuestas", descripcion: "Cuando una propuesta cambia de estado." },
+  { id: "collabs-directorio", pagina: "Collabs", subpagina: "Directorio", bloque: "Collabs", descripcion: "Al crear una collab y cuando cambia de estado." },
+  { id: "collab-contenidos", pagina: "Collabs", subpagina: "Ficha de una collab", bloque: "Contenidos", descripcion: "Cuando la marca revisa un guion o un contenido." },
+  { id: "collab-brief", pagina: "Collabs", subpagina: "Ficha de una collab", bloque: "Brief y materiales", descripcion: "Cuando la marca envía el brief o los materiales por su formulario." },
+  { id: "collab-contrato", pagina: "Collabs", subpagina: "Ficha de una collab", bloque: "Contrato", descripcion: "Cuando la marca firma el contrato." },
 ]
 
 type DefEvento = { label: string; objeto: ObjetoEvento; bloque: BloqueAutomatizable }
@@ -62,7 +62,7 @@ const MARCA: Record<Extract<EventoAutomatizacion, `marca:${string}`>, DefEvento>
   "marca:cambios": { label: "La marca pide cambios", objeto: "version", bloque: "collab-contenidos" },
   "marca:aprueba-guion": { label: "La marca aprueba un guion", objeto: "version", bloque: "collab-contenidos" },
   "marca:aprueba-contenido": { label: "La marca aprueba un contenido", objeto: "version", bloque: "collab-contenidos" },
-  "marca:brief": { label: "La marca manda el brief o los materiales", objeto: "collab", bloque: "collab-brief" },
+  "marca:brief": { label: "La marca envía el brief o los materiales", objeto: "collab", bloque: "collab-brief" },
   "marca:firma": { label: "La marca firma el contrato", objeto: "collab", bloque: "collab-contrato" },
 }
 
@@ -131,7 +131,7 @@ export type AjustesAutomatizaciones = { reglas: Automatizacion[] }
 const prioridad = z.enum(["urgente", "alta", "normal", "baja"])
 const accionTarea = z.object({
   tipo: z.literal("tarea"),
-  titulo: z.string().trim().min(1, "Escribe qué hay que hacer").max(160, "Máximo 160 caracteres"),
+  titulo: z.string().trim().min(1, "Indica la tarea").max(160, "Máximo 160 caracteres"),
   cuando: z.object({ dias: z.number().int().min(-365, "Como mucho, un año antes").max(365, "Como mucho, un año después"), desde: z.enum(["hoy", "inicio", "fin", "ultima-publicacion", "publicacion", "guion"]) }),
   prioridad,
   subtareas: z.array(z.string().trim().min(1).max(160)).max(30),

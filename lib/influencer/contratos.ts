@@ -77,7 +77,7 @@ export type Aviso = { id: string; titulo: string; detalle: string; tone: StatusT
 /** Lo que hay que mirar en un contrato que manda la marca antes de firmarlo. */
 export const CLAUSULAS_A_VIGILAR = [
   { id: "rondas", titulo: "Rondas de cambios limitadas", detalle: "Un número por pieza; las demás, aparte." },
-  { id: "derechos", titulo: "Derechos de uso con plazo y canales", detalle: "Nada de «a perpetuidad» ni «en todos los medios»." },
+  { id: "derechos", titulo: "Derechos de uso con plazo y canales", detalle: "Evita «a perpetuidad» y «en todos los medios»." },
   { id: "paid", titulo: "Uso en anuncios pagado aparte", detalle: "Paid o whitelisting, solo con acuerdo y precio." },
   { id: "exclusividad", titulo: "Exclusividad corta o pagada", detalle: "Categoría concreta y meses contados." },
   { id: "pago", titulo: "Pago a 60 días o menos", detalle: "Es el máximo de la ley de morosidad." },
@@ -111,7 +111,7 @@ export function revisarContrato({ collab, texto, valores }: { collab: Collab; te
     avisos.push({ id: "faltan", titulo: `Faltan ${faltan.length} ${faltan.length === 1 ? "dato" : "datos"}`, detalle: faltan.map((c) => variableDe(c)?.label ?? c).join(", "), tone: "warning" })
   }
   if (/ilimitad|sin l[ií]mite de (rondas|cambios)/.test(plano) || collab.brief.rondasIncluidas === 0) {
-    avisos.push({ id: "rondas", titulo: "Rondas de cambios sin límite", detalle: "Pon un número de rondas por pieza; las demás se cobran aparte.", tone: "danger" })
+    avisos.push({ id: "rondas", titulo: "Rondas de cambios sin límite", detalle: "Fija un número de rondas por pieza y cobra aparte las adicionales.", tone: "danger" })
   }
   const derechos = collab.brief.derechosUso
   if (/perpetu|indefinid|a perpetuidad/.test(plano) || (derechos && mesesDe(derechos) === null)) {

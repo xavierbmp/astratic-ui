@@ -145,7 +145,7 @@ export function revisarCaption(c: Pick<Contenido, "caption" | "redes" | "publici
   }
   if (c.publicidad) {
     const { ok, soloAd } = marcaDePublicidad(texto)
-    if (!ok) avisos.push({ id: "publi", texto: soloAd ? "«#ad» no vale en español: pon #publi o «publicidad»" : "Es publicidad (regalo o afiliado): pon #publi o «publicidad»" })
+    if (!ok) avisos.push({ id: "publi", texto: soloAd ? "En España, usa #publi o «publicidad» en lugar de #ad" : "Producto regalado o afiliado: identifícalo con #publi o «publicidad»" })
   }
   return avisos
 }

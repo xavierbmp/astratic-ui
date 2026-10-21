@@ -92,7 +92,7 @@ const TODAS = "todas"
 export function SelectorPlataforma({ value, onChange, tamano = "md", className, "aria-label": ariaLabel }: { value: string | undefined; onChange: (plataforma: string | undefined) => void; tamano?: "md" | "sm"; className?: string; "aria-label"?: string }) {
   const propia = value && !PLATAFORMAS.some((p) => p.id === value) ? [{ value, label: value, icono: <IconoPlataforma plataforma={value} className="text-muted-foreground" /> }] : []
   const opciones = [
-    { value: TODAS, label: "Cualquier plataforma", detalle: "Se entrega, no se publica en una concreta", icono: <GlobeIcon className="size-4 text-muted-foreground" /> },
+    { value: TODAS, label: "Cualquier plataforma", detalle: "Se entrega sin publicar", icono: <GlobeIcon className="size-4 text-muted-foreground" /> },
     ...PLATAFORMAS.map((p) => ({ value: p.id, label: p.nombre, icono: <IconoPlataforma plataforma={p.id} className="text-muted-foreground" /> })),
     ...propia,
   ]
