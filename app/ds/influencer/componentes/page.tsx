@@ -91,7 +91,7 @@ export default function InfluencerComponentesPage() {
         </Example>
       </DocSection>
 
-      <DocSection id="cifras-cabecera" title="Cifras en la cabecera" lead="Las cifras clave de una portada que no es el Inicio (Pipeline, Collabs, Cobros, Tarifas), a la derecha del título y antes de sus botones, en la prop stats de PageHeader. Sin tarjetas ni iconos: número, nombre y una línea de detalle, separadas por una raya fina. Con onClick filtran la lista de debajo.">
+      <DocSection id="cifras-cabecera" title="Cifras en la cabecera" lead="Las cifras clave de una portada que no es el Inicio (Pipeline, Collabs, Cobros, Tarifas), a la derecha del título, en la prop stats de PageHeader; los botones de la página bajan a la fila de las pestañas. Sin tarjetas ni iconos: número, nombre y una línea de detalle, separadas por una raya fina. Con onClick filtran la lista de debajo.">
         <Example className={EXAMPLE} code={`<PageHeader
   title="Cobros"
   description="Lo que te deben, lo que toca facturar y lo cobrado."

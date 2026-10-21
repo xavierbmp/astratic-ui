@@ -9,7 +9,7 @@
 - Contraste en claro: `border` separa bloques, `input` bordea campos y botones outline, `control` bordea lo que se marca (casillas, radios): tiene que verse sin buscarlo. Lo seleccionado (filas, tarjetas, elementos de lista) va en `bg-brand-soft` con un filo `brand` a la izquierda; el hover, en `bg-muted`.
 
 ## Anatomía de una página de operación (orden fijo)
-1. `PageBody` → `PageHeader` (título 27 px y una línea de descripción, `actions` con botones outline a la derecha y, debajo y a todo el ancho, `tabs` con las pestañas de subpágina si las hay).
+1. `PageBody` → `PageHeader` (título 27 px y una línea de descripción, a su derecha las cifras si las hay y, debajo y a todo el ancho, `tabs` con las pestañas de subpágina; `actions`, los botones outline, van a la derecha de esa fila de pestañas cuando hay pestañas o cifras (Xavier, 2026-10-21) y, si no, junto al título).
 2. `WorkGrid`, que reparte el resto de la página en dos columnas:
    - `stats={<KpiRow>}` con 3 a 5 `KpiCard`. Van **dentro** de la columna izquierda, no a ancho completo: `KpiRow` es `auto-fit minmax(180px,1fr)` y se reordena solo al estrecharse. Cuando las cifras son los tramos de un mismo recorrido (el estado de una base: sin normalizar, listas, en campaña…), van en el orden del trabajo y **cada una filtra la lista** al pulsarla (`KpiCard onClick` + `active`): es una condición más en el filtro de la vista abierta, que se ve en su botón «Filtro». Cuentan toda la base, no solo las filas cargadas.
    - **la base de datos** (`BaseDatos`, ver «Bases de datos») como hijo: lleva dentro su barra (vistas, filtro, grupos, orden, buscar y la acción principal negra y única), así que no hay toolbar suelta encima. Con cifras que filtran, estas cambian el filtro de la vista abierta.
