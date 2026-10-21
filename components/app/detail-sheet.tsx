@@ -258,7 +258,8 @@ export function DetailFields({ children, columns = 1, className }: { children: R
       {filas.length > 0 && (
         <dl
           className={cn(
-            "grid items-start gap-x-3 gap-y-0.5 text-sm",
+            // Con aire entre filas (Xavier, 2026-10-21, reporte cmvfj3or: «siempre queda muy pegado»).
+            "grid items-start gap-x-4 gap-y-1.5 text-sm",
             columns === 2 ? "grid-cols-[5.25rem_minmax(0,1fr)] @sm:grid-cols-[5.25rem_minmax(0,1fr)_5.25rem_minmax(0,1fr)]" : "grid-cols-[7.5rem_minmax(0,1fr)]"
           )}
         >
@@ -307,7 +308,7 @@ export function DetailField({
 }) {
   return (
     <>
-      <dt className="flex min-h-7 items-center text-xs text-muted-foreground">
+      <dt className="flex min-h-8 items-center text-xs text-muted-foreground">
         {onConfig ? (
           <button
             type="button"
@@ -322,7 +323,7 @@ export function DetailField({
           <span className="truncate">{label}</span>
         )}
       </dt>
-      <dd className="flex min-h-7 min-w-0 items-center">
+      <dd className="flex min-h-8 min-w-0 items-center">
         <div className="min-w-0 flex-1">{autoEdit ? <InlineAutoEdit.Provider value>{children}</InlineAutoEdit.Provider> : children}</div>
       </dd>
     </>
