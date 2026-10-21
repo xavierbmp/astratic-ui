@@ -85,6 +85,18 @@
   --color-tint-peach: var(--tint-peach);
   --color-tint-peach-foreground: var(--tint-peach-foreground);
 
+  /* El color de cada red en la tarjeta del perfil del workspace (`ProfilePanel`): su tinta (línea, barra, sombra del
+     logo), su fondo suave y el fondo de su logo (`bg-(image:--net-<red>-logo)`), que siempre lleva el logo en blanco. */
+  --color-net-instagram: var(--net-instagram);
+  --color-net-instagram-soft: var(--net-instagram-soft);
+  --color-net-tiktok: var(--net-tiktok);
+  --color-net-tiktok-soft: var(--net-tiktok-soft);
+  --color-net-youtube: var(--net-youtube);
+  --color-net-youtube-soft: var(--net-youtube-soft);
+  --color-net-linkedin: var(--net-linkedin);
+  --color-net-linkedin-soft: var(--net-linkedin-soft);
+  --color-net-logo-foreground: var(--net-logo-foreground);
+
   /* Colores de las opciones de un campo y de las filas de una base (`lib/base/campos.ts`). */
   --color-opcion-azul: var(--opcion-azul);
   --color-opcion-azul-foreground: var(--opcion-azul-foreground);
@@ -317,9 +329,34 @@
   --tint-sky-foreground: oklch(0.42 0.12 245);
   --tint-peach: oklch(0.95 0.055 60);
   --tint-peach-foreground: oklch(0.46 0.12 50);
+
+  /* Las redes (diseño «Tarjeta Perfil», Xavier 2026-10-21): los colores de cada marca, suaves de fondo. */
+  --net-instagram: #c13584;
+  --net-instagram-soft: #fbf1f6;
+  --net-instagram-logo: linear-gradient(45deg, #feda75, #fa7e1e 30%, #d62976 60%, #962fbf 85%, #4f5bd5);
+  --net-tiktok: #0fb5ae;
+  --net-tiktok-soft: #eef8f7;
+  --net-tiktok-logo: linear-gradient(#111111, #111111);
+  --net-youtube: #e0002d;
+  --net-youtube-soft: #fdf0f0;
+  --net-youtube-logo: linear-gradient(#ff0033, #ff0033);
+  --net-linkedin: #0a66c2;
+  --net-linkedin-soft: #eef4fb;
+  --net-linkedin-logo: linear-gradient(#0a66c2, #0a66c2);
+  --net-logo-foreground: #ffffff;
 }
 
 .dark .theme-influencer {
+  --net-instagram: #e05aa6;
+  --net-instagram-soft: color-mix(in oklab, #c13584 18%, var(--card));
+  --net-tiktok: #2fd1c9;
+  --net-tiktok-soft: color-mix(in oklab, #0fb5ae 16%, var(--card));
+  --net-tiktok-logo: linear-gradient(#000000, #000000);
+  --net-youtube: #ff4d6a;
+  --net-youtube-soft: color-mix(in oklab, #e0002d 16%, var(--card));
+  --net-linkedin: #4f9be6;
+  --net-linkedin-soft: color-mix(in oklab, #0a66c2 18%, var(--card));
+
   --background: oklch(0.16 0.008 265);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.008 265);

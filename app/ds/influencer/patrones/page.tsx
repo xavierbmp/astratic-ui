@@ -25,8 +25,8 @@ export default function InfluencerPatronesPage() {
         <CodeBlock
           code={`<PageBody className="gap-6 px-4 pb-28 md:px-[34px] md:pb-10">
   <header>…saludo, frase de lo urgente · botón Nuevo…</header>
-  <div className="grid gap-6 xl:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
-    <ProfilePanel links={<LinkRow max={4} … />} actions={<ProfileTile … />} … />
+  <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <ProfilePanel links={<LinkRow max={4} … />} actions={<>…Media kit · Editar…</>} … />
     <StatRow className="xl:grid-cols-2 xl:grid-rows-2 xl:[&>*]:justify-between">…4 StatTile…</StatRow>
   </div>
   <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">

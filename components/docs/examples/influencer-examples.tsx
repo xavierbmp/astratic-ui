@@ -1,14 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { FileTextIcon } from "lucide-react"
+import { FileTextIcon, PencilIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Block, BlockHeader } from "@/components/influencer/block"
 import { TaskCard } from "@/components/influencer/task-card"
 import { LinkGrid, LinkRow, type QuickLink } from "@/components/app/link-grid"
 import { PildorasMultiples } from "@/components/app/formulario/opciones-visuales"
-import { ProfilePanel, ProfileTile } from "@/components/influencer/profile-panel"
+import { ProfilePanel, type Tendencia } from "@/components/influencer/profile-panel"
+import type { SocialNetwork } from "@/components/app/social-icons"
 import { TaskTable } from "@/components/influencer/task-table"
 import { HOY, demoContactos, demoEnlaces, demoPerfil, demoEtiquetasTarea, demoMarcas, demoPropuestas, demoTareas } from "@/lib/influencer/demo-data"
 import { demoCollabs } from "@/lib/influencer/demo-collabs"
@@ -113,26 +114,48 @@ export function LinkRowExample() {
   return <LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} className="justify-start" />
 }
 
-/** La tarjeta del perfil del Inicio, con sus enlaces arriba a la derecha y el media kit junto a las cifras. */
+/** Cómo van los seguidores en el ejemplo (en el workspace salen de cada red conectada): Instagram y TikTok dan su línea; YouTube, solo su cifra. */
+const TENDENCIAS_EJEMPLO: Partial<Record<SocialNetwork, Tendencia>> = {
+  instagram: { serie: [62_100, 62_800, 62_400, 63_900, 63_500, 64_600, 65_200, 64_900, 66_300, 66_900, 67_500, 68_400], cambio: 1.8 },
+  tiktok: { serie: [35_600, 36_400, 36_100, 37_200, 36_900, 38_000, 38_900, 38_600, 39_700, 40_100, 40_600, 41_200], cambio: 6.4 },
+}
+
+/** La tarjeta del perfil del Inicio, con sus enlaces, el media kit y editar arriba a la derecha. */
 export function ProfilePanelExample() {
   const [links, setLinks] = React.useState<QuickLink[]>(demoEnlaces.map((e) => ({ id: e.id, label: e.etiqueta, url: e.url })))
   const [editing, setEditing] = React.useState(false)
   return (
     <ProfilePanel
-      className="max-w-xl"
+      className="max-w-3xl"
       name={demoPerfil.nombre}
       handle={demoPerfil.handle}
       photoUrl={demoPerfil.fotoUrl}
       niche={demoPerfil.nicho}
       tier={demoPerfil.tramo}
       city={demoPerfil.ciudad}
-      accounts={demoPerfil.cuentas.map((c) => ({ network: c.red, handle: c.handle, url: c.url, followers: c.seguidores, avgViews: c.visualizacionesMedias, engagement: c.interaccion }))}
+      online
+      accounts={demoPerfil.cuentas.map((c) => ({
+        network: c.red,
+        handle: c.handle,
+        url: c.url,
+        followers: c.seguidores,
+        avgViews: c.visualizacionesMedias,
+        engagement: c.interaccion,
+        trend: TENDENCIAS_EJEMPLO[c.red],
+      }))}
       href="#"
-      links={<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} max={4} />}
+      links={<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} max={3} conLapiz={false} />}
       actions={
-        <ProfileTile icon={<FileTextIcon />} label="Media kit" detail="Ver el PDF" asChild>
-          <a href="#" />
-        </ProfileTile>
+        <>
+          <Button asChild className="h-[38px] rounded-[13px] px-[15px]">
+            <a href="#">
+              <FileTextIcon /> Media kit
+            </a>
+          </Button>
+          <Button variant="outline" size="icon" className="size-[38px] rounded-[13px]" aria-label="Editar mis enlaces" onClick={() => setEditing(true)}>
+            <PencilIcon />
+          </Button>
+        </>
       }
     />
   )

@@ -182,21 +182,25 @@ export default function InfluencerComponentesPage() {
         />
       </DocSection>
 
-      <DocSection id="profile" title="Tarjeta del perfil" lead="Foto, nombre, nicho y tramo; arriba a la derecha sus enlaces y, debajo, las views medias y la interacción de la red elegida. Al pie, una ficha por red con sus seguidores (al pulsarla, las cifras pasan a ser las suyas) y el media kit.">
+      <DocSection id="profile" title="Tarjeta del perfil" lead="Foto con su punto verde, nombre con su @, nicho, tramo y ciudad; a la derecha los enlaces rápidos, el media kit y editar. Debajo, una ficha por red en su color con sus seguidores, su cambio, la interacción, las views medias y la línea de sus seguidores al pie. Abajo, la audiencia total con su reparto por red, las views medias y la interacción media.">
         <Example className={EXAMPLE} code={`<ProfilePanel
   name={profile.name} handle={profile.handle} photoUrl={profile.photoUrl}
-  niche="Skincare y maquillaje" tier="50K–100K" city="Valencia"
+  niche="Skincare y maquillaje" tier="50K–100K" city="Valencia" online
   accounts={profile.accounts} href="/workspace/perfil"
-  links={<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} />}
-  actions={<ProfileTile icon={<FileTextIcon />} label="Media kit" detail="Ver el PDF" asChild><a href="/media-kit" /></ProfileTile>}
+  links={<LinkRow links={links} onChange={setLinks} editing={editing} onEditingChange={setEditing} max={3} conLapiz={false} />}
+  actions={<>
+    <Button asChild><a href="/media-kit"><FileTextIcon /> Media kit</a></Button>
+    <Button variant="outline" size="icon" onClick={() => setEditing(true)}><PencilIcon /></Button>
+  </>}
 />`}>
           <ProfilePanelExample />
         </Example>
         <Rules
           items={[
-            <>Abre en la red con más seguidores. La interacción solo sale si la red la tiene.</>,
-            <>Las fichas del pie (cada red y el media kit, con <code>ProfileTile</code>) crecen hasta llenar la tarjeta: junto a las cifras, a la misma altura, no queda hueco.</>,
-            <>Por debajo de 448 px de tarjeta, los enlaces y las cifras bajan bajo el nombre. En la tarjeta caben cuatro enlaces a la vista (<code>LinkRow max={4}</code>).</>,
+            <>Cada red con sus colores (tokens <code>net-*</code>): el fondo suave de su ficha, su logo en blanco sobre su cuadrado y su tinta en la línea y en la barra del reparto.</>,
+            <>La línea de seguidores y su cambio solo salen donde la red los da. De YouTube, solo sus cifras tal cual: ni interacción, ni cambio, ni entra en la audiencia total ni en las medias.</>,
+            <>La interacción media es la de todos sus seguidores juntos; las views medias, las de la red con más seguidores.</>,
+            <>Con <code>href</code>, cada ficha lleva a su red en el perfil (<code>?red=</code>). Sin redes, <code>empty</code> (fichas <code>ProfileTile</code>) ocupa su sitio.</>,
           ]}
         />
       </DocSection>

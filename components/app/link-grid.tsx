@@ -279,7 +279,7 @@ const EN_FILA = 5
  * Los enlaces en una fila de iconos (en la cabecera de una página o en la tarjeta del perfil): los `max` primeros a la vista y
  * «+N» despliega el resto en la misma fila. El lápiz abre el directorio (`LinkGrid` en modo edición)
  * para añadir, ordenar, editar o borrar; `editing` y `onEditingChange` lo abren también desde fuera
- * (un «Nuevo › Enlace»).
+ * (un «Nuevo › Enlace»). Con `conLapiz={false}`, el lápiz va fuera (en el menú de editar de la tarjeta del perfil).
  */
 export function LinkRow({
   links,
@@ -287,6 +287,7 @@ export function LinkRow({
   editing,
   onEditingChange,
   max = EN_FILA,
+  conLapiz = true,
   className,
 }: {
   links: QuickLink[]
@@ -295,6 +296,8 @@ export function LinkRow({
   onEditingChange: (editing: boolean) => void
   /** Los que se ven antes de «+N» (cinco, salvo donde hay menos sitio). */
   max?: number
+  /** El lápiz que abre el directorio al final de la fila (de serie, sí). */
+  conLapiz?: boolean
   className?: string
 }) {
   const [expanded, setExpanded] = React.useState(false)
@@ -340,16 +343,18 @@ export function LinkRow({
               </button>
             </li>
           )}
-          <li>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-lg" className="rounded-full text-muted-foreground" aria-label="Editar mis enlaces" onClick={() => onEditingChange(true)}>
-                  <PencilIcon className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Editar mis enlaces</TooltipContent>
-            </Tooltip>
-          </li>
+          {conLapiz && (
+            <li>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon-lg" className="rounded-full text-muted-foreground" aria-label="Editar mis enlaces" onClick={() => onEditingChange(true)}>
+                    <PencilIcon className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Editar mis enlaces</TooltipContent>
+              </Tooltip>
+            </li>
+          )}
         </ul>
       )}
 
