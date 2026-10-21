@@ -43,6 +43,7 @@ function FilaHoy({
   onCambiarIcono,
   arrastrable,
   vencida,
+  conFecha,
 }: {
   tarea: Tarea
   hijas: Tarea[]
@@ -54,8 +55,10 @@ function FilaHoy({
   onCambiarIcono?: (t: Tarea, icono: IconoTarea | undefined) => void
   arrastrable: boolean
   vencida?: boolean
+  /** Una de los próximos días: en vez de la hora, su día. */
+  conFecha?: boolean
 }) {
-  const { ref, style, asa, arrastrando } = useFilaArrastrable(tarea.id, vencida ? "vencidas" : "hoy", !arrastrable)
+  const { ref, style, asa, arrastrando } = useFilaArrastrable(tarea.id, vencida ? "vencidas" : conFecha ? "siguientes" : "hoy", !arrastrable)
   const [abiertas, setAbiertas] = React.useState(false)
   const hecha = estaCerrada(tarea)
   return (
@@ -87,7 +90,7 @@ function FilaHoy({
         <span className="flex w-5 flex-none justify-center">
           <PrioridadIcono prioridad={tarea.prioridad} soloSiImporta />
         </span>
-        <span className="flex w-24 flex-none justify-end">{vencida ? <FechaTarea tarea={tarea} hoy={hoy} /> : <HoraTarea tarea={tarea} />}</span>
+        <span className="flex w-24 flex-none justify-end">{vencida || conFecha ? <FechaTarea tarea={tarea} hoy={hoy} /> : <HoraTarea tarea={tarea} />}</span>
       </div>
       {abiertas && <MiniSubtareas hijas={hijas} onToggle={onToggle} onAbrir={onAbrir} className="pr-2 pb-1.5 pl-[72px]" />}
     </li>
@@ -100,13 +103,15 @@ function FilaHoy({
  * línea, lo vencido (en rojo, con «Pasar todo a hoy») y lo de hoy por importancia (prioridad, hora y
  * lo que vence antes), que ella puede reordenar arrastrando. Cada fila con su icono y cada dato en su
  * columna. El bloque ocupa como mucho un tercio de la pantalla (Xavier, 2026-10-16): lo que no cabe se
- * desvanece abajo y «Ver todas» lo despliega. Las hechas de hoy, plegadas al final.
+ * desvanece abajo y «Ver todas» lo despliega. Las hechas de hoy, plegadas al final. Sin nada para hoy, «Hoy» queda
+ * vacío y debajo salen las siguientes por orden, hasta el mismo alto (Xavier, 2026-10-21, reporte cmvfixkv).
  */
 export function TareasHoy({
   hoy,
   vencidas,
   deHoy,
   hechasHoy,
+  siguientes = [],
   ctx,
   etiquetas,
   hijasDe,
@@ -127,6 +132,8 @@ export function TareasHoy({
   /** Ya en su orden: el automático o el que ella ha puesto. */
   deHoy: Tarea[]
   hechasHoy: Tarea[]
+  /** Las de los próximos días, por orden: salen cuando hoy no hay nada. */
+  siguientes?: Tarea[]
   ctx: ContextoTareas
   etiquetas: EtiquetaTarea[]
   /** Las subtareas de una tarea, en su orden: se despliegan en pequeño para marcarlas. */
@@ -151,7 +158,7 @@ export function TareasHoy({
   const [texto, setTexto] = React.useState("")
   const total = vencidas.length + deHoy.length
   const { ref: listaRef, sobra } = useSobra(!plegado && !todas)
-  const fila = (t: Tarea, extra: { vencida?: boolean; arrastrable: boolean }) => (
+  const fila = (t: Tarea, extra: { vencida?: boolean; conFecha?: boolean; arrastrable: boolean }) => (
     <FilaHoy key={t.id} tarea={t} hijas={hijasDe(t)} hoy={hoy} ctx={ctx} etiquetas={etiquetas} onAbrir={onAbrir} onToggle={onToggle} onCambiarIcono={onCambiarIcono} {...extra} />
   )
 
@@ -209,7 +216,15 @@ export function TareasHoy({
               <div className="grid grid-cols-1 gap-0.5">
                 {vencidas.length > 0 && deHoy.length > 0 && <span className="px-2 pt-1 text-xs font-semibold text-muted-foreground">Para hoy, por importancia</span>}
                 {deHoy.length === 0 && vencidas.length === 0 ? (
-                  <p className="px-2 py-2 text-sm text-muted-foreground">Nada para hoy. Mira lo de mañana o planifica la semana.</p>
+                  <>
+                    <p className="px-2 py-2 text-sm text-muted-foreground">{siguientes.length ? "Nada para hoy." : "Nada para hoy. Mira lo de mañana o planifica la semana."}</p>
+                    {siguientes.length > 0 && (
+                      <>
+                        <span className="px-2 pt-1 text-xs font-semibold text-muted-foreground">Lo siguiente</span>
+                        <ul className="grid grid-cols-1 gap-0.5">{siguientes.map((t) => fila(t, { conFecha: true, arrastrable: false }))}</ul>
+                      </>
+                    )}
+                  </>
                 ) : (
                   <GrupoArrastrable grupoId="hoy" ids={deHoy.map((t) => t.id)}>
                     <ul className="grid grid-cols-1 gap-0.5">{deHoy.map((t) => fila(t, { arrastrable: true }))}</ul>
