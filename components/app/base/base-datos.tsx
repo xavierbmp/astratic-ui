@@ -93,6 +93,7 @@ export function BaseDatos<T>({
   crearCamposAlImportar,
   ajustesTabla,
   portada,
+  tarjetaGaleria,
   lateral: lateralPropio,
   ficha: fichaPagina,
   kanban: kanbanBase,
@@ -142,6 +143,8 @@ export function BaseDatos<T>({
   ajustesTabla?: { label: string; onAbrir: () => void }
   /** La imagen de cada registro en las tarjetas del kanban y la galería. */
   portada?: (fila: T) => string | null | undefined
+  /** Una tarjeta a medida para la galería (una tarjeta de perfil): la pinta la página; la vista sigue filtrando, ordenando y abriendo. */
+  tarjetaGaleria?: (fila: T) => React.ReactNode
   /**
    * Un lateral propio en lugar del de las vistas (las carpetas de las ideas). Las vistas siguen en
    * el menú del nombre de la vista. `nombre` es para el botón que lo abre y lo cierra. Si `contenido`
@@ -366,7 +369,7 @@ export function BaseDatos<T>({
       case "kanban":
         return <KanbanBase {...tarjetas} campo={campos.find((c) => c.id === vista.apilar)} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} onEscribir={escribirUno} clave={`${clave}:${vista.id}`} resumen={kanban?.resumen} plegadas={kanban?.plegadas} acciones={kanban?.acciones} />
       case "galeria":
-        return <GaleriaBase {...tarjetas} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
+        return <GaleriaBase {...tarjetas} registros={registros} getId={getId} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} aMedida={tarjetaGaleria} />
       case "calendario":
         return <CalendarioBase campo={campos.find((c) => c.id === vista.fecha)} principal={campos.find((c) => c.principal)} registros={registros} getId={getId} hoy={hoy} colorDe={colorDe} abiertoId={abiertoId} onAbrir={onAbrir} onEscribir={escribirUno} />
       default:
