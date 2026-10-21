@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, CornerDownRightIcon, MapPinIcon, PencilLineIcon, QuoteIcon, SendHorizontalIcon, TimerIcon, XIcon } from "lucide-react"
+import { CheckIcon, CornerDownRightIcon, MapPinIcon, PencilLineIcon, QuoteIcon, SendHorizontalIcon, TimerIcon, Trash2Icon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { fmt, initials } from "@/lib/format"
 import { segundos, type Ancla, type DecisionSugerencia, type Mensaje, type NotaRevision } from "@/lib/revision-notas"
@@ -88,6 +88,8 @@ export type PropsConversacion<L extends string> = {
   /** Quien hace la pieza acepta o rechaza una sugerencia de cambio (una vez: decidida ya no se reabre). */
   onDecidir?: (notaId: string, decision: DecisionSugerencia) => void
   onResponder?: (notaId: string, texto: string) => void
+  /** Quien revisa borra una nota suya mientras la versión está abierta y nadie la ha resuelto (las sugerencias se retiran deshaciendo el cambio). */
+  onBorrar?: (notaId: string) => void
   /** Quien hace la pieza: un mensaje. Quien revisa: una nota, anclada si ha marcado un sitio. */
   onEnviar?: (texto: string, ancla?: Ancla) => void
   anclaPendiente?: Ancla | null
@@ -104,7 +106,7 @@ export type PropsConversacion<L extends string> = {
  * orden, cada nota con su número, su sitio en la pieza, su hilo y su estado. «Solo notas» deja lo
  * que hay que resolver. Abajo, el progreso: cuántas notas están resueltas.
  */
-export function Conversacion<L extends string>({ notas, mensajes, lado, ladoAutor, seleccionada, onSeleccionar, onResolver, onDecidir, onResponder, onEnviar, anclaPendiente, onQuitarAncla, cerrada, placeholder, textos: propios, className }: PropsConversacion<L>) {
+export function Conversacion<L extends string>({ notas, mensajes, lado, ladoAutor, seleccionada, onSeleccionar, onResolver, onDecidir, onResponder, onBorrar, onEnviar, anclaPendiente, onQuitarAncla, cerrada, placeholder, textos: propios, className }: PropsConversacion<L>) {
   const textos = { ...TEXTOS, ...propios }
   const esAutor = lado === ladoAutor
   const [vista, setVista] = React.useState<"todo" | "notas">("todo")
@@ -221,6 +223,11 @@ export function Conversacion<L extends string>({ notas, mensajes, lado, ladoAuto
                       {esAutor && onResolver && !e.n.sugerencia && (
                         <Button variant="ghost" size="sm" className={cn("h-7", e.n.resuelta ? "text-muted-foreground" : "text-success hover:text-success")} onClick={() => onResolver(e.n.id)}>
                           <CheckIcon /> {e.n.resuelta ? "Reabrir" : "Hecha"}
+                        </Button>
+                      )}
+                      {!esAutor && onBorrar && !cerrada && !e.n.resuelta && !e.n.sugerencia && (
+                        <Button variant="ghost" size="sm" className="h-7 text-muted-foreground hover:text-destructive" onClick={() => onBorrar(e.n.id)}>
+                          <Trash2Icon /> Eliminar
                         </Button>
                       )}
                       {onResponder && respondiendo !== e.n.id && (
