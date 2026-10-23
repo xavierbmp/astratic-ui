@@ -24,7 +24,7 @@ const ANCHO_MINIMO_BLOQUE = 520
  * abierto ocupa su sitio (con el ancho que haya elegido la persona) y al cerrarla vuelve la información;
  * plegado, la lista ocupa todo el ancho y la ficha se abre encima.
  *
- * Con `pestanas` (las `SubPaginas` del segundo nivel), van pegadas encima del bloque, como carpetas.
+ * Con `pestanas` (las `SubPaginas` del segundo nivel), van pegadas encima del bloque, a la derecha, como carpetas.
  */
 export function WorkGrid({
   stats,
@@ -85,7 +85,7 @@ export function WorkGrid({
           {toolbar}
         </div>
       )}
-      <div className={cn("flex min-h-0 min-w-0 flex-col xl:col-start-1", pestanas && "[&>[data-slot=sub-paginas]+*]:rounded-tl-none", rowStart[filaBloque])}>
+      <div className={cn("flex min-h-0 min-w-0 flex-col xl:col-start-1", pestanas && "[&>[data-slot=sub-paginas]+*]:rounded-tr-none [&>[data-slot=sub-paginas]+*>*]:rounded-tr-none", rowStart[filaBloque])}>
         {pestanas}
         {children}
       </div>
