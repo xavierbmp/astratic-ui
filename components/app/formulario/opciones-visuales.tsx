@@ -14,10 +14,10 @@ export type OpcionTarjeta<V extends string> = { value: V; label: string; descrip
  * materiales»): una tarjeta por opción con su icono, su nombre y una frase. La elegida, en
  * `brand-soft` con su borde.
  */
-export function TarjetasOpcion<V extends string>({ opciones, valor, onChange, columnas = 2, className, "aria-label": ariaLabel }: { opciones: OpcionTarjeta<V>[]; valor: V; onChange: (valor: V) => void; columnas?: 1 | 2 | 3; className?: string; "aria-label"?: string }) {
+export function TarjetasOpcion<V extends string>({ opciones, valor, onChange, columnas = 2, className, "aria-label": ariaLabel }: { opciones: OpcionTarjeta<V>[]; valor: V | undefined; onChange: (valor: V) => void; columnas?: 1 | 2 | 3; className?: string; "aria-label"?: string }) {
   return (
     <RadioGroup
-      value={valor}
+      value={valor ?? ""}
       onValueChange={(v) => {
         const o = opciones.find((x) => x.value === v)
         if (o) onChange(o.value)

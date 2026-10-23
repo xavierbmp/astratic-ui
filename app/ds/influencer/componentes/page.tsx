@@ -518,9 +518,9 @@ const [editing, setEditing] = useState(false)
         />
       </DocSection>
 
-      <DocSection id="asistente" title="Asistente por pasos" lead="El marco de la bienvenida: ocupa la pantalla, con el logotipo y la salida arriba, los pasos en vertical a la izquierda (hecho, para más tarde, el de ahora, pendiente) y cada paso en un bloque con su título, una frase de por qué y la fila de botones. En el móvil, una barra de progreso por tramos.">
+      <DocSection id="asistente" title="Asistente por pasos" lead="El marco de la bienvenida: ocupa la pantalla, con el logotipo y la salida arriba y, en el centro, una tarjeta con el progreso por tramos (hecho, para más tarde, el de ahora, pendiente; cada tramo lleva a su paso) y el paso de ahora con su título, una frase de por qué y la fila de botones. Una pregunta cada vez, sin la lista de pasos al lado.">
         <Example className={EXAMPLE} code={`<AsistenteMarco logo={<DocLogo devs={false} />} pasos={pasos} salida={<Button variant="ghost" size="sm">Ir a mi workspace</Button>}>
-  <AsistentePaso etiqueta="Cómo trabajas" titulo="Qué collabs te encajan" descripcion="…" pie={<PiePaso … />}>
+  <AsistentePaso titulo="Qué collabs te encajan" descripcion="…" pie={<PiePaso … />}>
     <PildorasMultiples opciones={…} valores={…} onChange={…} />
   </AsistentePaso>
 </AsistenteMarco>`}>
@@ -535,7 +535,7 @@ const [editing, setEditing] = useState(false)
               ]}
               salida={<Button variant="ghost" size="sm">Ir a mi workspace</Button>}
             >
-              <AsistentePaso etiqueta="Cómo trabajas" titulo="Qué collabs te encajan" descripcion="Con esto te proponemos solo campañas que aceptarías." pie={<><span /><Button>Continuar</Button></>}>
+              <AsistentePaso titulo="Qué collabs te encajan" descripcion="Con esto te proponemos solo campañas que aceptarías." pie={<><span /><Button>Continuar</Button></>}>
                 <PildorasEjemplo />
               </AsistentePaso>
             </AsistenteMarco>
@@ -543,9 +543,9 @@ const [editing, setEditing] = useState(false)
         </Example>
         <Rules
           items={[
-            <>Un paso, una pregunta grande: lo que se pide se entiende sin explicación y nada es obligatorio. Lo que se puede dejar lleva «Lo haré más tarde» y sale «Para más tarde» en el riel.</>,
+            <>Un paso, una pregunta grande: lo que se pide se entiende sin explicación y nada es obligatorio. Lo que se puede dejar lleva «Lo haré más tarde» y su tramo sale más claro en el progreso.</>,
             <>Al continuar se guarda lo del paso con las acciones de siempre de su página (perfil, tarifas, CRM, ajustes): el asistente no tiene datos propios salvo lo que no vive en otro sitio.</>,
-            <>Opciones cortas en píldoras (<code>PildorasOpcion</code> y <code>PildorasMultiples</code> del madre); lo elegido, con filo y en negrita, y con su check si se eligen varias.</>,
+            <>Cada pregunta con el control que le va (Xavier, 2026-10-23: «si son opciones muy determinantes, con iconos»): lo que decide mucho, en tarjetas con icono y una frase (<code>TarjetasOpcion</code>, <code>CasillasOpcion</code>); las opciones cortas, en píldoras (<code>PildorasOpcion</code> y <code>PildorasMultiples</code> del madre).</>,
           ]}
         />
       </DocSection>
