@@ -14,8 +14,8 @@ describe("ajustes", () => {
   })
   it("comprueba el IBAN con el módulo 97", () => {
     expect(validarIban("ES91 2100 0418 4502 0005 1332")).toBeNull()
-    expect(validarIban("ES91 2100 0418 4502 0005 1333")).toMatch(/no es correcto/)
-    expect(validarIban("ES91 2100")).toMatch(/IBAN entero|24/)
+    expect(validarIban("ES91 2100 0418 4502 0005 1333")).toMatch(/no válido/)
+    expect(validarIban("ES91 2100")).toMatch(/IBAN completo|24/)
     expect(formatearIban("es9121000418450200051332")).toBe("ES91 2100 0418 4502 0005 1332")
   })
   it("la retención según cómo factura", () => {
@@ -24,6 +24,6 @@ describe("ajustes", () => {
     expect(retencionSugerida("sociedad")).toBe(0)
   })
   it("dice qué falta para facturar", () => {
-    expect(faltaParaFacturar({ nombre: "A", nif: "1", direccion: "x", iban: "", forma: "sin-alta", ivaPct: 21, irpfPct: 0 })).toEqual(["darte de alta como autónoma o con una sociedad", "el IBAN para que te paguen"])
+    expect(faltaParaFacturar({ nombre: "A", nif: "1", direccion: "x", iban: "", forma: "sin-alta", ivaPct: 21, irpfPct: 0 })).toEqual(["darte de alta para facturar", "el IBAN"])
   })
 })

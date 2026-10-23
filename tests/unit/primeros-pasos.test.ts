@@ -45,7 +45,7 @@ describe("completar el perfil", () => {
     const enlaces = Object.fromEntries(primerosPasos(base).map((p) => [p.id, p.href]))
     expect(enlaces.tarifas).toBe("/bienvenida?paso=tarifas")
     expect(enlaces.instagram).toBe("/bienvenida?paso=conexiones")
-    expect(enlaces.autocontrol).toBe("/workspace/academia/publicidad")
+    expect(enlaces.autocontrol).toBe("/workspace/academia/autocontrol")
   })
 
   it("para cobrar hacen falta los datos fiscales y la dirección de envío", () => {
