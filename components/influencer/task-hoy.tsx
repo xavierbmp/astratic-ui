@@ -90,7 +90,8 @@ function FilaHoy({
         <span className="flex w-5 flex-none justify-center">
           <PrioridadIcono prioridad={tarea.prioridad} soloSiImporta />
         </span>
-        <span className="flex w-24 flex-none justify-end">{vencida || conFecha ? <FechaTarea tarea={tarea} hoy={hoy} /> : <HoraTarea tarea={tarea} />}</span>
+        {/* Ancho para «12 oct · vence 14 oct»: con menos, la fecha se salía por la izquierda y pisaba la prioridad (reporte cmvjfaej). */}
+        <span className="flex w-40 flex-none justify-end">{vencida || conFecha ? <FechaTarea tarea={tarea} hoy={hoy} /> : <HoraTarea tarea={tarea} />}</span>
       </div>
       {abiertas && <MiniSubtareas hijas={hijas} onToggle={onToggle} onAbrir={onAbrir} className="pr-2 pb-1.5 pl-[72px]" />}
     </li>
