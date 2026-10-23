@@ -23,6 +23,8 @@ const ANCHO_MINIMO_BLOQUE = 520
  * Con `ficha` (ver `usePanelFicha`), el panel se pliega y se despliega: desplegado, la ficha del registro
  * abierto ocupa su sitio (con el ancho que haya elegido la persona) y al cerrarla vuelve la información;
  * plegado, la lista ocupa todo el ancho y la ficha se abre encima.
+ *
+ * Con `pestanas` (las `SubPaginas` del segundo nivel), van pegadas encima del bloque, como carpetas.
  */
 export function WorkGrid({
   stats,
@@ -30,6 +32,7 @@ export function WorkGrid({
   aside,
   asideWidth = 320,
   ficha,
+  pestanas,
   className,
   children,
   ...props
@@ -42,6 +45,8 @@ export function WorkGrid({
   asideWidth?: number
   /** Panel de ficha de la página: si está activo, ocupa la columna derecha en lugar de `aside`. */
   ficha?: PanelFicha
+  /** Las pestañas del segundo nivel (`SubPaginas`), al principio del bloque y unidas a él. */
+  pestanas?: React.ReactNode
 }) {
   const conFicha = ficha?.activa === true
   // Plegado: en dos columnas no hay panel; en una, sigue debajo del bloque (allí no hay botón para desplegarlo).
@@ -80,7 +85,10 @@ export function WorkGrid({
           {toolbar}
         </div>
       )}
-      <div className={cn("flex min-h-0 min-w-0 flex-col xl:col-start-1", rowStart[filaBloque])}>{children}</div>
+      <div className={cn("flex min-h-0 min-w-0 flex-col xl:col-start-1", pestanas && "[&>[data-slot=sub-paginas]+*]:rounded-tl-none", rowStart[filaBloque])}>
+        {pestanas}
+        {children}
+      </div>
       {lateral && (
         <div className={cn("group/lado relative min-h-80 min-w-0 xl:col-start-2 xl:row-start-1 xl:min-h-0", rowSpan[filaBloque], plegado && "xl:hidden")}>
           <div className="flex min-h-0 flex-col xl:absolute xl:inset-0">{lateral}</div>
