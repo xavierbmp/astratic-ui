@@ -91,6 +91,7 @@
       "registryDependencies": ["sidebar", "breadcrumb", "button", "kbd", "command", "separator", "dropdown-menu", "tooltip"],
       "files": [
         { "path": "components/app/app-shell.tsx", "type": "registry:component" },
+        { "path": "components/app/pantalla-completa.tsx", "type": "registry:component" },
         { "path": "components/app/theme-toggle.tsx", "type": "registry:component" },
         { "path": "components/app/avatar-initials.tsx", "type": "registry:component" },
         { "path": "lib/nav.ts", "type": "registry:lib" },
@@ -579,6 +580,7 @@
       "registryDependencies": ["sidebar", "breadcrumb", "button", "kbd", "command", "separator", "dropdown-menu", "tooltip", "input-group", "badge", "table", "checkbox", "popover", "sheet", "skeleton", "alert-dialog", "progress", "tabs", "select", "sonner", "input", "label", "switch", "dialog", "textarea"],
       "files": [
         { "path": "components/app/app-shell.tsx", "type": "registry:component" },
+        { "path": "components/app/pantalla-completa.tsx", "type": "registry:component" },
         { "path": "components/app/theme-toggle.tsx", "type": "registry:component" },
         { "path": "components/app/page-header.tsx", "type": "registry:component" },
         { "path": "components/app/page-tabs.tsx", "type": "registry:component" },

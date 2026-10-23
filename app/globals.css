@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+/* Pantalla completa de las páginas de operar (`components/app/pantalla-completa.tsx`). */
+@custom-variant completa (&:where([data-pantalla-completa] *));
 
 @theme inline {
   --font-sans: var(--font-sans);

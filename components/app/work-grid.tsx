@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "cn"
 import { DetailPanelHost, type PanelFicha } from "@/components/app/detail-panel"
 import { ResizeHandle, useAnchoGuardado } from "@/components/app/resize-handle"
+import { useBloqueDeTrabajo } from "@/components/app/pantalla-completa"
 
 // El bloque de trabajo nunca se queda más estrecho que esto al ensanchar el panel.
 const ANCHO_MINIMO_BLOQUE = 520
@@ -25,6 +26,8 @@ const ANCHO_MINIMO_BLOQUE = 520
  * plegado, la lista ocupa todo el ancho y la ficha se abre encima.
  *
  * Con `pestanas` (las `SubPaginas` del segundo nivel), van pegadas encima del bloque, a la derecha, como carpetas.
+ *
+ * Mientras está montado, la página tiene «Pantalla completa» en la cabecera del shell (`pantalla-completa.tsx`).
  */
 export function WorkGrid({
   stats,
@@ -48,6 +51,8 @@ export function WorkGrid({
   /** Las pestañas del segundo nivel (`SubPaginas`), al principio del bloque y unidas a él. */
   pestanas?: React.ReactNode
 }) {
+  // Con un bloque de trabajo, la página puede ponerse en pantalla completa (el botón sale en la cabecera del shell).
+  useBloqueDeTrabajo()
   const conFicha = ficha?.activa === true
   // Plegado: en dos columnas no hay panel; en una, sigue debajo del bloque (allí no hay botón para desplegarlo).
   const plegado = ficha !== undefined && !ficha.preferida

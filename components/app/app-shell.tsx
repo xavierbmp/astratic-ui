@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { BellIcon, ChevronsUpDownIcon, SearchIcon } from "lucide-react"
 import { cn } from "cn"
+import { BotonPantallaCompleta, PantallaCompletaProvider } from "@/components/app/pantalla-completa"
 import { activeTab, type Brand, type CurrentUser, type NavGroup } from "@/lib/nav"
 import {
   Sidebar,
@@ -167,6 +168,7 @@ export function AppShell({
   return (
     <BreadcrumbContext.Provider value={{ extra, setExtra }}>
       <SidebarProvider>
+        <PantallaCompletaProvider>
         <Sidebar collapsible="icon">
           <SidebarHeader className="p-2">
             <SidebarMenu>
@@ -283,6 +285,7 @@ export function AppShell({
               >
                 <SearchIcon />
               </Button>
+              <BotonPantallaCompleta />
               {report}
               {notifications ?? (
                 <Button variant="ghost" size="icon" aria-label="Notificaciones">
@@ -338,6 +341,7 @@ export function AppShell({
             </CommandList>
           </Command>
         </CommandDialog>
+        </PantallaCompletaProvider>
       </SidebarProvider>
     </BreadcrumbContext.Provider>
   )

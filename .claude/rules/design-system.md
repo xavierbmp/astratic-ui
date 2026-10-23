@@ -19,6 +19,8 @@
    - Por debajo de 1280 px todo se apila en una columna y el panel va el último.
 3. `DetailSheet` para el registro abierto, ordenado por bloques y con todos sus datos editables en el sitio (ver «Fichas»). Nunca un modal para ver un registro. Se abre al lado de la lista sin difuminarla (solo un velo muy suave): la lista sigue a la vista. Su borde izquierdo se arrastra para ensancharla y cada persona la encuentra como la dejó.
 
+**Pantalla completa** (Xavier, 2026-10-23, reporte cmvlfay0): toda página con `WorkGrid` tiene en la cabecera del shell el botón «Pantalla completa» (`components/app/pantalla-completa.tsx`, sale solo al montarse el `WorkGrid`, desde el escritorio). Pliega la sidebar y sube lo de arriba a una fila (pestañas y botones a la izquierda, cifras a la derecha, sin título ni descripción), para que el bloque de trabajo se lleve casi toda la pantalla; se recuerda en el navegador y al salir la sidebar vuelve como estaba. Las piezas lo pintan con la variante `completa:` de `globals.css`.
+
 Dashboards: cifras + grid de secciones de resumen + panel «Hoy». No hay página de Ajustes: ver «Configuración in situ».
 
 Página propia de un registro (un evento, una cuenta, una campaña que se trabaja durante semanas): la misma anatomía. `PageHeader` con el nombre del registro como título y `PageTabs` con sus partes (Producción · Invitados · Proveedores…), cifras de ese registro, un bloque de trabajo e `InsightsPanel` con sus datos. **Nunca la lista de registros junto al detalle**: ya estás dentro; se cambia de registro con las migas o ⌘K.
