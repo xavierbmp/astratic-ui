@@ -85,7 +85,7 @@ export function clean(s: string | null | undefined, max: number) {
 /** Ruta CSS corta: se para en el primer id estable y prefiere `data-slot` a las clases de Tailwind. */
 function cssPath(el: Element): string {
   const parts: string[] = []
-  for (let node: Element | null = el; node && node !== document.body && parts.length < 6; node = node.parentElement) {
+  for (let node: Element | null = el; node && node !== el.ownerDocument.body && parts.length < 6; node = node.parentElement) {
     const n = node
     if (n.id && !/^(radix-|_r_)|[:«»]/.test(n.id)) {
       parts.unshift(`#${CSS.escape(n.id)}`)
@@ -111,7 +111,7 @@ const TITLED_SLOT = /^(sheet-content|dialog-content|popover-content|section|deta
 /** Los contenedores del kit (`data-slot`) por los que pasa, con el título de los que lo tienen. */
 function kitPath(el: Element): string {
   const parts: string[] = []
-  for (let n: Element | null = el; n && n !== document.body && parts.length < 8; n = n.parentElement) {
+  for (let n: Element | null = el; n && n !== el.ownerDocument.body && parts.length < 8; n = n.parentElement) {
     const slot = n.getAttribute("data-slot")
     if (!slot) {
       if (n === el) parts.unshift(n.tagName.toLowerCase())
@@ -128,7 +128,7 @@ function kitPath(el: Element): string {
 }
 
 const visibleText = (el: Element) =>
-  (el instanceof HTMLElement ? el.innerText : "") || el.textContent || el.getAttribute("aria-label") || el.getAttribute("placeholder")
+  ("innerText" in el ? (el as HTMLElement).innerText : "") || el.textContent || el.getAttribute("aria-label") || el.getAttribute("placeholder")
 
 export function describeElement(el: Element): ReportElement {
   const r = el.getBoundingClientRect()
