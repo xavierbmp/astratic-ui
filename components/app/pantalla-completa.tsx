@@ -7,22 +7,25 @@ import { Button } from "@/components/ui/button"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 
 /**
- * Pantalla completa de las páginas de operar (Xavier, 2026-10-23, reporte cmvlfay0): pliega la sidebar y sube todo lo
- * de arriba a una sola fila (las pestañas, los botones y las cifras, sin el título ni su descripción), para que el
- * bloque de trabajo (la base de datos) se lleve casi toda la pantalla. Solo existe donde hay un `WorkGrid`: el botón
+ * Pantalla completa de las páginas de operar (Xavier, 2026-10-23, reportes cmvlfay0 y cmvlkbo0): pliega la sidebar,
+ * quita la cabecera de la página (título, descripción y cifras, también las de `WorkGrid`), lleva sus pestañas y sus
+ * botones a la barra del shell, junto a las migas, y estrecha los laterales (el panel de información, las vistas de la
+ * base), para que el bloque de trabajo (la base de datos) se lleve casi toda la pantalla. Solo existe donde hay un `WorkGrid`: el botón
  * sale en la cabecera del shell al montarse uno, y en las demás páginas todo se ve como siempre. Se recuerda en el
  * navegador; al salir, la sidebar vuelve como estaba.
  *
- * El aspecto lo ponen las piezas con la variante `completa:` de `globals.css` (`PageHeader`, `PageBody`), que mira el
+ * Las piezas lo leen con `usePantallaCompleta` (`WorkGrid`, `LateralVistas`, `PageHeader`, que se pinta en la
+ * `RanuraPantallaCompleta` del shell) o con la variante `completa:` de `globals.css` (`PageBody`), que mira el
  * `data-pantalla-completa` que pone este proveedor alrededor de la sidebar y la página.
  */
-type Estado = { activa: boolean; hayBloque: boolean; alternar: () => void; registrar: () => () => void }
+type Estado = { activa: boolean; hayBloque: boolean; alternar: () => void; registrar: () => () => void; ranura: HTMLElement | null; setRanura: (el: HTMLElement | null) => void }
 
 const Contexto = React.createContext<Estado | null>(null)
 
 export function PantallaCompletaProvider({ children }: { children: React.ReactNode }) {
   const [guardada, setGuardada] = useLocalStorage("pantalla-completa", false)
   const [bloques, setBloques] = React.useState(0)
+  const [ranura, setRanura] = React.useState<HTMLElement | null>(null)
   const { open, setOpen, isMobile } = useSidebar()
   const hayBloque = bloques > 0
   // En el móvil no hay sidebar fija ni sitio que ganar: allí no se activa.
@@ -45,7 +48,7 @@ export function PantallaCompletaProvider({ children }: { children: React.ReactNo
     return () => setBloques((n) => n - 1)
   }, [])
 
-  const valor = React.useMemo<Estado>(() => ({ activa, hayBloque, alternar: () => setGuardada(!activa), registrar }), [activa, hayBloque, setGuardada, registrar])
+  const valor = React.useMemo<Estado>(() => ({ activa, hayBloque, alternar: () => setGuardada(!activa), registrar, ranura, setRanura }), [activa, hayBloque, setGuardada, registrar, ranura])
   // La marca que leen las piezas con `completa:`; `contents` para no tocar la maqueta de la sidebar.
   return (
     <Contexto.Provider value={valor}>
@@ -78,4 +81,18 @@ export function BotonPantallaCompleta() {
       {activa ? <Minimize2Icon /> : <Maximize2Icon />}
     </Button>
   )
+}
+
+/** El hueco de la barra del shell donde `PageHeader` pone sus pestañas y botones en pantalla completa. */
+export function RanuraPantallaCompleta() {
+  const { activa = false, setRanura } = React.useContext(Contexto) ?? {}
+  if (!activa) return null
+  // Las pestañas pisan el borde de la barra: sin su propia raya gris debajo.
+  return <div ref={setRanura} className="flex min-w-0 flex-1 items-end self-stretch pl-2 [&_[data-slot=page-tabs]]:h-12 [&_[data-slot=page-tabs]]:shadow-none" />
+}
+
+/** Dónde pintar la cabecera de la página en pantalla completa (fuera de ella, nada). */
+export function useRanuraPantallaCompleta() {
+  const estado = React.useContext(Contexto)
+  return estado?.activa ? estado.ranura : null
 }

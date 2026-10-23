@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { BellIcon, ChevronsUpDownIcon, SearchIcon } from "lucide-react"
 import { cn } from "cn"
-import { BotonPantallaCompleta, PantallaCompletaProvider } from "@/components/app/pantalla-completa"
+import { BotonPantallaCompleta, PantallaCompletaProvider, RanuraPantallaCompleta } from "@/components/app/pantalla-completa"
 import { activeTab, type Brand, type CurrentUser, type NavGroup } from "@/lib/nav"
 import {
   Sidebar,
@@ -266,6 +266,7 @@ export function AppShell({
                 })}
               </BreadcrumbList>
             </Breadcrumb>
+            <RanuraPantallaCompleta />
             <div className="ml-auto flex items-center gap-1.5">
               <button
                 type="button"

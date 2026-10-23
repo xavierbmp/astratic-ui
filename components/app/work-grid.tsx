@@ -4,10 +4,12 @@ import { usePathname } from "next/navigation"
 import { cn } from "cn"
 import { DetailPanelHost, type PanelFicha } from "@/components/app/detail-panel"
 import { ResizeHandle, useAnchoGuardado } from "@/components/app/resize-handle"
-import { useBloqueDeTrabajo } from "@/components/app/pantalla-completa"
+import { useBloqueDeTrabajo, usePantallaCompleta } from "@/components/app/pantalla-completa"
 
 // El bloque de trabajo nunca se queda más estrecho que esto al ensanchar el panel.
 const ANCHO_MINIMO_BLOQUE = 520
+// En pantalla completa el panel de información guarda su propio ancho, más estrecho de serie.
+const ANCHO_PANEL_COMPLETA = 240
 
 /**
  * Rejilla de la página de operación: a la izquierda las cifras, la toolbar y el bloque; a la
@@ -53,13 +55,16 @@ export function WorkGrid({
 }) {
   // Con un bloque de trabajo, la página puede ponerse en pantalla completa (el botón sale en la cabecera del shell).
   useBloqueDeTrabajo()
+  // En pantalla completa, sin cifras y con el panel más estrecho: el bloque se lleva el sitio (reporte cmvlkbo0).
+  const completa = usePantallaCompleta()
+  const cifras = completa ? undefined : stats
   const conFicha = ficha?.activa === true
   // Plegado: en dos columnas no hay panel; en una, sigue debajo del bloque (allí no hay botón para desplegarlo).
   const plegado = ficha !== undefined && !ficha.preferida
-  const limites = { min: 280, porDefecto: asideWidth, max: 560 }
-  const panel = useAnchoGuardado(`panel:${usePathname()}`, limites)
+  const limites = completa ? { min: 200, porDefecto: ANCHO_PANEL_COMPLETA, max: 560 } : { min: 280, porDefecto: asideWidth, max: 560 }
+  const panel = useAnchoGuardado(`${completa ? "panel-completa" : "panel"}:${usePathname()}`, limites)
   const lateral = conFicha ? <DetailPanelHost ficha={ficha} aside={aside} /> : aside
-  const filas = [stats && "auto", toolbar && "auto", "minmax(0,1fr)"].filter(Boolean)
+  const filas = [cifras && "auto", toolbar && "auto", "minmax(0,1fr)"].filter(Boolean)
   const filaBloque = filas.length
   const rowStart = ["", "xl:row-start-1", "xl:row-start-2", "xl:row-start-3"]
   const rowSpan = ["", "xl:row-span-1", "xl:row-span-2", "xl:row-span-3"]
@@ -77,15 +82,15 @@ export function WorkGrid({
       )}
       {...props}
     >
-      {stats && (
+      {cifras && (
         <div data-slot="work-grid-stats" className="min-w-0 xl:col-start-1 xl:row-start-1">
-          {stats}
+          {cifras}
         </div>
       )}
       {toolbar && (
         <div
           data-slot="work-grid-toolbar"
-          className={cn("flex min-w-0 flex-col gap-2 xl:col-start-1", stats ? "xl:row-start-2" : "xl:row-start-1")}
+          className={cn("flex min-w-0 flex-col gap-2 xl:col-start-1", cifras ? "xl:row-start-2" : "xl:row-start-1")}
         >
           {toolbar}
         </div>

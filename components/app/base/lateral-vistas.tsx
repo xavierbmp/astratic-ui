@@ -10,8 +10,11 @@ import { ICONO_VISTA } from "@/components/app/base/apariencia"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { ControlesLateral, type ControlLateral } from "@/components/app/controles-lateral"
 import type { FijasDeBase } from "@/components/app/base/controles-barra"
+import { usePantallaCompleta } from "@/components/app/pantalla-completa"
 
 const ANCHO_LATERAL = { min: 200, porDefecto: 256, max: 440 }
+// En pantalla completa guarda su propio ancho, lo más estrecho de serie (reporte cmvlkbo0).
+const ANCHO_LATERAL_COMPLETA = { min: 160, porDefecto: 180, max: 440 }
 
 const sinAcentos = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "")
 
@@ -48,7 +51,9 @@ export function LateralVistas({
   /** Las vistas fijas de la página: arriba del todo, con su candado, sin menú ni arrastre. */
   fijas?: FijasDeBase
 }) {
-  const { ancho, setAncho } = useAnchoGuardado(`base-lateral:${clave}`, ANCHO_LATERAL)
+  const completa = usePantallaCompleta()
+  const limites = completa ? ANCHO_LATERAL_COMPLETA : ANCHO_LATERAL
+  const { ancho, setAncho } = useAnchoGuardado(`${completa ? "base-lateral-completa" : "base-lateral"}:${clave}`, limites)
   const [busqueda, setBusqueda] = React.useState("")
   const [editando, setEditando] = React.useState<string | null>(null)
   const filtro = sinAcentos(busqueda.trim())
@@ -70,7 +75,7 @@ export function LateralVistas({
 
   return (
     <aside className={cn("relative flex w-[var(--lateral-w)] flex-none flex-col bg-card text-[13px]", control.lado === "izquierda" ? "border-r" : "border-l")} style={{ "--lateral-w": `${ancho}px` } as React.CSSProperties}>
-      <ResizeHandle ancho={ancho} onAncho={setAncho} limites={ANCHO_LATERAL} lado={control.lado === "izquierda" ? "derecha" : "izquierda"} destino={(borde) => borde.parentElement} variable="--lateral-w" label="Ancho de las vistas" />
+      <ResizeHandle ancho={ancho} onAncho={setAncho} limites={limites} lado={control.lado === "izquierda" ? "derecha" : "izquierda"} destino={(borde) => borde.parentElement} variable="--lateral-w" label="Ancho de las vistas" />
       <div className="flex flex-col gap-0.5 border-b p-2">
         <div className="flex items-center gap-1">
           <DropdownMenu>
