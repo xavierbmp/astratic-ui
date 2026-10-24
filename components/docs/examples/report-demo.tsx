@@ -9,6 +9,14 @@ import { Kbd } from "@/components/ui/kbd"
 const dia = 86_400_000
 const reports: ReportItem[] = [
   {
+    id: "demo-3",
+    description: "En la ficha de una marca me gustaría ver primero los contactos y después sus datos.",
+    status: "open",
+    url: "/demo/marcas",
+    createdAt: new Date(Date.now() - 2 * 3_600_000),
+    editable: true,
+  },
+  {
     id: "demo-2",
     description: "Al filtrar por «Vencidas» la tabla se queda en blanco un segundo antes de pintarse.",
     status: "in_progress",
@@ -30,7 +38,20 @@ async function enviar(r: ReportDraft) {
   await new Promise((ok) => setTimeout(ok, 400))
   // En la demo las imágenes se quedan en memoria tal cual llegan: la miniatura es su propia data URL.
   const attachments = r.attachments.map((a) => ({ kind: a.kind, name: a.name, url: a.dataUrl }))
-  reports.unshift({ id: `demo-${Date.now()}`, description: r.description, status: "open", url: r.context.url, createdAt: new Date(), attachments })
+  reports.unshift({ id: `demo-${Date.now()}`, description: r.description, status: "open", url: r.context.url, createdAt: new Date(), attachments, editable: true })
+}
+
+// Los pendientes de quien mira se cambian o se borran desde «Enviados».
+async function editar(id: string, description: string) {
+  await new Promise((ok) => setTimeout(ok, 300))
+  const r = reports.find((x) => x.id === id)
+  if (r) r.description = description.trim()
+}
+
+async function borrar(id: string) {
+  await new Promise((ok) => setTimeout(ok, 300))
+  const i = reports.findIndex((x) => x.id === id)
+  if (i >= 0) reports.splice(i, 1)
 }
 
 async function cargar() {
@@ -39,7 +60,7 @@ async function cargar() {
 }
 
 export function DemoReportButton({ shortcut = true }: { shortcut?: boolean }) {
-  return <ReportButton onSubmit={enviar} loadReports={cargar} shortcut={shortcut} />
+  return <ReportButton onSubmit={enviar} loadReports={cargar} onEditReport={editar} onDeleteReport={borrar} shortcut={shortcut} />
 }
 
 /** La cabecera del shell en pequeño, con el botón en su sitio. */

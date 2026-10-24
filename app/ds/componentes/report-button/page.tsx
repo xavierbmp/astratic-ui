@@ -170,6 +170,8 @@ export default function ReportButtonPage() {
           rows={[
             [<code key="s">onSubmit</code>, <code key="s-t">{"(r: ReportDraft) => Promise<string | void>"}</code>, "Guarda el reporte. Devuelve el mensaje de error o nada. Obligatoria."],
             [<code key="l">loadReports</code>, <code key="l-t">{"() => Promise<ReportItem[]>"}</code>, "Carga los enviados cada vez que se abre la pestaña. Sin ella no hay pestaña «Enviados»."],
+            [<code key="e">onEditReport</code>, <code key="e-t">{"(id: string, texto: string) => Promise<string | void>"}</code>, "Cambia el texto de uno suyo que sigue pendiente (los que llegan con editable). Sin ella, no se edita."],
+            [<code key="b">onDeleteReport</code>, <code key="b-t">{"(id: string) => Promise<string | void>"}</code>, "Borra uno suyo que sigue pendiente, tras confirmarlo. En curso ya no se borra."],
             [<code key="d">description</code>, <code key="d-t">ReactNode</code>, "Texto bajo el título del diálogo."],
             [<code key="k">shortcut</code>, <code key="k-t">boolean</code>, "⇧⌘X abre y cierra el diálogo. Por defecto true."],
           ]}

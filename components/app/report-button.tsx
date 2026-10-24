@@ -74,13 +74,19 @@ export function ReportTrigger({ className }: { className?: string }) {
 export function ReportButton({
   onSubmit,
   loadReports,
-  description = "Describe el problema o la sugerencia y, si quieres, señálalo en la página. El estado de cada reporte aparece en Enviados.",
+  onEditReport,
+  onDeleteReport,
+  description = "Cuéntanos qué cambiarías o qué falla y, si quieres, señálalo en la página. Lo revisamos y aquí verás cuándo está resuelto.",
   shortcut = true,
 }: {
   /** Guarda el reporte. Devuelve el mensaje de error, o nada si ha ido bien. */
   onSubmit: (report: ReportDraft) => Promise<string | void>
   /** Carga los reportes enviados; sin ella no hay pestaña «Enviados». */
   loadReports?: () => Promise<ReportItem[]>
+  /** Cambia el texto de uno suyo pendiente (`ReportItem.editable`); sin ella, no se edita. Devuelve el error o nada. */
+  onEditReport?: (id: string, description: string) => Promise<string | void>
+  /** Borra uno suyo pendiente; sin ella, no se borra. Devuelve el error o nada. */
+  onDeleteReport?: (id: string) => Promise<string | void>
   /** Texto bajo el título del diálogo. */
   description?: React.ReactNode
   /** ⇧⌘X abre y cierra el diálogo desde cualquier sitio. Solo un botón por pantalla lo lleva. */
@@ -318,7 +324,7 @@ export function ReportButton({
               </TabsList>
               <TabsContent value="new">{form}</TabsContent>
               <TabsContent value="sent">
-                <SentReports load={loadReports} />
+                <SentReports load={loadReports} onEdit={onEditReport} onDelete={onDeleteReport} />
               </TabsContent>
             </Tabs>
           ) : (
