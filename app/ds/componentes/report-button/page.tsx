@@ -119,6 +119,7 @@ export default function ReportButtonPage() {
           rows={[
             [<StatusBadge key="o" tone="warning">Pendiente</StatusBadge>, <code key="o-v">open</code>, "Recién enviado; nadie lo ha mirado."],
             [<StatusBadge key="p" tone="info">En curso</StatusBadge>, <code key="p-v">in_progress</code>, "Alguien lo está arreglando, o ya está arreglado y falta publicarlo."],
+            [<StatusBadge key="c" tone="neutral">Lo consideraremos</StatusBadge>, <code key="c-v">considering</code>, "Se ha leído y se tendrá en cuenta más adelante; ahora no se hace."],
             [<StatusBadge key="r" tone="success">Resuelto</StatusBadge>, <code key="r-v">resolved</code>, "Arreglado y publicado. La respuesta dice qué se hizo."],
             [<StatusBadge key="d" tone="neutral">Descartado</StatusBadge>, <code key="d-v">dismissed</code>, "No se va a hacer. La respuesta dice por qué."],
           ]}

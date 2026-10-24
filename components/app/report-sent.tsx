@@ -16,7 +16,7 @@ import { fmt } from "@/lib/format"
 import type { StatusTone } from "@/lib/status"
 import type { ReportAttachmentLink } from "@/components/app/report-attachments"
 
-export type ReportStatus = "open" | "in_progress" | "resolved" | "dismissed"
+export type ReportStatus = "open" | "in_progress" | "considering" | "resolved" | "dismissed"
 
 export type ReportItem = {
   id: string
@@ -37,6 +37,7 @@ export type ReportItem = {
 export const reportStatus: Record<ReportStatus, { label: string; tone: StatusTone }> = {
   open: { label: "Pendiente", tone: "warning" },
   in_progress: { label: "En curso", tone: "info" },
+  considering: { label: "Lo consideraremos", tone: "neutral" },
   resolved: { label: "Resuelto", tone: "success" },
   dismissed: { label: "Descartado", tone: "neutral" },
 }
