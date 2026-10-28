@@ -40,6 +40,8 @@ export type PropsRejilla<T> = {
   /** Cómo se pinta en reposo un campo de serie a medida (la marca con su logo). */
   celdas?: Partial<Record<string, (fila: T) => React.ReactNode>>
   objeto: { singular: string; plural: string }
+  /** Lo que se busca: al cambiar, la rejilla vuelve arriba para que el primer resultado se vea (reporte cmvsivnx). */
+  busqueda?: string
   marcadas: Set<string>
   onMarcar: (ids: Set<string>) => void
   abiertoId?: string | null
@@ -130,6 +132,9 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
     scrollPaddingEnd: ALTO_PIE,
   })
   React.useEffect(() => virtual.measure(), [virtual, alto, p.lineas])
+  React.useEffect(() => {
+    if (contenedor.current) contenedor.current.scrollTop = 0
+  }, [p.busqueda])
 
   const medirDerecha = React.useCallback(() => {
     const el = contenedor.current

@@ -376,6 +376,7 @@ export function BaseDatos<T>({
         return (
           <Rejilla
             lineas={lineas}
+            busqueda={busqueda}
             registros={registros}
             columnas={columnas}
             vista={vista}
