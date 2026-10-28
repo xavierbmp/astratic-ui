@@ -48,6 +48,9 @@ export type FijasDeBase = { vistas: VistaFijaMenu[]; activa: string | null; onAc
  */
 export function MenuNombreVista({ vista, vistas, acciones, fijas }: { vista: VistaBase; vistas: VistaBase[]; acciones: AccionesVista; fijas?: FijasDeBase }) {
   const [renombrando, setRenombrando] = React.useState(false)
+  // «Cambiar el nombre» abre su campo cuando el menú ya se ha cerrado del todo: antes, el foco que devuelve el menú
+  // lo cerraba al instante (reporte cmvr4b24).
+  const aRenombrar = React.useRef(false)
   const [nombre, setNombre] = React.useState(vista.nombre)
   const fija = fijas?.vistas.find((f) => f.id === fijas.activa)
   const Icono = fija?.icono ?? ICONO_VISTA[vista.tipo ?? "cuadricula"]
@@ -64,7 +67,16 @@ export function MenuNombreVista({ vista, vistas, acciones, fijas }: { vista: Vis
             </button>
           </DropdownMenuTrigger>
         </PopoverAnchor>
-        <DropdownMenuContent align="start" className="w-60">
+        <DropdownMenuContent
+          align="start"
+          className="w-60"
+          onCloseAutoFocus={(e) => {
+            if (!aRenombrar.current) return
+            aRenombrar.current = false
+            e.preventDefault()
+            setRenombrando(true)
+          }}
+        >
           <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Vistas</DropdownMenuLabel>
           <div className="max-h-64 overflow-y-auto">
             {fijas?.vistas.map((f) => {
@@ -108,8 +120,7 @@ export function MenuNombreVista({ vista, vistas, acciones, fijas }: { vista: Vis
           <DropdownMenuItem
             onSelect={() => {
               setNombre(vista.nombre)
-              // El menú se cierra antes de abrir el campo del nombre.
-              setTimeout(() => setRenombrando(true), 0)
+              aRenombrar.current = true
             }}
           >
             <PencilIcon /> Cambiar el nombre
