@@ -165,7 +165,7 @@ export function BaseDatos<T>({
   formulario?: { titulo?: string; descripcion?: string; textoCrear?: string; icono?: LucideIcon }
   /** Llegar con el formulario abierto («Nuevo contacto» desde otra página). */
   nuevoInicial?: boolean
-  vacio?: (hayFiltro: boolean, limpiar: () => void) => React.ReactNode
+  vacio?: (hayFiltro: boolean, limpiar: () => void, busqueda: string) => React.ReactNode
   /** Las vistas fijas de la página, arriba de las de cada persona. */
   vistasFijas?: VistaFija<T>[]
   /**
@@ -361,7 +361,7 @@ export function BaseDatos<T>({
   const colorDe = (f: T) => coloresDe(f).marca
   const escribirUno = onEscribir ? (fila: T, campo: DefCampo<T>, valor: ValorCampo) => onEscribir([{ fila, campo, valor }]) : undefined
   const tarjetas = { campos: columnas.map((c) => c.campo), colorDe, celdas, onAbrirVinculo, portada }
-  const textoVacio = registros.length === 0 ? vacio?.(hayFiltro, limpiar) : undefined
+  const textoVacio = registros.length === 0 ? vacio?.(hayFiltro, limpiar, busqueda) : undefined
 
   const cuerpo = () => {
     if (movil) return <ListaMovil registros={registros} columnas={columnas} getId={getId} celdas={celdas} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
@@ -407,7 +407,7 @@ export function BaseDatos<T>({
             onAbrirVinculo={onAbrirVinculo}
             // Con la ficha integrada, la ficha sigue a la celda activa: se ve el registro en el que se está.
             onActiva={(id) => ficha.activa && id !== abiertoId && onAbrir(id)}
-            vacio={vacio?.(hayFiltro, limpiar)}
+            vacio={vacio?.(hayFiltro, limpiar, busqueda)}
           />
         )
     }
