@@ -51,7 +51,7 @@ export default function DocumentosPage() {
             <><strong>Los mismos tokens que el portal.</strong> Nada de hex ni colores sueltos. En la elaborada, índigo para numeración, destacados y checks, y negro para precios y bloques que hay que leer sí o sí. En la simple, sin acento: solo los badges de estado.</>,
             <><strong>Cifras con formato.</strong> <code>fmt.eur</code> para importes («1.200 €»), cifras tabulares, precios sin IVA indicados.</>,
             <><strong>Texto con la skill de redacción</strong>, en el idioma del cliente y sin inventar datos suyos: lo que no se sabe se pregunta o se deja fuera.</>,
-            <><strong>Mockups con el kit</strong>, no capturas: se componen con <code>KpiCard</code>, <code>Section</code>, <code>StatusBadge</code>… y se escalan con <code>DocFigure</code>.</>,
+            <><strong>Mockups con el kit</strong>, no capturas: se componen con <code>KpiCard</code>, <code>Section</code>, <code>StatusBadge</code>… y se escalan con <code>DocFigure</code>. Para enseñar una funcionalidad en grande, una <Link href="/ds/documentos/escenas">escena</Link>.</>,
           ]}
         />
       </DocSection>
@@ -67,6 +67,7 @@ export default function DocumentosPage() {
   simple.tsx      hoja, cifras clave, tablas, condiciones, aviso, conformidad           (simple)
   guide.tsx       lienzo corrido, portada, índice, portadillas, capítulos, cajas, fuentes (guía)
   guide-markdown.tsx  pinta el Markdown de un capítulo con las piezas de la guía        (guía)
+  escenas/        mockups conceptuales en 3D y el movimiento de las presentaciones    (escenas)
 
 app/documentos/propuesta-elaborada/   demo elaborada (14 hojas)
 app/documentos/propuesta-simple/      demo simple (2 hojas)

@@ -1,0 +1,291 @@
+/*
+ * El movimiento de las presentaciones y propuestas en pantalla (nació en la auditoría del workspace de influencers,
+ * 2026-10-28). Cada pieza entra en su momento, una detrás de otra (`--retraso`); si la diapositiva se monta de nuevo al
+ * abrirla, todo vuelve a entrar. Las entradas solo guardan su estado inicial durante el retraso (`backwards`): al
+ * acabar, cada pieza queda tal cual, y en el PDF y con «menos movimiento» no se anima nada y todo sale en su sitio.
+ */
+
+.sube,
+.deLado,
+.aparece,
+.salta,
+.revela,
+.revelaX,
+.creceX,
+.creceY,
+.tacha,
+.escribe {
+  animation-duration: 0.8s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation-fill-mode: backwards;
+  animation-delay: var(--retraso, 0s);
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    translate: 0 1.6cqw;
+  }
+}
+.sube {
+  animation-name: subir;
+}
+
+@keyframes deLado {
+  from {
+    opacity: 0;
+    translate: 2.4cqw 0;
+  }
+}
+.deLado {
+  animation-name: deLado;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+.aparece {
+  animation-name: aparecer;
+  animation-duration: 1s;
+}
+
+/* Iconos, marcas de verificación y pastillas: un pequeño salto. */
+@keyframes saltar {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  60% {
+    opacity: 1;
+    scale: 1.12;
+  }
+}
+.salta {
+  animation-name: saltar;
+  animation-duration: 0.6s;
+}
+
+/* Las cifras y los titulares grandes salen desde abajo, como de una ranura. */
+@keyframes revelar {
+  from {
+    clip-path: inset(0 -10% 100% -10%);
+    translate: 0 0.35em;
+  }
+  to {
+    clip-path: inset(-20% -10% -30% -10%);
+  }
+}
+.revela {
+  animation-name: revelar;
+  animation-duration: 0.9s;
+}
+
+/* Lo que se descubre de izquierda a derecha: una línea de gráfica, una franja. */
+@keyframes revelarX {
+  from {
+    clip-path: inset(-10% 100% -10% 0);
+  }
+  to {
+    clip-path: inset(-10% -2% -10% 0);
+  }
+}
+.revelaX {
+  animation-name: revelarX;
+  animation-duration: 1.4s;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+@keyframes crecerX {
+  from {
+    scale: 0 1;
+  }
+}
+.creceX {
+  animation-name: crecerX;
+  animation-duration: 1.1s;
+  transform-origin: left center;
+}
+
+@keyframes crecerY {
+  from {
+    scale: 1 0;
+  }
+}
+.creceY {
+  animation-name: crecerY;
+  animation-duration: 1s;
+  transform-origin: center bottom;
+}
+
+/* La raya que tacha una cifra: se dibuja, y se queda. */
+@keyframes tachar {
+  from {
+    scale: 0 1;
+  }
+}
+.tacha {
+  animation-name: tachar;
+  animation-duration: 0.6s;
+  transform-origin: left center;
+}
+
+/* Un texto que se escribe letra a letra (la caja lleva su ancho en `ch`, `--letras`). */
+@keyframes escribir {
+  from {
+    width: 0;
+  }
+}
+.escribe {
+  overflow: hidden;
+  white-space: nowrap;
+  animation-name: escribir;
+  animation-duration: 1.4s;
+  animation-timing-function: steps(var(--letras, 16), end);
+}
+
+@keyframes parpadear {
+  50% {
+    opacity: 0;
+  }
+}
+.cursor {
+  animation: parpadear 1s step-end infinite;
+}
+
+/* Lo que flota, muy poco y cada pieza a su ritmo (`--fase`). */
+@keyframes flotar {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -0.6cqw;
+  }
+}
+.flota {
+  animation: flotar 7s ease-in-out infinite;
+  animation-delay: var(--fase, 0s);
+}
+
+/* Una foto que se acerca muy despacio. */
+@keyframes acercar {
+  from {
+    scale: 1.14;
+  }
+}
+.acerca {
+  animation: acercar 9s cubic-bezier(0.2, 0.6, 0.2, 1) backwards;
+}
+
+/* La onda que late alrededor de un punto o un botón. */
+@keyframes latir {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--latido, var(--color-brand)) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 1.6cqw transparent;
+  }
+}
+.late {
+  animation: latir 2.2s ease-out infinite;
+  animation-delay: var(--fase, 0s);
+}
+
+/* La flecha que invita a pasar a la siguiente. */
+@keyframes empujar {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0.5cqw 0;
+  }
+}
+.empuja {
+  animation: empujar 1.8s ease-in-out infinite;
+}
+
+/* Las columnas de logos que se desplazan sin fin (la pista lleva sus piezas dos veces). */
+@keyframes deslizar {
+  to {
+    translate: 0 -50%;
+  }
+}
+.desliza {
+  animation: deslizar var(--duracion, 40s) linear infinite;
+}
+.deslizaAlReves {
+  animation: deslizar var(--duracion, 40s) linear infinite reverse;
+}
+
+/* El fondo vivo de las tarjetas oscuras y de marca: dos luces que derivan y una trama de puntos. */
+@keyframes derivar {
+  0%,
+  100% {
+    translate: 0 0;
+    scale: 1;
+  }
+  50% {
+    translate: -6cqw 4cqw;
+    scale: 1.15;
+  }
+}
+.luz {
+  animation: derivar 18s ease-in-out infinite;
+  animation-delay: var(--fase, 0s);
+}
+
+.trama {
+  background-image: radial-gradient(color-mix(in oklab, currentColor 22%, transparent) 0.09cqw, transparent 0.11cqw);
+  background-size: 2.4cqw 2.4cqw;
+  mask-image: radial-gradient(60% 70% at 85% 40%, black, transparent 75%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sube,
+  .deLado,
+  .aparece,
+  .salta,
+  .revela,
+  .revelaX,
+  .creceX,
+  .creceY,
+  .tacha,
+  .escribe,
+  .cursor,
+  .flota,
+  .acerca,
+  .late,
+  .empuja,
+  .desliza,
+  .deslizaAlReves,
+  .luz {
+    animation: none;
+  }
+}
+
+@media print {
+  .sube,
+  .deLado,
+  .aparece,
+  .salta,
+  .revela,
+  .revelaX,
+  .creceX,
+  .creceY,
+  .tacha,
+  .escribe,
+  .cursor,
+  .flota,
+  .acerca,
+  .late,
+  .empuja,
+  .desliza,
+  .deslizaAlReves,
+  .luz {
+    animation: none;
+  }
+}

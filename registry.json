@@ -182,6 +182,18 @@
       ]
     },
     {
+      "name": "document-escenas",
+      "type": "registry:component",
+      "title": "Escenas y movimiento",
+      "description": "Mockups conceptuales de una funcionalidad (feature showcase): un escenario 4:3 con la pantalla inclinada detrás y piezas de la interfaz que flotan delante, unidas por líneas. Incluye las animaciones de entrada y de fondo de las presentaciones, quietas en el PDF.",
+      "dependencies": ["lucide-react"],
+      "files": [
+        { "path": "components/document/escenas/piezas.tsx", "type": "registry:component" },
+        { "path": "components/document/escenas/escenas.module.css", "type": "registry:file", "target": "components/document/escenas/escenas.module.css" },
+        { "path": "components/document/escenas/movimiento.module.css", "type": "registry:file", "target": "components/document/escenas/movimiento.module.css" }
+      ]
+    },
+    {
       "name": "section",
       "type": "registry:component",
       "title": "Sección",

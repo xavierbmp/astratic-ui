@@ -8,6 +8,7 @@ import {
   FolderTreeIcon,
   PaperclipIcon,
   MessagesSquareIcon,
+  Layers3Icon,
   LightbulbIcon,
   ChartColumnIcon,
   CircleUserIcon,
@@ -122,6 +123,7 @@ export const dsNav: NavGroup[] = [
       { id: "doc-elaborada", label: "Propuesta elaborada", href: "/ds/documentos/elaborada", icon: BookOpenTextIcon },
       { id: "doc-simple", label: "Propuesta simple", href: "/ds/documentos/simple", icon: ScrollTextIcon },
       { id: "doc-guia", label: "Guía", href: "/ds/documentos/guia", icon: BookTextIcon },
+      { id: "doc-escenas", label: "Escenas y movimiento", href: "/ds/documentos/escenas", icon: Layers3Icon },
     ],
   },
   {
