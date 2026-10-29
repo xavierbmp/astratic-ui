@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch"
 import type { DefCampo } from "@/lib/base/campos"
 import { ALTURAS_FILA, LISTA_TIPOS_VISTA, TIPOS_VISTA, type AlturaFila, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 import { ICONO_TIPO, ICONO_VISTA, IconoCampo } from "@/components/app/base/apariencia"
+import { IconoVista } from "@/components/app/base/iconos-vista"
 import { BotonBarra } from "@/components/app/base/boton-barra"
 
 export type AccionesVista = {
@@ -53,14 +54,14 @@ export function MenuNombreVista({ vista, vistas, acciones, fijas }: { vista: Vis
   const aRenombrar = React.useRef(false)
   const [nombre, setNombre] = React.useState(vista.nombre)
   const fija = fijas?.vistas.find((f) => f.id === fijas.activa)
-  const Icono = fija?.icono ?? ICONO_VISTA[vista.tipo ?? "cuadricula"]
+  const IconoFija = fija?.icono
   return (
     <Popover open={renombrando} onOpenChange={setRenombrando}>
       <DropdownMenu>
         <PopoverAnchor asChild>
           <DropdownMenuTrigger asChild>
             <button type="button" className="inline-flex h-7 min-w-0 items-center gap-1.5 rounded-md px-2 text-[13px] font-medium hover:bg-muted">
-              <Icono className="size-4 flex-none text-brand" />
+              {IconoFija ? <IconoFija className="size-4 flex-none text-brand" /> : <IconoVista vista={vista} className="size-4 flex-none text-brand" />}
               <span className="max-w-56 truncate">{vista.nombre}</span>
               {fija && <LockIcon className="size-3 flex-none text-muted-foreground" aria-label="Vista fija" />}
               <ChevronDownIcon className="size-3.5 flex-none text-muted-foreground" />
@@ -90,10 +91,9 @@ export function MenuNombreVista({ vista, vistas, acciones, fijas }: { vista: Vis
               )
             })}
             {vistas.map((v) => {
-              const IconoVista = ICONO_VISTA[v.tipo ?? "cuadricula"]
               return (
                 <DropdownMenuItem key={v.id} onSelect={() => acciones.activar(v.id)}>
-                  <IconoVista className="text-brand" />
+                  <IconoVista vista={v} className="text-brand" />
                   <span className="flex-1 truncate">{v.nombre}</span>
                   {!fija && v.id === vista.id && <CheckIcon />}
                 </DropdownMenuItem>

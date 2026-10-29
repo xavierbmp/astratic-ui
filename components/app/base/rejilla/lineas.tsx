@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronRightIcon, PanelRightOpenIcon } from "lucide-react"
+import { ArrowUpRightIcon, ChevronRightIcon } from "lucide-react"
 import { cn } from "cn"
 import { Checkbox } from "@/components/ui/checkbox"
 import { opcionDe, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
@@ -22,7 +22,7 @@ export function VeloColor({ color, fila }: { color: ColorOpcion; fila?: boolean 
 
 /**
  * La columna de la izquierda de un registro: el número de fila (y la marca de su color); al pasar
- * el ratón o marcada, la casilla y el botón que abre su ficha. Con `fondo`, la fila va pintada.
+ * el ratón o marcada, la casilla y la flechita que abre su ficha (reporte cmvtgjtf). Con `fondo`, la fila va pintada.
  */
 export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, abierta, onMarcar, onExpandir }: { indice: number; numero: number; color?: ColorOpcion; fondo?: ColorOpcion; alta: boolean; marcada: boolean; abierta: boolean; onMarcar: (m: boolean) => void; onExpandir: () => void }) {
   return (
@@ -34,7 +34,7 @@ export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, ab
         <Checkbox className={cn("hidden group-hover/fila:flex", marcada && "flex")} checked={marcada} onCheckedChange={(c) => onMarcar(c === true)} aria-label={`Marcar la fila ${numero}`} />
       </span>
       <button type="button" aria-label="Abrir la ficha" title="Abrir la ficha (Mayús + Espacio)" onClick={onExpandir} className={cn("ml-auto flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover/fila:opacity-100 hover:bg-muted hover:text-foreground", abierta && "text-brand opacity-100")}>
-        <PanelRightOpenIcon className="size-3.5" />
+        <ArrowUpRightIcon className="size-4" />
       </button>
     </div>
   )

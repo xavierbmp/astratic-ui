@@ -1,12 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { CopyIcon, EllipsisIcon, LockIcon, PencilIcon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react"
+import { CopyIcon, EllipsisIcon, LayoutPanelLeftIcon, LockIcon, PencilIcon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react"
 import { cn } from "cn"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ResizeHandle, useAnchoGuardado } from "@/components/app/resize-handle"
 import { LISTA_TIPOS_VISTA, TIPOS_VISTA, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 import { ICONO_VISTA } from "@/components/app/base/apariencia"
+import { IconoVista } from "@/components/app/base/iconos-vista"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { ControlesLateral, type ControlLateral } from "@/components/app/controles-lateral"
 import type { FijasDeBase } from "@/components/app/base/controles-barra"
@@ -36,8 +37,11 @@ export function LateralVistas({
   onBorrar,
   onReordenar,
   fijas,
+  onPestanas,
   ...control
 }: ControlLateral & {
+  /** Volver a las pestañas laterales, la forma de serie (reporte cmvsixcu). */
+  onPestanas?: () => void
   /** Para recordar su ancho en este navegador. */
   clave: string
   vistas: VistaBase[]
@@ -100,6 +104,11 @@ export function LateralVistas({
               })}
             </DropdownMenuContent>
           </DropdownMenu>
+          {onPestanas && (
+            <button type="button" aria-label="Ver las vistas como pestañas" title="Ver las vistas como pestañas" onClick={onPestanas} className="flex size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+              <LayoutPanelLeftIcon className="size-4" />
+            </button>
+          )}
           <ControlesLateral {...control} nombre="las vistas" />
         </div>
         <label className="flex h-8 items-center gap-2 rounded-md px-2 text-muted-foreground focus-within:bg-muted/60">
@@ -163,7 +172,6 @@ function FilaVista({
   asa?: React.ReactNode
 }) {
   const [nombre, setNombre] = React.useState(vista.nombre)
-  const Icono = ICONO_VISTA[vista.tipo ?? "cuadricula"]
   if (editando)
     return (
       <form
@@ -174,7 +182,7 @@ function FilaVista({
           onEditar(false)
         }}
       >
-        <Icono className="size-4 flex-none text-brand" />
+        <IconoVista vista={vista} className="size-4 flex-none text-brand" />
         <input
           autoFocus
           aria-label="Nombre de la vista"
@@ -203,7 +211,7 @@ function FilaVista({
           onEditar(true)
         }}
       >
-        <Icono className="size-4 flex-none text-brand" />
+        <IconoVista vista={vista} className="size-4 flex-none text-brand" />
         <span className="truncate">{vista.nombre}</span>
       </button>
       <DropdownMenu>

@@ -113,6 +113,16 @@ export function useBase<T>({
     [actualizar],
   )
 
+  /** Cambia el nombre o el icono de una vista desde sus pestañas laterales. Un nombre vacío no se guarda. */
+  const editar = React.useCallback(
+    (id: string, cambio: { nombre?: string; icono?: string }) => {
+      const nombre = cambio.nombre?.trim()
+      if (cambio.nombre !== undefined && !nombre) return
+      actualizar((c) => ({ ...c, vistas: c.vistas.map((v) => (v.id === id ? { ...v, ...(nombre ? { nombre } : {}), ...(cambio.icono ? { icono: cambio.icono } : {}) } : v)) }))
+    },
+    [actualizar],
+  )
+
   /** Borra una vista. La última no se borra: una base siempre tiene una. */
   const borrar = React.useCallback(
     (id: string) =>
@@ -155,7 +165,7 @@ export function useBase<T>({
     [actualizar],
   )
 
-  return { vistas: normal.vistas, vista, activar, cambiar, crear, duplicar, renombrar, borrar, restaurar, reordenar, formulario, cambiarFormulario, ajustes, ajustarCampo }
+  return { vistas: normal.vistas, vista, activar, cambiar, crear, duplicar, renombrar, editar, borrar, restaurar, reordenar, formulario, cambiarFormulario, ajustes, ajustarCampo }
 }
 
 export type BaseApi<T> = ReturnType<typeof useBase<T>>

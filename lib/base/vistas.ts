@@ -72,6 +72,8 @@ export type VistaBase = {
   nombre: string
   /** Sin él, cuadrícula (las vistas guardadas antes del kanban). */
   tipo?: TipoVista
+  /** El icono que se le eligió para reconocerla en las pestañas laterales (`ICONOS_VISTA_ELEGIBLES`); sin él, el de su tipo. */
+  icono?: string
   /** Kanban: el campo que reparte las columnas (una selección o un vínculo). */
   apilar?: string
   /** Calendario: el campo de fecha que pone cada registro en su día. */

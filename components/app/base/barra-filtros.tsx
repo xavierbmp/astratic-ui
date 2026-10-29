@@ -10,6 +10,8 @@ import type { CampoMenu } from "@/components/app/base/selector-campo"
 import { BotonBarra } from "@/components/app/base/boton-barra"
 import { Buscador } from "@/components/app/base/controles-barra"
 import { PanelFiltro } from "@/components/app/base/panel-filtro"
+import { MenuOrden } from "@/components/app/base/menu-orden"
+import type { Orden } from "@/lib/vistas/core"
 
 export type OpcionVistaPropia = { id: string; label: string; icono: LucideIcon }
 
@@ -36,6 +38,7 @@ export function BarraFiltros({
   vistas,
   grupos,
   orden,
+  ordenCampos,
   accion,
   pegada,
 }: {
@@ -52,6 +55,8 @@ export function BarraFiltros({
   grupos?: MenuVistaPropia
   /** Cómo se ordena; la primera opción es la de serie. */
   orden?: MenuVistaPropia
+  /** Ordenar por cualquiera de sus campos, como en una base (reporte cmvtfjmw); en lugar de `orden`. */
+  ordenCampos?: { orden: Orden[]; onCambiar: (orden: Orden[]) => void }
   accion?: React.ReactNode
   /** Dentro del mismo bloque que su vista, como la barra de una base: sin borde propio, con una raya debajo. */
   pegada?: boolean
@@ -92,6 +97,16 @@ export function BarraFiltros({
         </Popover>
         {grupos && <MenuOpciones icono={Rows3Icon} apagado="Agrupar" prefijo="Agrupado" menu={grupos} />}
         {orden && <MenuOpciones icono={ArrowUpDownIcon} apagado="Ordenar" prefijo="Ordenado" menu={orden} />}
+        {ordenCampos && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <BotonBarra icono={ArrowUpDownIcon} texto={ordenCampos.orden.length ? `Ordenado por ${ordenCampos.orden.length} ${ordenCampos.orden.length === 1 ? "campo" : "campos"}` : "Ordenar"} activo={ordenCampos.orden.length > 0} />
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-auto p-0">
+              <MenuOrden campos={campos} orden={ordenCampos.orden} otrasVistas={[]} onCambiar={ordenCampos.onCambiar} />
+            </PopoverContent>
+          </Popover>
+        )}
         <Buscador valor={busqueda} onCambiar={onBuscar} />
       </div>
       {accion && <div className="ml-1 flex-none">{accion}</div>}

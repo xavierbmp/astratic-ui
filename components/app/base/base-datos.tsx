@@ -15,9 +15,12 @@ import type { BaseApi } from "@/hooks/use-base"
 import { filtrarFilas, operadorPorDefecto } from "@/lib/filtros/core"
 import { ordenarFilas, valoresDeFiltro } from "@/lib/vistas/core"
 import { TIPOS_CAMPO, aFiltrable, campoDePropio, colorPorDefecto, textoDeValor, type CampoPropio, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
-import { agruparEnNiveles, aplicarAjustes, clavesDeGrupos, coloresDeRegistro, columnasDeVista, idBase, lineasDeRejilla, type VistaBase } from "@/lib/base/vistas"
+import { LISTA_TIPOS_VISTA, TIPOS_VISTA, agruparEnNiveles, aplicarAjustes, clavesDeGrupos, coloresDeRegistro, columnasDeVista, idBase, lineasDeRejilla, type VistaBase } from "@/lib/base/vistas"
 import { BarraBase, type MenuDeBarra } from "@/components/app/base/barra-base"
 import { LateralVistas } from "@/components/app/base/lateral-vistas"
+import { PestanasVistas } from "@/components/app/base/pestanas-vistas"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { ICONO_VISTA } from "@/components/app/base/apariencia"
 import { useLadoLateral, type ControlLateral } from "@/components/app/controles-lateral"
 import { EditorCampo } from "@/components/app/base/editor-campo"
 import { AjustesCampo, type PestanaAjustes } from "@/components/app/base/ajustes-campo"
@@ -194,8 +197,10 @@ export function BaseDatos<T>({
     return base.crear(tipo)
   }
   const fijas = vistasFijas?.length ? { vistas: vistasFijas.map((f) => ({ id: f.vista.id, nombre: f.vista.nombre, icono: f.icono })), activa: fija?.vista.id ?? null, onActivar: setFijaId } : undefined
-  // Con el panel de la página al lado, el lateral de vistas empieza cerrado para dejar sitio a la base.
-  const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, lateralInicial ?? !fichaPagina)
+  // Las vistas van de serie como pestañas laterales, estrechas, así que se ven siempre (reportes cmvsixcu y cmvtrp16);
+  // un lateral propio (las carpetas) empieza cerrado si la página tiene panel, para dejar sitio a la base.
+  const [lateral, setLateral] = useLocalStorage(lateralPropio ? `base-lateral:${clave}` : `base-vistas-abiertas:${clave}`, lateralInicial ?? (lateralPropio ? !fichaPagina : true))
+  const [formaVistas, setFormaVistas] = useLocalStorage<"pestanas" | "lista">(`base-forma-vistas:${clave}`, "pestanas")
   // Todo lateral se pasa al otro lado y se pliega desde su cabecera (Xavier, 2026-10-16).
   const { lado, cambiarLado } = useLadoLateral(`base:${clave}`)
   const control: ControlLateral = { lado, onCambiarLado: cambiarLado, onPlegar: () => setLateral(false) }
@@ -416,8 +421,44 @@ export function BaseDatos<T>({
   const pintarLateral = () => {
     if (!lateral || movil) return null
     if (lateralPropio) return typeof lateralPropio.contenido === "function" ? lateralPropio.contenido(control) : lateralPropio.contenido
+    if (formaVistas === "pestanas")
+      return (
+        <PestanasVistas
+          vistas={base.vistas}
+          activa={vista.id}
+          onActivar={activarVista}
+          menuCrear={(alCrear, boton) => (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>{boton}</DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="start" className="w-72" onCloseAutoFocus={(e) => e.preventDefault()}>
+                <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Tipo de vista</DropdownMenuLabel>
+                {LISTA_TIPOS_VISTA.map((t) => {
+                  const Icono = ICONO_VISTA[t]
+                  return (
+                    <DropdownMenuItem key={t} className="items-start" onSelect={() => alCrear(crearVista(t))}>
+                      <Icono className="mt-0.5 text-brand" />
+                      <span className="grid gap-0.5">
+                        <span>{TIPOS_VISTA[t].label}</span>
+                        <span className="text-xs text-muted-foreground">{TIPOS_VISTA[t].ayuda}</span>
+                      </span>
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          onEditar={base.editar}
+          onDuplicar={base.duplicar}
+          onBorrar={borrarVista}
+          onReordenar={base.reordenar}
+          fijas={fijas}
+          onLista={() => setFormaVistas("lista")}
+          {...control}
+        />
+      )
     return (
       <LateralVistas
+        onPestanas={() => setFormaVistas("pestanas")}
         clave={clave}
         vistas={base.vistas}
         activa={vista.id}
