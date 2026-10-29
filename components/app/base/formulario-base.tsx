@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LockIcon, SlidersHorizontalIcon, SquarePlusIcon, StarIcon, type LucideIcon } from "lucide-react"
+import { ChevronDownIcon, LockIcon, SlidersHorizontalIcon, SquarePlusIcon, StarIcon, type LucideIcon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,7 +28,9 @@ const ANCHO_COMPLETO: DefCampo<unknown>["tipo"][] = ["texto_largo", "multiselect
  * con su icono, cada campo con el control de su tipo (elegir es escribir, la fecha con su calendario,
  * el importe con su unidad) y ninguno obligatorio: lo que falta lo completa quien crea el registro
  * con su valor de serie. El engranaje abre encima, sin perder lo escrito, qué campos salen y en qué
- * orden (los de serie también, salvo el principal), como en un formulario de Airtable.
+ * orden (los de serie también, salvo el principal), como en un formulario de Airtable. Los que no salen se pueden
+ * rellenar igual: van plegados debajo, en «Ver N campos más» (reporte cmvtm2y5 del workspace). `extra` va arriba del
+ * todo, para lo propio de la página que no es un campo (segmentar una influencer al darla de alta).
  */
 export function FormularioBase<T>({
   open,
@@ -43,6 +45,7 @@ export function FormularioBase<T>({
   onCrear,
   onCrearOpcion,
   textoCrear = "Crear",
+  extra,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -62,6 +65,7 @@ export function FormularioBase<T>({
   /** Crear una opción escribiéndola en el desplegable de un campo propio, como en la rejilla. */
   onCrearOpcion?: (campoId: string, label: string) => OpcionCampo | null
   textoCrear?: string
+  extra?: React.ReactNode
 }) {
   const [configurando, setConfigurando] = React.useState(false)
   const cerrar = (o: boolean) => {
@@ -74,7 +78,7 @@ export function FormularioBase<T>({
     <FormularioDialog open={open} onOpenChange={cerrar} sub={configuracion} onVolver={() => setConfigurando(false)}>
       <FormularioCabecera icono={icono} titulo={titulo} descripcion={descripcion} accion={<ConfigButton label="Configurar el formulario" onClick={() => setConfigurando(true)} className="size-8" />} />
       {/* Se monta al abrir: arranca vacío (o con lo inicial), sin efectos que lo rellenen. */}
-      {open && <Cuerpo hoy={hoy} campos={campos} iniciales={iniciales} onCrear={onCrear} onCrearOpcion={onCrearOpcion} textoCrear={textoCrear} onCerrar={() => cerrar(false)} />}
+      {open && <Cuerpo hoy={hoy} campos={campos} iniciales={iniciales} onCrear={onCrear} onCrearOpcion={onCrearOpcion} textoCrear={textoCrear} extra={extra} onCerrar={() => cerrar(false)} />}
     </FormularioDialog>
   )
 }
@@ -120,8 +124,10 @@ function Cuerpo<T>({
   onCrear,
   onCrearOpcion,
   textoCrear,
+  extra,
   onCerrar,
 }: {
+  extra?: React.ReactNode
   hoy?: string
   campos: { campo: DefCampo<T>; visible: boolean }[]
   iniciales?: ValoresFormulario
@@ -134,14 +140,17 @@ function Cuerpo<T>({
   const [textos, setTextos] = React.useState<Record<string, string>>({})
   const [errores, setErrores] = React.useState<Record<string, string>>({})
   const [errorGeneral, setErrorGeneral] = React.useState<string | null>(null)
-  const visibles = campos.filter((c) => c.visible)
+  const [todos, setTodos] = React.useState(false)
+  const ocultos = campos.filter((c) => !c.visible)
+  const visibles = campos.filter((c) => c.visible || todos)
 
   // Nada es obligatorio: solo se avisa de lo escrito que no vale (un email mal puesto, letras en un número).
   const crear = (e: React.FormEvent) => {
     e.preventDefault()
     const nuevos: Record<string, string> = {}
     const finales: ValoresFormulario = { ...valores }
-    for (const { campo } of visibles) {
+    // También lo escrito en un campo plegado después de abrirlo.
+    for (const { campo } of campos) {
       if (!(campo.id in textos)) continue
       const lectura = valorDeTexto(campo, textos[campo.id])
       if (!lectura.ok) nuevos[campo.id] = lectura.error
@@ -157,6 +166,7 @@ function Cuerpo<T>({
   return (
     <Formulario onSubmit={crear}>
       <FormularioCuerpo>
+        {extra && <div className="col-span-6">{extra}</div>}
         {visibles.map(({ campo }) => (
           <CampoFormulario key={campo.id} etiqueta={campo.nombre} htmlFor={`fb-${campo.id}`} ancho={ANCHO_COMPLETO.includes(campo.tipo) ? "completo" : "mitad"} error={errores[campo.id] || undefined} ayuda={campo.descripcion}>
             <Control
@@ -177,6 +187,12 @@ function Cuerpo<T>({
             />
           </CampoFormulario>
         ))}
+        {ocultos.length > 0 && (
+          <button type="button" onClick={() => setTodos(!todos)} className="col-span-6 inline-flex items-center gap-1 justify-self-start text-sm text-muted-foreground hover:text-foreground">
+            <ChevronDownIcon className={cn("size-4 transition-transform", todos && "rotate-180")} />
+            {todos ? "Ver menos campos" : `Ver ${ocultos.length} ${ocultos.length === 1 ? "campo más" : "campos más"}`}
+          </button>
+        )}
       </FormularioCuerpo>
       <FormularioPie izquierda={errorGeneral ? <span className="text-danger">{errorGeneral}</span> : undefined}>
         <Button type="button" variant="outline" size="lg" onClick={onCerrar}>

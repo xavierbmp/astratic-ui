@@ -165,7 +165,11 @@ export function BaseDatos<T>({
   kanban?: { resumen?: (filas: T[]) => React.ReactNode; plegadas?: string[]; acciones?: (fila: T) => React.ReactNode }
   /** Botones de más en la barra de la selección (copiar emails, exportar…). */
   accionesSeleccion?: (ids: string[]) => React.ReactNode
-  formulario?: { titulo?: string; descripcion?: string; textoCrear?: string; icono?: LucideIcon }
+  /**
+   * `extra`: lo propio de la página arriba del formulario de alta, que no es un campo (segmentar al dar de alta).
+   * `principales`: los campos que salen abiertos mientras la persona no elija los suyos; el resto, plegados.
+   */
+  formulario?: { titulo?: string; descripcion?: string; textoCrear?: string; icono?: LucideIcon; extra?: React.ReactNode; principales?: string[] }
   /** Llegar con el formulario abierto («Nuevo contacto» desde otra página). */
   nuevoInicial?: boolean
   vacio?: (hayFiltro: boolean, limpiar: () => void, busqueda: string) => React.ReactNode
@@ -552,12 +556,13 @@ export function BaseDatos<T>({
           descripcion={formulario?.descripcion}
           icono={formulario?.icono}
           hoy={hoy}
-          campos={base.formulario}
+          campos={formulario?.principales && !base.formularioConfigurado ? base.formulario.map((c) => ({ ...c, visible: !!c.campo.principal || !!c.campo.obligatorio || formulario.principales!.includes(c.campo.id) })) : base.formulario}
           onConfigurar={base.cambiarFormulario}
           iniciales={iniciales}
           onCrear={onCrear}
           onCrearOpcion={onGuardarCampo ? crearOpcion : undefined}
           textoCrear={formulario?.textoCrear}
+          extra={formulario?.extra}
         />
       )}
 

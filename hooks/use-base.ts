@@ -151,6 +151,8 @@ export function useBase<T>({
   )
 
   const formulario = React.useMemo(() => camposDeFormulario(normal.formulario, campos), [normal.formulario, campos])
+  /** Si la persona ya eligió qué campos salen en el formulario de alta (si no, la página puede poner los suyos). */
+  const formularioConfigurado = Boolean(normal.formulario?.length)
   const cambiarFormulario = React.useCallback((lista: CampoFormulario[]) => actualizar((c) => ({ ...c, formulario: lista })), [actualizar])
 
   const ajustes = React.useMemo(() => normal.ajustes ?? {}, [normal.ajustes])
@@ -165,7 +167,7 @@ export function useBase<T>({
     [actualizar],
   )
 
-  return { vistas: normal.vistas, vista, activar, cambiar, crear, duplicar, renombrar, editar, borrar, restaurar, reordenar, formulario, cambiarFormulario, ajustes, ajustarCampo }
+  return { vistas: normal.vistas, vista, activar, cambiar, crear, duplicar, renombrar, editar, borrar, restaurar, reordenar, formulario, formularioConfigurado, cambiarFormulario, ajustes, ajustarCampo }
 }
 
 export type BaseApi<T> = ReturnType<typeof useBase<T>>
