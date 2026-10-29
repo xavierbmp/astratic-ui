@@ -36,6 +36,14 @@ Design system y kit de arranque de Astratic Network Devs para portales operativo
 ## Al clonar para un cliente
 Seguir `content/nuevo-proyecto.md` de arriba abajo. Borrar `app/ds`, `app/demo`, `app/documentos`, `content`, `components/docs`, `components/document`, `registry.json`. Copiar `.claude/rules/design-system.md` tal cual.
 
+## Consultar el código (Graphify)
+Hay un mapa del código en `graphify-out/` (fuera de git). Se rehace solo en segundo plano con cada commit, cambio de rama y merge, sin IA. Criterio completo en `Claude-Estandares-de-codigo` §12 (bóveda).
+- Antes de cambiar una pieza: `graphify affected "<archivo o función>"` (a qué afecta) y `graphify explain "<pieza>"` (qué usa y quién la usa, con `archivo:línea`).
+- Cómo se conectan dos piezas: `graphify path "A" "B"` (con `--undirected` si no sale).
+- `graphify query` solo con nombres de código, no con frases: con lenguaje libre trae ruido.
+- Texto literal (textos de la UI, rutas, variables de entorno) y el esquema de Prisma, que el mapa no lee: Grep, como siempre.
+- Si `graphify-out/` no existe (copia o worktree nuevo): `graphify update .` (unos 2 min la primera vez, sin IA).
+
 ## Workflow
 - Commits en español, describiendo el porqué. Push solo con confirmación explícita.
 - Ante error o integración externa nueva: skill `stack` antes de tocar código.

@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Notas de UI del widget de desarrollo
 .claude/ui-notes.md
+
+# Mapa del código de Graphify (se regenera solo)
+graphify-out/
