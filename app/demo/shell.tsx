@@ -3,12 +3,14 @@
 import Link from "next/link"
 import { BookOpenIcon } from "lucide-react"
 import { AppShell } from "@/components/app/app-shell"
+import { VistasEnPestanas } from "@/components/app/base/vistas-en-pestanas"
 import { Button } from "@/components/ui/button"
 import { DemoReportButton } from "@/components/docs/examples/report-demo"
 import { demoBrand, demoNav, demoUser } from "./nav"
 
 export function DemoShell({ children }: { children: React.ReactNode }) {
   return (
+    <VistasEnPestanas>
     <AppShell
       brand={demoBrand}
       user={demoUser}
@@ -24,5 +26,6 @@ export function DemoShell({ children }: { children: React.ReactNode }) {
     >
       {children}
     </AppShell>
+    </VistasEnPestanas>
   )
 }

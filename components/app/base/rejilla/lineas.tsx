@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ArrowUpRightIcon, ChevronRightIcon } from "lucide-react"
+import { ArrowUpRightIcon, ChevronRightIcon, PanelRightOpenIcon } from "lucide-react"
+import { useVistasEnPestanas } from "@/components/app/base/vistas-en-pestanas"
 import { cn } from "cn"
 import { Checkbox } from "@/components/ui/checkbox"
 import { opcionDe, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
@@ -25,6 +26,7 @@ export function VeloColor({ color, fila }: { color: ColorOpcion; fila?: boolean 
  * el ratón o marcada, la casilla y la flechita que abre su ficha (reporte cmvtgjtf). Con `fondo`, la fila va pintada.
  */
 export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, abierta, onMarcar, onExpandir }: { indice: number; numero: number; color?: ColorOpcion; fondo?: ColorOpcion; alta: boolean; marcada: boolean; abierta: boolean; onMarcar: (m: boolean) => void; onExpandir: () => void }) {
+  const flechita = useVistasEnPestanas()
   return (
     <div data-fila={indice} className={cn("sticky left-0 z-[6] flex flex-none gap-1 border-r border-b pr-1 pl-2 text-xs text-muted-foreground", alta ? "items-start pt-1.5" : "items-center", marcada || abierta ? FONDO.marcada : FONDO.normal)} style={{ width: ANCHO_IZQUIERDA }}>
       {fondo && !marcada && !abierta && <VeloColor color={fondo} fila />}
@@ -34,7 +36,7 @@ export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, ab
         <Checkbox className={cn("hidden group-hover/fila:flex", marcada && "flex")} checked={marcada} onCheckedChange={(c) => onMarcar(c === true)} aria-label={`Marcar la fila ${numero}`} />
       </span>
       <button type="button" aria-label="Abrir la ficha" title="Abrir la ficha (Mayús + Espacio)" onClick={onExpandir} className={cn("ml-auto flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover/fila:opacity-100 hover:bg-muted hover:text-foreground", abierta && "text-brand opacity-100")}>
-        <ArrowUpRightIcon className="size-4" />
+        {flechita ? <ArrowUpRightIcon className="size-4" /> : <PanelRightOpenIcon className="size-3.5" />}
       </button>
     </div>
   )

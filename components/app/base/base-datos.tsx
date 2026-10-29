@@ -19,6 +19,7 @@ import { LISTA_TIPOS_VISTA, TIPOS_VISTA, agruparEnNiveles, aplicarAjustes, clave
 import { BarraBase, type MenuDeBarra } from "@/components/app/base/barra-base"
 import { LateralVistas } from "@/components/app/base/lateral-vistas"
 import { PestanasVistas } from "@/components/app/base/pestanas-vistas"
+import { useVistasEnPestanas } from "@/components/app/base/vistas-en-pestanas"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ICONO_VISTA } from "@/components/app/base/apariencia"
 import { useLadoLateral, type ControlLateral } from "@/components/app/controles-lateral"
@@ -203,8 +204,11 @@ export function BaseDatos<T>({
   const fijas = vistasFijas?.length ? { vistas: vistasFijas.map((f) => ({ id: f.vista.id, nombre: f.vista.nombre, icono: f.icono })), activa: fija?.vista.id ?? null, onActivar: setFijaId } : undefined
   // Las vistas van de serie como pestañas laterales, estrechas, así que se ven siempre (reportes cmvsixcu y cmvtrp16);
   // un lateral propio (las carpetas) empieza cerrado si la página tiene panel, para dejar sitio a la base.
-  const [lateral, setLateral] = useLocalStorage(lateralPropio ? `base-lateral:${clave}` : `base-vistas-abiertas:${clave}`, lateralInicial ?? (lateralPropio ? !fichaPagina : true))
-  const [formaVistas, setFormaVistas] = useLocalStorage<"pestanas" | "lista">(`base-forma-vistas:${clave}`, "pestanas")
+  // Sin `VistasEnPestanas` en el shell, como antes: la lista ancha, cerrada si la página tiene panel.
+  const enPestanas = useVistasEnPestanas()
+  const [lateral, setLateral] = useLocalStorage(lateralPropio || !enPestanas ? `base-lateral:${clave}` : `base-vistas-abiertas:${clave}`, lateralInicial ?? (lateralPropio || !enPestanas ? !fichaPagina : true))
+  const [formaGuardada, setFormaVistas] = useLocalStorage<"pestanas" | "lista">(`base-forma-vistas:${clave}`, "pestanas")
+  const formaVistas = enPestanas ? formaGuardada : "lista"
   // Todo lateral se pasa al otro lado y se pliega desde su cabecera (Xavier, 2026-10-16).
   const { lado, cambiarLado } = useLadoLateral(`base:${clave}`)
   const control: ControlLateral = { lado, onCambiarLado: cambiarLado, onPlegar: () => setLateral(false) }
@@ -462,7 +466,7 @@ export function BaseDatos<T>({
       )
     return (
       <LateralVistas
-        onPestanas={() => setFormaVistas("pestanas")}
+        onPestanas={enPestanas ? () => setFormaVistas("pestanas") : undefined}
         clave={clave}
         vistas={base.vistas}
         activa={vista.id}
