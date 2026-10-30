@@ -23,6 +23,8 @@ export type TipoCampo =
   | "telefono"
   | "calificacion"
   | "progreso"
+  | "imagen"
+  | "adjunto"
   | "vinculo"
 
 /** Los tipos que se pueden crear: el vínculo a otra base solo lo pone la página en sus campos de serie. */
@@ -44,11 +46,16 @@ export const TIPOS_CAMPO: Record<TipoCampo, { label: string; ayuda: string; filt
   porcentaje: { label: "Porcentaje", ayuda: "Un tanto por ciento.", filtro: "numero" },
   calificacion: { label: "Calificación", ayuda: "De una a cinco estrellas.", filtro: "numero" },
   progreso: { label: "Progreso", ayuda: "Cuánto lleva hecho, en una barra: de 0 al total que elijas (100 de serie, en %).", filtro: "numero" },
+  imagen: { label: "Imagen", ayuda: "Una imagen, que sale también como portada en la vista de tarjetas.", filtro: "texto" },
+  adjunto: { label: "Archivo adjunto", ayuda: "Un archivo: un PDF, un contrato, un documento.", filtro: "texto" },
   vinculo: { label: "Registro vinculado", ayuda: "Un registro de otra base, que se abre con un clic (la marca de un contacto).", filtro: "select" },
 }
 
 /** El orden en que se ofrecen al crear un campo, como en Airtable. */
 export const LISTA_TIPOS_CAMPO = (Object.keys(TIPOS_CAMPO) as TipoCampo[]).filter((t): t is TipoCampoPropio => t !== "vinculo")
+
+/** Los que guardan un archivo subido: su valor es su dirección. Se ofrecen si la página sabe subir (`SubidaBaseProvider`). */
+export const TIPOS_CON_ARCHIVO: readonly TipoCampo[] = ["imagen", "adjunto"]
 
 /** Los que llevan opciones. */
 export const TIPOS_CON_OPCIONES: TipoCampo[] = ["select", "multiselect"]

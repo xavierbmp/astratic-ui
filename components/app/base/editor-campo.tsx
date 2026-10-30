@@ -14,6 +14,7 @@ import {
   ESTRELLAS_MAX,
   ESTRELLAS_POR_DEFECTO,
   LISTA_TIPOS_CAMPO,
+  TIPOS_CON_ARCHIVO,
   PROGRESO_POR_DEFECTO,
   TIPOS_CAMPO,
   TIPOS_CON_OPCIONES,
@@ -27,6 +28,7 @@ import { idBase } from "@/lib/base/vistas"
 import { ICONO_TIPO, IconoCampo } from "@/components/app/base/apariencia"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { SelectorColor } from "@/components/app/base/menu-color"
+import { useSubidaBase } from "@/components/app/base/subida-base"
 
 /** Los tipos entre los que se puede cambiar un campo ya creado sin tocar sus valores. */
 const FAMILIAS: TipoCampoPropio[][] = [
@@ -57,6 +59,7 @@ export function EditorCampo({
 }) {
   const [nombre, setNombre] = React.useState(campo?.nombre ?? "")
   const [tipo, setTipo] = React.useState<TipoCampoPropio>(campo?.tipo ?? "texto")
+  const sabeSubir = useSubidaBase() !== null
   const [opciones, setOpciones] = React.useState<OpcionCampo[]>(campo?.opciones ?? [])
   const [formato, setFormato] = React.useState<FormatoCampo>(campo?.formato ?? {})
   const [descripcion, setDescripcion] = React.useState(campo?.descripcion ?? "")
@@ -94,7 +97,7 @@ export function EditorCampo({
     <form onSubmit={guardar} noValidate className="flex w-[min(92vw,380px)] flex-col gap-3 p-3 text-[13px]">
       <Input autoFocus placeholder="Nombre del campo (opcional)" value={nombre} onChange={(e) => { setNombre(e.target.value); setError(null) }} aria-invalid={repetido || !!error} className="h-8 text-[13px]" />
       {repetido && <p className="-mt-1.5 text-danger">Ya hay un campo que se llama así: ponle otro nombre.</p>}
-      <SelectorTipo value={tipo} posibles={campo ? tiposPosibles(campo.tipo) : LISTA_TIPOS_CAMPO} onChange={(t) => { setTipo(t); setFormato({}); setError(null) }} />
+      <SelectorTipo value={tipo} posibles={campo ? tiposPosibles(campo.tipo) : LISTA_TIPOS_CAMPO.filter((t) => sabeSubir || !TIPOS_CON_ARCHIVO.includes(t))} onChange={(t) => { setTipo(t); setFormato({}); setError(null) }} />
       <p className="text-muted-foreground">{TIPOS_CAMPO[tipo].ayuda}{campo && " Un campo ya creado solo cambia a tipos que guardan lo mismo."}</p>
 
       {conOpciones && (

@@ -23,7 +23,7 @@ import {
   Table2Icon,
   TagsIcon,
   TypeIcon,
-  type LucideIcon,
+  type LucideIcon, ImageIcon, PaperclipIcon
 } from "lucide-react"
 import { cn } from "cn"
 import { AvatarInitials } from "@/components/app/avatar-initials"
@@ -47,6 +47,8 @@ export const ICONO_TIPO: Record<TipoCampo, LucideIcon> = {
   porcentaje: PercentIcon,
   calificacion: StarIcon,
   progreso: GaugeIcon,
+  imagen: ImageIcon,
+  adjunto: PaperclipIcon,
   vinculo: Link2Icon,
 }
 

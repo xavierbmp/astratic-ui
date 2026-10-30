@@ -5,6 +5,7 @@ import { CheckIcon, PlusIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
+import { ControlArchivoCampo } from "@/components/app/base/subida-base"
 import { opcionDe, valorDeTexto, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
 import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
 
@@ -43,6 +44,9 @@ export function EditorCelda<T>(props: PropsEditor<T>) {
       return <EditorFecha {...props} />
     case "texto_largo":
       return <EditorTextoLargo {...props} />
+    case "imagen":
+    case "adjunto":
+      return <EditorArchivo {...props} />
     default:
       return <EditorTexto {...props} />
   }
@@ -100,6 +104,18 @@ function Ancla({ encima }: { encima?: boolean }) {
     <PopoverAnchor asChild>
       <span aria-hidden className={cn("pointer-events-none absolute left-0 w-full", encima ? "top-0 h-0" : "inset-y-0")} />
     </PopoverAnchor>
+  )
+}
+
+/** Imagen o adjunto: se sube, se ve y se quita en una caja sobre la celda. */
+function EditorArchivo<T>({ campo, valor, onGuardar, onCancelar }: PropsEditor<T>) {
+  return (
+    <Popover open onOpenChange={(abierto) => !abierto && onCancelar()}>
+      <Ancla />
+      <PopoverContent align="start" className="w-72 p-3" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <ControlArchivoCampo tipo={campo.tipo} valor={typeof valor === "string" ? valor : null} onCambiar={(v) => onGuardar(v, "quedarse")} />
+      </PopoverContent>
+    </Popover>
   )
 }
 

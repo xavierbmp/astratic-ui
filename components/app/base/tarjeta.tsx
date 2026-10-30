@@ -25,12 +25,15 @@ export type PropsTarjetas<T> = {
  */
 export function TarjetaRegistro<T>({ fila, campos, colorDe, celdas, onAbrirVinculo, portada }: PropsTarjetas<T> & { fila: T }) {
   const principal = campos.find((c) => c.principal)
-  const resto = campos.filter((c) => !c.principal && !esValorVacio(c.valor(fila)))
+  const resto = campos.filter((c) => !c.principal && c.tipo !== "imagen" && !esValorVacio(c.valor(fila)))
   const color = colorDe(fila)
-  const imagen = portada?.(fila)
+  // Sin portada de la página, el primer campo de imagen que enseña la vista.
+  const campoImagen = campos.find((c) => c.tipo === "imagen")
+  const delCampo = campoImagen?.valor(fila)
+  const imagen = portada?.(fila) ?? (typeof delCampo === "string" ? delCampo : undefined)
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      {portada && (
+      {(portada || campoImagen) && (
         <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-muted">
           {imagen && <Image src={imagen} alt="" fill sizes="320px" unoptimized={!imagen.startsWith("https://")} className="object-cover" />}
         </div>

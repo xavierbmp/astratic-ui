@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, StarIcon } from "lucide-react"
+import Image from "next/image"
+import { CheckIcon, PaperclipIcon, StarIcon } from "lucide-react"
 import { cn } from "cn"
 import { ESTRELLAS_POR_DEFECTO, lecturaProgreso, opcionDe, textoDeValor, type DefCampo, type ValorCampo } from "@/lib/base/campos"
 import { ALTURAS_FILA, type AlturaFila } from "@/lib/base/vistas"
@@ -103,6 +104,24 @@ export function ValorCelda<T>({
     case "moneda":
     case "porcentaje":
       return <span className="block w-full truncate text-right tabular-nums">{textoDeValor(campo, valor)}</span>
+    case "imagen": {
+      const texto = textoDeValor(campo, valor)
+      if (!texto) return null
+      return (
+        <a href={texto} target="_blank" rel="noreferrer" aria-label={`Abrir ${campo.nombre}`} className="relative block size-7 flex-none overflow-hidden rounded-md bg-muted" onClick={(e) => e.stopPropagation()}>
+          <Image src={texto} alt="" fill sizes="28px" unoptimized className="object-cover" />
+        </a>
+      )
+    }
+    case "adjunto": {
+      const texto = textoDeValor(campo, valor)
+      if (!texto) return null
+      return (
+        <a href={texto} target="_blank" rel="noreferrer" className="inline-flex min-w-0 items-center gap-1 underline decoration-muted-foreground/40 underline-offset-2 hover:decoration-foreground" onClick={(e) => e.stopPropagation()}>
+          <PaperclipIcon className="size-3.5 flex-none text-muted-foreground" aria-hidden /> Abrir archivo
+        </a>
+      )
+    }
     case "url":
     case "email": {
       const texto = textoDeValor(campo, valor)

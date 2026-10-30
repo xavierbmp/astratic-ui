@@ -12,6 +12,7 @@ import { ESTRELLAS_POR_DEFECTO, valorDeTexto, type DefCampo, type OpcionCampo, t
 import type { CampoFormulario as CampoDelFormulario } from "@/lib/base/vistas"
 import { ConfigButton } from "@/components/app/config-button"
 import { ICONO_TIPO, IconoCampo } from "@/components/app/base/apariencia"
+import { ControlArchivoCampo } from "@/components/app/base/subida-base"
 import { useVistasEnPestanas } from "@/components/app/base/vistas-en-pestanas"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { ElegirOpciones } from "@/components/app/base/selector-opciones"
@@ -232,6 +233,9 @@ function Control<T>({
   const opciones = (campo.opciones ?? []).map((o) => ({ value: o.id, label: o.label, color: o.color }))
   const textoActual = texto ?? (valor === null || valor === undefined ? "" : String(valor))
   switch (campo.tipo) {
+    case "imagen":
+    case "adjunto":
+      return <ControlArchivoCampo tipo={campo.tipo} valor={typeof valor === "string" ? valor : null} onCambiar={onValor} />
     case "casilla":
       return (
         <label className="flex h-10 w-fit items-center gap-2.5 text-sm">
