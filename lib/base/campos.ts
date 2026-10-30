@@ -57,6 +57,9 @@ export const LISTA_TIPOS_CAMPO = (Object.keys(TIPOS_CAMPO) as TipoCampo[]).filte
 /** Los que guardan un archivo subido: su valor es su dirección. Se ofrecen si la página sabe subir (`SubidaBaseProvider`). */
 export const TIPOS_CON_ARCHIVO: readonly TipoCampo[] = ["imagen", "adjunto"]
 
+/** La dirección de un archivo, si se puede abrir sin riesgo: solo http y https, nunca `javascript:` ni `data:`. */
+export const enlaceSeguro = (valor: unknown): string | null => (typeof valor === "string" && /^https?:\/\//i.test(valor) ? valor : null)
+
 /** Los que llevan opciones. */
 export const TIPOS_CON_OPCIONES: TipoCampo[] = ["select", "multiselect"]
 
@@ -295,6 +298,9 @@ export function valorDeTexto<T>(campo: Pick<DefCampo<T>, "tipo" | "opciones" | "
   const t = texto.trim()
   if (t === "") return ok(campo.tipo === "casilla" ? false : campo.tipo === "multiselect" ? [] : null)
   switch (campo.tipo) {
+    case "imagen":
+    case "adjunto":
+      return enlaceSeguro(t) ? ok(t) : mal("Tiene que ser un enlace que empiece por https://")
     case "numero":
     case "moneda":
     case "porcentaje": {

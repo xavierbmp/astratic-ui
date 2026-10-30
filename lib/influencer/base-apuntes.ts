@@ -3,7 +3,7 @@
 // y no se escribe en la celda. Puro: lo usan la página y las pruebas.
 
 import { SIN_VALOR } from "@/lib/vistas/core"
-import { opcionesDeEstados, textoLimpio, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { campoDePropio, conValorPropio, opcionesDeEstados, textoLimpio, type CampoPropio, type DefCampo, type ValorCampo } from "@/lib/base/campos"
 import { vistaNueva, type VistaBase } from "@/lib/base/vistas"
 import { socialLabel, type SocialNetwork } from "@/components/app/social-icons"
 import { ESTADOS_IDEA, FORMATOS, TIPOS_APUNTE, type Apunte, type Carpeta, type Contenido, type FechaClave, type Marca, type Pilar } from "@/lib/influencer/modelo"
@@ -18,7 +18,7 @@ const REDES: SocialNetwork[] = ["instagram", "tiktok", "youtube"]
 
 export type ContextoBaseApuntes = { contenidos: Contenido[]; pilares: Pilar[]; carpetas: Carpeta[]; marcas: Marca[]; fechasClave: FechaClave[]; hoy: string }
 
-export function camposBaseApuntes({ contenidos, pilares, carpetas, marcas, fechasClave, hoy }: ContextoBaseApuntes): DefCampo<Apunte>[] {
+export function camposBaseApuntes({ contenidos, pilares, carpetas, marcas, fechasClave, hoy, propios = [] }: ContextoBaseApuntes & { propios?: CampoPropio[] }): DefCampo<Apunte>[] {
   return [
     { id: "titulo", nombre: "Título", tipo: "texto", principal: true, obligatorio: true, grupo: "Datos", valor: (a) => a.titulo },
     { id: "tipo", nombre: "Tipo", tipo: "select", obligatorio: true, opciones: Object.entries(TIPOS_APUNTE).map(([id, label], i) => ({ id, label, color: i === 0 ? "amarillo" : "gris" })), grupo: "Datos", valor: (a) => a.tipo },
@@ -56,6 +56,7 @@ export const vistasDeSerieApuntes = (campos: DefCampo<Apunte>[]): VistaBase[] =>
  */
 export function escribirEnApunte(a: Apunte, campo: DefCampo<Apunte>, valor: ValorCampo): Apunte {
   if (campo.soloLectura) return a
+  if (campo.propio) return conValorPropio(a, campo.id, valor)
   switch (campo.id) {
     case "titulo":
       return textoLimpio(valor) ? { ...a, titulo: textoLimpio(valor) ?? a.titulo } : a

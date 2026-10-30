@@ -1357,6 +1357,8 @@ export type Apunte = {
   caducaEl?: string
   creadoEl: string
   actualizadoEl: string
+  /** Los valores de sus campos propios (CampoPropio de la base «apuntes»), por id de campo. */
+  valores?: Record<string, ValorCampo>
 }
 
 /** Donde ordena sus apuntes, con un tinte para reconocerla. Puede ir dentro de otra; `orden`, su sitio entre sus hermanas. */

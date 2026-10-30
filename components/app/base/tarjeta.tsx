@@ -3,7 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import { cn } from "cn"
-import { esValorVacio, textoDeValor, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
+import { enlaceSeguro, esValorVacio, textoDeValor, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
 import { CLASE_FUERTE } from "@/components/app/base/apariencia"
 import { ValorCelda } from "@/components/app/base/rejilla/valor-celda"
 
@@ -29,8 +29,7 @@ export function TarjetaRegistro<T>({ fila, campos, colorDe, celdas, onAbrirVincu
   const color = colorDe(fila)
   // Sin portada de la página, el primer campo de imagen que enseña la vista.
   const campoImagen = campos.find((c) => c.tipo === "imagen")
-  const delCampo = campoImagen?.valor(fila)
-  const imagen = portada?.(fila) ?? (typeof delCampo === "string" ? delCampo : undefined)
+  const imagen = portada?.(fila) ?? (campoImagen && enlaceSeguro(campoImagen.valor(fila))) ?? undefined
   return (
     <div className="flex min-w-0 flex-col gap-2">
       {(portada || campoImagen) && (

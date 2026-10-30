@@ -4,7 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import { CheckIcon, PaperclipIcon, StarIcon } from "lucide-react"
 import { cn } from "cn"
-import { ESTRELLAS_POR_DEFECTO, lecturaProgreso, opcionDe, textoDeValor, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { ESTRELLAS_POR_DEFECTO, lecturaProgreso, opcionDe, enlaceSeguro, textoDeValor, type DefCampo, type ValorCampo } from "@/lib/base/campos"
 import { ALTURAS_FILA, type AlturaFila } from "@/lib/base/vistas"
 import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
 
@@ -105,7 +105,7 @@ export function ValorCelda<T>({
     case "porcentaje":
       return <span className="block w-full truncate text-right tabular-nums">{textoDeValor(campo, valor)}</span>
     case "imagen": {
-      const texto = textoDeValor(campo, valor)
+      const texto = enlaceSeguro(valor)
       if (!texto) return null
       return (
         <a href={texto} target="_blank" rel="noreferrer" aria-label={`Abrir ${campo.nombre}`} className="relative block size-7 flex-none overflow-hidden rounded-md bg-muted" onClick={(e) => e.stopPropagation()}>
@@ -114,7 +114,7 @@ export function ValorCelda<T>({
       )
     }
     case "adjunto": {
-      const texto = textoDeValor(campo, valor)
+      const texto = enlaceSeguro(valor)
       if (!texto) return null
       return (
         <a href={texto} target="_blank" rel="noreferrer" className="inline-flex min-w-0 items-center gap-1 underline decoration-muted-foreground/40 underline-offset-2 hover:decoration-foreground" onClick={(e) => e.stopPropagation()}>
