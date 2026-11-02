@@ -17,7 +17,7 @@ const imagenSegura = (url: string | null | undefined) => (url && (/^https?:\/\//
  * de cifras (`FichaMetricas`), como hijos.
  */
 export function FichaCabecera({
-  portada = PORTADA_FICHA,
+  portada,
   sobrePortada,
   foto,
   nombre,
@@ -30,8 +30,8 @@ export function FichaCabecera({
   className,
   children,
 }: {
-  /** La imagen de la portada. */
-  portada?: string
+  /** La imagen de la portada. Sin ella, o si no es un enlace válido, la de serie. */
+  portada?: string | null
   /** Lo que va encima de la portada, arriba a la derecha: el botón de la etapa. */
   sobrePortada?: React.ReactNode
   foto?: string | null
@@ -52,8 +52,10 @@ export function FichaCabecera({
   return (
     <section data-slot="ficha-cabecera" className={cn("relative rounded-ficha-cabecera bg-ficha-superficie shadow-ficha", className)}>
       <div className="px-2 pt-2">
-        <div className={cn("relative rounded-ficha-portada bg-ficha-portada", compacta ? "h-[60px]" : "h-[92px]", " bg-cover bg-[center_58%] bg-no-repeat dark:brightness-75")} style={{ backgroundImage: `url('${portada}')` }}>
-          {sobrePortada && <div className="absolute top-2.5 right-2.5 dark:brightness-[1.34]">{sobrePortada}</div>}
+        <div className={cn("relative rounded-ficha-portada bg-ficha-portada", compacta ? "h-[60px]" : "h-[92px]")}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- enlace firmado o externo: no pasa por el optimizador */}
+          <img src={imagenSegura(portada) ?? PORTADA_FICHA} alt="" className="absolute inset-0 size-full rounded-ficha-portada object-cover object-[center_58%] dark:brightness-75" />
+          {sobrePortada && <div className="absolute top-2.5 right-2.5">{sobrePortada}</div>}
         </div>
       </div>
       <div className="flex flex-wrap items-start gap-x-[22px] gap-y-2 px-[26px]">
