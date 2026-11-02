@@ -8,6 +8,9 @@ import { initials } from "@/lib/format"
 /** La imagen de portada de serie, para los registros que no tienen una propia. */
 export const PORTADA_FICHA = "/ficha/portada-nubes.jpg"
 
+/** Una imagen que viene de un dato: solo enlaces http(s) o rutas de la propia app. */
+const imagenSegura = (url: string | null | undefined) => (url && (/^https?:\/\//i.test(url) || /^\/[^/]/.test(url)) ? url : null)
+
 /**
  * La cabecera de un registro, con la portada, la foto encima de su borde, el nombre, una línea sobre quién es y un dato
  * a la derecha (el marcador de encaje, por ejemplo). Debajo van la fila de redes o de datos (`FichaColumnas`) y la banda
@@ -73,9 +76,9 @@ function FotoFicha({ foto, nombre, iniciales, compacta }: { foto?: string | null
   return (
     <div className={cn("relative z-[1] box-border flex-none rounded-full bg-ficha-superficie p-[5px]", compacta ? "-mt-8 size-[72px]" : "-mt-[50px] size-[100px]")}>
       <div className={cn("grid size-full place-items-center overflow-hidden rounded-full bg-ficha-relleno-2 font-medium", compacta ? "text-xl" : "text-[28px]", " tracking-[-0.01em] text-ficha-tinta-2 shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.08)]")}>
-        {foto ? (
+        {imagenSegura(foto) ? (
           // eslint-disable-next-line @next/next/no-img-element -- enlace firmado o externo: no pasa por el optimizador
-          <img src={foto} alt={nombre} className="size-full object-cover" />
+          <img src={imagenSegura(foto) ?? undefined} alt={nombre} className="size-full object-cover" />
         ) : (
           (iniciales ?? initials(nombre.replace(/^@/, "")))
         )}

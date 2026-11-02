@@ -347,6 +347,26 @@
       ]
     },
     {
+      "name": "ficha-pagina",
+      "type": "registry:component",
+      "title": "Ficha de página",
+      "description": "La página de un registro: barra con el recorrido y sus acciones, cabecera con portada y foto, columnas por red o dato principal, banda de cifras, bloques con rayas finas, marcador de barras y las piezas de sus paneles. Con sus tokens ficha-* en globals.css.",
+      "registryDependencies": ["dropdown-menu", "popover"],
+      "files": [
+        { "path": "components/app/ficha-pagina/marco.tsx", "type": "registry:component" },
+        { "path": "components/app/ficha-pagina/menu.tsx", "type": "registry:component" },
+        { "path": "components/app/ficha-pagina/cabecera.tsx", "type": "registry:component" },
+        { "path": "components/app/ficha-pagina/bloque.tsx", "type": "registry:component" },
+        { "path": "components/app/ficha-pagina/piezas.tsx", "type": "registry:component" },
+        { "path": "components/app/ficha-pagina/pagina-registro.tsx", "type": "registry:component" },
+        { "path": "components/app/ficha-pagina/campos.tsx", "type": "registry:component" },
+        { "path": "components/app/ficha-pagina/formato.ts", "type": "registry:lib" },
+        { "path": "lib/base/lista-abierta.ts", "type": "registry:lib" },
+        { "path": "components/app/inline-field.tsx", "type": "registry:component" }
+      ],
+      "dependencies": ["lucide-react", "radix-ui"]
+    },
+    {
       "name": "detail-sheet",
       "type": "registry:component",
       "title": "Sheet de detalle",

@@ -90,6 +90,18 @@ Si hay un editor con cambios sin guardar y se va a cambiar de registro, de paso 
 ### HTML que no escribe el portal
 Emails, firmas o documentos importados se pintan siempre en `HtmlFrame` (marco aislado, sin scripts, que crece con su contenido). Nunca `dangerouslySetInnerHTML` con HTML de fuera.
 
+## Página de un registro (`components/app/ficha-pagina/`)
+Regla de Xavier (2026-11-02, diseño «Ficha Influencer v2» de Claude Design). **Todo registro con entidad propia tiene su página**, y su celda de inicio de la base lleva allí; `DetailSheet` queda para lo que se mira un momento y no es un registro de verdad (una invitación, un aviso, una etiqueta). Documentación en `/ds/componentes/ficha-pagina`.
+
+- **Anatomía, de arriba abajo:** `PaginaRegistro` (fondo y barra fija), `FichaCabecera` (portada de 92 px con la etapa encima en `BotonEstadoFicha`, foto de 100 px sobre su borde, nombre a 26 px y una línea, y a la derecha un dato como el `Marcador`), `FichaColumnas` con una `FichaColumna` por red o dato principal, `FichaMetricas` con la banda gris de cifras y debajo los bloques: tres en columna con `FichaColumnasBloques` y los demás a todo el ancho, en el orden en que se miran.
+- **Barra:** a la izquierda el recorrido de la lista (`FichaRecorrido`, «12 de 148 en «Moda BCN»», de `leerListaAbierta`) o, si se llega sin lista, «Volver» a la base. A la derecha, los botones reales del registro en `BotonFicha` y el «…» al final (`MasFicha`). Favorita y Semilla, con `BotonFavorita` y `BotonSemilla`.
+- **Bloques:** `FichaBloque` (superficie clara, radio 28, sombra suave, sin borde) con `FichaBloqueTitulo` a 17 px. Dentro, nada de tarjetas: rayas finas con `FichaCeldas` y `FichaCelda`, que se recolocan solas por su `base`. En un bloque estrecho, `FichaFila`.
+- **Todo se edita donde se lee**, con `InlineField` sin aire (`-mx-1 min-h-0 w-[calc(100%+0.5rem)] px-1`), y los campos de una base con `CeldasDeCampos`. No hay botón «Editar». Es el sitio donde se edita lo que no se edita en la tabla.
+- **Solo tokens `ficha-*`** (superficie, tintas, rayas, relleno, sombras, radios) y `ficha-tema-*` para las temáticas, en su bloque de `globals.css`, con su modo oscuro. Lo que aquí es un número suelto (14,5 px, 22 px) es la escala de esta página.
+- **Lo estimado no se confunde con lo real:** `MarcaEstimado`, barras rayadas y el signo «≈».
+- **Lo que el registro no tiene se quita**, sin inventarlo. Una página de otro registro se monta con las mismas piezas y sus datos: las columnas de una marca son su Instagram, su web y lo que se sabe de ella en la red.
+- **Rutas:** cada una se da de alta en `rutaDeRegistro` del portal, que es lo que usa la base para abrirla.
+
 ## Configuración in situ (sin página de Ajustes)
 Nada se configura en una página de ajustes aparte: cada cosa se configura **donde se usa**. Solo tiene página propia lo que no pertenece a ninguna pantalla (el equipo y sus permisos).
 

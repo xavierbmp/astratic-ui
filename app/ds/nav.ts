@@ -64,6 +64,7 @@ export const componentPages: { slug: string; label: string; summary: string; ico
   { slug: "base-de-datos", label: "Base de datos", summary: "Toda lista de registros, al estilo Airtable: vistas, campos, filtros, grupos, kanban, galería y calendario.", icon: DatabaseIcon },
   { slug: "insights-panel", label: "Panel de información", summary: "Columna derecha con bloques personalizables.", icon: PanelRightIcon },
   { slug: "ajustes-bloques", label: "Ajustes de bloques", summary: "Ordenar, esconder y elegir qué enseña cada bloque, donde se ve.", icon: SlidersHorizontalIcon },
+  { slug: "ficha-pagina", label: "Ficha de página", summary: "La página de un registro: cabecera con portada, columnas, banda de cifras y bloques con rayas finas.", icon: PanelRightIcon },
   { slug: "detail-sheet", label: "Sheet de detalle", summary: "La ficha de un registro: bloques, edición en el sitio, flechas y dos columnas.", icon: PanelRightOpenIcon },
   { slug: "bulk-bar", label: "Barra de selección", summary: "Acciones en bloque sobre las filas marcadas.", icon: ListChecksIcon },
   { slug: "calendarios", label: "Agenda y calendarios", summary: "Agenda del mes, calendario pequeño, planificar con arrastre y Gantt.", icon: CalendarDaysIcon },

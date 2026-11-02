@@ -10,14 +10,17 @@ import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu
 import { BotonFicha, BotonFichaIcono, FichaBarra, FichaContenido, FichaPagina, FichaRecorrido } from "./marco"
 import { MenuFichaContenido, MenuFichaOpcion, MenuFichaTitulo } from "./menu"
 
+/** La lista la deja la base antes de navegar: mientras se está en la página no cambia. */
+const sinAvisos = () => () => undefined
+
 /**
  * El recorrido que dejó la base al abrir un registro: su posición y sus vecinos en la vista de la que se viene. Vive en
  * el navegador, así que hasta montarse no hay lista: la página se pinta igual en el servidor, sin flechas.
  */
 export function useListaAbierta(clave: string, id: string) {
-  const [lista, setLista] = React.useState<ListaAbierta | null>(null)
-  React.useEffect(() => setLista(leerListaAbierta(clave)), [clave])
-  return vecinosEnLista(lista, id)
+  const crudo = React.useSyncExternalStore(sinAvisos, () => JSON.stringify(leerListaAbierta(clave)), () => "null")
+  // Es lo que acaba de serializar la línea de arriba: siempre una lista o nada.
+  return React.useMemo(() => vecinosEnLista(JSON.parse(crudo) as ListaAbierta | null, id), [crudo, id])
 }
 
 /**
