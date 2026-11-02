@@ -1,23 +1,16 @@
 "use client"
 
 import * as React from "react"
-import { PanelRightCloseIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { ResizeHandle, acotarAncho } from "@/components/app/resize-handle"
 
 /**
- * El panel de la derecha de una página de operación y la ficha (Xavier, 2026-10-16: «el bloque lateral siempre el
- * mismo»). Desplegado (lo de serie), enseña «Información» y, al pulsar un registro, su ficha en ese mismo sitio; al
- * cerrarla, vuelve «Información». Plegado (el botón del final de la barra de la base), la lista ocupa todo el ancho
- * y el registro se abre encima, con la ficha completa. Se ensancha o estrecha arrastrando su borde y es una
- * preferencia de cada persona y de cada página.
- *
- * Solo con sitio para las dos columnas (1280 px o más): en pantallas estrechas el panel va debajo
- * del bloque, así que la ficha se abre encima, como siempre.
+ * Dónde se abre la ficha de un registro: encima de la lista (lo de serie) o al lado de la tabla, si alguien lo elige en
+ * los ajustes de la base. Es una preferencia de cada persona y de cada página, con el ancho que le dé arrastrando su
+ * borde. Al lado, solo con sitio para las dos columnas (1280 px o más).
  */
 export type PanelFicha = {
-  /** El panel está desplegado (lo que ha elegido la persona para esta página). */
+  /** La ficha va al lado de la tabla (lo que ha elegido la persona para esta página). */
   preferida: boolean
   /** La ficha va en el panel ahora: desplegado y con sitio para dos columnas. */
   activa: boolean
@@ -64,51 +57,4 @@ export function usePanelFicha(pageKey: string): PanelFicha {
     nodo,
     setNodo,
   }
-}
-
-/** Plegar el panel: en la cabecera de «Información» y de la ficha integrada. Desplegarlo, desde la barra de la base. */
-export function PlegarPanel({ ficha, className }: { ficha: PanelFicha; className?: string }) {
-  return (
-    <Button variant="ghost" size="icon-sm" aria-label="Plegar el panel" title="Plegar el panel" className={className} onClick={() => ficha.alternar(false)}>
-      <PanelRightCloseIcon />
-    </Button>
-  )
-}
-
-/**
- * La columna derecha con el panel desplegado: «Información» (`aside`) y, encima de ella en el mismo sitio, la ficha
- * del registro abierto, que `DetailSheet` pinta aquí. Sin ninguno abierto se ve «Información». El borde izquierdo se
- * arrastra para cambiar el ancho de la ficha.
- */
-export function DetailPanelHost({ ficha, aside }: { ficha: PanelFicha; aside: React.ReactNode }) {
-  return (
-    <div className="group/panel flex h-full min-h-0 flex-col">
-      <div className="flex h-full min-h-0 flex-col group-has-[[data-slot=detail-panel-content]]/panel:hidden">{aside}</div>
-      <section data-slot="detail-panel" className="relative hidden h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card shadow-xs group-has-[[data-slot=detail-panel-content]]/panel:flex">
-        <BordeRedimensionable ficha={ficha} />
-        <DestinoFicha setNodo={ficha.setNodo} />
-      </section>
-    </div>
-  )
-}
-
-/** Donde `DetailSheet` pinta la ficha abierta (con un portal); vacío, no ocupa sitio. */
-function DestinoFicha({ setNodo }: { setNodo: (el: HTMLElement | null) => void }) {
-  return <div ref={setNodo} className="flex min-h-0 flex-1 flex-col empty:hidden" />
-}
-
-/** El borde izquierdo del panel: se arrastra (o se mueve con las flechas) para ensanchar la ficha. */
-function BordeRedimensionable({ ficha }: { ficha: PanelFicha }) {
-  return (
-    <ResizeHandle
-      ancho={ficha.ancho}
-      onAncho={ficha.setAncho}
-      limites={ANCHO_FICHA}
-      maximo={(rejilla) => rejilla.clientWidth - ANCHO_MINIMO_LISTA}
-      lado="izquierda"
-      destino={(borde) => borde.closest<HTMLElement>("[data-slot=work-grid]")}
-      variable="--ficha-w"
-      label="Ancho de la ficha"
-    />
-  )
 }
