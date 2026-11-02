@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useLocalStorage } from "@/hooks/use-local-storage"
-import { ResizeHandle, acotarAncho } from "@/components/app/resize-handle"
+import { acotarAncho } from "@/components/app/resize-handle"
 
 /**
  * Dónde se abre la ficha de un registro: encima de la lista (lo de serie) o al lado de la tabla, si alguien lo elige en
@@ -24,8 +24,6 @@ export type PanelFicha = {
 }
 
 export const ANCHO_FICHA = { min: 380, porDefecto: 480, max: 960 }
-// La lista nunca se queda más estrecha que esto al ensanchar la ficha.
-const ANCHO_MINIMO_LISTA = 520
 const DOS_COLUMNAS = "(min-width: 1280px)"
 
 type Prefs = { plegado: boolean; ancho: number }
