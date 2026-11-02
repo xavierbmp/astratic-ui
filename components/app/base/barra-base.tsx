@@ -110,8 +110,9 @@ export function BarraBase<T>({
   const coloreado = !vista.color ? null : reglasColor ? `Coloreado por ${reglasColor} ${reglasColor === 1 ? "regla" : "reglas"}` : `Coloreado por ${nombreDe(vista.color.campo) ?? "un campo"}`
 
   return (
-    <div data-slot="barra-base" className="@container/barra grid h-12 flex-none grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b px-3">
-      <div className="flex min-w-0 items-center gap-1">
+    <div data-slot="barra-base" className="@container/barra flex-none border-b">
+      <div className="flex h-12 items-center gap-2 px-3 @3xl/barra:grid @3xl/barra:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <div className="flex max-w-[45%] min-w-0 flex-none items-center gap-1 @3xl/barra:max-w-none">
         {lateral && (
           <button type="button" aria-label={lateral.abierto ? `Ocultar ${lateral.nombre}` : `Ver ${lateral.nombre}`} title={lateral.abierto ? `Ocultar ${lateral.nombre}` : `Ver ${lateral.nombre}`} aria-pressed={lateral.abierto} onClick={lateral.onAlternar} className="hidden size-8 flex-none items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
             <IconoPlegarLateral lado={lateral.lado} abierto={lateral.abierto} className="size-4" />
@@ -120,7 +121,7 @@ export function BarraBase<T>({
         <NombreVista vista={vista} acciones={acciones} fijas={fijas} enfocar={enfocarNombre} onEnfocado={onNombreEnfocado} />
       </div>
 
-      <div className="flex min-w-0 items-center justify-center gap-0.5 overflow-x-auto [scrollbar-width:none]">
+      <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] @3xl/barra:justify-center">
         {!fija && tipo === "kanban" && (
           <SelectorCampoVista icono={Columns3Icon} texto={`Apilado por ${nombreDe(vista.apilar) ?? "…"}`} titulo="Las columnas salen de" campos={camposApilables(campos)} valor={vista.apilar} vacio="Crea un campo de selección única para repartir las tarjetas." onCambiar={(apilar) => onCambiar({ apilar })} />
         )}
@@ -156,9 +157,10 @@ export function BarraBase<T>({
         <Buscador valor={busqueda} onCambiar={onBuscar} />
       </div>
 
-      <div className="flex min-w-0 items-center justify-end gap-1.5">
+      <div className="flex min-w-0 flex-none items-center justify-end gap-1.5">
         {accion}
         <AjustesBase vista={vista} onCambiar={onCambiar} ajustes={ajustes} panelFicha={panelFicha} fija={fija} />
+      </div>
       </div>
     </div>
   )

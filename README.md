@@ -58,4 +58,4 @@ registry.json          definición del registry
 
 ## Reglas en una frase
 
-Una página de operación es: cabecera, de 3 a 5 cifras, toolbar encima del bloque (buscador · filtros · vistas · acción principal), **un** bloque de operación y un panel de información a la derecha; el detalle se abre en una ficha lateral por bloques, editable en el sitio. No hay página de Ajustes: cada cosa se configura donde se usa. Si un módulo tiene subpáginas, van como pestañas en la cabecera. Todo lo demás está en `/ds/patrones/convenciones` y `/ds/patrones/navegacion`.
+Una página de operación es: cabecera, pestañas de vistas y una base de datos a todo el ancho, con su cabecera y su celda de inicio. Sin paneles al lado.
