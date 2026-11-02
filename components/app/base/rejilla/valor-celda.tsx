@@ -6,10 +6,10 @@ import { CheckIcon, PaperclipIcon, StarIcon } from "lucide-react"
 import { cn } from "cn"
 import { ESTRELLAS_POR_DEFECTO, lecturaProgreso, opcionDe, enlaceSeguro, textoDeValor, type DefCampo, type ValorCampo } from "@/lib/base/campos"
 import { ALTURAS_FILA, type AlturaFila } from "@/lib/base/vistas"
-import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
+import { EstadoEnLinea, FichaOpcion, FichaVinculo, OpcionEnLinea } from "@/components/app/base/apariencia"
 
 /** Líneas de texto que caben en una fila de esta altura (el texto mide 18 px con 6 px de margen arriba y abajo). */
-const lineas = (altura: AlturaFila) => Math.max(1, Math.floor((ALTURAS_FILA[altura].px - 12) / 18))
+const lineas = (altura: AlturaFila) => Math.max(1, Math.floor((ALTURAS_FILA[altura].px - 16) / 18))
 
 /**
  * El valor de una celda en reposo, como en Airtable: texto cortado (o en varias líneas si la fila
@@ -46,7 +46,7 @@ export function ValorCelda<T>({
           aria-label={campo.nombre}
           disabled={!editable}
           onClick={() => onCambiar(valor !== true)}
-          className={cn("flex size-4 items-center justify-center rounded-[4px] border border-control", valor === true && "border-brand bg-brand text-brand-foreground")}
+          className={cn("flex size-4 cursor-pointer items-center justify-center rounded-[5px] border border-control disabled:cursor-default", valor === true && "border-foreground bg-foreground text-background")}
         >
           {valor === true && <CheckIcon className="size-3" />}
         </button>
@@ -54,6 +54,12 @@ export function ValorCelda<T>({
     case "select":
     case "multiselect": {
       const ids = Array.isArray(valor) ? valor : typeof valor === "string" && valor ? [valor] : []
+      // Una sola opción se lee como el estado de la referencia: su icono o su punto, y el texto, sin ficha.
+      if (campo.tipo === "select") {
+        const o = ids[0] ? opcionDe(campo, ids[0]) : undefined
+        if (!ids[0]) return null
+        return o?.tono ? <EstadoEnLinea label={o.label} tono={o.tono} /> : <OpcionEnLinea label={o?.label ?? ids[0]} color={o?.color} />
+      }
       return (
         <span className={cn("flex min-w-0 gap-1", varias ? "flex-wrap content-start" : "overflow-hidden")}>
           {ids.map((id) => {
@@ -103,7 +109,7 @@ export function ValorCelda<T>({
     case "numero":
     case "moneda":
     case "porcentaje":
-      return <span className="block w-full truncate text-right tabular-nums">{textoDeValor(campo, valor)}</span>
+      return <span className="block w-full truncate text-muted-foreground tabular-nums">{textoDeValor(campo, valor)}</span>
     case "imagen": {
       const texto = enlaceSeguro(valor)
       if (!texto) return null
@@ -128,7 +134,7 @@ export function ValorCelda<T>({
       if (!texto) return null
       const href = campo.tipo === "email" ? `mailto:${texto}` : /^https?:\/\//i.test(texto) ? texto : `https://${texto}`
       return (
-        <a href={href} target="_blank" rel="noreferrer" className={cn("min-w-0 underline decoration-muted-foreground/40 underline-offset-2 hover:decoration-foreground", !varias && "truncate")} style={recorte} onMouseDown={(e) => e.stopPropagation()}>
+        <a href={href} target="_blank" rel="noreferrer" className={cn("min-w-0 underline-offset-2 hover:underline", !varias && "truncate")} style={recorte} onMouseDown={(e) => e.stopPropagation()}>
           {texto}
         </a>
       )

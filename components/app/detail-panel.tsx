@@ -51,8 +51,8 @@ const acotar = (px: number) => acotarAncho(px, ANCHO_FICHA)
 
 /** Estado del panel de una página (desplegado o plegado, y el ancho de la ficha). Se pasa a `WorkGrid`, `InsightsPanel`, `BaseDatos` y `DetailSheet`. */
 export function usePanelFicha(pageKey: string): PanelFicha {
-  // Clave nueva desde el 2026-10-16: la de antes guardaba «ficha en el panel», que ahora es lo de serie.
-  const [prefs, setPrefs] = useLocalStorage<Prefs>(`panel-lateral:${pageKey}`, { plegado: false, ancho: ANCHO_FICHA.porDefecto })
+  // De serie la ficha se abre encima; quien quiera, la pone al lado de la tabla desde los ajustes de la base.
+  const [prefs, setPrefs] = useLocalStorage<Prefs>(`ficha-al-lado:${pageKey}`, { plegado: true, ancho: ANCHO_FICHA.porDefecto })
   const dosColumnas = useDosColumnas()
   const [nodo, setNodo] = React.useState<HTMLElement | null>(null)
   return {

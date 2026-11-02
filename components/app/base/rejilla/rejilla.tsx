@@ -13,7 +13,7 @@ import { ALTO_CABECERA, ALTO_GRUPO, ALTURAS_FILA, type ColoresRegistro, type Lin
 import { Cabecera } from "@/components/app/base/rejilla/cabecera"
 import { LineaGrupo, anchoDeFijas } from "@/components/app/base/rejilla/lineas"
 import type { Salida } from "@/components/app/base/rejilla/editor-celda"
-import { FilaRegistro, tintesDeColumnas } from "@/components/app/base/rejilla/fila"
+import { FilaRegistro } from "@/components/app/base/rejilla/fila"
 import { Pie } from "@/components/app/base/rejilla/pie"
 import type { AccionesCampo } from "@/components/app/base/rejilla/menu-campo"
 import { ALTO_PIE, ALTO_SUBGRUPO, ANCHO_ANADIR, anchoTotal, colocarColumnas, type Columna } from "@/components/app/base/rejilla/medidas"
@@ -21,12 +21,15 @@ import { copiarTexto } from "@/lib/portapapeles"
 
 export type CambioCelda<T> = { fila: T; campo: DefCampo<T>; valor: ValorCampo }
 
-const ALTO_CABECERA_AJUSTADA = 52
+const ALTO_CABECERA_AJUSTADA = 56
 const MAX_DESHACER = 50
 const FLECHAS: Record<string, Direccion> = { ArrowUp: "arriba", ArrowDown: "abajo", ArrowLeft: "izquierda", ArrowRight: "derecha" }
 
 /** ¿Se escribe en la celda con un editor? Las casillas y las estrellas se cambian con un clic. */
 const conEditor = <T,>(campo: DefCampo<T>) => campo.tipo !== "casilla" && campo.tipo !== "calificacion"
+
+/** Lo que se elige de una lista o un calendario se abre al primer clic; lo que se escribe, al pulsar la celda ya elegida. */
+const seAbreAlPrimerClic = <T,>(campo: DefCampo<T>) => campo.tipo === "select" || campo.tipo === "multiselect" || campo.tipo === "vinculo" || campo.tipo === "fecha"
 
 export type PropsRejilla<T> = {
   lineas: LineaRejilla<T>[]
@@ -63,11 +66,11 @@ export type PropsRejilla<T> = {
 }
 
 /**
- * La rejilla de la base, como la de Airtable: cabecera y columnas fijas que se quedan quietas,
- * filas virtuales (miles sin que se note), selección de celdas como en una hoja de cálculo
- * (clic, Mayús, arrastrar, flechas, Tab, ⌘ + flecha, ⌘A), editar escribiendo o con doble clic,
- * copiar y pegar con Excel, el tirador para rellenar, borrar, deshacer (⌘Z), grupos plegables,
- * el color de cada fila y los totales del pie.
+ * La tabla de la base: limpia por fuera y una hoja de cálculo por dentro. Cabecera y columnas fijas que se quedan
+ * quietas, filas virtuales (miles sin que se note), selección de celdas (clic, Mayús, arrastrar, flechas, Tab, ⌘ + flecha,
+ * ⌘A), copiar y pegar con Excel, el tirador para rellenar, borrar, deshacer (⌘Z), grupos plegables, el color de cada fila
+ * y los totales del pie. Toda celda se edita en el sitio salvo la de inicio, que abre la página del registro: una lista o
+ * una fecha al primer clic; un texto o un número, pulsando la celda ya elegida o escribiendo encima.
  */
 export function Rejilla<T>(p: PropsRejilla<T>) {
   const { columnas: columnasVista, vista, registros, getId } = p
@@ -80,6 +83,10 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
   const [altoVisible, setAltoVisible] = React.useState(600)
   /** Quedan columnas a la derecha: el «+» de añadir campo se queda a la vista y lo de debajo se difumina. */
   const [masALaDerecha, setMasALaDerecha] = React.useState(false)
+  /** Se ha movido en horizontal: las columnas fijas echan una sombra sobre lo que pasa por debajo. */
+  const [desplazada, setDesplazada] = React.useState(false)
+  /** La celda que se acaba de pulsar: al soltar sin arrastrar, puede abrir su editor. */
+  const pulsada = React.useRef<{ celda: Celda; yaElegida: boolean } | null>(null)
   const arrastre = React.useRef<"seleccion" | "relleno" | null>(null)
   /** Se guarda lo que se escribía porque se pulsó otra celda: la selección va a la nueva, no se queda en la editada. */
   const saliendoPorClic = React.useRef(false)
@@ -138,7 +145,9 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
 
   const medirDerecha = React.useCallback(() => {
     const el = contenedor.current
-    if (el) setMasALaDerecha(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
+    if (!el) return
+    setMasALaDerecha(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
+    setDesplazada(el.scrollLeft > 0)
   }, [])
 
   React.useEffect(() => {
@@ -195,7 +204,8 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
       const i = porId.get(getId(c.fila))
       return i === undefined ? c : { ...c, fila: registros[i] }
     })
-    const validos = cambios.filter((c) => !c.campo.soloLectura)
+    // La celda de inicio no se escribe aquí: lo suyo se edita en la página del registro.
+    const validos = cambios.filter((c) => !c.campo.soloLectura && !c.campo.principal)
     const sinObligatorio = validos.filter((c) => !(c.campo.obligatorio && esValorVacio(c.valor)))
     if (sinObligatorio.length < validos.length) toast.error("Hay campos que no pueden quedarse vacíos")
     const reales = sinObligatorio.filter((c) => JSON.stringify(c.campo.valor(c.fila) ?? null) !== JSON.stringify(c.valor ?? null))
@@ -206,7 +216,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
 
   const celdaEditable = (c: Celda) => {
     const campo = columnas[c.col]?.campo
-    return !!campo && !campo.soloLectura && !!p.onEscribir
+    return !!campo && !campo.soloLectura && !campo.principal && !!p.onEscribir
   }
 
   const empezarEdicion = (c: Celda, inicial?: string) => {
@@ -249,7 +259,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
       for (let c = sel.c0; c <= sel.c1; c += 1) {
         const campo = columnas[c].campo
         const lectura = valorDeTexto(campo, "")
-        if (lectura.ok && !campo.soloLectura) cambios.push({ fila: p.registros[f], campo, valor: lectura.valor })
+        if (lectura.ok && !campo.soloLectura && !campo.principal) cambios.push({ fila: p.registros[f], campo, valor: lectura.valor })
       }
     escribir(cambios)
   }
@@ -293,7 +303,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
     let soloLectura = 0
     for (const c of celdas) {
       const campo = columnas[c.col].campo
-      if (campo.soloLectura) {
+      if (campo.soloLectura || campo.principal) {
         soloLectura += 1
         continue
       }
@@ -303,7 +313,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
     }
     escribir(cambios)
     if (errores.length) toast.error(errores.length === 1 ? `Una celda no se ha pegado: ${errores[0]}` : `${errores.length} celdas no se han pegado. Por ejemplo: ${errores[0]}`)
-    else if (soloLectura) toast.message("Los campos calculados no se pegan")
+    else if (soloLectura) toast.message("Los campos calculados y la celda de inicio no se pegan")
     const ultima = celdas.at(-1)
     if (celdas[0] && ultima) setRango({ ancla: { fila: celdas[0].fila, col: celdas[0].col }, foco: { fila: ultima.fila, col: ultima.col } })
   }
@@ -382,8 +392,12 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
       setRellenoHasta(sel?.f1 ?? null)
       return
     }
+    // La celda de inicio abre el registro y sus logos abren su enlace: no seleccionan nada.
+    if (destino.closest("[data-abre-registro], [data-enlace-registro]")) return
     const c = celdaDe(e.target)
     if (!c || destino.closest("input, textarea")) return
+    const yaElegida = !!rango && !esMultiple(rango) && rango.foco.fila === c.fila && rango.foco.col === c.col
+    pulsada.current = destino.closest("button, a") || e.shiftKey ? null : { celda: c, yaElegida }
     if (editando) {
       // Como en Airtable: lo escrito se guarda al salir del campo y se selecciona la celda pulsada.
       saliendoPorClic.current = true
@@ -403,6 +417,16 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
     if (!c) return
     if (arrastre.current === "seleccion" && rango && (rango.foco.fila !== c.fila || rango.foco.col !== c.col)) setRango({ ancla: rango.ancla, foco: c })
     if (arrastre.current === "relleno") setRellenoHasta(c.fila)
+  }
+
+  /** Al soltar sobre la misma celda: una lista o una fecha se abren; un texto, si la celda ya estaba elegida. */
+  const alSoltarClic = (e: React.MouseEvent) => {
+    const antes = pulsada.current
+    pulsada.current = null
+    const c = celdaDe(e.target)
+    if (!antes || !c || c.fila !== antes.celda.fila || c.col !== antes.celda.col) return
+    const campo = columnas[c.col]?.campo
+    if (campo && conEditor(campo) && (antes.yaElegida || seAbreAlPrimerClic(campo))) empezarEdicion(c)
   }
 
   React.useEffect(() => {
@@ -451,7 +475,15 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
     p.onCambiarVista({ campos: p.vista.campos.map((c) => (c.id === id ? { ...c, ancho } : c)) })
   }
 
-  const tintes = React.useMemo(() => tintesDeColumnas(vista), [vista])
+  const filtrados = React.useMemo(() => {
+    const ids = new Set<string>()
+    const recorrer = (g: VistaBase["filtro"]) => {
+      g.condiciones.forEach((c) => ids.add(c.campo))
+      g.grupos?.forEach(recorrer)
+    }
+    recorrer(vista.filtro)
+    return ids
+  }, [vista.filtro])
   const ids = p.registros.map(p.getId)
   const marcadasTodas = ids.length > 0 && ids.every((id) => p.marcadas.has(id)) ? true : ids.some((id) => p.marcadas.has(id)) ? "indeterminate" : false
   const plegados = new Set(p.vista.plegados)
@@ -465,14 +497,15 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
       role="grid"
       aria-rowcount={p.registros.length}
       aria-colcount={columnas.length}
-      className="relative min-h-0 flex-1 overflow-auto bg-background outline-none"
+      data-desplazada={desplazada}
+      className="group/rejilla relative min-h-0 flex-1 overflow-auto bg-card outline-none"
       onKeyDown={alTeclear}
       onCopy={alCopiar}
       onCut={alCortar}
       onPaste={alPegar}
       onScroll={medirDerecha}
     >
-      <div className="flex min-h-full flex-col" style={{ width: total }}>
+      <div className="flex min-h-full min-w-full flex-col" style={{ width: total }}>
         <Cabecera
           columnas={columnas}
           alto={altoCabecera}
@@ -488,6 +521,8 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
           onAnadirCampo={p.onAnadirCampo}
           onEditarCampo={p.onEditarCampo}
           anadirFijo={masALaDerecha}
+          ordenDe={(id) => vista.orden.find((o) => o.campo === id)?.dir}
+          filtrados={filtrados}
         />
         <AsaFijas finFijas={finFijas} alto={altoVisible} columnas={columnas} onCongelar={(n) => p.onCambiarVista({ congelar: n })} />
         {masALaDerecha && p.onAnadirCampo && <DifuminadoDerecha arriba={altoCabecera} alto={altoVisible - altoCabecera} />}
@@ -499,10 +534,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
               style={{ height: virtual.getTotalSize() }}
               onMouseDown={alPulsar}
               onMouseOver={alPasar}
-              onDoubleClick={(e) => {
-                const c = celdaDe(e.target)
-                if (c && !(e.target as HTMLElement).closest("button, a")) empezarEdicion(c)
-              }}
+              onMouseUp={alSoltarClic}
               onContextMenu={(e) => {
                 const fila = filaDe(e.target)
                 if (fila === null) return e.preventDefault()
@@ -513,7 +545,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
             >
               {virtual.getVirtualItems().map((item) => {
                 const linea = p.lineas[item.index]
-                const estilo: React.CSSProperties = { position: "absolute", top: 0, left: 0, transform: `translateY(${item.start - altoCabecera}px)`, height: item.size, width: total }
+                const estilo: React.CSSProperties = { position: "absolute", top: 0, left: 0, transform: `translateY(${item.start - altoCabecera}px)`, height: item.size, width: total, minWidth: "100%" }
                 if (linea.tipo === "grupo")
                   return (
                     <div key={`g-${linea.nodo.clave}`} style={estilo}>
@@ -548,7 +580,6 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
                     rellenoHasta={rellenoHasta}
                     editando={editando?.celda.fila === f ? editando : null}
                     celdas={p.celdas}
-                    tintes={tintes}
                     editable={!!p.onEscribir}
                     onMarcar={(m) => {
                       const s = new Set(p.marcadas)
@@ -579,7 +610,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
             {filaObjetivo && (
               <>
                 <ContextMenuItem onSelect={() => p.onAbrir(p.getId(filaObjetivo))}>
-                  <PanelRightOpenIcon /> Abrir la ficha <ContextMenuShortcut>⇧␣</ContextMenuShortcut>
+                  <PanelRightOpenIcon /> Abrir <ContextMenuShortcut>⇧␣</ContextMenuShortcut>
                 </ContextMenuItem>
                 <ContextMenuItem onSelect={() => void copiarTexto(aTsv(matrizSeleccion()), "Copiado")}>
                   <CopyIcon /> Copiar las celdas <ContextMenuShortcut>⌘C</ContextMenuShortcut>
@@ -616,7 +647,7 @@ export function Rejilla<T>(p: PropsRejilla<T>) {
 function DifuminadoDerecha({ arriba, alto }: { arriba: number; alto: number }) {
   return (
     <div aria-hidden className="pointer-events-none sticky right-0 z-[15] h-0 self-end" style={{ top: arriba, width: ANCHO_ANADIR }}>
-      <span className="absolute top-0 right-0 w-full bg-linear-to-l from-background via-background/70 to-transparent" style={{ height: Math.max(0, alto) }} />
+      <span className="absolute top-0 right-0 w-full bg-linear-to-l from-card via-card/70 to-transparent" style={{ height: Math.max(0, alto) }} />
     </div>
   )
 }
@@ -652,7 +683,7 @@ function AsaFijas<T>({ finFijas, alto, columnas, onCongelar }: { finFijas: numbe
           window.addEventListener("pointerup", soltar, { once: true })
         }}
       >
-        <span className={cn("h-full w-0.5 group-hover/asa:bg-brand", x !== null && "bg-brand")} />
+        <span className={cn("h-full w-0.5 rounded-full group-hover/asa:bg-brand/60", x !== null && "bg-brand")} />
       </span>
     </div>
   )

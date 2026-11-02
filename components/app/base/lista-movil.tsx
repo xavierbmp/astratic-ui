@@ -3,6 +3,7 @@
 import * as React from "react"
 import { cn } from "cn"
 import type { DefCampo } from "@/lib/base/campos"
+import { CeldaInicio } from "@/components/app/base/celda-inicio"
 import { ValorCelda } from "@/components/app/base/rejilla/valor-celda"
 
 /** Cuántos campos, además del principal, enseña cada tarjeta. */
@@ -39,7 +40,7 @@ export function ListaMovil<T>({
         return (
           <li key={id}>
             <button type="button" onClick={() => onAbrir(id)} className={cn("flex w-full flex-col gap-1 px-4 py-3 text-left hover:bg-muted/60", abiertoId === id && "bg-brand-soft")}>
-              {principal && <span className="truncate text-sm font-medium">{celdas?.[principal.id]?.(fila) ?? String(principal.valor(fila) ?? "")}</span>}
+              {principal?.inicio ? <CeldaInicio inicio={principal.inicio(fila)} /> : principal && <span className="truncate text-sm font-medium">{celdas?.[principal.id]?.(fila) ?? String(principal.valor(fila) ?? "")}</span>}
               {resto.map(({ campo }) => (
                 <span key={campo.id} className="flex min-w-0 items-center gap-2 text-xs">
                   <span className="w-24 flex-none truncate text-muted-foreground">{campo.nombre}</span>

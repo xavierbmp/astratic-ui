@@ -2,26 +2,25 @@
 
 import * as React from "react"
 import { toast } from "sonner"
-import { PlusIcon, Trash2Icon, UploadIcon, type LucideIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { PlusIcon, Settings2Icon, Trash2Icon, UploadIcon, type LucideIcon } from "lucide-react"
+import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { BulkBar } from "@/components/app/bulk-bar"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
-import { ConfigButton } from "@/components/app/config-button"
 import { usePanelFicha, type PanelFicha } from "@/components/app/detail-panel"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { BaseApi } from "@/hooks/use-base"
 import { filtrarFilas, operadorPorDefecto } from "@/lib/filtros/core"
 import { ordenarFilas, valoresDeFiltro } from "@/lib/vistas/core"
+import { guardarListaAbierta } from "@/lib/base/lista-abierta"
 import { TIPOS_CAMPO, aFiltrable, campoDePropio, colorPorDefecto, textoDeValor, type CampoPropio, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
-import { LISTA_TIPOS_VISTA, TIPOS_VISTA, agruparEnNiveles, aplicarAjustes, clavesDeGrupos, coloresDeRegistro, columnasDeVista, idBase, lineasDeRejilla, type VistaBase } from "@/lib/base/vistas"
-import { BarraBase, type MenuDeBarra } from "@/components/app/base/barra-base"
-import { LateralVistas } from "@/components/app/base/lateral-vistas"
+import { agruparEnNiveles, aplicarAjustes, clavesDeGrupos, coloresDeRegistro, columnasDeVista, idBase, lineasDeRejilla, type VistaBase } from "@/lib/base/vistas"
+import { BarraBase, type AjusteDeBase, type MenuDeBarra } from "@/components/app/base/barra-base"
 import { PestanasVistas } from "@/components/app/base/pestanas-vistas"
-import { useVistasEnPestanas } from "@/components/app/base/vistas-en-pestanas"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { ICONO_VISTA } from "@/components/app/base/apariencia"
+import { useRanuraBotonesPagina } from "@/components/app/page-header"
 import { useLadoLateral, type ControlLateral } from "@/components/app/controles-lateral"
 import { EditorCampo } from "@/components/app/base/editor-campo"
 import { AjustesCampo, type PestanaAjustes } from "@/components/app/base/ajustes-campo"
@@ -64,12 +63,12 @@ export type VistaFija<T> = {
 }
 
 /**
- * Una base de datos con la colocación de Airtable y el aspecto del design system, entera: la barra
- * de la vista, el lateral de vistas (que se ensancha arrastrando), la vista (cuadrícula, kanban,
- * galería o calendario), el formulario de alta, los campos propios y la ficha, encima o integrada a
- * la derecha. La página pone los datos y lo que pasa al escribir, crear o borrar; la base hace el
- * resto (filtrar, buscar, ordenar, agrupar, colorear, seleccionar, copiar y pegar, y recordar las
- * vistas de cada persona con `useBase`).
+ * Una base de datos entera: las vistas en pestañas como las de Chrome (la primera es la plantilla de las demás), con
+ * los botones generales de la página en su misma fila; debajo, el bloque con su cabecera (el nombre de la vista, lo que
+ * cambia lo que se ve, los botones principales y los ajustes), la vista (tabla, kanban, galería o calendario), el formulario
+ * de alta, los campos propios y la ficha. La página pone los datos y lo que pasa al escribir, crear o borrar; la base hace
+ * el resto (filtrar, buscar, ordenar, agrupar, colorear, seleccionar, copiar y pegar, y recordar las vistas de cada persona
+ * con `useBase`). Un registro se abre desde su celda de inicio: en su página si tiene (`paginaRegistro`), si no con `onAbrir`.
  *
  * En el móvil la vista cede el sitio a una lista de tarjetas, con los mismos filtros y orden.
  */
@@ -96,12 +95,14 @@ export function BaseDatos<T>({
   onImportar,
   crearCamposAlImportar,
   ajustesTabla,
+  botones,
+  ajustes: ajustesPagina,
+  paginaRegistro,
   portada,
   tarjetaGaleria,
   lateral: lateralPropio,
   ficha: fichaPagina,
   kanban: kanbanBase,
-  lateralInicial,
   accionesSeleccion: accionesSeleccionBase,
   formulario,
   nuevoInicial = false,
@@ -109,7 +110,7 @@ export function BaseDatos<T>({
   vistasFijas,
   children,
 }: {
-  /** Para recordar en este navegador el lateral de vistas, su ancho y si la ficha va integrada. */
+  /** Para recordar en este navegador el lateral propio, su ancho y si la ficha va al lado. */
   clave: string
   base: BaseApi<T>
   campos: DefCampo<T>[]
@@ -143,25 +144,28 @@ export function BaseDatos<T>({
    * página lo recibe en `nuevos` de `onImportar` para escribir sus valores (`registrosDeFilas(filas, [...campos, ...nuevos], …)`).
    */
   crearCamposAlImportar?: boolean
-  /** Los ajustes de la tabla (valores por defecto, opciones y su orden): un engranaje junto a la acción principal. */
+  /** Los ajustes de la tabla (valores por defecto, opciones y su orden): entran en los ajustes de la base. */
   ajustesTabla?: { label: string; onAbrir: () => void }
+  /** Los botones principales propios de la página, a la derecha de la cabecera y antes de «Nuevo». */
+  botones?: React.ReactNode
+  /** Lo que la página añade a los ajustes de la base, al final de su cabecera: las automatizaciones, sobre todo. */
+  ajustes?: AjusteDeBase[]
+  /**
+   * La página de cada registro: su celda de inicio y su tarjeta llevan a `ruta(id)` y dejan la lista tal como se ve
+   * para las flechas de la página (`lib/base/lista-abierta.ts`, por `clave`). Sin ruta para ese registro, `onAbrir`.
+   */
+  paginaRegistro?: { clave: string; ruta: (id: string) => string | null }
   /** La imagen de cada registro en las tarjetas del kanban y la galería. */
   portada?: (fila: T) => string | null | undefined
   /** Una tarjeta a medida para la galería (una tarjeta de perfil): la pinta la página; la vista sigue filtrando, ordenando y abriendo. */
   tarjetaGaleria?: (fila: T) => React.ReactNode
   /**
-   * Un lateral propio en lugar del de las vistas (las carpetas de las ideas). Las vistas siguen en
-   * el menú del nombre de la vista. `nombre` es para el botón que lo abre y lo cierra. Si `contenido`
-   * es una función, recibe con qué pasarse al otro lado y plegarse (`ControlesLateral`).
+   * Un lateral propio de la página (las carpetas de las ideas). `nombre` es para el botón que lo abre y lo cierra. Si
+   * `contenido` es una función, recibe con qué pasarse al otro lado y plegarse (`ControlesLateral`).
    */
   lateral?: { nombre: string; contenido: React.ReactNode | ((control: ControlLateral) => React.ReactNode) }
-  /**
-   * La ficha integrada de la página (`usePanelFicha`) cuando la base va dentro de un `WorkGrid` con
-   * panel: entonces la ficha ocupa la columna del panel y la base no pinta la suya.
-   */
+  /** La ficha de la página (`usePanelFicha`), la misma que recibe su `DetailSheet`, para abrirla al lado de la tabla. */
   ficha?: PanelFicha
-  /** Si el lateral de vistas empieza abierto (de serie, sí; cerrado si la página tiene panel). */
-  lateralInicial?: boolean
   /** Del kanban: el resumen de cada columna, las que empiezan plegadas y los botones al pie de cada tarjeta. */
   kanban?: { resumen?: (filas: T[]) => React.ReactNode; plegadas?: string[]; acciones?: (fila: T) => React.ReactNode }
   /** Botones de más en la barra de la selección (copiar emails, exportar…). */
@@ -178,7 +182,7 @@ export function BaseDatos<T>({
   vistasFijas?: VistaFija<T>[]
   /**
    * Lo que la página pinta con los registros que se ven, en su orden: la ficha y sus flechas. Se le
-   * pasa `ficha` para su `DetailSheet`: con la ficha integrada, se pinta a la derecha de la base.
+   * pasa `ficha` para su `DetailSheet`: con la ficha al lado, se pinta a la derecha de la base.
    */
   children?: (registros: T[], ficha: PanelFicha) => React.ReactNode
 }) {
@@ -187,7 +191,8 @@ export function BaseDatos<T>({
   const fija = vistasFijas?.find((f) => f.vista.id === fijaId)
   const vista = fija?.vista ?? base.vista
   const filas = fija?.filas ?? filasBase
-  const onAbrir = fija?.onAbrir ?? onAbrirBase
+  const router = useRouter()
+  const onAbrirSinPagina = fija?.onAbrir ?? onAbrirBase
   const onEscribir = fija ? undefined : onEscribirBase
   const onBorrar = fija ? undefined : onBorrarBase
   const kanban = fija ? fija.kanban : kanbanBase
@@ -197,18 +202,16 @@ export function BaseDatos<T>({
     setFijaId(null)
     base.activar(id)
   }
-  const crearVista = (tipo: Parameters<typeof base.crear>[0]) => {
+  // La pestaña nueva nace como la de base y su nombre queda listo para escribirlo en la barra.
+  const [enfocarNombre, setEnfocarNombre] = React.useState(false)
+  const crearVista = () => {
     setFijaId(null)
-    return base.crear(tipo)
+    base.crear()
+    setEnfocarNombre(true)
   }
+  const ranuraBotones = useRanuraBotonesPagina()
   const fijas = vistasFijas?.length ? { vistas: vistasFijas.map((f) => ({ id: f.vista.id, nombre: f.vista.nombre, icono: f.icono })), activa: fija?.vista.id ?? null, onActivar: setFijaId } : undefined
-  // Las vistas van de serie como pestañas laterales, estrechas, así que se ven siempre (reportes cmvsixcu y cmvtrp16);
-  // un lateral propio (las carpetas) empieza cerrado si la página tiene panel, para dejar sitio a la base.
-  // Sin `VistasEnPestanas` en el shell, como antes: la lista ancha, cerrada si la página tiene panel.
-  const enPestanas = useVistasEnPestanas()
-  const [lateral, setLateral] = useLocalStorage(lateralPropio || !enPestanas ? `base-lateral:${clave}` : `base-vistas-abiertas:${clave}`, lateralInicial ?? (lateralPropio || !enPestanas ? !fichaPagina : true))
-  const [formaGuardada, setFormaVistas] = useLocalStorage<"pestanas" | "lista">(`base-forma-vistas:${clave}`, "pestanas")
-  const formaVistas = enPestanas ? formaGuardada : "lista"
+  const [lateral, setLateral] = useLocalStorage(`base-lateral:${clave}`, true)
   // Todo lateral se pasa al otro lado y se pliega desde su cabecera (Xavier, 2026-10-16).
   const { lado, cambiarLado } = useLadoLateral(`base:${clave}`)
   const control: ControlLateral = { lado, onCambiarLado: cambiarLado, onPlegar: () => setLateral(false) }
@@ -271,6 +274,7 @@ export function BaseDatos<T>({
       insertarIzquierda: onGuardarCampo && !campo.principal ? () => abrirEditor({ antesDe: campo.id }) : undefined,
       insertarDerecha: onGuardarCampo ? () => abrirEditor({ despuesDe: campo.id }) : undefined,
       ordenar: (dir) => base.cambiar({ orden: [{ campo: campo.id, dir }] }),
+      quitarOrden: () => base.cambiar((v) => ({ orden: v.orden.filter((o) => o.campo !== campo.id) })),
       filtrar: () => {
         base.cambiar((v) => ({ filtro: { ...v.filtro, condiciones: [...v.filtro.condiciones, { campo: campo.id, op: operadorPorDefecto(TIPOS_CAMPO[campo.tipo].filtro) }] } }))
         setMenu("filtro")
@@ -354,14 +358,14 @@ export function BaseDatos<T>({
   const marcadasVisibles = [...marcadas].filter((id) => registros.some((f) => getId(f) === id))
   const abrirNuevo = onNuevo ?? (onCrear ? () => setNuevo(true) : undefined)
   const accionNueva =
-    !fija && (abrirNuevo || ajustesTabla || onImportar) ? (
+    !fija && (abrirNuevo || onImportar || botones) ? (
       <>
+        {botones}
         {onImportar && (
           <Button variant="ghost" size="sm" onClick={() => setImportando(true)} aria-label={`Importar ${objeto.plural}`} title="Importar desde un Excel o un CSV">
             <UploadIcon /> <span className="hidden lg:inline">Importar</span>
           </Button>
         )}
-        {ajustesTabla && <ConfigButton label={ajustesTabla.label} onClick={ajustesTabla.onAbrir} className="size-7" />}
         {abrirNuevo && (
           <Button size="sm" onClick={abrirNuevo} aria-label={objeto.nuevo}>
             <PlusIcon /> <span className="hidden sm:inline">{objeto.nuevo}</span>
@@ -369,12 +373,19 @@ export function BaseDatos<T>({
         )}
       </>
     ) : undefined
+  const ajustesDeBase: AjusteDeBase[] = [...(ajustesPagina ?? []), ...(ajustesTabla ? [{ id: "tabla", label: ajustesTabla.label, icono: Settings2Icon, onSelect: ajustesTabla.onAbrir }] : [])]
 
   const coloresDe = (f: T) => coloresDeRegistro(f, vista.color, campos, filtrables, ref)
   const colorDe = (f: T) => coloresDe(f).marca
   const escribirUno = onEscribir ? (fila: T, campo: DefCampo<T>, valor: ValorCampo) => onEscribir([{ fila, campo, valor }]) : undefined
-  const tarjetas = { campos: columnas.map((c) => c.campo), colorDe, celdas, onAbrirVinculo, portada }
+  const tarjetas = { campos: columnas.map((c) => c.campo), inicio: campos.find((c) => c.principal)?.inicio, colorDe, celdas, onAbrirVinculo, portada }
   const textoVacio = registros.length === 0 ? vacio?.(hayFiltro, limpiar, busqueda) : undefined
+  const onAbrir = (id: string) => {
+    const ruta = fija ? null : paginaRegistro?.ruta(id)
+    if (!ruta || !paginaRegistro) return onAbrirSinPagina(id)
+    guardarListaAbierta(paginaRegistro.clave, { vista: vista.nombre, ids: registros.map(getId) })
+    router.push(ruta)
+  }
 
   const cuerpo = () => {
     if (movil) return <ListaMovil registros={registros} columnas={columnas} getId={getId} celdas={celdas} abiertoId={abiertoId} onAbrir={onAbrir} vacio={textoVacio} />
@@ -418,8 +429,8 @@ export function BaseDatos<T>({
                 : undefined
             }
             onAbrirVinculo={onAbrirVinculo}
-            // Con la ficha integrada, la ficha sigue a la celda activa: se ve el registro en el que se está.
-            onActiva={(id) => ficha.activa && id !== abiertoId && onAbrir(id)}
+            // Con la ficha al lado y abierta, sigue a la celda activa: se ve el registro en el que se está.
+            onActiva={(id) => ficha.activa && abiertoId && id !== abiertoId && onAbrirSinPagina(id)}
             vacio={vacio?.(hayFiltro, limpiar, busqueda)}
           />
         )
@@ -427,97 +438,61 @@ export function BaseDatos<T>({
   }
 
   const pintarLateral = () => {
-    if (!lateral || movil) return null
-    if (lateralPropio) return typeof lateralPropio.contenido === "function" ? lateralPropio.contenido(control) : lateralPropio.contenido
-    if (formaVistas === "pestanas")
-      return (
-        <PestanasVistas
-          vistas={base.vistas}
-          activa={vista.id}
-          onActivar={activarVista}
-          menuCrear={(alCrear, boton) => (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>{boton}</DropdownMenuTrigger>
-              <DropdownMenuContent side="right" align="start" className="w-72" onCloseAutoFocus={(e) => e.preventDefault()}>
-                <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Tipo de vista</DropdownMenuLabel>
-                {LISTA_TIPOS_VISTA.map((t) => {
-                  const Icono = ICONO_VISTA[t]
-                  return (
-                    <DropdownMenuItem key={t} className="items-start" onSelect={() => alCrear(crearVista(t))}>
-                      <Icono className="mt-0.5 text-brand" />
-                      <span className="grid gap-0.5">
-                        <span>{TIPOS_VISTA[t].label}</span>
-                        <span className="text-xs text-muted-foreground">{TIPOS_VISTA[t].ayuda}</span>
-                      </span>
-                    </DropdownMenuItem>
-                  )
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-          onEditar={base.editar}
-          onDuplicar={base.duplicar}
-          onBorrar={borrarVista}
-          onReordenar={base.reordenar}
-          fijas={fijas}
-          onLista={() => setFormaVistas("lista")}
-          {...control}
-        />
-      )
-    return (
-      <LateralVistas
-        onPestanas={enPestanas ? () => setFormaVistas("pestanas") : undefined}
-        clave={clave}
+    if (!lateral || movil || !lateralPropio) return null
+    return typeof lateralPropio.contenido === "function" ? lateralPropio.contenido(control) : lateralPropio.contenido
+  }
+
+  const primeraAbierta = !fijas?.vistas.length && !fija && vista.id === base.vistas[0]?.id
+  return (
+    <div data-slot="base" className="flex h-full min-h-[420px] min-w-0 flex-col">
+      <PestanasVistas
         vistas={base.vistas}
         activa={vista.id}
         onActivar={activarVista}
         onCrear={crearVista}
-        onRenombrar={base.renombrar}
+        onEditar={base.editar}
         onDuplicar={base.duplicar}
         onBorrar={borrarVista}
         onReordenar={base.reordenar}
         fijas={fijas}
-        {...control}
+        ranura={ranuraBotones}
       />
-    )
-  }
-
-  return (
-    <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-xl border bg-card">
-      <BarraBase
-        vista={vista}
-        vistas={base.vistas}
-        campos={campos}
-        camposMenu={camposMenu}
-        objeto={objeto.plural}
-        lateralAbierto={lateral && !movil}
-        ladoLateral={lado}
-        onLateral={() => setLateral(!lateral)}
-        nombreLateral={lateralPropio?.nombre}
-        onCambiar={base.cambiar}
-        acciones={{
-          renombrar: (n) => base.renombrar(vista.id, n),
-          duplicar: () => base.duplicar(vista.id),
-          borrar: base.vistas.length > 1 ? () => borrarVista(vista.id) : undefined,
-          activar: activarVista,
-          crear: crearVista,
-        }}
-        onContraer={() => base.cambiar({ plegados: clavesDeGrupos(nodos) })}
-        onExpandir={() => base.cambiar({ plegados: [] })}
-        busqueda={busqueda}
-        onBuscar={setBusqueda}
-        accion={accionNueva}
-        // Sin ficha (cada registro se abre en su página) no hay ficha que integrar.
-        panelFicha={children ? { activo: ficha.preferida, onAlternar: () => ficha.alternar(!ficha.preferida) } : undefined}
-        menu={menu}
-        onMenu={setMenu}
-        fijas={fijas}
-      />
-      <div data-slot="base-datos" className="flex min-h-0 flex-1" style={{ "--ficha-w": `${ficha.ancho}px` } as React.CSSProperties}>
-        {lado === "izquierda" && pintarLateral()}
-        <div className="flex min-w-0 flex-1 flex-col">{cuerpo()}</div>
-        {lado === "derecha" && pintarLateral()}
-        {ficha.activa && !fichaPagina && children && <PanelFichaBase ficha={ficha} />}
+      <div className={cn("relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-card shadow-superficie", primeraAbierta && "rounded-tl-[10px]")}>
+        <BarraBase
+          vista={vista}
+          campos={campos}
+          camposMenu={camposMenu}
+          objeto={objeto.plural}
+          otrasVistas={base.vistas.filter((v) => v.id !== vista.id)}
+          lateral={lateralPropio && !movil ? { nombre: lateralPropio.nombre, abierto: lateral, lado, onAlternar: () => setLateral(!lateral) } : undefined}
+          onCambiar={base.cambiar}
+          acciones={{
+            renombrar: (n) => base.renombrar(vista.id, n),
+            duplicar: () => base.duplicar(vista.id),
+            borrar: vista.id !== base.vistas[0]?.id ? () => borrarVista(vista.id) : undefined,
+            cambiarTipo: base.cambiarTipo,
+            cambiarIcono: (icono) => base.editar(vista.id, { icono }),
+          }}
+          onContraer={() => base.cambiar({ plegados: clavesDeGrupos(nodos) })}
+          onExpandir={() => base.cambiar({ plegados: [] })}
+          busqueda={busqueda}
+          onBuscar={setBusqueda}
+          accion={accionNueva}
+          ajustes={ajustesDeBase}
+          // Sin ficha (cada registro se abre en su página) no hay ficha que abrir al lado.
+          panelFicha={children ? { activo: ficha.preferida, onAlternar: () => ficha.alternar(!ficha.preferida) } : undefined}
+          menu={menu}
+          onMenu={setMenu}
+          fijas={fijas}
+          enfocarNombre={enfocarNombre}
+          onNombreEnfocado={() => setEnfocarNombre(false)}
+        />
+        <div data-slot="base-datos" className="flex min-h-0 flex-1" style={{ "--ficha-w": `${ficha.ancho}px` } as React.CSSProperties}>
+          {lado === "izquierda" && pintarLateral()}
+          <div className="flex min-w-0 flex-1 flex-col">{cuerpo()}</div>
+          {lado === "derecha" && pintarLateral()}
+          {ficha.activa && children && <PanelFichaBase ficha={ficha} />}
+        </div>
       </div>
 
       <Popover open={!!editor} onOpenChange={(abierto) => !abierto && setEditor(null)}>

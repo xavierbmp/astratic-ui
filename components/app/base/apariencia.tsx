@@ -7,8 +7,13 @@ import * as React from "react"
 import {
   AlignLeftIcon,
   CalendarDaysIcon,
+  CircleAlertIcon,
+  CircleCheckIcon,
+  CircleDashedIcon,
   CircleDotIcon,
   Columns3Icon,
+  IdCardIcon,
+  TriangleAlertIcon,
   EuroIcon,
   GaugeIcon,
   GlobeIcon,
@@ -33,6 +38,7 @@ import type { ColorOpcion, TipoCampo } from "@/lib/base/campos"
 import type { TipoVista } from "@/lib/base/vistas"
 
 export const ICONO_TIPO: Record<TipoCampo, LucideIcon> = {
+  inicio: IdCardIcon,
   texto: TypeIcon,
   texto_largo: AlignLeftIcon,
   casilla: SquareCheckIcon,
@@ -117,6 +123,33 @@ export function FichaOpcion({ label, color, tono, className, children }: { label
     <span className={cn("inline-flex max-w-full min-w-0 items-center gap-1 rounded-full px-2 py-px text-xs leading-[18px] whitespace-nowrap", tono ? statusToneClass[tono] : CLASE_OPCION[color ?? "gris"], tono && "rounded-md font-medium", className)}>
       <span className="truncate">{label}</span>
       {children}
+    </span>
+  )
+}
+
+const ICONO_TONO: Record<StatusTone, LucideIcon> = { success: CircleCheckIcon, warning: TriangleAlertIcon, danger: CircleAlertIcon, info: CircleDotIcon, neutral: CircleDashedIcon }
+const COLOR_TONO: Record<StatusTone, string> = { success: "text-success", warning: "text-warning", danger: "text-danger", info: "text-info", neutral: "text-muted-foreground" }
+
+/**
+ * Un estado en una tabla: su icono del color del tono y su texto, sin ficha. Lo que avisa o está mal (pendiente, error)
+ * lleva también el texto de ese color; lo demás, en el del texto.
+ */
+export function EstadoEnLinea({ label, tono, className }: { label: string; tono: StatusTone; className?: string }) {
+  const Icono = ICONO_TONO[tono]
+  return (
+    <span className={cn("inline-flex max-w-full min-w-0 items-center gap-1.5 whitespace-nowrap", (tono === "warning" || tono === "danger") && COLOR_TONO[tono], className)}>
+      <Icono className={cn("size-3.5 flex-none", COLOR_TONO[tono])} aria-hidden />
+      <span className="truncate">{label}</span>
+    </span>
+  )
+}
+
+/** Una opción de una lista en una tabla: el punto de su color y su texto, sin ficha. */
+export function OpcionEnLinea({ label, color, className }: { label: string; color?: ColorOpcion; className?: string }) {
+  return (
+    <span className={cn("inline-flex max-w-full min-w-0 items-center gap-1.5 whitespace-nowrap", className)}>
+      <span aria-hidden className={cn("size-2 flex-none rounded-full", CLASE_FUERTE[color ?? "gris"])} />
+      <span className="truncate">{label}</span>
     </span>
   )
 }

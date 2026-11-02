@@ -1,8 +1,17 @@
 "use client"
 
+import * as React from "react"
 import { createPortal } from "react-dom"
 import { cn } from "cn"
 import { useRanuraPantallaCompleta } from "@/components/app/pantalla-completa"
+
+/** El hueco de la fila de vistas de una base, donde van los botones generales de la página. Lo reparte `PageBody`. */
+const RanuraBotones = React.createContext<{ nodo: HTMLElement | null; setNodo: (nodo: HTMLElement | null) => void } | null>(null)
+
+/** Lo llama la base: su fila de pestañas ofrece el hueco de los botones de la página. */
+export function useRanuraBotonesPagina() {
+  return React.useContext(RanuraBotones)?.setNodo
+}
 
 export function PageHeader({
   title,
@@ -22,10 +31,22 @@ export function PageHeader({
   tabs?: React.ReactNode
   /** Cifras clave discretas a la derecha del título (las del workspace de influencers, `CifrasCabecera`). */
   stats?: React.ReactNode
-  /** Los botones de la página: con pestañas o cifras, a la derecha de la fila de las pestañas; si no, junto al título. */
+  /**
+   * Los botones generales de la página. Con una base debajo, a la derecha de la fila de sus vistas. Sin base: con
+   * pestañas o cifras, a la derecha de la fila de las pestañas; si no, junto al título.
+   */
   actions?: React.ReactNode
 }) {
   const ranura = useRanuraPantallaCompleta()
+  const huecoBase = React.useContext(RanuraBotones)?.nodo
+  if (huecoBase && actions) {
+    return (
+      <>
+        {createPortal(actions, huecoBase)}
+        <PageHeader title={title} description={description} tabs={tabs} stats={stats} className={className} {...props} />
+      </>
+    )
+  }
   // En pantalla completa la cabecera no ocupa sitio: sus pestañas y sus botones suben a la barra del shell, junto a las
   // migas, y el título, la descripción y las cifras se quitan (reporte cmvlkbo0).
   if (ranura) {
@@ -67,11 +88,15 @@ export function PageHeader({
 }
 
 export function PageBody({ className, ...props }: React.ComponentProps<"div">) {
+  const [nodo, setNodo] = React.useState<HTMLElement | null>(null)
+  const ranura = React.useMemo(() => ({ nodo, setNodo }), [nodo])
   return (
-    <div
-      data-slot="page-body"
-      className={cn("flex min-h-0 flex-1 flex-col gap-4 px-[34px] pt-[26px] pb-10 completa:gap-3 completa:pt-3", className)}
-      {...props}
-    />
+    <RanuraBotones.Provider value={ranura}>
+      <div
+        data-slot="page-body"
+        className={cn("flex min-h-0 flex-1 flex-col gap-4 px-[34px] pt-[26px] pb-10 completa:gap-3 completa:pt-3", className)}
+        {...props}
+      />
+    </RanuraBotones.Provider>
   )
 }

@@ -74,14 +74,14 @@ export function KanbanBase<T>({
 
   if (!campo)
     return (
-      <div className="flex min-h-0 flex-1 justify-center overflow-auto bg-background pt-10">
+      <div className="flex min-h-0 flex-1 justify-center overflow-auto bg-card pt-10">
         <EmptyState icon={Columns3Icon} title="Elige cómo repartir las tarjetas" description="El kanban necesita un campo de selección única o un vínculo: cada opción es una columna." />
       </div>
     )
 
   const editable = !!onEscribir && !campo.soloLectura
   return (
-    <div className="min-h-0 flex-1 bg-background">
+    <div className="min-h-0 flex-1 bg-card">
       <Kanban
         columns={columnas}
         items={items}
@@ -98,7 +98,7 @@ export function KanbanBase<T>({
               <TarjetaRegistro fila={item.fila} {...tarjeta} />
               {botones && (
                 // Sus botones no abren la ficha ni empiezan a arrastrar la tarjeta.
-                <div className="mt-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                <div className={tarjeta.inicio ? "flex items-center gap-1.5 px-2 pb-2" : "mt-2 flex items-center gap-1.5"} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                   {botones}
                 </div>
               )}
@@ -109,7 +109,7 @@ export function KanbanBase<T>({
         openId={abiertoId}
         storageKey={clave}
         defaultCollapsed={plegadas}
-        density="compact"
+        density={tarjeta.inicio ? "perfil" : "compact"}
       />
     </div>
   )

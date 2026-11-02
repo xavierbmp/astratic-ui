@@ -16,6 +16,7 @@ export type AccionesCampo = {
   insertarIzquierda?: () => void
   insertarDerecha?: () => void
   ordenar: (dir: "asc" | "desc") => void
+  quitarOrden?: () => void
   filtrar: () => void
   agrupar: () => void
   ocultar?: () => void

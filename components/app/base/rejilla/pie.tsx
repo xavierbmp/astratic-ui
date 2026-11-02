@@ -28,8 +28,8 @@ export function Pie<T>({
   onCalculo: (id: string, calculo: Calculo | null) => void
 }) {
   return (
-    <div className="sticky bottom-0 z-20 flex border-t bg-card text-xs text-muted-foreground" style={{ height: ALTO_PIE }}>
-      <div className="sticky left-0 z-10 flex flex-none items-center bg-card pl-1.5" style={{ width: ANCHO_IZQUIERDA }}>
+    <div className="sticky bottom-0 z-20 flex border-t border-border/70 bg-card text-xs text-muted-foreground" style={{ height: ALTO_PIE }}>
+      <div className="sticky left-0 z-10 flex flex-none items-center justify-center bg-card" style={{ width: ANCHO_IZQUIERDA }}>
         {onNuevo && (
           <button type="button" aria-label={`Nuevo ${objeto.singular}`} title={`Nuevo ${objeto.singular}`} className="flex size-7 items-center justify-center rounded-md text-foreground/80 hover:bg-muted" onClick={onNuevo}>
             <PlusIcon className="size-4" />
@@ -39,7 +39,7 @@ export function Pie<T>({
       {columnas.map((c) => (
         <div key={c.campo.id} className={cn("flex flex-none items-center justify-end bg-card", c.fija && "sticky z-10")} style={{ width: c.ancho, left: c.fija ? c.x : undefined }}>
           {c.campo.principal ? (
-            <span className="mr-auto pl-2 tabular-nums">
+            <span className="mr-auto pl-2.5 tabular-nums">
               {filas.length.toLocaleString("es-ES")} {filas.length === 1 ? objeto.singular : objeto.plural}
             </span>
           ) : (

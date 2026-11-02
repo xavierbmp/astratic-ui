@@ -28,16 +28,16 @@ export type AlturaFila = "corta" | "media" | "alta" | "extra"
 
 /** Las alturas de fila de Airtable, en píxeles. */
 export const ALTURAS_FILA: Record<AlturaFila, { label: string; px: number }> = {
-  corta: { label: "Corta", px: 32 },
-  media: { label: "Media", px: 56 },
-  alta: { label: "Alta", px: 88 },
-  extra: { label: "Extraalta", px: 128 },
+  corta: { label: "Corta", px: 44 },
+  media: { label: "Media", px: 64 },
+  alta: { label: "Alta", px: 96 },
+  extra: { label: "Extraalta", px: 136 },
 }
 
-export const ALTO_CABECERA = 32
+export const ALTO_CABECERA = 40
 export const ALTO_GRUPO = 36
-export const ANCHO_POR_DEFECTO = 180
-export const ANCHO_PRINCIPAL = 260
+export const ANCHO_POR_DEFECTO = 170
+export const ANCHO_PRINCIPAL = 250
 export const ANCHO_MINIMO = 80
 export const ANCHO_MAXIMO = 800
 /** Como en Airtable: hasta tres niveles de grupo. */
@@ -109,7 +109,10 @@ export type AjusteCampo = { opciones?: { id: string; color?: ColorOpcion }[] }
  * ajustes de los campos de serie y las vistas de serie que ya conoce (`ofrecidas`), para que una de
  * serie nueva le llegue una vez y, si la borra, no vuelva.
  */
-export type ConfigBase = { vistas: VistaBase[]; activa?: string; formulario?: CampoFormulario[]; ajustes?: Record<string, AjusteCampo>; ofrecidas?: string[] }
+export type ConfigBase = { vistas: VistaBase[]; activa?: string; formulario?: CampoFormulario[]; ajustes?: Record<string, AjusteCampo>; ofrecidas?: string[]; diseno?: number }
+
+/** La versión del diseño de las tablas con la que se guardaron las vistas: las de antes se ponen al día una vez. */
+const DISENO_TABLA = 2
 
 /** Una vista de serie. `nueva`: llegó después de que hubiera vistas guardadas, así que se añade a quien ya tenía las suyas. */
 export type VistaDeSerie = VistaBase & { nueva?: boolean }
@@ -149,11 +152,13 @@ export function vistaNueva<T>(
   const apilar = tipo === "kanban" ? (apilarPedido ?? camposApilables(campos)[0]?.id) : undefined
   const fecha = tipo === "calendario" ? (fechaPedida ?? camposDeFecha(campos)[0]?.id) : undefined
   let enTarjeta = 0
+  // Con celda de inicio, la tarjeta es la de perfil: sale limpia y cada persona enciende lo que quiera.
+  const conInicio = campos.some((c) => c.principal && c.inicio)
   const visible = (c: DefCampo<T>) => {
     if (c.principal) return true
-    if (c.ocultoDeSerie) return false
+    if (c.ocultoDeSerie || c.enInicio) return false
     if (tipo === "cuadricula") return true
-    if (c.id === apilar || enTarjeta >= CAMPOS_EN_TARJETA) return false
+    if (conInicio || c.id === apilar || enTarjeta >= CAMPOS_EN_TARJETA) return false
     enTarjeta += 1
     return true
   }
@@ -190,7 +195,7 @@ export function normalizarVista<T>(vista: VistaBase, campos: DefCampo<T>[]): Vis
   const principal = campos.find((c) => c.principal)
   const lista = [
     ...vista.campos.filter((c) => existen.has(c.id)),
-    ...campos.filter((c) => !conocidos.has(c.id)).map((c) => ({ id: c.id, visible: !c.ocultoDeSerie })),
+    ...campos.filter((c) => !conocidos.has(c.id)).map((c) => ({ id: c.id, visible: !c.ocultoDeSerie && !c.enInicio })),
   ]
   const ordenada = principal
     ? [{ ...(lista.find((c) => c.id === principal.id) ?? { id: principal.id }), visible: true }, ...lista.filter((c) => c.id !== principal.id)]
@@ -232,9 +237,37 @@ function conLasDeSerieNuevas(config: ConfigBase, deSerie: VistaDeSerie[]): Vista
 
 /** La configuración al día: sin vistas, las de serie (y las de serie nuevas, a quien ya tenía las suyas); la activa, una que exista. */
 export function normalizarConfig<T>(config: ConfigBase | null | undefined, campos: DefCampo<T>[], deSerie: VistaDeSerie[]): ConfigBase {
-  const vistas = (config?.vistas?.length ? conLasDeSerieNuevas(config, deSerie) : deSerie.map(sinMarcaDeNueva)).map((v) => normalizarVista(v, campos))
+  const guardadas = config?.vistas?.length ? conLasDeSerieNuevas(config, deSerie) : deSerie.map(sinMarcaDeNueva)
+  // Las vistas guardadas con la tabla de antes pasan una vez a la de ahora, sin perder sus filtros ni su orden.
+  const alDia = config?.vistas?.length && config.diseno !== DISENO_TABLA ? guardadas.map((v) => vistaAlDiseno(v, campos)) : guardadas
+  const vistas = alDia.map((v) => normalizarVista(v, campos))
   const activa = vistas.some((v) => v.id === config?.activa) ? config?.activa : vistas[0]?.id
-  return { vistas, activa, formulario: config?.formulario, ...(config?.ajustes ? { ajustes: config.ajustes } : {}), ofrecidas: deSerie.map((v) => v.id) }
+  return { vistas, activa, formulario: config?.formulario, ...(config?.ajustes ? { ajustes: config.ajustes } : {}), ofrecidas: deSerie.map((v) => v.id), diseno: DISENO_TABLA }
+}
+
+/**
+ * Una vista guardada, en el diseño de ahora: lo que va dentro de la celda de inicio deja de ser columna, la principal
+ * vuelve a su ancho compacto y la fila a la altura de la tabla. Con celda de inicio, las tarjetas salen limpias.
+ */
+function vistaAlDiseno<T>(vista: VistaBase, campos: DefCampo<T>[]): VistaBase {
+  const porId = new Map(campos.map((c) => [c.id, c]))
+  const conInicio = campos.some((c) => c.principal && c.inicio)
+  const enTarjetas = vista.tipo === "kanban" || vista.tipo === "galeria"
+  return {
+    ...vista,
+    altura: vista.altura === "media" ? "corta" : vista.altura,
+    campos: vista.campos.map((cv) => {
+      const campo = porId.get(cv.id)
+      if (campo?.principal) return { id: cv.id, visible: true }
+      if (campo?.enInicio || (conInicio && enTarjetas)) return { ...cv, visible: false }
+      return cv
+    }),
+  }
+}
+
+/** Una vista nueva desde la de base: nace con sus filtros, sus campos y su orden; la base es la plantilla de las demás. */
+export function vistaDesdeBase(base: VistaBase, id: string, nombre: string): VistaBase {
+  return { ...base, id, nombre, icono: undefined, plegados: [] }
 }
 
 /** Los campos que se ven, en el orden de la vista y con su ancho. */

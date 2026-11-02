@@ -96,9 +96,11 @@ export function Kanban<T extends KanbanItem>({
    * `compact` para tableros con muchas tarjetas: columnas más estrechas y tarjetas de dos o tres
    * líneas, sin monograma. Caben el doble de registros a la vista.
    */
-  density?: "default" | "compact"
+  /** `perfil`: columnas anchas y la tarjeta sin relleno, para la tarjeta de perfil de un registro. */
+  density?: "default" | "compact" | "perfil"
 }) {
   const compacto = density === "compact"
+  const perfil = density === "perfil"
   const dndId = React.useId()
   const [activeId, setActiveId] = React.useState<string | null>(null)
   const columnaInicial = React.useRef<string | null>(null)
@@ -192,11 +194,12 @@ export function Kanban<T extends KanbanItem>({
               onCollapse={() => toggleCollapsed(col.id)}
               menu={columnMenu?.(col, index)}
               compact={compacto}
+              ancha={perfil}
               onTitleClick={onColumnTitleClick ? () => onColumnTitleClick(col) : undefined}
             >
               <SortableContext items={colItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                 {colItems.map((item) => (
-                  <SortableCard key={item.id} id={item.id} open={item.id === openId} compact={compacto} onClick={onCardClick ? () => onCardClick(item) : undefined}>
+                  <SortableCard key={item.id} id={item.id} open={item.id === openId} compact={compacto} perfil={perfil} onClick={onCardClick ? () => onCardClick(item) : undefined}>
                     {renderCard(item, { dragging: item.id === activeId })}
                   </SortableCard>
                 ))}
@@ -218,7 +221,7 @@ export function Kanban<T extends KanbanItem>({
       </div>
       <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.2, 0, 0, 1)" }}>
         {activeItem ? (
-          <div className={cn("rotate-1 cursor-grabbing rounded-lg border bg-card shadow-pop", compacto ? "px-2.5 py-2" : "p-3")}>
+          <div className={cn("rotate-1 cursor-grabbing border bg-card shadow-pop", perfil ? "rounded-[20px]" : "rounded-lg", perfil ? "" : compacto ? "px-2.5 py-2" : "p-3")}>
             {renderCard(activeItem, { dragging: true })}
           </div>
         ) : null}
@@ -241,6 +244,7 @@ function KanbanColumnView({
   menu,
   onTitleClick,
   compact,
+  ancha,
   children,
 }: {
   column: KanbanColumn
@@ -249,6 +253,7 @@ function KanbanColumnView({
   onCollapse: () => void
   menu?: React.ReactNode
   compact?: boolean
+  ancha?: boolean
   onTitleClick?: () => void
   children: React.ReactNode
 }) {
@@ -259,7 +264,7 @@ function KanbanColumnView({
       data-slot="kanban-column"
       className={cn(
         "flex flex-1 flex-col rounded-xl bg-muted/60 p-1.5 transition-colors",
-        compact ? "min-w-44 basis-44" : "min-w-52 basis-52",
+        ancha ? "max-w-[300px] min-w-[252px] basis-[252px]" : compact ? "min-w-44 basis-44" : "min-w-52 basis-52",
         isOver && "bg-brand-soft ring-1 ring-brand/40"
       )}
     >
@@ -329,7 +334,7 @@ function CollapsedColumn({ column, count, onExpand }: { column: KanbanColumn; co
   )
 }
 
-function SortableCard({ id, open, compact, onClick, children }: { id: string; open?: boolean; compact?: boolean; onClick?: () => void; children: React.ReactNode }) {
+function SortableCard({ id, open, compact, perfil, onClick, children }: { id: string; open?: boolean; compact?: boolean; perfil?: boolean; onClick?: () => void; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   return (
     <div
@@ -339,10 +344,11 @@ function SortableCard({ id, open, compact, onClick, children }: { id: string; op
       {...listeners}
       onClick={onClick}
       className={cn(
-        "rounded-lg border bg-card shadow-xs outline-none hover:border-foreground/20 focus-visible:ring-2 focus-visible:ring-ring/50",
-        compact ? "px-2.5 py-2" : "p-3",
+        "outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        perfil ? "rounded-[20px] bg-card shadow-superficie transition-shadow hover:shadow-pop" : "rounded-lg border bg-card shadow-xs hover:border-foreground/20",
+        !perfil && (compact ? "px-2.5 py-2" : "p-3"),
         onClick ? "cursor-pointer" : "cursor-grab",
-        open && "border-brand bg-brand-soft hover:border-brand",
+        open && (perfil ? "ring-2 ring-brand" : "border-brand bg-brand-soft hover:border-brand"),
         isDragging && "opacity-40"
       )}
     >

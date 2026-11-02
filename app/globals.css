@@ -71,6 +71,11 @@
   --shadow-pop: 0 10px 30px oklch(0 0 0 / 0.12), 0 2px 6px oklch(0 0 0 / 0.06);
   /* Sombra de tarjeta: cada design system le da su valor (`--card-shadow`). */
   --shadow-card: var(--card-shadow);
+  /* Lo que flota sobre el fondo de la página (un bloque de base, una tarjeta de perfil) y la fila levantada de una tabla. */
+  --shadow-superficie: var(--superficie-shadow);
+  --shadow-fila: var(--fila-shadow);
+  --color-portada: var(--portada);
+  --color-superficie-hundida: var(--superficie-hundida);
 
   /* Tintes pastel del design system hijo «Influencer Workspace» (solo tienen valor dentro de
      `.theme-influencer`): fondo claro con su texto oscuro del mismo tono. */
@@ -134,9 +139,9 @@
 .theme-light {
   --radius: 0.625rem;
 
-  --background: oklch(1 0 0);
+  --background: oklch(0.973 0 0);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: oklch(0.995 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -185,6 +190,10 @@
   --sidebar-ring: oklch(0.62 0 0);
 
   --card-shadow: var(--shadow-xs);
+  --superficie-shadow: 0 0 0 1px oklch(0 0 0 / 0.04), 0 1px 2px oklch(0 0 0 / 0.03), 0 18px 40px -24px oklch(0 0 0 / 0.14);
+  --fila-shadow: 0 0 0 1px oklch(0 0 0 / 0.03), 0 6px 18px -6px oklch(0 0 0 / 0.14);
+  --portada: oklch(0.915 0.014 250);
+  --superficie-hundida: oklch(0.967 0 0);
 
   /* Colores de las opciones de un campo y de las filas de una base (como los de Airtable):
      fondo claro, texto del mismo tono y uno fuerte para la marca de color de la fila. */
@@ -218,6 +227,10 @@
 }
 
 .dark {
+  --superficie-shadow: 0 0 0 1px oklch(1 0 0 / 0.07), 0 18px 40px -24px oklch(0 0 0 / 0.6);
+  --fila-shadow: 0 0 0 1px oklch(1 0 0 / 0.08), 0 6px 18px -6px oklch(0 0 0 / 0.6);
+  --portada: oklch(0.28 0.012 250);
+  --superficie-hundida: oklch(0.225 0 0);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.185 0 0);
@@ -772,4 +785,22 @@
   --ficha-boton-semilla: linear-gradient(180deg, #213428, #1b2a21);
   --ficha-rayado: repeating-linear-gradient(135deg, #a0a0a0 0 1.5px, #3a3b3e 1.5px 4.5px);
   --ficha-rayado-fino: repeating-linear-gradient(135deg, #b0b0b0 0 1.5px, #3f4043 1.5px 4px);
+
+/* La pestaña abierta de una base, como la de Chrome: se une al bloque de debajo con sus dos esquinas curvas hacia fuera. */
+.pestana-activa::before,
+.pestana-activa::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+.pestana-activa::before {
+  right: 100%;
+  background: radial-gradient(circle at 0 0, transparent 10px, var(--card) 10.5px);
+}
+.pestana-activa::after {
+  left: 100%;
+  background: radial-gradient(circle at 100% 0, transparent 10px, var(--card) 10.5px);
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import type { DefCampo } from "@/lib/base/campos"
-import { TIPOS_VISTA, idBase, normalizarConfig, normalizarVista, vistaNueva, camposDeFormulario, type AjusteCampo, type CampoFormulario, type ConfigBase, type TipoVista, type VistaBase, type VistaDeSerie } from "@/lib/base/vistas"
+import { camposApilables, camposDeFecha, idBase, normalizarConfig, normalizarVista, vistaDesdeBase, vistaNueva, camposDeFormulario, type AjusteCampo, type CampoFormulario, type ConfigBase, type TipoVista, type VistaBase, type VistaDeSerie } from "@/lib/base/vistas"
 
 /** Tiempo que se espera antes de guardar: ensanchar una columna no manda un guardado por píxel. */
 const ESPERA_GUARDADO = 500
@@ -77,19 +77,38 @@ export function useBase<T>({
 
   const activar = React.useCallback((id: string) => actualizar((c) => ({ ...c, activa: id })), [actualizar])
 
-  /** Crea una vista del tipo que se pida («Kanban 2») y la abre. Devuelve su id. */
+  /**
+   * Crea una vista y la abre. Devuelve su id. Sin tipo, o con el de la base, nace como la de base (la primera, la
+   * plantilla de las demás): con sus filtros, sus campos y su orden. Con otro tipo, una vista nueva de ese tipo.
+   */
   const crear = React.useCallback(
-    (tipo: TipoVista = "cuadricula") => {
+    (tipo?: TipoVista) => {
       const id = idBase("v")
       actualizar((c) => {
         const usados = new Set(c.vistas.map((v) => v.nombre))
-        const base = TIPOS_VISTA[tipo].label
-        let n = c.vistas.filter((v) => (v.tipo ?? "cuadricula") === tipo).length + 1
-        while (usados.has(`${base} ${n}`)) n += 1
-        return { ...c, vistas: [...c.vistas, vistaNueva(`${base} ${n}`, camposRef.current, { id, tipo })], activa: id }
+        let n = c.vistas.length + 1
+        while (usados.has(`Vista ${n}`)) n += 1
+        const nombre = `Vista ${n}`
+        const plantilla = c.vistas[0]
+        const nueva = plantilla && (!tipo || tipo === (plantilla.tipo ?? "cuadricula")) ? vistaDesdeBase(plantilla, id, nombre) : vistaNueva(nombre, camposRef.current, { id, tipo: tipo ?? "cuadricula" })
+        return { ...c, vistas: [...c.vistas, nueva], activa: id }
       })
       return id
     },
+    [actualizar],
+  )
+
+  /** Cambia el tipo de la vista abierta (cuadrícula, kanban, galería o calendario) sin perder su filtro ni su orden. */
+  const cambiarTipo = React.useCallback(
+    (tipo: TipoVista) =>
+      actualizar((c) => ({
+        ...c,
+        vistas: c.vistas.map((v) =>
+          v.id === (c.activa ?? c.vistas[0]?.id)
+            ? { ...v, tipo: tipo === "cuadricula" ? undefined : tipo, apilar: tipo === "kanban" ? (v.apilar ?? camposApilables(camposRef.current)[0]?.id) : v.apilar, fecha: tipo === "calendario" ? (v.fecha ?? camposDeFecha(camposRef.current)[0]?.id) : v.fecha }
+            : v,
+        ),
+      })),
     [actualizar],
   )
 
@@ -98,7 +117,7 @@ export function useBase<T>({
       actualizar((c) => {
         const original = c.vistas.find((v) => v.id === id)
         if (!original) return c
-        const copia = { ...original, id: idBase("v"), nombre: `${original.nombre} (copia)` }
+        const copia = { ...original, id: idBase("v"), nombre: `${original.nombre} (copia)`, icono: original.icono }
         const i = c.vistas.indexOf(original)
         return { ...c, vistas: [...c.vistas.slice(0, i + 1), copia, ...c.vistas.slice(i + 1)], activa: copia.id }
       }),
@@ -113,7 +132,7 @@ export function useBase<T>({
     [actualizar],
   )
 
-  /** Cambia el nombre o el icono de una vista desde sus pestañas laterales. Un nombre vacío no se guarda. */
+  /** Cambia el nombre o el icono de una vista desde su pestaña o desde la barra. Un nombre vacío no se guarda. */
   const editar = React.useCallback(
     (id: string, cambio: { nombre?: string; icono?: string }) => {
       const nombre = cambio.nombre?.trim()
@@ -123,11 +142,11 @@ export function useBase<T>({
     [actualizar],
   )
 
-  /** Borra una vista. La última no se borra: una base siempre tiene una. */
+  /** Borra una vista. La de base, la primera, no se borra: es la plantilla de las demás. */
   const borrar = React.useCallback(
     (id: string) =>
       actualizar((c) => {
-        if (c.vistas.length <= 1) return c
+        if (c.vistas.length <= 1 || c.vistas[0]?.id === id) return c
         const vistas = c.vistas.filter((v) => v.id !== id)
         return { ...c, vistas, activa: c.activa === id ? vistas[0]?.id : c.activa }
       }),
@@ -141,11 +160,13 @@ export function useBase<T>({
     [actualizar],
   )
 
+  /** Ordena las vistas. La de base sigue la primera: es la plantilla y la pestaña que no se mueve. */
   const reordenar = React.useCallback(
     (ids: string[]) =>
       actualizar((c) => {
         const porId = new Map(c.vistas.map((v) => [v.id, v]))
-        return { ...c, vistas: ids.map((id) => porId.get(id)).filter((v): v is VistaBase => v !== undefined) }
+        const baseId = c.vistas[0]?.id
+        return { ...c, vistas: [baseId, ...ids.filter((id) => id !== baseId)].map((id) => (id ? porId.get(id) : undefined)).filter((v): v is VistaBase => v !== undefined) }
       }),
     [actualizar],
   )
@@ -167,7 +188,7 @@ export function useBase<T>({
     [actualizar],
   )
 
-  return { vistas: normal.vistas, vista, activar, cambiar, crear, duplicar, renombrar, editar, borrar, restaurar, reordenar, formulario, formularioConfigurado, cambiarFormulario, ajustes, ajustarCampo }
+  return { vistas: normal.vistas, vista, activar, cambiar, cambiarTipo, crear, duplicar, renombrar, editar, borrar, restaurar, reordenar, formulario, formularioConfigurado, cambiarFormulario, ajustes, ajustarCampo }
 }
 
 export type BaseApi<T> = ReturnType<typeof useBase<T>>
