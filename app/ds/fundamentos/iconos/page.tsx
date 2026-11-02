@@ -205,7 +205,7 @@ export default function IconosPage() {
           columns={["Tamaño", "Clase", "Dónde"]}
           rows={[
             ["16 px", <code key="a">size-4</code>, "Menú lateral, cabecera de Section, botones default e icon, conmutador de vistas, toasts, chevron de fila. Es el tamaño por defecto de Button y de la sidebar."],
-            ["14 px", <code key="b">size-3.5</code>, "Botones sm (automático), etiqueta de KpiCard, bloques del panel de información, buscador de la cabecera, icono junto al texto de una celda."],
+            ["14 px", <code key="b">size-3.5</code>, "Botones sm (automático), etiqueta de KpiCard, buscador de la cabecera, icono junto al texto de una celda."],
             ["12 px", <code key="c">size-3</code>, "Deltas de KPI, chips de filtros activos, flechas de orden en cabeceras de columna, botones xs. Badge lo fuerza con [&>svg]:size-3!, así que el icono de un badge siempre mide 12 px."],
             ["20 px", <code key="d">size-5</code>, "Solo estados vacíos y de error, dentro de su caja de 40 px. Nunca en botones, títulos ni cifras."],
           ]}

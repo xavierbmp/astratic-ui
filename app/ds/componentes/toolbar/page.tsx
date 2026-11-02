@@ -22,14 +22,14 @@ export default function BarraPage() {
     <DocPage
       eyebrow="Componentes"
       title="Barra de la base"
-      lead="Los controles de una lista viven dentro de la base de datos, en su barra, con la colocación de Airtable: a la izquierda el lateral y la vista; a la derecha lo que cambia lo que se ve (campos, filtro, grupos, orden, color, altura, buscar), la acción principal y la ficha integrada. Ya no hay una toolbar suelta encima del bloque."
+      lead="Los controles de una lista viven dentro de la base de datos, en su cabecera, igual en todas: a la izquierda el icono y el nombre de la vista; en el centro lo que cambia lo que se ve; a la derecha los botones principales y, al final, los ajustes (campos, filtro, grupos, orden, color, altura, buscar), la acción principal y la ficha integrada. Ya no hay una toolbar suelta encima del bloque."
     >
       <DocSection id="botones" title="Los botones, de izquierda a derecha">
         <SpecTable
           columns={["Botón", "Qué hace", "Icono"]}
           rows={[
-            ["Lateral", "Abre y cierra el lateral de vistas (o el propio de la página: carpetas, calendario).", "PanelLeft"],
-            ["Nombre de la vista", "Su tipo, su nombre y su menú: las demás vistas, «Crear vista», renombrar, duplicar, eliminar.", "Table2 · Columns3 · LayoutGrid · CalendarDays"],
+            ["Lateral", "Solo si la página tiene el suyo (carpetas, calendario): lo abre y lo cierra.", "PanelLeft"],
+            ["Nombre de la vista", "Su icono, con su menú (ver como, cambiar el icono, duplicar, eliminar), y su nombre, que se escribe ahí mismo.", "Table2 · Columns3 · LayoutGrid · CalendarDays"],
             ["Apilado por / Fecha", "Solo en kanban y calendario: el campo que reparte las columnas o pone cada registro en su día.", "Columns3 · CalendarDays"],
             ["Ocultar campos", "Qué campos se ven y en qué orden (en kanban y galería, los de la tarjeta).", "EyeOff"],
             ["Filtro", "Condiciones con los operadores de cada tipo y grupos anidados.", "SlidersHorizontal"],

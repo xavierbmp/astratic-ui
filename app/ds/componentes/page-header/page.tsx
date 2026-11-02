@@ -215,7 +215,7 @@ export default function PageHeaderPage() {
           code={`<PageBody>
   <PageHeader title="Facturación" description="…" tabs={<PageTabs items={facturacionTabs} />} actions={…} />
   <KpiRow>…</KpiRow>
-  <WorkGrid toolbar={<Toolbar>…</Toolbar>} aside={…}>
+  <WorkGrid toolbar={<Toolbar>…</Toolbar>}>
     <Section>…</Section>
   </WorkGrid>
 </PageBody>`}

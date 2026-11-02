@@ -12,7 +12,7 @@ import { PageBody, PageHeader } from "@/components/app/page-header"
 import { KpiCard, KpiRow } from "@/components/app/kpi"
 import { WorkGrid } from "@/components/app/work-grid"
 import { EmptyState } from "@/components/app/states"
-import { InsightStat, InsightsPanel } from "@/components/app/insights-panel"
+import { InsightStat } from "@/components/app/insight-list"
 import { BaseDatos } from "@/components/app/base/base-datos"
 
 export type TaskState = "pendiente" | "en-curso" | "hecha"
@@ -79,45 +79,11 @@ export function TareasView({ initialTasks }: { initialTasks: Task[] }) {
         <KpiCard icon={CircleCheckIcon} label="Completadas esta semana" value={done.length} delta={{ value: 25, label: "vs semana pasada" }} />
       </KpiRow>
 
-      <WorkGrid
-        aside={
-          <InsightsPanel
-            storageKey="demo-tareas"
-            title="Carga de trabajo"
-            blocks={[
-              {
-                id: "por-persona",
-                title: "Por responsable",
-                icon: UserIcon,
-                render: () => (
-                  <div className="divide-y">
-                    {owners.map((o) => (
-                      <InsightStat key={o} label={o} value={tasks.filter((t) => t.owner === o && t.columnId !== "hecha").length} sub="pendientes" />
-                    ))}
-                  </div>
-                ),
-              },
-              {
-                id: "ritmo",
-                title: "Ritmo",
-                icon: CircleCheckIcon,
-                render: () => (
-                  <div className="divide-y">
-                    <InsightStat label="Completadas hoy" value={2} />
-                    <InsightStat label="Media diaria" value="3,4" />
-                    <InsightStat label="Más antigua" value="6 días" />
-                  </div>
-                ),
-              },
-            ]}
-          />
-        }
-      >
+      <WorkGrid>
         <div className="h-[600px] xl:h-full">
           {enNavegador && (
             <BaseDatos
               clave="demo-tareas"
-              lateralInicial={false}
               base={base}
               campos={camposBase}
               filas={tasks}

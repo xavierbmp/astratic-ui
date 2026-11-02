@@ -13,7 +13,7 @@ export default function IntroPage() {
         <Prose>
           <p>
             Astratic UI es un <strong>design system con código</strong>: tokens de color y tipografía, componentes de
-            shadcn/ui configurados, un kit de componentes de aplicación (shell, tabla, kanban, panel de información,
+            shadcn/ui configurados, un kit de componentes de aplicación (shell, tabla, kanban,
             sheet de detalle…) y las <strong>convenciones fijas</strong> que dicen dónde va cada cosa. Está pensado para
             portales operativos: CRM, gestión de campañas, facturación, equipo, eventos. Lo que se ve en la propuesta a
             Twic es el punto de partida; aquí está generalizado para cualquier cliente.
@@ -29,7 +29,7 @@ export default function IntroPage() {
       <DocSection id="principios" title="Principios">
         <Rules
           items={[
-            <><strong>Una página, un bloque de operación.</strong> Cifras arriba, un único bloque central donde se trabaja (tabla, lista o kanban), y a la derecha un panel de información de la misma altura. Nada de bloques sueltos debajo.</>,
+            <><strong>Una página, un bloque de operación.</strong> Un único bloque donde se trabaja (tabla, kanban, galería o calendario), a todo el ancho y sin paneles al lado.</>,
             <><strong>Denso con aire.</strong> Texto de trabajo a 13,5 px, filas de 40 px, tarjetas con borde y sombra mínima. Cabe mucho y se lee todo.</>,
             <><strong>Un solo acento.</strong> Índigo para lo activo y el foco; el botón principal es negro. Los colores de estado significan siempre lo mismo.</>,
             <><strong>Las convenciones no se negocian por página.</strong> El buscador va a la izquierda, la acción principal a la derecha, el detalle se abre en un panel lateral. Si hay una excepción, se documenta aquí, no se improvisa.</>,

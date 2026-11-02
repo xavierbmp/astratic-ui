@@ -263,7 +263,6 @@ export default function ChartsPage() {
             { href: "/ds/componentes/kpi", label: "Cifras (KPI)", text: "La tarjeta que puede llevar una sparkline." },
             { href: "/ds/componentes/section", label: "Sección", text: "El contenedor con cabecera y periodo." },
             { href: "/ds/fundamentos/color", label: "Color", text: "El acento y los grises de --chart-1 a --chart-5." },
-            { href: "/ds/componentes/insights-panel", label: "Panel de información", text: "Bloques de resumen a la derecha." },
           ]}
         />
       </DocSection>

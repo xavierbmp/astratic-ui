@@ -17,7 +17,7 @@ import { BaseDatos } from "@/components/app/base/base-datos"
 import { StatusBadge } from "@/components/app/status-badge"
 import { AvatarInitials } from "@/components/app/avatar-initials"
 import { EmptyState } from "@/components/app/states"
-import { InsightList, InsightStat, InsightsPanel } from "@/components/app/insights-panel"
+import { InsightList, InsightStat } from "@/components/app/insight-list"
 import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, DetailSection, DetailSheet } from "@/components/app/detail-sheet"
 import { facturacionTabs } from "../../nav"
 
@@ -89,51 +89,11 @@ export function CobrosView({
         <KpiCard icon={TimerIcon} label="Plazo de cobro" value={`${avgDays} días`} hint="de media desde la emisión" />
       </KpiRow>
 
-      <WorkGrid
-        aside={
-          <InsightsPanel
-            storageKey="demo-cobros"
-            blocks={[
-              {
-                id: "metodos",
-                title: "Por método",
-                icon: CreditCardIcon,
-                render: () => (
-                  <div className="divide-y">
-                    {(Object.keys(paymentMethods) as PaymentMethod[]).map((m) => {
-                      const list = payments.filter((p) => p.method === m)
-                      return <InsightStat key={m} label={paymentMethods[m].label} value={fmt.eur(sum(list))} sub={`${list.length} cobros`} />
-                    })}
-                  </div>
-                ),
-              },
-              {
-                id: "sin-conciliar",
-                title: "Sin conciliar",
-                icon: TriangleAlertIcon,
-                render: () =>
-                  unreconciled.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">Todo conciliado.</p>
-                  ) : (
-                    <InsightList
-                      items={unreconciled.map((p) => ({
-                        key: p.id,
-                        title: p.code,
-                        subtitle: `${p.recordName} · ${p.invoiceCode}`,
-                        trailing: <span className="font-medium">{fmt.eur(p.amount)}</span>,
-                      }))}
-                    />
-                  ),
-              },
-            ]}
-          />
-        }
-      >
+      <WorkGrid>
         <div className="h-[600px] xl:h-full">
           {enNavegador && (
             <BaseDatos
               clave="demo-cobros"
-              lateralInicial={false}
               base={base}
               campos={camposBase}
               filas={payments}

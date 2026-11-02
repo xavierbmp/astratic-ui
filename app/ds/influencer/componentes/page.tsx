@@ -274,8 +274,7 @@ const [editing, setEditing] = useState(false)
         <Prose>
           <p>
             Regla de los dos registros: lo que resume y las cifras de arriba van en el estilo visual del hijo; el bloque
-            donde se trabaja es el del madre sin adornos: <code>WorkGrid</code>, la <code>BaseDatos</code> al estilo Airtable,{" "}
-            <code>InsightsPanel</code> y <code>DetailSheet</code>. Lo que no
+            donde se trabaja es el del madre sin adornos: <code>WorkGrid</code>, la <code>BaseDatos</code> y <code>DetailSheet</code>. Lo que no
             existía en el madre y hacía falta para operar nace aquí.
           </p>
         </Prose>

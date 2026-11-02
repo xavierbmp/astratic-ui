@@ -40,7 +40,7 @@ export default function InfluencerIntroPage() {
             ["Superficies", "Tarjeta blanca con borde y sombra mínima", "Fondo gris claro, tarjetas blancas sin borde y con sombra suave"],
             ["Forma", "Radio base 10 px", "Radio base 16 px: bloques rounded-2xl, elementos rounded-xl, chips rounded-full"],
             ["Color", "Un acento (índigo) y cinco colores de estado", "Lo mismo, más seis tintes pastel para tarjetas, etiquetas e iconos"],
-            ["Layout de página", "Cifras + toolbar + un bloque + panel de información", "Bloques grandes y pocos; cifras solo en las páginas de inicio; imágenes de campaña y de perfil"],
+            ["Layout de página", "Una base a todo el ancho y cifras en la cabecera", "Bloques grandes y pocos; cifras solo en las páginas de inicio; imágenes de campaña y de perfil"],
           ]}
         />
       </DocSection>

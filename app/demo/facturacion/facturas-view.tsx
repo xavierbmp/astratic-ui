@@ -28,7 +28,7 @@ import { BaseDatos } from "@/components/app/base/base-datos"
 import { StatusBadge } from "@/components/app/status-badge"
 import { AvatarInitials } from "@/components/app/avatar-initials"
 import { EmptyState } from "@/components/app/states"
-import { InsightList, InsightsPanel } from "@/components/app/insights-panel"
+import { InsightList } from "@/components/app/insight-list"
 import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, DetailSection, DetailSheet } from "@/components/app/detail-sheet"
 import { facturacionTabs } from "../nav"
 import { copiarTexto } from "@/lib/portapapeles"
@@ -86,60 +86,11 @@ export function FacturasView({
         <KpiCard icon={CircleCheckIcon} label="Cobrado este mes" value={fmt.eur(collectedThisMonth)} delta={{ value: 8.5, label: "vs agosto" }} />
       </KpiRow>
 
-      <WorkGrid
-        aside={
-          <InsightsPanel
-            storageKey="demo-facturas"
-            blocks={[
-              {
-                id: "estados",
-                title: "Por estado",
-                icon: LayersIcon,
-                render: () => (
-                  <ul className="flex flex-col gap-2">
-                    {(Object.keys(invoiceStatus) as InvoiceStatus[]).map((s) => {
-                      const list = invoices.filter((f) => f.status === s)
-                      return (
-                        <li key={s} className="grid grid-cols-[1fr_auto] gap-x-3 text-xs">
-                          <span>{invoiceStatus[s].label}</span>
-                          <span className="tabular-nums text-muted-foreground">{fmt.eur(sum(list))}</span>
-                          <span className="col-span-2 mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
-                            <span className="block h-full rounded-full bg-brand" style={{ width: `${(sum(list) / sum(invoices)) * 100}%` }} />
-                          </span>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                ),
-              },
-              {
-                id: "vencimientos",
-                title: "Próximos vencimientos",
-                icon: CalendarClockIcon,
-                render: () => (
-                  <InsightList
-                    items={invoices
-                      .filter((f) => f.status === "enviada")
-                      .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
-                      .slice(0, 4)
-                      .map((f) => ({
-                        key: f.id,
-                        title: f.code,
-                        subtitle: f.recordName,
-                        trailing: <span className="text-muted-foreground">{fmt.date(f.dueAt)}</span>,
-                      }))}
-                  />
-                ),
-              },
-            ]}
-          />
-        }
-      >
+      <WorkGrid>
         <div className="h-[600px] xl:h-full">
           {enNavegador && (
             <BaseDatos
               clave="demo-facturas"
-              lateralInicial={false}
               base={base}
               campos={camposBase}
               filas={invoices}

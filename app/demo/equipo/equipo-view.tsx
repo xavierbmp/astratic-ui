@@ -27,7 +27,7 @@ const statusMeta = {
 /** Los campos del directorio del equipo: todo se ve; cambiar algo es cosa de la ficha. */
 function camposEquipo(people: Person[]): DefCampo<Person>[] {
   return [
-    { id: "name", nombre: "Persona", tipo: "texto", principal: true, soloLectura: true, valor: (p) => p.name },
+    { id: "name", nombre: "Persona", tipo: "inicio", principal: true, soloLectura: true, inicio: (p) => ({ nombre: p.name, secundario: p.role, forma: "persona", enlaces: [{ red: "email", href: `mailto:${p.email}`, titulo: p.email }] }), valor: (p) => p.name },
     { id: "role", nombre: "Rol", tipo: "texto", soloLectura: true, valor: (p) => p.role },
     { id: "area", nombre: "Área", tipo: "select", soloLectura: true, opciones: [...new Set(people.map((p) => p.area))].map((a) => ({ id: a, label: a })), valor: (p) => p.area },
     { id: "email", nombre: "Email", tipo: "email", soloLectura: true, valor: (p) => p.email },

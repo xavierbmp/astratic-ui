@@ -32,7 +32,7 @@ const scale = [
     sample: "Datos de contacto",
     className: "text-[13px] font-semibold",
     spec: "13 px · 600",
-    where: "Bloques del panel de información y secciones dentro del sheet.",
+    where: "Secciones dentro del sheet y de un diálogo.",
   },
   {
     level: "Celda principal",

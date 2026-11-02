@@ -28,7 +28,7 @@ import {
 import { AvatarInitials } from "@/components/app/avatar-initials"
 import { StatusBadge } from "@/components/app/status-badge"
 import { ConfirmDialog } from "@/components/app/confirm-dialog"
-import { InsightList } from "@/components/app/insights-panel"
+import { InsightList } from "@/components/app/insight-list"
 import { InlineField, InlineTitle, type ValorInline } from "@/components/app/inline-field"
 import {
   DetailBody,
