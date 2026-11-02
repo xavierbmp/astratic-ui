@@ -7,7 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { ControlArchivoCampo } from "@/components/app/base/subida-base"
 import { opcionDe, valorDeTexto, type DefCampo, type OpcionCampo, type ValorCampo } from "@/lib/base/campos"
-import { FichaOpcion, FichaVinculo } from "@/components/app/base/apariencia"
+import { EstadoEnLinea, FichaOpcion, FichaVinculo, OpcionEnLinea } from "@/components/app/base/apariencia"
 
 /** Cómo termina una edición: guardar y quedarse, o guardar y pasar a la celda de al lado o de abajo. */
 export type Salida = "quedarse" | "derecha" | "izquierda" | "abajo"
@@ -263,7 +263,7 @@ function EditorOpciones<T>({ campo, valor, inicial, onGuardar, onAplicar, onCanc
             <CommandGroup>
               {(campo.opciones ?? []).map((o) => (
                 <CommandItem key={o.id} value={`${o.label} ${o.id}`} onSelect={() => elegir(o.id)}>
-                  {objeto ? <FichaVinculo label={o.label} /> : <FichaOpcion label={o.label} color={o.color} tono={o.tono} />}
+                  {objeto ? <FichaVinculo label={o.label} /> : campo.tipo === "select" ? o.tono ? <EstadoEnLinea label={o.label} tono={o.tono} /> : <OpcionEnLinea label={o.label} color={o.color} /> : <FichaOpcion label={o.label} color={o.color} tono={o.tono} />}
                   {elegidas.includes(o.id) && <CheckIcon className="ml-auto size-3.5" />}
                 </CommandItem>
               ))}

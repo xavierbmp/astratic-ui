@@ -1,12 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { ArrowDownIcon, ArrowUpIcon, ChevronDownIcon, ChevronsUpDownIcon, InfoIcon, ListFilterIcon, PlusIcon } from "lucide-react"
+import { ArrowDownIcon, ArrowUpIcon, ChevronDownIcon, ChevronsUpDownIcon, ListFilterIcon, PlusIcon } from "lucide-react"
 import { cn } from "cn"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from "@/components/ui/context-menu"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { ANCHO_MAXIMO, ANCHO_MINIMO } from "@/lib/base/vistas"
 import { ItemsCampo, type AccionesCampo } from "@/components/app/base/rejilla/menu-campo"
 import { ANCHO_ANADIR, ANCHO_IZQUIERDA, type Columna } from "@/components/app/base/rejilla/medidas"
@@ -157,7 +156,7 @@ export function Cabecera<T>({
                   if (!(e.target as HTMLElement).closest("[data-no-arrastre]")) onEditarCampo?.(c.campo.id, e.currentTarget)
                 }}
               >
-                <span className={cn("min-w-0", ajustar ? "line-clamp-2 leading-tight break-words" : "truncate")}>{c.campo.nombre}</span>
+                <span title={c.campo.descripcion ?? c.campo.nombre} className={cn("min-w-0", ajustar ? "line-clamp-2 leading-tight break-words" : "truncate")}>{c.campo.nombre}</span>
                 <button
                   type="button"
                   data-no-arrastre
@@ -170,14 +169,6 @@ export function Cabecera<T>({
                 </button>
                 {filtrados.has(c.campo.id) && <ListFilterIcon aria-label="Filtra la vista" className="size-3 flex-none text-brand" />}
                 <span className="min-w-0 flex-1" />
-                {c.campo.descripcion && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <InfoIcon data-no-arrastre className="size-3.5 flex-none text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-64">{c.campo.descripcion}</TooltipContent>
-                  </Tooltip>
-                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button type="button" data-no-arrastre aria-label={`Opciones de ${c.campo.nombre}`} className="flex size-5 flex-none items-center justify-center rounded-sm text-muted-foreground opacity-0 group-hover/cabecera:opacity-100 hover:bg-muted aria-expanded:opacity-100">

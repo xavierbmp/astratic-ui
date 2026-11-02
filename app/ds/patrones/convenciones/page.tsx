@@ -178,7 +178,7 @@ export default function ConvencionesPage() {
             "Acciones en bloque en la parte superior de la tabla.",
             "Avisos de texto en la toolbar o encima de la tabla.",
             "Varios bloques de operación apilados en la misma página.",
-            "Toolbar a todo el ancho, con las vistas y «Nuevo» encima del panel de información.",
+            "Una columna de bloques de información o de ayuda al lado de la base.",
             "Modales para ver un registro: el detalle es un sheet.",
             "Un botón «Editar» que abre un formulario para cambiar un dato.",
             "Una página de Ajustes: se configura donde se usa.",

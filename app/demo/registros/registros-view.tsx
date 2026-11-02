@@ -41,7 +41,7 @@ import { WorkGrid } from "@/components/app/work-grid"
 import { StatusBadge } from "@/components/app/status-badge"
 import { AvatarInitials, AvatarStack } from "@/components/app/avatar-initials"
 import { EmptyState } from "@/components/app/states"
-import { InsightList, InsightStat, InsightsPanel } from "@/components/app/insights-panel"
+import { InsightList, InsightStat } from "@/components/app/insight-list"
 import { DetailBody, DetailField, DetailFields, DetailFooter, DetailHeader, DetailMeta, DetailSection, DetailSectionAction, DetailSheet, RecordPager } from "@/components/app/detail-sheet"
 import { usePanelFicha, type PanelFicha } from "@/components/app/detail-panel"
 import { BaseDatos } from "@/components/app/base/base-datos"
@@ -307,84 +307,7 @@ export function RegistrosView({
         <KpiCard icon={UsersIcon} label="Responsables" value={owners.length} hint="activos" />
       </KpiRow>
 
-      <WorkGrid
-        ficha={panel}
-        aside={
-          <InsightsPanel
-            storageKey="demo-registros"
-            ficha={panel}
-            blocks={[
-              {
-                id: "resumen",
-                title: "Resumen",
-                icon: BanknoteIcon,
-                render: () => (
-                  <div className="divide-y">
-                    <InsightStat label="Valor medio" value={fmt.eur(records.length ? totalValue / records.length : 0)} />
-                    <InsightStat label="Ganados este mes" value={won.length} sub={fmt.eur(won.reduce((a, r) => a + r.value, 0))} />
-                    <InsightStat label="Sin actividad 7 días" value={3} />
-                  </div>
-                ),
-              },
-              {
-                id: "fases",
-                title: "Por fase",
-                icon: KanbanSquareIcon,
-                render: () => (
-                  <ul className="flex flex-col gap-2">
-                    {stages.map((s) => {
-                      const n = records.filter((r) => r.stage === s.id).length
-                      return (
-                        <li key={s.id} className="grid grid-cols-[1fr_auto] gap-x-3 text-xs">
-                          <span className="flex items-center justify-between">
-                            <span>{s.label}</span>
-                            <span className="tabular-nums text-muted-foreground">{n}</span>
-                          </span>
-                          <span className="col-span-2 mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
-                            <span className="block h-full rounded-full bg-brand" style={{ width: `${records.length ? (n / records.length) * 100 : 0}%` }} />
-                          </span>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                ),
-              },
-              {
-                id: "vencimientos",
-                title: "Próximos vencimientos",
-                icon: CalendarClockIcon,
-                render: () => (
-                  <InsightList
-                    items={[...records].sort((a, b) => a.dueAt.localeCompare(b.dueAt)).slice(0, 4).map((r) => ({
-                      key: r.id,
-                      title: r.name,
-                      subtitle: r.owner,
-                      trailing: <span className="text-muted-foreground">{fmt.date(r.dueAt)}</span>,
-                    }))}
-                  />
-                ),
-              },
-              {
-                id: "actividad",
-                title: "Actividad",
-                icon: ActivityIcon,
-                defaultVisible: false,
-                render: () => (
-                  <InsightList
-                    items={demoActivity.slice(0, 4).map((a) => ({
-                      key: a.id,
-                      leading: <AvatarInitials name={a.who} size="sm" />,
-                      title: (<><span className="font-semibold">{a.who}</span> {a.what}</>),
-                      subtitle: a.target,
-                      trailing: <span className="text-muted-foreground">{a.when}</span>,
-                    }))}
-                  />
-                ),
-              },
-            ]}
-          />
-        }
-      >
+      <WorkGrid>
         <div className="h-[640px] xl:h-full">
           {enNavegador && (
             <BaseDatos

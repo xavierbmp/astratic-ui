@@ -133,7 +133,7 @@ export default function AvatarsPage() {
           columns={["Tamaño", "Píxeles", "Contexto"]}
           rows={[
             [<code key="s">xs</code>, "20 px", "Tarjetas kanban, campos del sheet, pies de tarjeta."],
-            [<code key="s">sm</code>, "24 px", "Celdas secundarias («Responsable»), listas del panel de información, pilas."],
+            [<code key="s">sm</code>, "24 px", "Celdas secundarias («Responsable»), listas, pilas."],
             [<code key="s">md</code>, "32 px", "Celda principal de la tabla (CellPrimary), listas, sidebar."],
             [<code key="s">lg</code>, "48 px", "Cabecera del sheet de detalle."],
             [<code key="s">xl</code>, "64 px", "Ficha de un registro o de una persona con página propia."],

@@ -24,7 +24,7 @@ export default function ComponentesPage() {
           </p>
           <p>
             El <strong>kit de aplicación</strong> vive en <code>components/app</code> y es lo que documenta este catálogo:
-            shell, cabecera de página, cifras, toolbar, tabla de datos, kanban, panel de información, sheet de detalle.
+            shell, cabecera de página, cifras, toolbar, tabla de datos, kanban, sheet de detalle.
             Son composiciones de los componentes base con las convenciones del sistema ya aplicadas, para que una página
             nueva se monte encajando piezas y no decidiendo medidas.
           </p>

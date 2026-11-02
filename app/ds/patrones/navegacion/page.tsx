@@ -21,7 +21,7 @@ export default function NavegacionPage() {
             ["Módulo", <code key="m">ModuloMenu</code>, "Sidebar, con su icono. Al pulsarlo se despliega y entra en su primera subpágina", <code key="a">/facturacion</code>],
             ["Subpágina", <code key="s">ModuloMenu</code>, "Sidebar, debajo de su módulo. Su nombre es el título de la página", <code key="h">/gastos</code>],
             ["Pestaña", <code key="b">PageTabs</code>, "Cabecera de página, debajo del título y a todo el ancho", <code key="c">/facturacion/cobros</code>],
-            ["Vista", <code key="d">BarraBase · LateralVistas</code>, "Barra de la base: el nombre de la vista y el lateral", "No cambia: se guarda por persona"],
+            ["Vista", <code key="d">PestanasVistas · BarraBase</code>, "Pestañas de Chrome encima del bloque; su nombre, en la cabecera de la base", "No cambia: se guarda por persona"],
             ["Filtro", <code key="e">PanelFiltro</code>, "Barra de la base: botón «Filtro» y buscar", "Recorta la vista; no cambia de página"],
             ["Registro", <code key="f">DetailSheet</code>, "Panel lateral derecho, encima de la página", <code key="g">?registro=id</code>],
           ]}

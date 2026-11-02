@@ -18,8 +18,10 @@ const base = useBase({ campos, deSerie: vistasDeSerieMarcas(campos), inicial: co
   objeto={{ singular: "marca", plural: "marcas", nuevo: "Nueva marca" }}
   abiertoId={abiertaId}
   onAbrir={abrir}
+  paginaRegistro={{ clave: "marca", ruta: (id) => \`/marcas/\${id}\` }}
   onEscribir={(cambios) => setMarcas((ms) => aplicarCambios(ms, cambios, escribirEnMarca))}
   onNuevo={() => setNueva(true)}          // o onCrear: el formulario de la base
+  ajustes={[{ id: "reglas", label: "Automatizaciones", icono: WorkflowIcon, onSelect: abrirReglas }]}
   onBorrar={(ids) => borrar.pedir(ids)}
   propios={propios} onGuardarCampo={...} onBorrarCampo={...}
   onAbrirVinculo={(campo, id) => abrirMarca(id)}
@@ -32,16 +34,31 @@ const CAMPO = `// Un campo de serie: se oculta, no se borra. Lo calculado lleva 
 { id: "estado", nombre: "Estado", tipo: "select", obligatorio: true, opciones: opcionesDeEstados(ESTADOS_PROPUESTA), valor: (p) => p.estado }
 { id: "importe", nombre: "Importe", tipo: "moneda", soloLectura: true, valor: (p) => importeDe(p, tarifas) }`
 
+const INICIO = `// La primera celda de una base. \`valor\` sigue siendo su texto, para buscar, ordenar y copiar.
+{
+  id: "nombre", nombre: "Marca", tipo: "inicio", principal: true,
+  inicio: (m) => ({
+    nombre: m.nombre,
+    secundario: dominioDe(m.web),
+    imagen: m.logoUrl,
+    forma: "entidad",
+    enlaces: enlaces(enlaceWeb(m.web), enlaceInstagram(m.instagram, m.seguidores)),
+  }),
+  valor: (m) => m.nombre,
+}
+// Lo que va dentro se oculta como columna y sigue sirviendo para filtrar y ordenar.
+{ id: "web", nombre: "Web", tipo: "url", enInicio: true, valor: (m) => m.web }`
+
 /** Documentación de la base de datos al estilo Airtable: la pieza de toda lista de registros. */
 export default function BaseDeDatosPage() {
   return (
     <DocPage
       eyebrow="Componentes"
       title="Base de datos"
-      lead="Toda lista de registros es una base de datos con la colocación y el funcionamiento de Airtable, y los colores e iconos de Astratic UI: vistas personales (cuadrícula, kanban, galería y calendario), campos de muchos tipos que se ocultan y se crean, filtros anidados con los operadores de Airtable, grupos, orden, color, altura de fila, totales, selección y copiar y pegar como en Excel, y la ficha de siempre, encima o integrada a la derecha."
+      lead="Toda lista de registros es una base de datos: por fuera una tabla limpia, por dentro una hoja de cálculo. Vistas en pestañas como las de Chrome, vistas personales (cuadrícula, kanban, galería y calendario), campos de muchos tipos que se ocultan y se crean, filtros anidados con los operadores de Airtable, grupos, orden, color, altura de fila, totales, selección y copiar y pegar como en Excel, y la ficha de siempre, encima o integrada a la derecha."
     >
       <DocSection id="demo" title="Pruébala">
-        <Example padded={false} description="Las vistas, el ancho del lateral y lo que cambies se quedan en este navegador. En un portal, en su base de datos.">
+        <Example padded={false} description="Las vistas y lo que cambies se quedan en este navegador. En un portal, en su base de datos.">
           <BaseDatosDemo />
         </Example>
       </DocSection>
@@ -54,8 +71,7 @@ export default function BaseDeDatosPage() {
             dentro de una ficha (las tarifas, las facturas de una collab), que es <code>DataTable</code>.
           </p>
           <p>
-            Regla de Xavier (2026-10-13): <strong>la colocación es la de Airtable; los colores y los iconos, los nuestros</strong>. Y se sustituye lo que
-            había, sin mezclar piezas viejas con nuevas. Cuando una página tiene algo propio que vale la pena (las carpetas de las ideas, el calendario de
+            Cuando una página tiene algo propio que vale la pena (las carpetas de las ideas, el calendario de
             tareas a mano, el calendario de contenidos), la base entra entera y lo propio se queda en su lateral o al lado.
           </p>
         </Prose>
@@ -65,11 +81,11 @@ export default function BaseDeDatosPage() {
         <SpecTable
           columns={["Parte", "Qué hace"]}
           rows={[
-            ["Barra (BarraBase)", "Lateral, nombre de la vista con su menú (todas las vistas y «Crear vista»), y a la derecha lo que tiene su tipo: el campo del kanban o del calendario, ocultar campos, filtro, agrupar, ordenar, color, altura y buscar. Al final la acción principal y el botón de la ficha integrada."],
-            ["Lateral (LateralVistas)", "«Crear vista» por tipo, buscar una vista y la lista, que se ordena arrastrando. Se ensancha arrastrando su borde y, junto a «Crear vista», se pasa al otro lado o se pliega (`ControlesLateral`, con la flechita hacia donde se esconde; el lado se recuerda). Una página puede poner el suyo (`lateral`): las carpetas, un calendario; si `contenido` es una función, recibe esos mismos controles."],
-            ["Vista", "Cuadrícula (Rejilla), kanban (el Kanban del kit), galería o calendario. En el móvil, una lista de tarjetas con los mismos filtros."],
-            ["Pie", "En la cuadrícula: «+» para un registro nuevo, cuántos hay y el resumen de cada columna (suma, media, vacíos, únicos, fechas…)."],
-            ["Ficha", "La de cada objeto (`DetailSheet`), encima o integrada a la derecha (ficha propia de la base o la columna del panel de `WorkGrid`)."],
+            ["Pestañas de vistas (PestanasVistas)", "Encima del bloque, como las de Chrome. La primera es la vista de base: no se borra y es la plantilla de las demás. «+» abre una nueva con la base como esté. Pasadas diez se difuminan; al pulsar la última se coloca en medio. A su derecha, los botones generales de la página."],
+            ["Cabecera (BarraBase)", "Izquierda: icono y nombre de la vista, que se escribe ahí mismo; el icono abre su menú (ver como, cambiar el icono, duplicar, eliminar). Centro: el campo del kanban o del calendario, ocultar campos, filtro, agrupar, ordenar, color, altura y buscar. Derecha: los botones principales y, al final del todo, los ajustes de la base."],
+            ["Vista", "Tabla (Rejilla), kanban (el Kanban del kit), galería o calendario. En el móvil, una lista de tarjetas con los mismos filtros."],
+            ["Pie", "En la tabla: «+» para un registro nuevo, cuántos hay y el resumen de cada columna (suma, media, vacíos, únicos, fechas…)."],
+            ["Registro", "Se abre desde su celda de inicio: en su página (paginaRegistro) o, sin ella, en la ficha de cada objeto (DetailSheet), encima o al lado de la tabla."],
           ]}
         />
       </DocSection>
@@ -92,8 +108,7 @@ export default function BaseDeDatosPage() {
               de una lista con buscador y al pulsarlo abre su ficha (<code>onAbrirVinculo</code>). Solo lo ponen las páginas en sus campos de serie.
             </>,
             <>
-              <strong>Estados</strong>: con <code>opcionesDeEstados(ESTADOS_…)</code> llevan su tono y se ven como <code>StatusBadge</code>. Las demás opciones,
-              con los colores <code>opcion-*</code>.
+              <strong>Estados</strong>: con <code>opcionesDeEstados(ESTADOS_…)</code> llevan su tono y en la tabla se ven con su icono y su texto (<code>EstadoEnLinea</code>). Las demás opciones, con el punto de su color (<code>OpcionEnLinea</code>); la selección múltiple, en fichas.
             </>,
             <>
               <strong>Ajustes de un campo</strong>: doble clic en su cabecera (o «Editar el campo» de su menú). Uno propio se edita entero (nombre, tipo,
@@ -137,20 +152,32 @@ export default function BaseDeDatosPage() {
               <code>kanban.acciones</code>, botones al pie de una tarjeta para mover el registro sin abrirlo (ganada o perdida en las que se negocian).
             </>,
             <>
-              <strong>Galería</strong> con <code>portada</code> para la imagen de cada tarjeta. <strong>Calendario</strong> sobre un campo de fecha; si la fecha
+              <strong>Tarjetas</strong>: con celda de inicio, kanban y galería usan <code>TarjetaPerfil</code> (imagen grande, foto, nombre, frase, tres cifras y logos), con <code>portada</code> para la imagen. <strong>Calendario</strong> sobre un campo de fecha; si la fecha
               se puede escribir, se arrastra a otro día.
             </>,
           ]}
         />
       </DocSection>
 
-      <DocSection id="cuadricula" title="La cuadrícula">
+      <DocSection id="inicio" title="Celda de inicio">
+        <Prose>
+          <p>
+            La primera celda de toda base es de tipo <code>inicio</code>: junta en una sola celda, compacta, quién es el registro. Arriba, su nombre y su{" "}
+            <code>@</code> o su dominio; debajo, sus logos reales con sus cifras. Pulsarla abre la página del registro; pulsar un logo abre ese enlace. Es el
+            único campo que no se edita en la tabla. Lo que lleva dentro se declara con <code>enInicio</code>: sirve para filtrar y ordenar, y no sale como columna.
+          </p>
+        </Prose>
+        <CodeBlock code={INICIO} lang="ts" />
+      </DocSection>
+
+      <DocSection id="cuadricula" title="La tabla">
         <Rules
           items={[
-            <>Celdas que se editan escribiendo o con doble clic; Enter, Tab y las flechas se mueven como en una hoja de cálculo; ⌘Z deshace.</>,
+            <>Sin rayas entre columnas, una raya fina entre filas y la cabecera en gris con las flechas de ordenar. Al pasar el ratón, la fila se levanta (<code>shadow-fila</code>).</>,
+            <>Toda celda se edita encima: una lista o una fecha al primer clic; un texto o un número pulsando la celda ya elegida o escribiendo; una casilla con su clic. Enter, Tab y las flechas se mueven como en una hoja de cálculo; ⌘Z deshace.</>,
             <>Selección de celdas con Mayús o arrastrando, copiar y pegar con Excel (TSV y HTML), el tirador para rellenar hacia abajo.</>,
             <>Columnas que se arrastran y se ensanchan, columnas fijas con su asa, menú de cada cabecera (editar, insertar, ordenar, filtrar, agrupar, ocultar).</>,
-            <>A la izquierda, el número de fila, la casilla para marcarla y el botón que abre la ficha. Lo marcado va a la <code>BulkBar</code>.</>,
+            <>A la izquierda, la casilla para marcar la fila. Lo marcado va a la <code>BulkBar</code>.</>,
             <>Miles de filas sin notarse: las filas son virtuales (<code>@tanstack/react-virtual</code>).</>,
           ]}
         />
@@ -159,9 +186,7 @@ export default function BaseDeDatosPage() {
       <DocSection id="pagina" title="En una página">
         <Prose>
           <p>
-            Sola (Contactos), la base ocupa lo que queda de pantalla. Con cifras y panel (Pipeline, Marcas, Collabs, Cobros), va dentro de{" "}
-            <code>WorkGrid</code>: las cifras arriba (pueden filtrar la vista con <code>base.cambiar</code>), el panel a la derecha y la ficha integrada usa la
-            columna del panel (prop <code>ficha</code> con <code>usePanelFicha</code>). Las páginas con una vista propia que no es una base (un calendario a
+            La base va dentro de <code>WorkGrid</code> y ocupa lo que queda de pantalla, a todo el ancho. Las cifras de la cabecera pueden filtrar la vista con <code>base.cambiar</code>. Lo que se configura de vez en cuando va en sus ajustes (<code>ajustes</code> y <code>useBloquesEnAjustes</code>). La ficha se abre encima o, si alguien lo elige en los ajustes, al lado (prop <code>ficha</code> con <code>usePanelFicha</code>). Las páginas con una vista propia que no es una base (un calendario a
             medida) usan <code>BarraFiltros</code>: la misma barra, solo con la vista, el filtro y buscar.
           </p>
         </Prose>

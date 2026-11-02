@@ -3,6 +3,7 @@
 // la página y las pruebas.
 
 import { campoDePropio, conValorPropio, textoLimpio, type CampoPropio, type ColorOpcion, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { enlaceEmail, enlaceInstagram, enlaceTelefono, enlaces } from "@/lib/base/inicio"
 import { vistaNueva, type VistaBase } from "@/lib/base/vistas"
 import { soloFecha } from "@/lib/influencer/fechas"
 import { ultimoContactoDe } from "@/lib/influencer/crm"
@@ -23,7 +24,7 @@ const texto = (v: string | undefined) => v ?? null
 export function camposBaseContactos({ marcas, interacciones, propios }: { marcas: Marca[]; interacciones: Interaccion[]; propios: CampoPropio[] }): DefCampo<Contacto>[] {
   const opcionesMarca = opcionesDeMarcas(marcas)
   return [
-    { id: "nombre", nombre: "Nombre", tipo: "texto", principal: true, obligatorio: true, grupo: "Datos", valor: (c) => c.nombre },
+    { id: "nombre", nombre: "Nombre", tipo: "inicio", principal: true, obligatorio: true, grupo: "Datos", inicio: (c) => ({ nombre: c.nombre, secundario: c.cargo, forma: "persona", enlaces: enlaces(enlaceEmail(c.email), enlaceTelefono(c.telefono), enlaceInstagram(c.instagram)) }), valor: (c) => c.nombre },
     { id: "marca", nombre: "Marca", tipo: "vinculo", vinculo: { objeto: "marca" }, opciones: opcionesMarca, grupo: "Datos", valor: (c) => c.marcaId ?? null },
     { id: "cargo", nombre: "Cargo", tipo: "texto", grupo: "Datos", valor: (c) => texto(c.cargo) },
     { id: "email", nombre: "Email", tipo: "email", grupo: "Cómo escribirle", valor: (c) => texto(c.email) },

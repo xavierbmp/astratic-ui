@@ -162,7 +162,7 @@ export default function KanbanPage() {
               válido para soltar. Con <code>storageKey</code> se recuerda qué columnas plegó cada usuario.
             </>,
             <>
-              <strong>Tres fases desplegadas a la vez</strong> con el panel de información abierto a 1440 px (cuatro sin
+              <strong>Tres fases desplegadas a la vez</strong> a 1440 px (cuatro sin
               panel). Con más fases, las de los extremos empiezan plegadas con <code>defaultCollapsed</code>, como «Lead» y
               «Ganado» en el CRM de Twic.
             </>,

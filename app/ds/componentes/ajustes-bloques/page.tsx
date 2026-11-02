@@ -89,7 +89,6 @@ export default function AjustesBloquesPage() {
       <DocSection id="siguiente" title="Relacionado">
         <NextLinks
           links={[
-            { href: "/ds/componentes/insights-panel", label: "Panel de información", text: "Sus bloques también se eligen y se ordenan." },
             { href: "/ds/componentes/section", label: "Sección", text: "La cabecera donde va el engranaje." },
           ]}
         />

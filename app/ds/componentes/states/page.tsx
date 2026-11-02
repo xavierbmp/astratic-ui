@@ -76,7 +76,7 @@ export default function StatesPage() {
       <DocSection id="uso" title="Cuándo se usa">
         <Prose>
           <p>
-            Una tabla, un kanban, una fila de cifras o un bloque del panel de información no están terminados hasta
+            Una tabla, un kanban o una fila de cifras no están terminados hasta
             que se sabe qué muestran cuando no hay datos, mientras llegan y cuando fallan. Los tres estados ocupan el
             mismo sitio que el contenido normal, dentro del <code>SectionBody</code>, sin tocar la cabecera del bloque
             ni el resto de la página.
@@ -185,7 +185,7 @@ export default function StatesPage() {
           items={[
             <>
               Todo bloque tiene los tres estados. La revisión de una página empieza por comprobar los tres en cada
-              bloque, incluidos los del panel de información.
+              bloque.
             </>,
             <>
               El vacío dice cómo poblarlo y ofrece la acción: título de una línea, descripción de una frase, botón{" "}

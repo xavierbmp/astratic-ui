@@ -10,7 +10,7 @@ const deLista = (xs: string[]) => [...new Set(xs)].sort((a, b) => a.localeCompar
 
 export function camposDemoRegistros(registros: DemoRecord[]): DefCampo<DemoRecord>[] {
   return [
-    { id: "name", nombre: "Registro", tipo: "texto", principal: true, obligatorio: true, grupo: "Datos", valor: (r) => r.name },
+    { id: "name", nombre: "Registro", tipo: "inicio", principal: true, obligatorio: true, grupo: "Datos", inicio: (r) => ({ nombre: r.name, forma: "entidad", detalle: r.category }), valor: (r) => r.name },
     { id: "stage", nombre: "Fase", tipo: "select", obligatorio: true, opciones: opcionesDeEstados(stages), grupo: "Estado", valor: (r) => r.stage },
     { id: "owner", nombre: "Responsable", tipo: "select", obligatorio: true, opciones: deLista(registros.map((r) => r.owner)), grupo: "Datos", valor: (r) => r.owner },
     { id: "value", nombre: "Valor", tipo: "moneda", formato: { decimales: 0 }, grupo: "Dinero", valor: (r) => r.value },

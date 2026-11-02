@@ -55,7 +55,6 @@ export default function EspaciadoPage() {
             ["Cabecera de la app", "48 px", <code key="i">h-12</code>, "AppShell: migas a la izquierda, buscador y acciones a la derecha."],
             ["Sidebar", "256 px", <code key="j">--sidebar-width</code>, "AppShell. Colapsa a 48 px."],
             ["Sheet de detalle", "440 px", <code key="k">width</code>, "DetailSheet. 400 px para fichas simples."],
-            ["Panel de información", "320 px", <code key="l">WorkGrid aside</code>, "Empieza a la altura del bloque de operación y mide lo mismo."],
           ]}
         />
         <Rules
@@ -162,7 +161,7 @@ export default function EspaciadoPage() {
 <PageBody>
   <PageHeader title="Registros" description="…" />
   <KpiRow>…</KpiRow>
-  <WorkGrid toolbar={<Toolbar>…</Toolbar>} aside={<InsightsPanel storageKey="registros" blocks={…} />}>
+  <WorkGrid toolbar={<Toolbar>…</Toolbar>}>
     <Section>…</Section>
   </WorkGrid>
 </PageBody>`}

@@ -27,7 +27,7 @@ import { PageBody, PageHeader } from "@/components/app/page-header"
 import { KpiCard, KpiRow } from "@/components/app/kpi"
 import { Section, SectionBody, SectionHeader } from "@/components/app/section"
 import { WorkGrid } from "@/components/app/work-grid"
-import { InsightList, InsightsPanel } from "@/components/app/insights-panel"
+import { InsightList } from "@/components/app/insight-list"
 import { StatusBadge } from "@/components/app/status-badge"
 import { AvatarInitials } from "@/components/app/avatar-initials"
 import { CellPrimary, DataTable, type Column } from "@/components/app/data-table"
@@ -114,69 +114,7 @@ export function DashboardView({
         <KpiCard icon={AlarmClockIcon} label="Vencidos" value={overdue.length} alert={overdue.length > 0 ? `${fmt.eur(overdue.reduce((a, r) => a + r.value, 0))} en riesgo` : undefined} />
       </KpiRow>
 
-      <WorkGrid
-        aside={
-          <InsightsPanel
-            storageKey="demo-dashboard"
-            title="Hoy"
-            blocks={[
-              {
-                id: "tareas",
-                title: "Tareas de hoy",
-                icon: CircleCheckIcon,
-                action: <Link href="/demo/tareas" className="hover:text-foreground">Ver todas</Link>,
-                render: () => (
-                  <InsightList
-                    items={tasks.slice(0, 4).map((t) => ({
-                      key: t.id,
-                      leading: <AvatarInitials name={t.owner} size="sm" />,
-                      title: t.title,
-                      subtitle: t.record,
-                      trailing: <StatusBadge tone={t.tone}>{t.due}</StatusBadge>,
-                    }))}
-                  />
-                ),
-              },
-              {
-                id: "actividad",
-                title: "Actividad reciente",
-                icon: ActivityIcon,
-                render: () => (
-                  <InsightList
-                    items={activity.slice(0, 5).map((a) => ({
-                      key: a.id,
-                      leading: <AvatarInitials name={a.who} size="sm" />,
-                      title: (
-                        <>
-                          <span className="font-semibold">{a.who}</span> {a.what}
-                        </>
-                      ),
-                      subtitle: a.target,
-                      trailing: <span className="text-muted-foreground">{a.when}</span>,
-                    }))}
-                  />
-                ),
-              },
-              {
-                id: "vencimientos",
-                title: "Próximos vencimientos",
-                icon: CalendarClockIcon,
-                render: () => (
-                  <InsightList
-                    items={upcoming.slice(0, 4).map((r) => ({
-                      key: r.id,
-                      leading: <AvatarInitials name={r.name} size="sm" variant="entity" />,
-                      title: r.name,
-                      subtitle: r.owner,
-                      trailing: <span className="text-muted-foreground">{fmt.date(r.dueAt)}</span>,
-                    }))}
-                  />
-                ),
-              },
-            ]}
-          />
-        }
-      >
+      <WorkGrid>
         <div className="flex flex-1 flex-col gap-4">
           <div className="grid gap-4 lg:grid-cols-5">
             <Section className="lg:col-span-3">

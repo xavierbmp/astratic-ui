@@ -4,6 +4,7 @@
 // (`base-contactos.ts`).
 
 import { campoDePropio, conValorPropio, opcionesDeEstados, textoLimpio, type CampoPropio, type DefCampo, type ValorCampo } from "@/lib/base/campos"
+import { dominioDe, enlaceInstagram, enlaceWeb, enlaces } from "@/lib/base/inicio"
 import { vistaNueva, type VistaBase } from "@/lib/base/vistas"
 import { soloFecha } from "@/lib/influencer/fechas"
 import { contactoDePropuesta, importeDe, type ResumenMarca } from "@/lib/influencer/crm"
@@ -38,7 +39,7 @@ export function camposBaseMarcas({ marcas, contactos, resumenes, propios }: { ma
   const r = (m: Marca) => resumenes.get(m.id)
   const sectores = [...new Set(marcas.map((m) => m.sector).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"))
   return [
-    { id: "nombre", nombre: "Nombre", tipo: "texto", principal: true, obligatorio: true, grupo: "Datos", valor: (m) => m.nombre },
+    { id: "nombre", nombre: "Nombre", tipo: "inicio", principal: true, obligatorio: true, grupo: "Datos", inicio: (m) => ({ nombre: m.nombre, secundario: dominioDe(m.web), forma: "entidad", imagen: m.logoUrl, enlaces: enlaces(enlaceWeb(m.web), enlaceInstagram(m.instagram)), detalle: m.sector || null }), valor: (m) => m.nombre },
     { id: "relacion", nombre: "Relación", tipo: "select", soloLectura: true, opciones: opcionesDeEstados(RELACIONES_MARCA), grupo: "Relación", descripcion: "Se calcula a partir de sus propuestas y collabs.", valor: (m) => r(m)?.relacion ?? null },
     { id: "sector", nombre: "Sector", tipo: "texto", grupo: "Datos", descripcion: sectores.length ? `Los que tienes: ${sectores.join(", ")}.` : undefined, valor: (m) => texto(m.sector) },
     { id: "principal", nombre: "Contacto principal", tipo: "vinculo", vinculo: { objeto: "persona" }, soloLectura: true, opciones: contactos.map((c) => ({ id: c.id, label: c.nombre })), grupo: "Relación", descripcion: "Se edita desde Contactos o la ficha de la marca.", valor: (m) => r(m)?.principal?.id ?? null },
