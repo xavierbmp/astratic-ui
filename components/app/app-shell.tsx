@@ -287,7 +287,7 @@ export function AppShell({
                   const last = i === crumbs.length - 1
                   return (
                     <React.Fragment key={`${c.label}-${i}`}>
-                      <BreadcrumbItem className={cn(i === 0 && crumbs.length > 1 && "hidden md:inline-flex", last ? "min-w-0" : "completa:hidden")}>
+                      <BreadcrumbItem className={cn(!last && "hidden md:inline-flex", last ? "min-w-0" : "completa:hidden")}>
                         {last ? (
                           <BreadcrumbPage className="truncate font-medium">{c.label}</BreadcrumbPage>
                         ) : c.href ? (
@@ -298,7 +298,7 @@ export function AppShell({
                           <span>{c.label}</span>
                         )}
                       </BreadcrumbItem>
-                      {!last && <BreadcrumbSeparator className={cn(i === 0 && crumbs.length > 1 && "hidden md:block", "completa:hidden")} />}
+                      {!last && <BreadcrumbSeparator className="hidden md:block completa:hidden" />}
                     </React.Fragment>
                   )
                 })}
