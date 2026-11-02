@@ -9,7 +9,7 @@
 - Contraste en claro: `border` separa bloques, `input` bordea campos y botones outline, `control` bordea lo que se marca (casillas, radios): tiene que verse sin buscarlo. Lo seleccionado (filas, tarjetas, elementos de lista) va en `bg-brand-soft` con un filo `brand` a la izquierda; el hover, en `bg-muted`.
 
 ## Anatomía de una página de operación (orden fijo)
-1. `PageBody` → `PageHeader` (título 27 px y una línea de descripción, a su derecha las cifras si las hay y, debajo y a todo el ancho, `tabs` con las pestañas de subpágina; `actions`, los botones outline, van a la derecha de esa fila de pestañas cuando hay pestañas o cifras (Xavier, 2026-10-21) y, si no, junto al título).
+1. `PageBody` → `PageHeader` (título 27 px y una línea de descripción, a su derecha las cifras si las hay y, debajo y a todo el ancho, `tabs` con sus pestañas si las tiene; `actions`, los botones outline, van a la derecha de esa fila de pestañas cuando hay pestañas o cifras (Xavier, 2026-10-21) y, si no, junto al título).
 2. `WorkGrid`, que reparte el resto de la página en dos columnas:
    - `stats={<KpiRow>}` con 3 a 5 `KpiCard`. Van **dentro** de la columna izquierda, no a ancho completo: `KpiRow` es `auto-fit minmax(180px,1fr)` y se reordena solo al estrecharse. Cuando las cifras son los tramos de un mismo recorrido (el estado de una base: sin normalizar, listas, en campaña…), van en el orden del trabajo y **cada una filtra la lista** al pulsarla (`KpiCard onClick` + `active`): es una condición más en el filtro de la vista abierta, que se ve en su botón «Filtro». Cuentan toda la base, no solo las filas cargadas.
    - **la base de datos** (`BaseDatos`, ver «Bases de datos») como hijo: lleva dentro su barra (vistas, filtro, grupos, orden, buscar y la acción principal negra y única), así que no hay toolbar suelta encima. Con cifras que filtran, estas cambian el filtro de la vista abierta.
@@ -25,16 +25,22 @@ Dashboards: cifras + grid de secciones de resumen + panel «Hoy». No hay págin
 
 Página propia de un registro (un evento, una cuenta, una campaña que se trabaja durante semanas): la misma anatomía. `PageHeader` con el nombre del registro como título y `PageTabs` con sus partes (Producción · Invitados · Proveedores…), cifras de ese registro, un bloque de trabajo e `InsightsPanel` con sus datos. **Nunca la lista de registros junto al detalle**: ya estás dentro; se cambia de registro con las migas o ⌘K.
 
-Una página de operación trabaja, no resume: **un solo bloque de trabajo** y un panel de 2 o 3 bloques cortos. Gráficos, rankings y clipping van al dashboard; el resto de partes, a subpáginas. Si al mirarla no se sabe dónde poner los ojos, sobra información.
+Una página de operación trabaja, no resume: **un solo bloque de trabajo** y un panel de 2 o 3 bloques cortos. Gráficos, rankings y clipping van al dashboard; el resto de partes, a otras subpáginas o pestañas. Si al mirarla no se sabe dónde poner los ojos, sobra información.
 
-## Subpáginas
-- Un módulo con partes distintas que comparten título (Facturas y Cobros en Facturación) usa subpáginas: una ruta por parte (`/facturacion`, `/facturacion/cobros`) y `PageTabs` en la prop `tabs` de `PageHeader`.
-- Las pestañas se definen una vez en `nav.ts` (campo `tabs` del ítem, cada una con su icono de lucide): la sidebar marca el módulo y las migas y ⌘K incluyen la subpágina.
+## Navegación: módulos, subpáginas y pestañas
+Regla de Xavier (2026-11-02). Tres niveles, cada uno con su sitio. **Una página tiene como mucho una fila de pestañas.**
+
+- **Módulo** (IRM, CRM): en la sidebar, con su icono (`ModuloMenu`). Al pulsarlo se despliega y entra en su primera subpágina. Solo está desplegado el que se usa, así el menú cabe sin scroll.
+- **Subpágina** (Influencers, Pipeline, Contratos): en la sidebar, debajo de su módulo, con texto y sin icono. Su nombre es el título de la página. Cada una, su descripción, cifras, bloque y botones.
+- **Pestaña** (Base, Revisión, Buscar): `PageTabs` debajo del título, a todo el ancho, con los botones a la derecha de la misma fila. Cada una es una ruta. La subpágina sin partes no lleva fila de pestañas.
+- **Se declaran una vez** en `nav.ts`: las subpáginas en `tabs` del módulo y las pestañas en `tabs` de cada subpágina. De ahí salen la sidebar, el título, las pestañas, las migas y ⌘K (`CabeceraSubpagina`). Se activa con `AppShell subpaginasEnMenu`; todo portal nuevo lo lleva y los que ya existen pasan en su tanda.
+- **Contadores**: con el módulo plegado, la suma de sus pendientes; desplegado, cada subpágina el suyo y sin repetir el total; y cada pestaña el suyo.
+- **Sidebar plegada a iconos**: al pasar el ratón sobre un módulo sale un menú con sus subpáginas; al pulsarlo se entra en la primera.
+- **Registro** (una campaña, una collab): volver, su nombre y una fila de pestañas con sus partes, con el mismo diseño. No va en la sidebar.
 - **Aspecto de las pestañas** (Xavier, 2026-10-14, a partir de una captura de referencia): icono y texto, sin cápsulas; 44 px de alto, 16 px de aire a cada lado y 20 px entre pestañas; las demás en `muted-foreground` y la activa en `foreground` con un subrayado de 2 px que pisa una línea gris a todo el ancho. Siempre en el mismo sitio: debajo del título, y la descripción ocupa una línea para no moverlas.
 - **Navegar o elegir**: lo que cambia de página, o de «página» dentro de una ficha, un diálogo o un bloque (las partes de una ficha o de una página de registro, Nuevo y Enviados), usa las pestañas de navegación: `PageTabs` o `TabsList variant="line"`, que comparten estilo (`navTabClass` en `components/ui/tabs.tsx`). En una ficha o un diálogo estrecho, `compact` (pestañas juntas y con 12 px de aire) para que quepan todas sin desplazarse. Lo que elige un valor o recorta lo que se ve (periodo, Email o Llamadas en un formulario, Todo o Notas, los recortes de una lista) es un control segmentado: `TabsList` por defecto; en la cabecera de un bloque o un panel, `Segmentado` (el mismo, a 28 px).
-- Mismo título en todas las subpáginas; cada una con su descripción, cifras, base y panel. De 2 a 6; sin anidar.
-- **Segundo nivel** (Xavier, 2026-10-23: Roster › Influencers · Temáticas · Etiquetas): `SubPaginas`, pestañas de carpeta cuadradas pegadas encima del bloque de trabajo, a la derecha (`WorkGrid pestanas`; reporte cmvkzcqs), la activa del color del bloque y unida a él. No van en la cabecera: allí se movían según los botones de cada página.
-- No son subpáginas: otra forma de ver los mismos datos (una vista de la base) ni un recorte de la lista (filtro). Un solo segmentado por cabecera.
+- No son pestañas: otra forma de ver los mismos datos (una vista de la base) ni un recorte de la lista (filtro). Un solo segmentado por cabecera.
+- **Prohibido**: dos filas de pestañas, pestañas de carpeta encima de un bloque y repetir en el título el nombre del módulo.
 
 ## Bases de datos (estilo Airtable)
 **Toda lista de registros es una `BaseDatos`** (`components/app/base/`, lógica en `lib/base/`, documentación en `/ds/componentes/base-de-datos`): nunca se monta una lista con filtros, columnas o vistas a mano. Regla de Xavier (2026-10-13): **la colocación y el funcionamiento son los de Airtable; los colores y los iconos, los de Astratic UI**, y se sustituye lo que había sin mezclar piezas viejas y nuevas.

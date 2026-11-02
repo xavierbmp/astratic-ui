@@ -30,6 +30,7 @@ export function PanelFiltro({
   objeto = "registros",
   otrasVistas,
   pie,
+  frase,
 }: {
   campos: CampoMenu[]
   value: GrupoCondiciones
@@ -40,6 +41,8 @@ export function PanelFiltro({
   otrasVistas?: { id: string; nombre: string; filtro: GrupoCondiciones }[]
   /** Botones de más, a la derecha del pie (guardar como rápido…). */
   pie?: React.ReactNode
+  /** Lo que dice encima de las condiciones, si no es una vista («Le llega a quien cumple:»). */
+  frase?: string
 }) {
   const n = contarCondiciones(value)
   const anadir = () => {
@@ -59,7 +62,7 @@ export function PanelFiltro({
           <TooltipContent className="max-w-64">Solo se ven los registros que cumplen las condiciones. Un grupo mezcla «y» con «o»: «(Lumea o Nuura) y sin email».</TooltipContent>
         </Tooltip>
       </div>
-      <p className="px-4 pt-2 pb-1 text-muted-foreground">{n === 0 && !(value.grupos ?? []).length ? "No se aplican condiciones de filtrado" : `En esta vista, se muestran los ${objeto} que cumplen:`}</p>
+      <p className="px-4 pt-2 pb-1 text-muted-foreground">{n === 0 && !(value.grupos ?? []).length ? "No se aplican condiciones de filtrado" : (frase ?? `En esta vista, se muestran los ${objeto} que cumplen:`)}</p>
       <div className="flex min-h-0 flex-col gap-2 overflow-y-auto px-4 py-2">
         <ItemsGrupo grupo={value} nivel={1} campos={campos} onChange={onChange} />
       </div>

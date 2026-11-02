@@ -27,8 +27,6 @@ const ANCHO_PANEL_COMPLETA = 240
  * abierto ocupa su sitio (con el ancho que haya elegido la persona) y al cerrarla vuelve la información;
  * plegado, la lista ocupa todo el ancho y la ficha se abre encima.
  *
- * Con `pestanas` (las `SubPaginas` del segundo nivel), van pegadas encima del bloque, a la derecha, como carpetas.
- *
  * Mientras está montado, la página tiene «Pantalla completa» en la cabecera del shell (`pantalla-completa.tsx`).
  */
 export function WorkGrid({
@@ -37,7 +35,6 @@ export function WorkGrid({
   aside,
   asideWidth = 320,
   ficha,
-  pestanas,
   className,
   children,
   ...props
@@ -50,8 +47,6 @@ export function WorkGrid({
   asideWidth?: number
   /** Panel de ficha de la página: si está activo, ocupa la columna derecha en lugar de `aside`. */
   ficha?: PanelFicha
-  /** Las pestañas del segundo nivel (`SubPaginas`), al principio del bloque y unidas a él. */
-  pestanas?: React.ReactNode
 }) {
   // Con un bloque de trabajo, la página puede ponerse en pantalla completa (el botón sale en la cabecera del shell).
   useBloqueDeTrabajo()
@@ -95,8 +90,7 @@ export function WorkGrid({
           {toolbar}
         </div>
       )}
-      <div className={cn("flex min-h-0 min-w-0 flex-col xl:col-start-1", pestanas && "[&>[data-slot=sub-paginas]+*]:rounded-tr-none [&>[data-slot=sub-paginas]+*>*]:rounded-tr-none", rowStart[filaBloque])}>
-        {pestanas}
+      <div className={cn("flex min-h-0 min-w-0 flex-col xl:col-start-1", rowStart[filaBloque])}>
         {children}
       </div>
       {lateral && (

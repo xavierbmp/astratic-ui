@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react"
 
-/** Subpágina de un módulo: una ruta propia que se muestra como pestaña en la cabecera (PageTabs). */
+/** Subpágina de un módulo o pestaña de una subpágina: una ruta propia. */
 export type PageTab = {
   href: string
   label: string
@@ -8,6 +8,8 @@ export type PageTab = {
   icon: LucideIcon
   /** Pendientes de esa subpágina (pill ámbar, como los contadores de la sidebar). */
   count?: number
+  /** Las pestañas de esta subpágina (`PageTabs`, bajo su título). La primera vive en `href`. */
+  tabs?: PageTab[]
 }
 
 export type NavItem = {

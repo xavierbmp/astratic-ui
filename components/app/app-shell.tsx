@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { BellIcon, ChevronsUpDownIcon, SearchIcon } from "lucide-react"
+import { BellIcon, ChevronLeftIcon, ChevronsUpDownIcon, SearchIcon } from "lucide-react"
 import { cn } from "cn"
 import { BotonPantallaCompleta, PantallaCompletaProvider, RanuraPantallaCompleta } from "@/components/app/pantalla-completa"
 import { activeTab, type Brand, type CurrentUser, type NavGroup } from "@/lib/nav"
@@ -46,9 +46,18 @@ import {
 } from "@/components/ui/command"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AvatarInitials } from "@/components/app/avatar-initials"
+import { ModuloMenu } from "@/components/app/modulo-menu"
 import { ThemeToggle } from "@/components/app/theme-toggle"
 
 type Crumb = { label: string; href?: string }
+
+const sinTildes = (t: string) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase()
+
+/** ⌘K encuentra igual «revision» que «Revisión»: todas las palabras escritas tienen que estar. */
+function filtroSinTildes(valor: string, busqueda: string) {
+  const texto = sinTildes(valor)
+  return sinTildes(busqueda).split(/\s+/).every((palabra) => texto.includes(palabra)) ? 1 : 0
+}
 
 const BreadcrumbContext = React.createContext<{
   extra: Crumb[]
@@ -72,10 +81,12 @@ export function AppShell({
   nav,
   children,
   headerEnd,
+  volver,
   userMenu,
   report,
   notifications,
   sidebarExtra,
+  subpaginasEnMenu = false,
 }: {
   brand: Brand
   /** Logotipo de la marca: con la sidebar abierta sustituye al monograma y el nombre; plegada, sigue el monograma. */
@@ -84,6 +95,8 @@ export function AppShell({
   nav: NavGroup[]
   children: React.ReactNode
   headerEnd?: React.ReactNode
+  /** A dónde vuelve la página abierta: va al principio de la barra, con su nombre, y la pantalla completa lo conserva. */
+  volver?: { href: string; titulo: string } | null
   /** Contenido del menú desplegable del usuario (pie de la sidebar): «Ir a…», tema, cerrar sesión. */
   userMenu?: React.ReactNode
   /** Botón «Sugerencias y problemas» (`ReportButton`) ya montado; va entre el buscador y la campana. */
@@ -95,11 +108,17 @@ export function AppShell({
    * páginas (los pasos para completar su perfil). Se encarga él de verse bien con la sidebar plegada.
    */
   sidebarExtra?: React.ReactNode
+  /** Las subpáginas de cada módulo van desplegadas en la sidebar y las pestañas quedan para dentro de cada subpágina. */
+  subpaginasEnMenu?: boolean
 }) {
   const pathname = usePathname()
   const router = useRouter()
   const [extra, setExtra] = React.useState<Crumb[]>([])
   const [paletteOpen, setPaletteOpen] = React.useState(false)
+  // A dónde se acaba de pulsar: el menú responde al momento, sin esperar a que cargue la página de destino.
+  const [destino, setDestino] = React.useState<{ id: string; href: string; desde: string } | null>(null)
+  const enCurso = destino?.desde === pathname ? destino : null
+  const irA = (id: string, href: string) => setDestino({ id, href, desde: pathname })
 
   // El módulo activo: el de la ruta más larga que contiene a `pathname`, contando también sus subpáginas, que
   // pueden vivir en otra ruta (una página que agrupa módulos que ya existían, como el IRM del admin de la red).
@@ -128,12 +147,15 @@ export function AppShell({
 
   // La primera subpágina vive en la ruta del módulo; las demás añaden su miga: «Grupo › Página › Subpágina».
   const tab = current?.item.tabs ? activeTab(current.item.tabs, pathname) : undefined
+  const pestana = tab?.tabs ? activeTab(tab.tabs, pathname) : undefined
   const crumbs: Crumb[] = [
     ...(current?.group.label ? [{ label: current.group.label }] : []),
-    ...(current ? [{ label: current.item.label, href: current.item.href }] : []),
-    ...(tab && tab.href !== current?.item.href ? [{ label: tab.label, href: tab.href }] : []),
+    ...(current ? [{ label: current.item.label, href: subpaginasEnMenu ? (current.item.tabs?.[0]?.href ?? current.item.href) : current.item.href }] : []),
+    ...(tab && (subpaginasEnMenu || tab.href !== current?.item.href) ? [{ label: tab.label, href: tab.href }] : []),
+    ...(pestana && pestana.href !== tab?.href ? [{ label: pestana.label, href: pestana.href }] : []),
     ...extra,
   ]
+  const activoId = enCurso?.id ?? current?.item.id
 
   const grupo = (group: NavGroup, key: string, className?: string) => (
     <SidebarGroup key={key} className={className}>
@@ -141,11 +163,15 @@ export function AppShell({
       <SidebarGroupContent>
         <SidebarMenu>
           {group.items.map((item) => {
-            const active = current?.item.id === item.id
+            const active = activoId === item.id
+            if (subpaginasEnMenu && item.tabs?.length) {
+              const subActiva = enCurso?.id === item.id ? enCurso.href : activeTab(item.tabs, pathname)?.href
+              return <ModuloMenu key={item.id} item={item} abierto={active} subActiva={subActiva} onIr={irA} />
+            }
             return (
               <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
-                  <Link href={item.href}>
+                  <Link href={item.href} onClick={() => irA(item.id, item.href)}>
                     <item.icon />
                     <span>{item.label}</span>
                   </Link>
@@ -240,16 +266,28 @@ export function AppShell({
         </Sidebar>
 
         <SidebarInset className="min-w-0">
-          <header className="flex h-12 flex-none items-center gap-2 border-b px-4">
+          {/* En pantalla completa, las pestañas de una subpágina ya dicen dónde se está: la miga no lo repite. */}
+          <header className="flex h-12 flex-none items-center gap-2 border-b px-4 completa:[&:has([data-subpagina])_[data-slot=breadcrumb]]:hidden">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mx-1 h-4!" />
+            {volver && (
+              <>
+                <Button variant="outline" size="sm" asChild className="h-7 flex-none gap-1 pr-2.5 pl-1.5 text-[13px] completa:px-1">
+                  <Link href={volver.href} aria-label={`Volver a ${volver.titulo}`} title={`Volver a ${volver.titulo}`}>
+                    <ChevronLeftIcon aria-hidden />
+                    <span className="completa:hidden">{volver.titulo}</span>
+                  </Link>
+                </Button>
+                <Separator orientation="vertical" className="mx-1 h-4!" />
+              </>
+            )}
             <Breadcrumb className="min-w-0">
               <BreadcrumbList className="flex-nowrap text-sm whitespace-nowrap">
                 {crumbs.map((c, i) => {
                   const last = i === crumbs.length - 1
                   return (
                     <React.Fragment key={`${c.label}-${i}`}>
-                      <BreadcrumbItem className={cn(i === 0 && crumbs.length > 1 && "hidden md:inline-flex", last && "min-w-0")}>
+                      <BreadcrumbItem className={cn(i === 0 && crumbs.length > 1 && "hidden md:inline-flex", last ? "min-w-0" : "completa:hidden")}>
                         {last ? (
                           <BreadcrumbPage className="truncate font-medium">{c.label}</BreadcrumbPage>
                         ) : c.href ? (
@@ -260,7 +298,7 @@ export function AppShell({
                           <span>{c.label}</span>
                         )}
                       </BreadcrumbItem>
-                      {!last && <BreadcrumbSeparator className={cn(i === 0 && crumbs.length > 1 && "hidden md:block")} />}
+                      {!last && <BreadcrumbSeparator className={cn(i === 0 && crumbs.length > 1 && "hidden md:block", "completa:hidden")} />}
                     </React.Fragment>
                   )
                 })}
@@ -271,11 +309,12 @@ export function AppShell({
               <button
                 type="button"
                 onClick={() => setPaletteOpen(true)}
-                className="hidden h-8 w-64 items-center gap-2 rounded-lg border bg-background px-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted md:flex"
+                aria-label="Buscar en el portal"
+                className="hidden h-8 w-64 items-center gap-2 rounded-lg border bg-background px-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted md:flex completa:w-8 completa:justify-center completa:px-0"
               >
                 <SearchIcon className="size-3.5" />
-                <span className="flex-1 text-left">Buscar en el portal…</span>
-                <Kbd>⌘K</Kbd>
+                <span className="flex-1 text-left completa:hidden">Buscar en el portal…</span>
+                <Kbd className="completa:hidden">⌘K</Kbd>
               </button>
               <Button
                 variant="ghost"
@@ -301,7 +340,7 @@ export function AppShell({
         </SidebarInset>
 
         <CommandDialog open={paletteOpen} onOpenChange={setPaletteOpen} title="Buscar" description="Ir a una página">
-          <Command>
+          <Command filter={filtroSinTildes}>
             <CommandInput placeholder="Buscar páginas…" />
             <CommandList>
               <CommandEmpty>Sin resultados.</CommandEmpty>
@@ -313,17 +352,18 @@ export function AppShell({
                         value={`${group.label ?? ""} ${item.label}`}
                         onSelect={() => {
                           setPaletteOpen(false)
-                          router.push(item.href)
+                          router.push(subpaginasEnMenu ? (item.tabs?.[0]?.href ?? item.href) : item.href)
                         }}
                       >
                         <item.icon />
                         {item.label}
                       </CommandItem>
                       {item.tabs
-                        ?.filter((t) => t.href !== item.href)
+                        ?.flatMap((t) => [t, ...(t.tabs ?? [])])
+                        .filter((t) => subpaginasEnMenu || t.href !== item.href)
                         .map((t) => (
                           <CommandItem
-                            key={t.href}
+                            key={`${t.href}-${t.label}`}
                             value={`${group.label ?? ""} ${item.label} ${t.label}`}
                             onSelect={() => {
                               setPaletteOpen(false)

@@ -39,7 +39,7 @@ function ItemDestino({ p }: { p: PortalDestino }) {
   if (p.alElegir) return <DropdownMenuItem onSelect={p.alElegir}>{contenido}</DropdownMenuItem>
   return (
     <DropdownMenuItem asChild>
-      {p.href.startsWith("/") ? <Link href={p.href}>{contenido}</Link> : <a href={p.href}>{contenido}</a>}
+      {p.href.startsWith("/") ? <Link href={p.href}>{contenido}</Link> : <a href={p.href} target="_blank" rel="noreferrer">{contenido}</a>}
     </DropdownMenuItem>
   )
 }
