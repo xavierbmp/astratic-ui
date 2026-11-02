@@ -20,15 +20,15 @@ export const BotonBarra = React.forwardRef<HTMLButtonElement, React.ComponentPro
       aria-label={soloIcono ? texto : undefined}
       title={texto}
       className={cn(
-        "inline-flex h-7 flex-none items-center gap-1.5 rounded-md px-2 text-[13px] whitespace-nowrap text-foreground/80 hover:bg-muted aria-expanded:bg-muted",
+        "inline-flex h-8 flex-none items-center gap-1.5 rounded-lg px-2.5 text-[13px] whitespace-nowrap text-muted-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
         activo && "bg-brand-soft text-foreground hover:bg-brand-soft aria-expanded:bg-brand-soft [&>svg]:text-brand",
-        soloIcono && "w-7 justify-center px-0",
+        soloIcono && "w-8 justify-center px-0",
         className,
       )}
       {...props}
     >
       <Icono className="size-4 flex-none" />
-      {!soloIcono && <span className={activo ? "hidden max-w-44 truncate @3xl/barra:inline" : "hidden @6xl/barra:inline"}>{texto}</span>}
+      {!soloIcono && <span className={activo ? "hidden max-w-44 truncate @3xl/barra:inline" : "hidden @5xl/barra:inline"}>{texto}</span>}
     </button>
   )
 })

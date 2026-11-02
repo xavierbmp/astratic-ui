@@ -26,9 +26,10 @@ export type TipoCampo =
   | "imagen"
   | "adjunto"
   | "vinculo"
+  | "inicio"
 
-/** Los tipos que se pueden crear: el vínculo a otra base solo lo pone la página en sus campos de serie. */
-export type TipoCampoPropio = Exclude<TipoCampo, "vinculo">
+/** Los tipos que se pueden crear: el vínculo y la celda de inicio solo los pone la página en sus campos de serie. */
+export type TipoCampoPropio = Exclude<TipoCampo, "vinculo" | "inicio">
 
 /** Cada tipo: su nombre, qué hace y con qué operadores se filtra. */
 export const TIPOS_CAMPO: Record<TipoCampo, { label: string; ayuda: string; filtro: TipoFiltro }> = {
@@ -49,10 +50,11 @@ export const TIPOS_CAMPO: Record<TipoCampo, { label: string; ayuda: string; filt
   imagen: { label: "Imagen", ayuda: "Una imagen, que sale también como portada en la vista de tarjetas.", filtro: "texto" },
   adjunto: { label: "Archivo adjunto", ayuda: "Un archivo: un PDF, un contrato, un documento.", filtro: "texto" },
   vinculo: { label: "Registro vinculado", ayuda: "Un registro de otra base, que se abre con un clic (la marca de un contacto).", filtro: "select" },
+  inicio: { label: "Inicio del registro", ayuda: "La primera celda de la base: quién es y sus enlaces. Abre su página.", filtro: "texto" },
 }
 
 /** El orden en que se ofrecen al crear un campo, como en Airtable. */
-export const LISTA_TIPOS_CAMPO = (Object.keys(TIPOS_CAMPO) as TipoCampo[]).filter((t): t is TipoCampoPropio => t !== "vinculo")
+export const LISTA_TIPOS_CAMPO = (Object.keys(TIPOS_CAMPO) as TipoCampo[]).filter((t): t is TipoCampoPropio => t !== "vinculo" && t !== "inicio")
 
 /** Los que guardan un archivo subido: su valor es su dirección. Se ofrecen si la página sabe subir (`SubidaBaseProvider`). */
 export const TIPOS_CON_ARCHIVO: readonly TipoCampo[] = ["imagen", "adjunto"]
@@ -114,6 +116,14 @@ export function lecturaProgreso(valor: number, maximo = PROGRESO_POR_DEFECTO): {
   return { texto: total === PROGRESO_POR_DEFECTO ? `${Math.round(n)} %` : `${Math.round(n)} de ${total}`, parte: n / total }
 }
 
+/** Una cifra corta para la celda de inicio y las tarjetas: «86,4K», «342K», «1,3M», «828». */
+export function cifraCompacta(n: number): string {
+  const corta = (x: number) => (x >= 100 ? String(Math.round(x)) : String(Math.round(x * 10) / 10).replace(".", ","))
+  if (n >= 1_000_000) return `${corta(n / 1_000_000)}M`
+  if (n >= 1000) return `${corta(n / 1000)}K`
+  return String(n)
+}
+
 /** El valor de un campo en una fila. Las fechas van como día ISO (AAAA-MM-DD); las listas, por id de opción. */
 export type ValorCampo = string | number | boolean | string[] | null
 
@@ -126,6 +136,33 @@ export type CampoPropio = {
   formato?: FormatoCampo
   /** Texto de ayuda que sale al pasar por su cabecera. */
   descripcion?: string
+}
+
+/** A dónde lleva un enlace de la celda de inicio: las redes con su logo real, y la web, el email y el teléfono. */
+export type RedInicio = "instagram" | "tiktok" | "youtube" | "linkedin" | "x" | "facebook" | "twitch" | "pinterest" | "web" | "email" | "telefono"
+
+/** Un enlace de la celda de inicio: su logo, a dónde va y, si la tiene, su cifra (seguidores). */
+export type EnlaceInicio = { red: RedInicio; href: string; cifra?: number | null; titulo?: string }
+
+/**
+ * La celda de inicio de un registro, siempre la primera de su base: junta en una sola celda lo que dice quién es.
+ * Arriba, su nombre y lo que le sigue (el @ de su red principal, el dominio de una marca); debajo, sus enlaces con sus
+ * cifras o, sin enlaces, `detalle`. Pulsarla abre la página del registro; pulsar un logo abre ese enlace. Lo que aparece
+ * aquí se edita en la página del registro. La tarjeta de perfil del kanban y la galería sale de lo mismo.
+ */
+export type InicioRegistro = {
+  nombre: string
+  secundario?: string | null
+  /** Su foto o su logo; sin ella, sus iniciales. */
+  imagen?: string | null
+  /** Una persona va en círculo; una entidad (marca, agencia, campaña), en cuadrado. */
+  forma?: "persona" | "entidad"
+  enlaces?: EnlaceInicio[]
+  detalle?: string | null
+  /** En la tarjeta: la imagen grande de arriba, la frase bajo el nombre y sus tres cifras. */
+  portada?: string | null
+  descripcion?: string | null
+  cifras?: { label: string; valor: string }[]
 }
 
 /** Un campo de una base: de serie o propio, con cómo leer su valor de una fila. */
@@ -153,6 +190,13 @@ export type DefCampo<T> = {
    * llama uno («marca»), para los textos («Sin marca», «Abrir la marca»).
    */
   vinculo?: { objeto: string }
+  /** La celda de inicio (`tipo: "inicio"`): lo que enseña. `valor` sigue siendo su texto, para buscar, ordenar y copiar. */
+  inicio?: (fila: T) => InicioRegistro
+  /**
+   * Va dentro de la celda de inicio (los apellidos, el @ de una red, sus seguidores): existe para filtrar y ordenar,
+   * pero no se enseña como columna salvo que alguien la encienda.
+   */
+  enInicio?: boolean
   valor: (fila: T) => ValorCampo
 }
 

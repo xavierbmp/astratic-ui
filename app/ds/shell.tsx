@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import { LayoutDashboardIcon } from "lucide-react"
 import { cn } from "cn"
 import { AppShell } from "@/components/app/app-shell"
-import { VistasEnPestanas } from "@/components/app/base/vistas-en-pestanas"
 import { Button } from "@/components/ui/button"
 import { DemoReportButton } from "@/components/docs/examples/report-demo"
 import { DESIGN_SYSTEMS, designSystemFor, type DesignSystemId } from "./design-systems"
@@ -21,7 +20,6 @@ export function DsShell({ children }: { children: React.ReactNode }) {
   const current = designSystemFor(usePathname())
 
   return (
-    <VistasEnPestanas>
     <AppShell
       brand={SHELLS[current.id].brand}
       user={dsUser}
@@ -56,6 +54,5 @@ export function DsShell({ children }: { children: React.ReactNode }) {
     >
       {children}
     </AppShell>
-    </VistasEnPestanas>
   )
 }

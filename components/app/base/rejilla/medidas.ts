@@ -2,11 +2,11 @@
 
 import type { DefCampo } from "@/lib/base/campos"
 
-/** La columna de la izquierda: número de fila, casilla y expandir. */
-export const ANCHO_IZQUIERDA = 84
+/** La columna de la izquierda: la casilla de la fila. */
+export const ANCHO_IZQUIERDA = 44
 /** La columna del «+» para crear un campo. */
-export const ANCHO_ANADIR = 92
-export const ALTO_PIE = 34
+export const ANCHO_ANADIR = 56
+export const ALTO_PIE = 36
 export const ALTO_SUBGRUPO = 32
 
 /** Una columna ya colocada: su campo, su ancho y dónde empieza (contando la columna de la izquierda). */

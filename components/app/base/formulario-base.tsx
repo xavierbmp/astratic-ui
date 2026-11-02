@@ -13,7 +13,6 @@ import type { CampoFormulario as CampoDelFormulario } from "@/lib/base/vistas"
 import { ConfigButton } from "@/components/app/config-button"
 import { ICONO_TIPO, IconoCampo } from "@/components/app/base/apariencia"
 import { ControlArchivoCampo } from "@/components/app/base/subida-base"
-import { useVistasEnPestanas } from "@/components/app/base/vistas-en-pestanas"
 import { ListaOrdenable } from "@/components/app/base/menu-comun"
 import { ElegirOpciones } from "@/components/app/base/selector-opciones"
 import { CampoFormulario, Formulario, FormularioCabecera, FormularioCuerpo, FormularioDialog, FormularioPie } from "@/components/app/formulario/formulario-dialog"
@@ -143,8 +142,7 @@ function Cuerpo<T>({
   const [errores, setErrores] = React.useState<Record<string, string>>({})
   const [errorGeneral, setErrorGeneral] = React.useState<string | null>(null)
   const [todos, setTodos] = React.useState(false)
-  const conPlegados = useVistasEnPestanas()
-  const ocultos = conPlegados ? campos.filter((c) => !c.visible) : []
+  const ocultos = campos.filter((c) => !c.visible)
   const visibles = campos.filter((c) => c.visible || todos)
 
   // Nada es obligatorio: solo se avisa de lo escrito que no vale (un email mal puesto, letras en un número).

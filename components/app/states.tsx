@@ -125,18 +125,6 @@ export function PageSkeleton({ block = "table", kpis = 4 }: { block?: "table" | 
             <Skeleton className="ml-auto h-9 w-32 rounded-md" />
           </div>
         }
-        aside={
-          <Section className="h-full">
-            <div className="border-b px-4 py-3">
-              <Skeleton className="h-3.5 w-24 rounded" />
-            </div>
-            <div className="flex flex-col gap-3 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 rounded-md" />
-              ))}
-            </div>
-          </Section>
-        }
       >
         <Section>{block === "kanban" ? <KanbanSkeleton /> : <TableSkeleton rows={8} />}</Section>
       </WorkGrid>

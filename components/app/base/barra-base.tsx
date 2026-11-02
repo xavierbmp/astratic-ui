@@ -9,14 +9,14 @@ import type { DefCampo } from "@/lib/base/campos"
 import { camposApilables, camposDeFecha, camposOcultos, textoCampos, textoFiltro, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 import type { CampoMenu } from "@/components/app/base/selector-campo"
 import { BotonBarra } from "@/components/app/base/boton-barra"
-import { Buscador, MenuAltura, MenuNombreVista, SelectorCampoVista, type AccionesVista, type FijasDeBase } from "@/components/app/base/controles-barra"
+import { AjustesBase, Buscador, MenuAltura, NombreVista, SelectorCampoVista, type AccionesVista, type AjusteDeBase, type FijasDeBase } from "@/components/app/base/controles-barra"
 import { PanelFiltro } from "@/components/app/base/panel-filtro"
 import { MenuCampos } from "@/components/app/base/menu-campos"
 import { MenuOrden } from "@/components/app/base/menu-orden"
 import { MenuGrupos } from "@/components/app/base/menu-grupos"
 import { MenuColor } from "@/components/app/base/menu-color"
 
-export type { AccionesVista, FijasDeBase }
+export type { AccionesVista, AjusteDeBase, FijasDeBase }
 
 /** Los menús de la barra, para abrirlos desde fuera («Filtrar por este campo» abre el de filtro). */
 export type MenuDeBarra = "campos" | "filtro" | "grupos" | "orden" | "color"
@@ -30,7 +30,7 @@ const MENUS: Record<TipoVista, MenuDeBarra[]> = {
 }
 
 /** Un botón de la barra que abre su menú. */
-function MenuBarra({ icono, texto, activo, children, align = "start", abierto, onAbierto }: { icono: LucideIcon; texto: string; activo?: boolean; children: React.ReactNode; align?: "start" | "end"; abierto: boolean; onAbierto: (a: boolean) => void }) {
+function MenuBarra({ icono, texto, activo, children, align = "center", abierto, onAbierto }: { icono: LucideIcon; texto: string; activo?: boolean; children: React.ReactNode; align?: "start" | "center" | "end"; abierto: boolean; onAbierto: (a: boolean) => void }) {
   return (
     <Popover open={abierto} onOpenChange={onAbierto}>
       <PopoverTrigger asChild>
@@ -45,21 +45,17 @@ function MenuBarra({ icono, texto, activo, children, align = "start", abierto, o
 }
 
 /**
- * La barra de una vista de la base, con la colocación de Airtable: a la izquierda el lateral de
- * vistas y el nombre de la vista (con su menú); a la derecha lo que tenga su tipo (ocultar campos,
- * filtro, agrupar, ordenar, color, altura de fila, el campo del kanban o del calendario) y buscar;
- * al final la acción principal de la página y el botón que pone la ficha en el panel de la derecha.
+ * La cabecera de una base, igual en todas. A la izquierda, el icono y el nombre de la vista, que se escribe ahí mismo. En el
+ * centro, todo lo que cambia lo que se ve: campos, filtro, agrupar, ordenar, color, altura y buscar. A la derecha, los
+ * botones principales de la base y, al final del todo, sus ajustes (automatizaciones, valores de serie…).
  */
 export function BarraBase<T>({
   vista,
-  vistas,
   campos,
   camposMenu,
   objeto,
-  lateralAbierto,
-  ladoLateral = "izquierda",
-  onLateral,
-  nombreLateral = "las vistas",
+  otrasVistas,
+  lateral,
   onCambiar,
   acciones,
   onContraer,
@@ -67,42 +63,46 @@ export function BarraBase<T>({
   busqueda,
   onBuscar,
   accion,
+  ajustes,
   panelFicha,
   menu,
   onMenu,
   fijas,
+  enfocarNombre,
+  onNombreEnfocado,
 }: {
   vista: VistaBase
-  vistas: VistaBase[]
   campos: DefCampo<T>[]
   camposMenu: CampoMenu[]
   /** «contactos»: para los textos. */
   objeto: string
-  lateralAbierto: boolean
-  /** A qué lado va el lateral: el icono del botón apunta hacia allí. */
-  ladoLateral?: LadoLateral
-  onLateral: () => void
-  /** El texto del botón del lateral («las vistas», «las carpetas»). */
-  nombreLateral?: string
+  otrasVistas: VistaBase[]
+  /** Un lateral propio de la página (carpetas): el botón que lo abre y lo cierra. */
+  lateral?: { nombre: string; abierto: boolean; lado: LadoLateral; onAlternar: () => void }
   onCambiar: (parcial: Partial<VistaBase>) => void
   acciones: AccionesVista
   onContraer: () => void
   onExpandir: () => void
   busqueda: string
   onBuscar: (q: string) => void
+  /** Los botones principales: importar y crear. */
   accion?: React.ReactNode
-  /** La ficha del registro abierto, integrada a la derecha en vez de encima (solo en pantallas anchas). */
+  /** Lo que la página añade a los ajustes de la base. */
+  ajustes?: AjusteDeBase[]
+  /** La ficha del registro abierto, al lado de la base en vez de encima (solo en pantallas anchas). */
   panelFicha?: { activo: boolean; onAlternar: () => void }
   menu: MenuDeBarra | null
   onMenu: (m: MenuDeBarra | null) => void
   /** Las vistas fijas de la página. Con una abierta, la barra solo deja buscar: la vista no se configura. */
   fijas?: FijasDeBase
+  /** Una vista recién creada: su nombre queda seleccionado para escribirlo. */
+  enfocarNombre?: boolean
+  onNombreEnfocado?: () => void
 }) {
   const tipo = vista.tipo ?? "cuadricula"
   const fija = !!fijas?.activa
   const tiene = (m: MenuDeBarra) => !fija && MENUS[tipo].includes(m)
   const de = (m: MenuDeBarra) => ({ abierto: menu === m, onAbierto: (a: boolean) => onMenu(a ? m : null) })
-  const otras = vistas.filter((v) => v.id !== vista.id)
   const ocultos = camposOcultos(vista)
   const filtrado = textoFiltro(vista.filtro, campos)
   const nombreDe = (id: string | undefined) => campos.find((c) => c.id === id)?.nombre
@@ -110,13 +110,17 @@ export function BarraBase<T>({
   const coloreado = !vista.color ? null : reglasColor ? `Coloreado por ${reglasColor} ${reglasColor === 1 ? "regla" : "reglas"}` : `Coloreado por ${nombreDe(vista.color.campo) ?? "un campo"}`
 
   return (
-    <div className="@container/barra flex h-11 flex-none items-center gap-1 border-b px-2">
-      <button type="button" aria-label={lateralAbierto ? `Ocultar ${nombreLateral}` : `Ver ${nombreLateral}`} title={lateralAbierto ? `Ocultar ${nombreLateral}` : `Ver ${nombreLateral}`} aria-pressed={lateralAbierto} onClick={onLateral} className="hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
-        <IconoPlegarLateral lado={ladoLateral} abierto={lateralAbierto} className="size-4" />
-      </button>
-      <MenuNombreVista vista={vista} vistas={vistas} acciones={acciones} fijas={fijas} />
+    <div data-slot="barra-base" className="@container/barra grid h-12 flex-none grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b px-3">
+      <div className="flex min-w-0 items-center gap-1">
+        {lateral && (
+          <button type="button" aria-label={lateral.abierto ? `Ocultar ${lateral.nombre}` : `Ver ${lateral.nombre}`} title={lateral.abierto ? `Ocultar ${lateral.nombre}` : `Ver ${lateral.nombre}`} aria-pressed={lateral.abierto} onClick={lateral.onAlternar} className="hidden size-8 flex-none items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
+            <IconoPlegarLateral lado={lateral.lado} abierto={lateral.abierto} className="size-4" />
+          </button>
+        )}
+        <NombreVista vista={vista} acciones={acciones} fijas={fijas} enfocar={enfocarNombre} onEnfocado={onNombreEnfocado} />
+      </div>
 
-      <div className="ml-auto flex min-w-0 items-center gap-0.5 overflow-x-auto">
+      <div className="flex min-w-0 items-center justify-center gap-0.5 overflow-x-auto [scrollbar-width:none]">
         {!fija && tipo === "kanban" && (
           <SelectorCampoVista icono={Columns3Icon} texto={`Apilado por ${nombreDe(vista.apilar) ?? "…"}`} titulo="Las columnas salen de" campos={camposApilables(campos)} valor={vista.apilar} vacio="Crea un campo de selección única para repartir las tarjetas." onCambiar={(apilar) => onCambiar({ apilar })} />
         )}
@@ -124,46 +128,38 @@ export function BarraBase<T>({
           <SelectorCampoVista icono={CalendarDaysIcon} texto={`Fecha: ${nombreDe(vista.fecha) ?? "…"}`} titulo="Cada registro va en el día de" campos={camposDeFecha(campos)} valor={vista.fecha} vacio="Crea un campo de fecha para ver los registros en el calendario." onCambiar={(fecha) => onCambiar({ fecha })} />
         )}
         {tiene("campos") && (
-          <MenuBarra icono={EyeOffIcon} texto={ocultos ? `${ocultos} ${ocultos === 1 ? "campo oculto" : "campos ocultos"}` : "Ocultar campos"} activo={ocultos > 0} {...de("campos")}>
+          <MenuBarra icono={EyeOffIcon} texto={ocultos ? `${ocultos} ${ocultos === 1 ? "campo oculto" : "campos ocultos"}` : "Ocultar campos"} {...de("campos")}>
             <MenuCampos vista={vista} campos={campos} onCambiar={(lista) => onCambiar({ campos: lista })} />
           </MenuBarra>
         )}
         {!fija && (
           <MenuBarra icono={ListFilterIcon} texto={filtrado ?? "Filtro"} activo={contarCondiciones(vista.filtro) > 0} {...de("filtro")}>
-            <PanelFiltro campos={camposMenu} value={vista.filtro} onChange={(filtro) => onCambiar({ filtro })} objeto={objeto} otrasVistas={otras} />
+            <PanelFiltro campos={camposMenu} value={vista.filtro} onChange={(filtro) => onCambiar({ filtro })} objeto={objeto} otrasVistas={otrasVistas} />
           </MenuBarra>
         )}
         {tiene("grupos") && (
           <MenuBarra icono={Rows3Icon} texto={vista.grupos.length ? textoCampos(vista.grupos.length, "Agrupados") : "Agrupar"} activo={vista.grupos.length > 0} {...de("grupos")}>
-            <MenuGrupos campos={camposMenu} grupos={vista.grupos} otrasVistas={otras} onCambiar={(grupos) => onCambiar({ grupos, plegados: [] })} onContraer={onContraer} onExpandir={onExpandir} />
+            <MenuGrupos campos={camposMenu} grupos={vista.grupos} otrasVistas={otrasVistas} onCambiar={(grupos) => onCambiar({ grupos, plegados: [] })} onContraer={onContraer} onExpandir={onExpandir} />
           </MenuBarra>
         )}
         {tiene("orden") && (
           <MenuBarra icono={ArrowUpDownIcon} texto={vista.orden.length ? textoCampos(vista.orden.length, "Ordenado") : "Ordenar"} activo={vista.orden.length > 0} {...de("orden")}>
-            <MenuOrden campos={camposMenu} orden={vista.orden} otrasVistas={otras} onCambiar={(orden) => onCambiar({ orden })} />
+            <MenuOrden campos={camposMenu} orden={vista.orden} otrasVistas={otrasVistas} onCambiar={(orden) => onCambiar({ orden })} />
           </MenuBarra>
         )}
         {!fija && (
-          <MenuBarra icono={PaletteIcon} texto={coloreado ?? "Color"} activo={!!coloreado} align="end" {...de("color")}>
+          <MenuBarra icono={PaletteIcon} texto={coloreado ?? "Color"} activo={!!coloreado} {...de("color")}>
             <MenuColor campos={camposMenu} color={vista.color} onCambiar={(color) => onCambiar({ color })} />
           </MenuBarra>
         )}
-        {!fija && tipo === "cuadricula" && <MenuAltura altura={vista.altura} ajustarCabeceras={!!vista.ajustarCabeceras} onCambiar={onCambiar} />}
+        {!fija && tipo === "cuadricula" && <MenuAltura altura={vista.altura} onCambiar={onCambiar} />}
         <Buscador valor={busqueda} onCambiar={onBuscar} />
       </div>
-      {accion && <div className="ml-1 flex-none">{accion}</div>}
-      {panelFicha && (
-        <button
-          type="button"
-          aria-pressed={panelFicha.activo}
-          aria-label={panelFicha.activo ? "Plegar el panel" : "Desplegar el panel"}
-          title={panelFicha.activo ? "Plegar el panel (la ficha se abre encima)" : "Desplegar el panel (la ficha se ve en él)"}
-          onClick={panelFicha.onAlternar}
-          className="ml-0.5 hidden size-7 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground aria-pressed:bg-brand-soft aria-pressed:text-brand xl:inline-flex"
-        >
-          <IconoPlegarLateral lado="derecha" abierto={panelFicha.activo} className="size-4" />
-        </button>
-      )}
+
+      <div className="flex min-w-0 items-center justify-end gap-1.5">
+        {accion}
+        <AjustesBase vista={vista} onCambiar={onCambiar} ajustes={ajustes} panelFicha={panelFicha} fija={fija} />
+      </div>
     </div>
   )
 }

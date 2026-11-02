@@ -2,23 +2,26 @@
 
 import * as React from "react"
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core"
-import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { SortableContext, horizontalListSortingStrategy, sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { ArrowLeftRightIcon, CopyIcon, ListIcon, LockIcon, PencilIcon, PlusIcon, Trash2Icon, type LucideIcon } from "lucide-react"
+import { CopyIcon, LockIcon, PencilIcon, PlusIcon, Trash2Icon, XIcon, type LucideIcon } from "lucide-react"
 import { cn } from "cn"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import type { TipoVista } from "@/lib/base/vistas"
-import { IconoPlegarLateral, type ControlLateral } from "@/components/app/controles-lateral"
 import { RejillaIconosVista, iconoDeVista } from "@/components/app/base/iconos-vista"
 
 /** Lo que una pestaña necesita de su vista: sea una vista de una base o una vista ligera de una página con filtros. */
 export type PestanaVista = { id: string; nombre: string; icono?: string; tipo?: TipoVista }
 
-/** Una pestaña fija de la página: arriba del todo, con su candado, sin menú ni arrastre. */
+/** Una pestaña fija de la página: la primera de todas, con su candado, sin menú ni arrastre. */
 export type PestanaFija = { id: string; nombre: string; icono?: LucideIcon }
+
+/** Hasta aquí se ven enteras; las de más se difuminan y se llega a ellas pulsando la última, que queda en medio. */
+const PESTANAS_A_LA_VISTA = 10
+/** Lo que asoma, difuminado, de la pestaña que viene después de la última a la vista. */
+const ASOMA = 72
 
 const mover = <X,>(lista: X[], de: number, a: number) => {
   const copia = [...lista]
@@ -28,132 +31,174 @@ const mover = <X,>(lista: X[], de: number, a: number) => {
 }
 
 /**
- * Las vistas como pestañas laterales (Xavier, 2026-10-29, reportes cmvsixcu y cmvtrp16 del workspace): una columna
- * estrecha a un lado de la base con una pestaña cuadrada por vista, su icono y su nombre debajo, como las pestañas de
- * arriba pero en el lateral. «+» crea una vista y abre enseguida su nombre y su icono; luego se le ponen los filtros,
- * los campos y el orden en la barra, como a cualquier vista. Se arrastran para ordenarlas; doble clic o el clic derecho
- * cambian el nombre y el icono, la duplican o la borran. Sirve igual para una `BaseDatos` (sus vistas) que para una
- * página con `BarraFiltros` (sus vistas ligeras, `useVistasLigeras`).
+ * Las vistas de una base, como las pestañas de Chrome, encima de su bloque. La primera es la vista de base: no se borra
+ * y es la plantilla de las demás. «+» abre una pestaña nueva con la base tal como está, y en la barra se le pone el nombre,
+ * los filtros y los campos. Pasadas diez se difuminan; al pulsar la última se coloca en medio y deja ver las que siguen.
+ * Se arrastran para ordenarlas; doble clic o el clic derecho cambian el nombre y el icono, la duplican o la borran.
+ * A su derecha, en la misma fila, van los botones generales de la página (`ranura`).
  */
 export function PestanasVistas({
   vistas,
   activa,
   onActivar,
   onCrear,
-  menuCrear,
   onEditar,
   onDuplicar,
   onBorrar,
   onReordenar,
   fijas,
-  onLista,
-  lado,
-  onCambiarLado,
-  onPlegar,
-  nombre = "las vistas",
-}: Partial<ControlLateral> & {
+  ranura,
+  className,
+}: {
   vistas: PestanaVista[]
   activa: string | null
   onActivar: (id: string) => void
-  /** Crea una vista y devuelve su id: se abre ya para ponerle nombre e icono. */
-  onCrear?: () => string
-  /** En lugar de crear sin más, un menú propio (el tipo de vista de una base) que recibe con qué abrir la nueva. */
-  menuCrear?: (alCrear: (id: string) => void, boton: React.ReactNode) => React.ReactNode
+  /** Abre una pestaña nueva. */
+  onCrear?: () => void
   onEditar: (id: string, cambio: { nombre?: string; icono?: string }) => void
   onDuplicar?: (id: string) => void
-  /** Sin él, o con una sola vista, no se borra. */
+  /** Sin él no se borra. La primera, la de base, nunca. */
   onBorrar?: (id: string) => void
   onReordenar?: (ids: string[]) => void
   fijas?: { vistas: PestanaFija[]; activa: string | null; onActivar: (id: string) => void }
-  /** Pasar a la lista ancha de vistas (la de Airtable). */
-  onLista?: () => void
-  nombre?: string
+  /** El hueco de la derecha, donde la página pone sus botones generales. */
+  ranura?: (nodo: HTMLDivElement | null) => void
+  className?: string
 }) {
   const [editando, setEditando] = React.useState<string | null>(null)
   const sensores = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }))
   const idContexto = React.useId()
-  const ids = vistas.map((v) => v.id)
+  const tira = React.useRef<HTMLDivElement>(null)
+  const [limite, setLimite] = React.useState<number | undefined>(undefined)
+  const [bordes, setBordes] = React.useState({ izquierda: false, derecha: false })
+  const ordenables = vistas.slice(1).map((v) => v.id)
+  const abierta = fijas?.activa ?? activa
+
   const alSoltar = (e: DragEndEvent) => {
-    if (e.over && e.active.id !== e.over.id) onReordenar?.(mover(ids, ids.indexOf(String(e.active.id)), ids.indexOf(String(e.over.id))))
+    if (e.over && e.active.id !== e.over.id) onReordenar?.(mover(ordenables, ordenables.indexOf(String(e.active.id)), ordenables.indexOf(String(e.over.id))))
   }
-  const botonCrear = (
-    <button type="button" aria-label="Nueva vista" title="Nueva vista" className="flex h-12 w-full flex-none items-center justify-center rounded-lg border border-dashed text-muted-foreground hover:border-solid hover:bg-muted hover:text-foreground" onClick={menuCrear ? undefined : () => onCrear && setEditando(onCrear())}>
-      <PlusIcon className="size-4" />
-    </button>
-  )
+
+  const medirBordes = React.useCallback(() => {
+    const el = tira.current
+    if (el) setBordes({ izquierda: el.scrollLeft > 1, derecha: el.scrollLeft + el.clientWidth < el.scrollWidth - 1 })
+  }, [])
+
+  // Las diez primeras se ven enteras: el ancho de la tira acaba poco después de la décima, con la siguiente asomando.
+  const nombres = vistas.map((v) => v.nombre).join("\n")
+  const cuantasFijas = fijas?.vistas.length ?? 0
+  React.useLayoutEffect(() => {
+    const el = tira.current
+    if (!el) return
+    const medir = () => {
+      const pestanas = el.querySelectorAll<HTMLElement>("[data-pestana]")
+      const decima = pestanas[PESTANAS_A_LA_VISTA - 1]
+      setLimite(pestanas.length > PESTANAS_A_LA_VISTA && decima ? decima.offsetLeft + decima.offsetWidth + ASOMA : undefined)
+      medirBordes()
+    }
+    medir()
+    const observador = new ResizeObserver(medir)
+    observador.observe(el)
+    return () => observador.disconnect()
+  }, [medirBordes, nombres, cuantasFijas])
+
+  // La pestaña abierta se queda en medio si hay más de las que caben: así se ven las que siguen.
+  React.useEffect(() => {
+    const el = tira.current
+    const pestana = el?.querySelector<HTMLElement>('[data-pestana][aria-selected="true"]')
+    if (!el || !pestana || el.scrollWidth <= el.clientWidth) return
+    el.scrollTo({ left: pestana.offsetLeft - (el.clientWidth - pestana.offsetWidth) / 2, behavior: "smooth" })
+  }, [abierta, limite])
+
+  const mascara = `linear-gradient(to right, ${bordes.izquierda ? "transparent, black 56px" : "black, black"}, ${bordes.derecha ? `black calc(100% - ${ASOMA}px), transparent` : "black"})`
+
   return (
-    <aside data-slot="pestanas-vistas" aria-label="Vistas" className={cn("flex w-[88px] flex-none flex-col gap-1 bg-card p-1.5", lado === "derecha" ? "border-l" : "border-r")}>
-      <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
-        {fijas?.vistas.map((f) => {
-          const Icono = f.icono ?? LockIcon
-          return <Pestana key={f.id} nombre={f.nombre} icono={Icono} activa={f.id === fijas.activa} onClick={() => fijas.onActivar(f.id)} fija />
-        })}
-        {fijas && fijas.vistas.length > 0 && <span className="mx-2 my-0.5 border-t" aria-hidden />}
-        <DndContext id={idContexto} sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
-          <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-            {vistas.map((v) => (
-              <PestanaOrdenable
-                key={v.id}
-                vista={v}
-                activa={!fijas?.activa && v.id === activa}
-                editando={editando === v.id}
-                onEditando={(si) => setEditando(si ? v.id : null)}
-                onActivar={() => onActivar(v.id)}
-                onEditar={(cambio) => onEditar(v.id, cambio)}
-                onDuplicar={onDuplicar && (() => onDuplicar(v.id))}
-                onBorrar={onBorrar && vistas.length > 1 ? () => onBorrar(v.id) : undefined}
-                arrastrable={!!onReordenar}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-        {/* Desde un menú, el nombre se abre cuando el menú ya se ha cerrado: si no, al devolver el foco lo cierra. */}
-        {(onCrear || menuCrear) && (menuCrear ? menuCrear((id) => setTimeout(() => setEditando(id), 60), botonCrear) : botonCrear)}
+    <div data-slot="pestanas-vistas" className={cn("relative z-10 -mb-px flex h-9 min-w-0 flex-none items-end gap-1", className)}>
+      <div ref={tira} role="tablist" aria-label="Vistas" onScroll={medirBordes} className="min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ maxWidth: limite, maskImage: mascara, WebkitMaskImage: mascara }}>
+        <div className="relative flex w-max items-end px-2.5">
+          {fijas?.vistas.map((f) => (
+            <Pestana key={f.id} nombre={f.nombre} icono={f.icono ?? LockIcon} activa={f.id === fijas.activa} onClick={() => fijas.onActivar(f.id)} titulo={`${f.nombre}: vista fija, la misma para todas las personas`} />
+          ))}
+          <DndContext id={idContexto} sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
+            <SortableContext items={ordenables} strategy={horizontalListSortingStrategy}>
+              {vistas.map((v, i) => (
+                <PestanaOrdenable
+                  key={v.id}
+                  vista={v}
+                  esBase={i === 0}
+                  activa={!fijas?.activa && v.id === activa}
+                  editando={editando === v.id}
+                  onEditando={(si) => setEditando(si ? v.id : null)}
+                  onActivar={() => onActivar(v.id)}
+                  onEditar={(cambio) => onEditar(v.id, cambio)}
+                  onDuplicar={onDuplicar && (() => onDuplicar(v.id))}
+                  onBorrar={onBorrar && i > 0 ? () => onBorrar(v.id) : undefined}
+                  arrastrable={!!onReordenar && i > 0}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        </div>
       </div>
-      <div className="flex flex-col items-center gap-0.5 border-t pt-1">
-        {onLista && (
-          <Button variant="ghost" size="icon-sm" aria-label="Ver las vistas en lista" title="Ver las vistas en lista" onClick={onLista}>
-            <ListIcon />
-          </Button>
-        )}
-        {onCambiarLado && (
-          <Button variant="ghost" size="icon-sm" aria-label={`Pasar ${nombre} a la ${lado === "izquierda" ? "derecha" : "izquierda"}`} title={`Pasar a la ${lado === "izquierda" ? "derecha" : "izquierda"}`} onClick={onCambiarLado}>
-            <ArrowLeftRightIcon />
-          </Button>
-        )}
-        {onPlegar && lado && (
-          <Button variant="ghost" size="icon-sm" aria-label={`Plegar ${nombre}`} title={`Plegar ${nombre}`} onClick={onPlegar}>
-            <IconoPlegarLateral lado={lado} abierto />
-          </Button>
-        )}
-      </div>
-    </aside>
+      {onCrear && (
+        <button type="button" aria-label="Nueva vista" title="Nueva vista" onClick={onCrear} className="mb-1 flex size-7 flex-none items-center justify-center rounded-lg text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground">
+          <PlusIcon className="size-4" />
+        </button>
+      )}
+      <div ref={ranura} data-slot="botones-pagina" className="mb-1 ml-auto flex flex-none items-center gap-2 pl-3 whitespace-nowrap empty:hidden" />
+    </div>
   )
 }
 
-/** Una pestaña cuadrada: el icono y, debajo, el nombre en dos líneas como mucho. La activa, en el color de lo elegido. */
-const Pestana = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button"> & { nombre: string; icono: LucideIcon; activa: boolean; fija?: boolean }>(function Pestana({ nombre, icono: Icono, activa, fija, className, ...props }, ref) {
+/** Una pestaña: su icono, su nombre y, si se puede borrar, la equis. La activa es del color del bloque y se une a él. */
+const Pestana = React.forwardRef<HTMLDivElement, React.ComponentProps<"div"> & { nombre: string; icono: LucideIcon; activa: boolean; titulo?: string; onCerrar?: () => void }>(function Pestana({ nombre, icono: Icono, activa, titulo, onCerrar, className, onClick, onKeyDown, ...props }, ref) {
   return (
-    <button
+    <div
       ref={ref}
-      type="button"
-      title={fija ? `${nombre} · vista fija, la misma para todas` : nombre}
-      aria-current={activa || undefined}
+      data-pestana
+      role="tab"
+      tabIndex={0}
+      aria-selected={activa}
+      title={titulo ?? nombre}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        onKeyDown?.(e)
+        if (e.defaultPrevented || (e.key !== "Enter" && e.key !== " ")) return
+        e.preventDefault()
+        e.currentTarget.click()
+      }}
       className={cn(
-        "relative flex w-full flex-none flex-col items-center gap-1 rounded-lg px-1 pt-2 pb-1.5 text-center text-[10.5px] leading-[1.15] text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50",
-        activa && "bg-brand-soft font-medium text-foreground before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-brand hover:bg-brand-soft",
+        "group/pestana relative flex h-8 max-w-52 min-w-0 flex-none cursor-pointer items-center gap-1.5 rounded-t-[10px] pr-1.5 pl-3 text-[13px] whitespace-nowrap outline-none select-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        activa ? "pestana-activa z-10 bg-card font-medium text-foreground" : "text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground",
+        !onCerrar && "pr-3",
         className,
       )}
       {...props}
     >
-      <Icono className={cn("size-[18px] flex-none", activa && "text-brand")} />
-      <span className="line-clamp-2 w-full [overflow-wrap:anywhere] hyphens-auto" lang="es">{nombre}</span>
-    </button>
+      <Icono className={cn("size-3.5 flex-none", activa && "text-brand")} />
+      <span className="truncate">{nombre}</span>
+      {onCerrar && (
+        <button
+          type="button"
+          aria-label={`Eliminar la vista ${nombre}`}
+          title="Eliminar la vista"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            onCerrar()
+          }}
+          className={cn("flex size-4 flex-none items-center justify-center rounded-[5px] text-muted-foreground opacity-0 group-hover/pestana:opacity-100 hover:bg-foreground/10 hover:text-foreground focus-visible:opacity-100", activa && "opacity-100")}
+        >
+          <XIcon className="size-3" />
+        </button>
+      )}
+      {!activa && <span aria-hidden className="absolute top-2 right-0 bottom-2 w-px bg-border group-hover/pestana:opacity-0" />}
+    </div>
   )
 })
 
 function PestanaOrdenable({
   vista,
+  esBase,
   activa,
   editando,
   onEditando,
@@ -164,6 +209,7 @@ function PestanaOrdenable({
   arrastrable,
 }: {
   vista: PestanaVista
+  esBase: boolean
   activa: boolean
   editando: boolean
   onEditando: (si: boolean) => void
@@ -182,7 +228,7 @@ function PestanaOrdenable({
     setEscrito(null)
   }
   return (
-    <div ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }} className={cn(isDragging && "relative z-10 opacity-80")}>
+    <div ref={arrastrable ? setNodeRef : undefined} style={{ transform: CSS.Translate.toString(transform), transition }} className={cn("flex-none", isDragging && "relative z-20 opacity-80")}>
       <Popover
         open={editando}
         onOpenChange={(abierto) => {
@@ -193,7 +239,16 @@ function PestanaOrdenable({
         <ContextMenu>
           <ContextMenuTrigger asChild>
             <PopoverAnchor asChild>
-              <Pestana nombre={vista.nombre} icono={iconoDeVista(vista)} activa={activa} onClick={onActivar} onDoubleClick={() => onEditando(true)} {...attributes} {...listeners} />
+              <Pestana
+                nombre={vista.nombre}
+                icono={iconoDeVista(vista)}
+                activa={activa}
+                titulo={esBase ? `${vista.nombre}: la vista de base, la plantilla de las demás` : vista.nombre}
+                onClick={onActivar}
+                onDoubleClick={() => onEditando(true)}
+                onCerrar={onBorrar}
+                {...(arrastrable ? { ...attributes, ...listeners } : {})}
+              />
             </PopoverAnchor>
           </ContextMenuTrigger>
           <ContextMenuContent>
@@ -215,7 +270,7 @@ function PestanaOrdenable({
             )}
           </ContextMenuContent>
         </ContextMenu>
-        <PopoverContent side="right" align="start" className="w-auto p-3" onFocusOutside={(e) => e.preventDefault()}>
+        <PopoverContent side="bottom" align="start" className="w-auto p-3" onFocusOutside={(e) => e.preventDefault()}>
           <form
             className="flex flex-col gap-3"
             onSubmit={(e) => {
@@ -232,7 +287,6 @@ function PestanaOrdenable({
               Icono
               <RejillaIconosVista valor={vista.icono} onElegir={(icono) => onEditar({ icono })} />
             </div>
-            <p className="max-w-[228px] text-[11px] leading-snug text-muted-foreground">Los filtros, los campos y el orden se ponen en la barra de la vista, como siempre.</p>
           </form>
         </PopoverContent>
       </Popover>

@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowUpRightIcon, ChevronRightIcon, PanelRightOpenIcon } from "lucide-react"
-import { useVistasEnPestanas } from "@/components/app/base/vistas-en-pestanas"
+import { ChevronRightIcon } from "lucide-react"
 import { cn } from "cn"
 import { Checkbox } from "@/components/ui/checkbox"
 import { opcionDe, type ColorOpcion, type DefCampo } from "@/lib/base/campos"
@@ -12,9 +11,12 @@ import { ANCHO_IZQUIERDA, type Columna } from "@/components/app/base/rejilla/med
 
 /** El fondo de las celdas: opaco siempre, para que las columnas fijas tapen lo que pasa por debajo. */
 export const FONDO = {
-  normal: "bg-card group-hover/fila:bg-[color-mix(in_oklch,var(--card),var(--foreground)_3%)]",
-  marcada: "bg-[color-mix(in_oklch,var(--card),var(--brand)_9%)]",
+  normal: "bg-card",
+  marcada: "bg-[color-mix(in_oklch,var(--card),var(--brand)_7%)]",
 } as const
+
+/** La raya entre filas, sin rayas entre columnas. Al pasar el ratón la fila se levanta y su raya se quita. */
+export const RAYA_FILA = "border-b border-border/70 group-hover/fila:border-transparent"
 
 /** El velo de una regla de color: entero en la celda que pinta, más suave en la fila entera. */
 export function VeloColor({ color, fila }: { color: ColorOpcion; fila?: boolean }) {
@@ -22,22 +24,15 @@ export function VeloColor({ color, fila }: { color: ColorOpcion; fila?: boolean 
 }
 
 /**
- * La columna de la izquierda de un registro: el número de fila (y la marca de su color); al pasar
- * el ratón o marcada, la casilla y la flechita que abre su ficha (reporte cmvtgjtf). Con `fondo`, la fila va pintada.
+ * La columna de la izquierda de un registro: su casilla, siempre a la vista, y la marca de su color. Con `fondo`, la
+ * fila va pintada. El registro se abre desde la celda de inicio.
  */
-export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, abierta, onMarcar, onExpandir }: { indice: number; numero: number; color?: ColorOpcion; fondo?: ColorOpcion; alta: boolean; marcada: boolean; abierta: boolean; onMarcar: (m: boolean) => void; onExpandir: () => void }) {
-  const flechita = useVistasEnPestanas()
+export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, abierta, onMarcar }: { indice: number; numero: number; color?: ColorOpcion; fondo?: ColorOpcion; alta: boolean; marcada: boolean; abierta: boolean; onMarcar: (m: boolean) => void }) {
   return (
-    <div data-fila={indice} className={cn("sticky left-0 z-[6] flex flex-none gap-1 border-r border-b pr-1 pl-2 text-xs text-muted-foreground", alta ? "items-start pt-1.5" : "items-center", marcada || abierta ? FONDO.marcada : FONDO.normal)} style={{ width: ANCHO_IZQUIERDA }}>
+    <div data-fila={indice} className={cn("sticky left-0 z-[6] flex flex-none justify-center group-hover/fila:rounded-l-[10px]", RAYA_FILA, alta ? "items-start pt-3" : "items-center", marcada || abierta ? FONDO.marcada : FONDO.normal)} style={{ width: ANCHO_IZQUIERDA }}>
       {fondo && !marcada && !abierta && <VeloColor color={fondo} fila />}
-      {color && <span className={cn("absolute inset-y-1 left-0.5 w-1 rounded-full", CLASE_FUERTE[color])} aria-hidden />}
-      <span className="flex w-7 flex-none items-center">
-        <span className={cn("tabular-nums group-hover/fila:hidden", marcada && "hidden")}>{numero}</span>
-        <Checkbox className={cn("hidden group-hover/fila:flex", marcada && "flex")} checked={marcada} onCheckedChange={(c) => onMarcar(c === true)} aria-label={`Marcar la fila ${numero}`} />
-      </span>
-      <button type="button" aria-label="Abrir la ficha" title="Abrir la ficha (Mayús + Espacio)" onClick={onExpandir} className={cn("ml-auto flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover/fila:opacity-100 hover:bg-muted hover:text-foreground", abierta && "text-brand opacity-100")}>
-        {flechita ? <ArrowUpRightIcon className="size-4" /> : <PanelRightOpenIcon className="size-3.5" />}
-      </button>
+      {(color || marcada || abierta) && <span className={cn("absolute inset-y-2 left-0.5 w-[3px] rounded-full", color ? CLASE_FUERTE[color] : "bg-brand")} aria-hidden />}
+      <Checkbox className="relative" checked={marcada} onCheckedChange={(c) => onMarcar(c === true)} aria-label={`Marcar la fila ${numero}`} />
     </div>
   )
 }
@@ -49,9 +44,9 @@ export function CeldaIzquierda({ indice, numero, color, fondo, alta, marcada, ab
  */
 export function LineaGrupo<T>({ nodo, campo, alto, anchoFijas, total, plegado, onPlegar }: { nodo: NodoGrupo<T>; campo: DefCampo<T> | undefined; alto: number; anchoFijas: number; total: number; plegado: boolean; onPlegar: () => void }) {
   const opcion = campo && (campo.tipo === "select" || campo.tipo === "multiselect" || campo.tipo === "vinculo") ? opcionDe(campo, nodo.id) : undefined
-  const fondo = nodo.nivel === 0 ? "bg-muted" : "bg-[color-mix(in_oklch,var(--muted),var(--card)_45%)]"
+  const fondo = nodo.nivel === 0 ? "bg-[color-mix(in_oklch,var(--muted),var(--card)_40%)]" : "bg-[color-mix(in_oklch,var(--muted),var(--card)_70%)]"
   return (
-    <div className={cn("flex border-b text-[13px]", fondo)} style={{ height: alto, width: total }}>
+    <div className={cn("flex min-w-full border-b border-border/70 text-[13px]", fondo)} style={{ height: alto, width: total }}>
       <div className={cn("sticky left-0 z-[6] flex flex-none items-center gap-2 pr-2", fondo)} style={{ width: anchoFijas, paddingLeft: 8 + nodo.nivel * 20 }}>
         <button type="button" aria-expanded={!plegado} aria-label={plegado ? "Desplegar el grupo" : "Plegar el grupo"} onClick={onPlegar} className="flex size-6 flex-none items-center justify-center rounded-md text-muted-foreground hover:bg-background/70">
           <ChevronRightIcon className={cn("size-4 transition-transform", !plegado && "rotate-90")} />
