@@ -564,3 +564,212 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Ficha de página (`components/app/ficha-pagina`): la página de un registro.
+   Cabecera con portada, bloques blancos con rayas finas, botones en relieve y el
+   marcador de barras. Tokens propios porque su superficie, su radio y sus sombras
+   son más suaves que los del resto del kit (diseño «Ficha Influencer v2», 2026-11-02).
+   ========================================================================== */
+@theme inline {
+  --font-ficha: var(--ficha-fuente);
+
+  --color-ficha-fondo: var(--ficha-fondo);
+  --color-ficha-superficie: var(--ficha-superficie);
+  --color-ficha-tinta: var(--ficha-tinta);
+  --color-ficha-tinta-2: var(--ficha-tinta-2);
+  --color-ficha-tinta-3: var(--ficha-tinta-3);
+  --color-ficha-tinta-4: var(--ficha-tinta-4);
+  --color-ficha-raya: var(--ficha-raya);
+  --color-ficha-raya-suave: var(--ficha-raya-suave);
+  --color-ficha-raya-banda: var(--ficha-raya-banda);
+  --color-ficha-relleno: var(--ficha-relleno);
+  --color-ficha-relleno-2: var(--ficha-relleno-2);
+  --color-ficha-campo: var(--ficha-campo);
+  --color-ficha-pista: var(--ficha-pista);
+  --color-ficha-solido: var(--ficha-solido);
+  --color-ficha-solido-2: var(--ficha-solido-2);
+  --color-ficha-solido-3: var(--ficha-solido-3);
+  --color-ficha-solido-4: var(--ficha-solido-4);
+  --color-ficha-sobre-solido: var(--ficha-sobre-solido);
+  --color-ficha-vacio: var(--ficha-vacio);
+  --color-ficha-borde: var(--ficha-borde);
+  --color-ficha-borde-2: var(--ficha-borde-2);
+  --color-ficha-casilla: var(--ficha-casilla);
+  --color-ficha-portada: var(--ficha-portada);
+
+  /* Los puntos de estado y de etapa. */
+  --color-ficha-ok: var(--ficha-ok);
+  --color-ficha-aviso: var(--ficha-aviso);
+  --color-ficha-mal: var(--ficha-mal);
+  --color-ficha-gris: var(--ficha-gris);
+  --color-ficha-violeta: var(--ficha-violeta);
+  --color-ficha-rosa: var(--ficha-rosa);
+  --color-ficha-naranja: var(--ficha-naranja);
+  --color-ficha-amarillo: var(--ficha-amarillo);
+  --color-ficha-azul: var(--ficha-azul);
+  --color-ficha-favorita: var(--ficha-favorita);
+  --color-ficha-semilla: var(--ficha-semilla);
+  --color-ficha-semilla-hoja: var(--ficha-semilla-hoja);
+
+  /* Los colores de las temáticas: la tinta para el texto y un tono suave para las barras. */
+  --color-ficha-tema-rose: var(--ficha-tema-rose);
+  --color-ficha-tema-rose-suave: var(--ficha-tema-rose-suave);
+  --color-ficha-tema-sky: var(--ficha-tema-sky);
+  --color-ficha-tema-sky-suave: var(--ficha-tema-sky-suave);
+  --color-ficha-tema-lavender: var(--ficha-tema-lavender);
+  --color-ficha-tema-lavender-suave: var(--ficha-tema-lavender-suave);
+  --color-ficha-tema-mint: var(--ficha-tema-mint);
+  --color-ficha-tema-mint-suave: var(--ficha-tema-mint-suave);
+  --color-ficha-tema-peach: var(--ficha-tema-peach);
+  --color-ficha-tema-peach-suave: var(--ficha-tema-peach-suave);
+  --color-ficha-tema-lime: var(--ficha-tema-lime);
+  --color-ficha-tema-lime-suave: var(--ficha-tema-lime-suave);
+
+  --radius-ficha: 28px;
+  --radius-ficha-cabecera: 30px;
+  --radius-ficha-portada: 22px;
+  --radius-ficha-menu: 20px;
+  --radius-ficha-opcion: 14px;
+
+  --shadow-ficha: var(--ficha-sombra);
+  --shadow-ficha-boton: var(--ficha-sombra-boton);
+  --shadow-ficha-boton-sm: var(--ficha-sombra-boton-sm);
+  --shadow-ficha-menu: var(--ficha-sombra-menu);
+  --shadow-ficha-segmento: var(--ficha-sombra-segmento);
+  --shadow-ficha-chip: var(--ficha-sombra-chip);
+  --shadow-ficha-favorita: var(--ficha-sombra-favorita);
+  --shadow-ficha-semilla: var(--ficha-sombra-semilla);
+}
+
+:root {
+  --ficha-fuente: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --ficha-fondo: #f5f5f5;
+  --ficha-superficie: #fcfcfc;
+  --ficha-tinta: #0e0e0e;
+  --ficha-tinta-2: #555555;
+  --ficha-tinta-3: #6b6b6b;
+  --ficha-tinta-4: #8a8a8a;
+  --ficha-raya: #ececec;
+  --ficha-raya-suave: #f0f0f0;
+  --ficha-raya-banda: #e6e6e6;
+  --ficha-relleno: #f1f1f1;
+  --ficha-relleno-2: #e9e9e9;
+  --ficha-campo: #f2f2f2;
+  --ficha-pista: #eeeeee;
+  --ficha-solido: #1a1a1a;
+  --ficha-solido-2: #9e9e9e;
+  --ficha-solido-3: #bdbdbd;
+  --ficha-solido-4: #cfcfcf;
+  --ficha-sobre-solido: #fcfcfc;
+  --ficha-vacio: #e4e4e4;
+  --ficha-borde: #e2e2e2;
+  --ficha-borde-2: #cfcfcf;
+  --ficha-casilla: #bdbdbd;
+  --ficha-portada: #c3d0db;
+
+  --ficha-ok: #4fb874;
+  --ficha-aviso: #e0a02a;
+  --ficha-mal: #c62546;
+  --ficha-gris: #9b9b9b;
+  --ficha-violeta: #8772d9;
+  --ficha-rosa: #b5427c;
+  --ficha-naranja: #e0782f;
+  --ficha-amarillo: #d9a92e;
+  --ficha-azul: #4a86c5;
+  --ficha-favorita: #e6a11f;
+  --ficha-semilla: #2f9a5c;
+  --ficha-semilla-hoja: #bfe5cb;
+
+  --ficha-tema-rose: #8e2f45;
+  --ficha-tema-rose-suave: #e3bfc7;
+  --ficha-tema-sky: #2e5a8a;
+  --ficha-tema-sky-suave: #c5d3e3;
+  --ficha-tema-lavender: #5b45a8;
+  --ficha-tema-lavender-suave: #d3cbeb;
+  --ficha-tema-mint: #2d6b4c;
+  --ficha-tema-mint-suave: #c2d9cb;
+  --ficha-tema-peach: #8a4b12;
+  --ficha-tema-peach-suave: #ebd2ba;
+  --ficha-tema-lime: #5a6420;
+  --ficha-tema-lime-suave: #d5dab6;
+
+  --ficha-sombra: 0 0 0 1px rgb(0 0 0 / 0.035), 0 1px 2px rgb(0 0 0 / 0.03), 0 22px 44px -22px rgb(0 0 0 / 0.16);
+  --ficha-sombra-boton: 0 0 0 1px rgb(0 0 0 / 0.045), 0 6px 14px -6px rgb(0 0 0 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.95);
+  --ficha-sombra-boton-sm: 0 0 0 1px rgb(0 0 0 / 0.045), 0 4px 10px -5px rgb(0 0 0 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.95);
+  --ficha-sombra-menu: 0 0 0 1px rgb(0 0 0 / 0.05), 0 24px 48px -12px rgb(0 0 0 / 0.22), 0 6px 14px -6px rgb(0 0 0 / 0.08);
+  --ficha-sombra-segmento: 0 0 0 1px rgb(0 0 0 / 0.06), 0 3px 8px -2px rgb(0 0 0 / 0.12);
+  --ficha-sombra-chip: 0 0 0 1px rgb(0 0 0 / 0.07), 0 2px 5px -2px rgb(0 0 0 / 0.14);
+  --ficha-sombra-favorita: 0 0 0 1px rgb(160 110 20 / 0.14), 0 6px 14px -6px rgb(0 0 0 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.9);
+  --ficha-sombra-semilla: 0 0 0 1px rgb(40 120 70 / 0.14), 0 6px 14px -6px rgb(0 0 0 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.9);
+
+  --ficha-boton: linear-gradient(180deg, #f7f7f7, #ececec);
+  --ficha-boton-hover: linear-gradient(180deg, #fcfcfc, #f1f1f1);
+  --ficha-boton-favorita: linear-gradient(180deg, #fff8ea, #f6e9cc);
+  --ficha-boton-semilla: linear-gradient(180deg, #f1faf3, #ddefe2);
+  /* El marcador: de violeta a verde, repartido entre las barras encendidas. */
+  --ficha-marcador: linear-gradient(90deg, #8772d9, #8771e0, #8874d5, #8e6bd7, #9751b8, #b13270, #c62546, #d0211c, #d3611a, #e89815, #d9ae31, #b6b747, #99c148, #8dc366, #73c661, #55cd7f, #55d182);
+  /* Lo estimado: barras rayadas para que no se confundan con un dato real. */
+  --ficha-rayado: repeating-linear-gradient(135deg, #6e6e6e 0 1.5px, #d6d6d6 1.5px 4.5px);
+  --ficha-rayado-fino: repeating-linear-gradient(135deg, #5e5e5e 0 1.5px, #c9c9c9 1.5px 4px);
+}
+
+.dark {
+  --ficha-fondo: #111213;
+  --ficha-superficie: #1a1b1d;
+  --ficha-tinta: #f3f3f3;
+  --ficha-tinta-2: #b4b4b4;
+  --ficha-tinta-3: #9c9c9c;
+  --ficha-tinta-4: #7d7d7d;
+  --ficha-raya: rgb(255 255 255 / 0.08);
+  --ficha-raya-suave: rgb(255 255 255 / 0.06);
+  --ficha-raya-banda: rgb(255 255 255 / 0.08);
+  --ficha-relleno: #27282b;
+  --ficha-relleno-2: #313236;
+  --ficha-campo: #232427;
+  --ficha-pista: #2d2e31;
+  --ficha-solido: #e9e9e9;
+  --ficha-solido-2: #8d8d8d;
+  --ficha-solido-3: #666666;
+  --ficha-solido-4: #4d4d4d;
+  --ficha-sobre-solido: #161718;
+  --ficha-vacio: #3a3b3e;
+  --ficha-borde: rgb(255 255 255 / 0.13);
+  --ficha-borde-2: rgb(255 255 255 / 0.22);
+  --ficha-casilla: #6a6b6e;
+  --ficha-portada: #2b3238;
+
+  --ficha-favorita: #eeb040;
+  --ficha-semilla: #5fc78a;
+  --ficha-semilla-hoja: #2f6a48;
+
+  --ficha-tema-rose: #e78fa3;
+  --ficha-tema-rose-suave: #5a3039;
+  --ficha-tema-sky: #8ab4e0;
+  --ficha-tema-sky-suave: #2d4258;
+  --ficha-tema-lavender: #ab9cf0;
+  --ficha-tema-lavender-suave: #3e3662;
+  --ficha-tema-mint: #7fcca2;
+  --ficha-tema-mint-suave: #2a4a39;
+  --ficha-tema-peach: #e3a871;
+  --ficha-tema-peach-suave: #553a22;
+  --ficha-tema-lime: #bcc873;
+  --ficha-tema-lime-suave: #434a1f;
+
+  --ficha-sombra: 0 0 0 1px rgb(255 255 255 / 0.05), 0 1px 2px rgb(0 0 0 / 0.3), 0 22px 44px -22px rgb(0 0 0 / 0.6);
+  --ficha-sombra-boton: 0 0 0 1px rgb(255 255 255 / 0.07), 0 6px 14px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  --ficha-sombra-boton-sm: 0 0 0 1px rgb(255 255 255 / 0.07), 0 4px 10px -5px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  --ficha-sombra-menu: 0 0 0 1px rgb(255 255 255 / 0.08), 0 24px 48px -12px rgb(0 0 0 / 0.7), 0 6px 14px -6px rgb(0 0 0 / 0.4);
+  --ficha-sombra-segmento: 0 0 0 1px rgb(255 255 255 / 0.08), 0 3px 8px -2px rgb(0 0 0 / 0.5);
+  --ficha-sombra-chip: 0 0 0 1px rgb(255 255 255 / 0.1), 0 2px 5px -2px rgb(0 0 0 / 0.5);
+  --ficha-sombra-favorita: 0 0 0 1px rgb(238 176 64 / 0.25), 0 6px 14px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --ficha-sombra-semilla: 0 0 0 1px rgb(95 199 138 / 0.25), 0 6px 14px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.06);
+
+  --ficha-boton: linear-gradient(180deg, #2e2f32, #242528);
+  --ficha-boton-hover: linear-gradient(180deg, #36373b, #2b2c2f);
+  --ficha-boton-favorita: linear-gradient(180deg, #3d3320, #30281a);
+  --ficha-boton-semilla: linear-gradient(180deg, #213428, #1b2a21);
+  --ficha-rayado: repeating-linear-gradient(135deg, #a0a0a0 0 1.5px, #3a3b3e 1.5px 4.5px);
+  --ficha-rayado-fino: repeating-linear-gradient(135deg, #b0b0b0 0 1.5px, #3f4043 1.5px 4px);
+}
