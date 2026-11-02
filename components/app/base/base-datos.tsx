@@ -380,6 +380,11 @@ export function BaseDatos<T>({
   const escribirUno = onEscribir ? (fila: T, campo: DefCampo<T>, valor: ValorCampo) => onEscribir([{ fila, campo, valor }]) : undefined
   const tarjetas = { campos: columnas.map((c) => c.campo), inicio: campos.find((c) => c.principal)?.inicio, colorDe, celdas, onAbrirVinculo, portada }
   const textoVacio = registros.length === 0 ? vacio?.(hayFiltro, limpiar, busqueda) : undefined
+  // Un enlace de los de antes (`?registro=`) lleva a su página, si el registro la tiene.
+  const rutaAbierta = !fija && abiertoId ? (paginaRegistro?.ruta(abiertoId) ?? null) : null
+  React.useEffect(() => {
+    if (rutaAbierta) router.replace(rutaAbierta)
+  }, [rutaAbierta, router])
   const onAbrir = (id: string) => {
     const ruta = fija ? null : paginaRegistro?.ruta(id)
     if (!ruta || !paginaRegistro) return onAbrirSinPagina(id)
