@@ -24,7 +24,7 @@ export function FichaContenido({ className, ...props }: React.ComponentProps<"ma
  */
 export function FichaBarra({ inicio, className, children, ...props }: Omit<React.ComponentProps<"header">, "children"> & { inicio?: React.ReactNode; children?: React.ReactNode }) {
   return (
-    <header data-slot="ficha-barra" className={cn("sticky top-0 z-30 bg-ficha-fondo/85 backdrop-blur-[16px] backdrop-saturate-[1.4]", className)} {...props}>
+    <header data-slot="ficha-barra" className={cn("z-30 bg-ficha-fondo/85 backdrop-blur-[16px] backdrop-saturate-[1.4] md:sticky md:top-0", className)} {...props}>
       <div className="mx-auto box-border flex max-w-[1440px] flex-wrap items-center gap-x-3.5 gap-y-2.5 px-4 py-2.5 md:px-7">
         {inicio}
         <div className="min-w-0 flex-1 basis-0" />
