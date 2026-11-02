@@ -23,7 +23,7 @@ Design system y kit de arranque de Astratic Network Devs para portales operativo
 - Documentos A4 y PDF (propuestas, presupuestos) en `components/document/`, documentados en `/ds/documentos`. Dos formatos: **elaborada** (portales y software, maqueta Twic, demo `/documentos/propuesta-elaborada`) y **simple** (servicios y trabajos cortos, maqueta Feel The Diving, demo `/documentos/propuesta-simple`). Cada hoja recorta lo que no cabe: revisar el PDF exportado hoja a hoja. El tema claro se fuerza con `.theme-light` y la impresión vive en el bloque «Documentos A4 y PDF» de `globals.css`.
 
 ## Reglas de diseño (resumen; la verdad está en `/ds/patrones/convenciones` y `.claude/rules/design-system.md`)
-- Una página de operación = cabecera + cifras (3 a 5) + **una** base de datos + panel de información de 320 px a la derecha. Detalle en `DetailSheet` (overlay derecho): ficha por bloques plegables, cada dato editable donde se lee (sin botón «Editar»), vacíos como «+ Campo» y flechas al anterior/siguiente. Registros con secuencia: ficha de dos columnas (`DetailSplit` + `StepTimeline`).
+- Una página de operación = cabecera + pestañas de vistas + **una** base de datos a todo el ancho, sin paneles al lado. Ver `.claude/rules/design-system.md`.
 - Sin página de Ajustes: cada cosa se configura donde se usa (engranaje en su bloque, nombre del campo pulsable en la ficha, «Crear»/«Gestionar» en los selectores).
 - Contraste en claro: `border` < `input` < `control` (casillas); lo seleccionado en `bg-brand-soft` con filo `brand`. HTML de fuera siempre en `HtmlFrame`.
 - Los controles de una lista van en la barra de su base (`BarraBase`): vista, campos, filtro, grupos, orden, color, buscar y **la acción principal negra, una por página**. Sin toolbar suelta encima.
