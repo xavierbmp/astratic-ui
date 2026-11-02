@@ -3,6 +3,10 @@
 import * as React from "react"
 import { ArrowUpRightIcon, XIcon } from "lucide-react"
 import { cn } from "cn"
+import type { StatusTone } from "@/lib/status"
+
+/** El color del punto de un estado, por su tono. */
+export const PUNTO_TONO: Record<StatusTone, string> = { success: "bg-ficha-ok", info: "bg-ficha-azul", warning: "bg-ficha-aviso", danger: "bg-ficha-mal", neutral: "bg-ficha-gris" }
 
 const ANCHO_BARRA = 3
 const HUECO_BARRA = 4
@@ -46,6 +50,11 @@ export function PastillaFicha({ punto, tamano = "md", className, children, ...pr
       {children}
     </span>
   )
+}
+
+/** Un estado: la píldora con el punto de su tono. Es lo que `StatusBadge` en el resto del kit. */
+export function EstadoFicha({ tono, ...props }: Omit<React.ComponentProps<typeof PastillaFicha>, "punto"> & { tono: StatusTone }) {
+  return <PastillaFicha punto={PUNTO_TONO[tono]} {...props} />
 }
 
 /** El enlace en píldora de la bio, con su flecha. */
@@ -224,9 +233,32 @@ export function LeyendaTarifa({ forma, children }: { forma: "tramo" | "abierta" 
   )
 }
 
+const CAMPO = "box-border w-full min-w-0 rounded-ficha-opcion border-0 bg-ficha-campo px-3.5 text-sm text-ficha-tinta outline-none placeholder:text-ficha-tinta-4 focus:shadow-[inset_0_0_0_1.5px_var(--ficha-tinta)] disabled:opacity-60"
+
+/** Donde se escribe lo nuevo de un bloque: el nombre de un material, una pregunta. Lo que ya existe se edita con `InlineField`. Con `unidad`, «€» o «%» al final. */
+export function EntradaFicha({ unidad, className, ...props }: React.ComponentProps<"input"> & { unidad?: string }) {
+  if (!unidad) return <input className={cn(CAMPO, "h-10", className)} {...props} />
+  return (
+    <span className={cn("relative block min-w-0", className)}>
+      <input className={cn(CAMPO, "h-10 pr-12")} {...props} />
+      <span className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-[13px] text-ficha-tinta-3">{unidad}</span>
+    </span>
+  )
+}
+
+/** El texto largo de lo nuevo de un bloque: una respuesta. */
+export function AreaFicha({ className, ...props }: React.ComponentProps<"textarea">) {
+  return <textarea className={cn(CAMPO, "resize-y py-2.5 leading-normal", className)} {...props} />
+}
+
 /** Un mensaje suave para lo que aún no tiene datos: una línea, sin caja. */
 export function VacioFicha({ className, ...props }: React.ComponentProps<"p">) {
   return <p className={cn("m-0 py-2 text-[13.5px] text-ficha-tinta-3", className)} {...props} />
+}
+
+/** Lo mismo cuando es todo lo que hay en un bloque, debajo de su título. */
+export function VacioBloque({ className, ...props }: React.ComponentProps<"p">) {
+  return <VacioFicha className={cn("border-t border-ficha-raya px-[22px] py-3", className)} {...props} />
 }
 
 /** La línea de una nota: inicial en un círculo, quién, cuándo y el texto. */

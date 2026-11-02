@@ -4,12 +4,13 @@ import * as React from "react"
 import { ArchiveIcon, ListPlusIcon, MailIcon, PlusIcon } from "lucide-react"
 import { InlineField } from "@/components/app/inline-field"
 import { SocialIcon } from "@/components/app/social-icons"
-import { FichaBloque, FichaBloqueTitulo, FichaCelda, FichaCeldas, FichaColumnasBloques, FichaDato, FichaEtiqueta, FichaFila, FichaLinea } from "@/components/app/ficha-pagina/bloque"
+import { FichaBloque, FichaBloqueTitulo, FichaCelda, FichaCeldas, FichaColumnasBloques, FichaDato, FichaEtiqueta, FichaFila, FichaLinea, FichaRenglon } from "@/components/app/ficha-pagina/bloque"
 import { FichaCabecera, FichaColumna, FichaColumnaDato, FichaColumnas, FichaMetrica, FichaMetricas, InsigniaFicha } from "@/components/app/ficha-pagina/cabecera"
+import { BurbujasFicha, ResponderFicha } from "@/components/app/ficha-pagina/conversacion"
 import { eurosFicha } from "@/components/app/ficha-pagina/formato"
 import { BotonFavorita, BotonFicha, BotonFichaIcono, BotonSemilla, FichaBarra, FichaContenido, FichaGrupo, FichaPagina, FichaRecorrido } from "@/components/app/ficha-pagina/marco"
 import { BotonEstadoFicha } from "@/components/app/ficha-pagina/pagina-registro"
-import { BarrasSerie, BarraReparto, CeldaPanel, CifraPanel, EscalaTarifa, FilaBarra, KeywordFicha, LeyendaTarifa, Marcador, NotaFicha, PasosFicha, PastillaEnlace, PastillaFicha, SegmentadoFicha } from "@/components/app/ficha-pagina/piezas"
+import { BarrasSerie, BarraReparto, CeldaPanel, CifraPanel, EntradaFicha, EscalaTarifa, EstadoFicha, FilaBarra, KeywordFicha, LeyendaTarifa, Marcador, NotaFicha, PasosFicha, PastillaEnlace, PastillaFicha, SegmentadoFicha } from "@/components/app/ficha-pagina/piezas"
 
 const ETAPAS = [
   { id: "revisar", label: "Por revisar", punto: "bg-ficha-violeta" },
@@ -25,6 +26,7 @@ export function FichaPaginaDemo() {
   const [etapa, setEtapa] = React.useState<(typeof ETAPAS)[number]["id"]>("contactada")
   const [modo, setModo] = React.useState<"real" | "estimado">("real")
   const [ciudad, setCiudad] = React.useState<string | null>("Barcelona")
+  const [respuesta, setRespuesta] = React.useState("")
   return (
     <FichaPagina className="rounded-2xl">
       <FichaBarra className="static rounded-t-2xl" inicio={<FichaRecorrido posicion={12} total={148} vista="Moda BCN" etiqueta="influencer" onAnterior={() => undefined} onSiguiente={() => undefined} />}>
@@ -229,6 +231,30 @@ export function FichaPaginaDemo() {
             </FichaCelda>
           </FichaCeldas>
         </FichaBloque>
+
+        <FichaColumnasBloques>
+          <FichaBloque className="flex-[1_1_380px]">
+            <FichaBloqueTitulo compacto titulo="Materiales" contador={2} />
+            <div className="border-t border-ficha-raya px-[22px] py-3">
+              <EntradaFicha aria-label="Nombre del material" placeholder="Nombre del material" />
+            </div>
+            <FichaRenglon titulo="Fotos de producto" detalle="Subido el 12 oct" fin={<EstadoFicha tono="success">Revisado</EstadoFicha>} />
+            <FichaRenglon titulo="Guía de marca" detalle="Subido el 3 oct" fin={<EstadoFicha tono="warning">Por revisar</EstadoFicha>} />
+          </FichaBloque>
+          <FichaBloque className="flex-[1_1_380px]">
+            <FichaBloqueTitulo compacto titulo="Mensajes" />
+            <div className="flex flex-col gap-3 border-t border-ficha-raya px-[22px] py-4">
+              <BurbujasFicha
+                vacio="Aún no hay mensajes."
+                mensajes={[
+                  { id: "1", nuestro: false, texto: "¿Podemos mover la publicación al jueves?", pie: "Ana · hace 2 h" },
+                  { id: "2", nuestro: true, texto: "Sí, lo apunto.", pie: "Astratic · hace 1 h" },
+                ]}
+              />
+              <ResponderFicha texto={respuesta} onTexto={setRespuesta} enviando={false} onEnviar={() => setRespuesta("")} placeholder="Escribe a Ana" />
+            </div>
+          </FichaBloque>
+        </FichaColumnasBloques>
       </FichaContenido>
     </FichaPagina>
   )

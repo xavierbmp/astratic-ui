@@ -133,6 +133,7 @@ Regla de Xavier (2026-11-02, diseño «Ficha Influencer v2» de Claude Design). 
 - **Todo se edita donde se lee**, con `InlineField` sin aire (`-mx-1 min-h-0 w-[calc(100%+0.5rem)] px-1`), y los campos de una base con `CeldasDeCampos`. No hay botón «Editar». Es el sitio donde se edita lo que no se edita en la tabla.
 - **Solo tokens `ficha-*`** (superficie, tintas, rayas, relleno, sombras, radios) y `ficha-tema-*` para las temáticas, en su bloque de `globals.css`, con su modo oscuro. Lo que aquí es un número suelto (14,5 px, 22 px) es la escala de esta página.
 - **Lo estimado no se confunde con lo real:** `MarcaEstimado`, barras rayadas y el signo «≈».
+- **Listas dentro de un bloque:** `FichaRenglon` (foto o icono, nombre, una línea y sus pastillas, y lo suyo a la derecha), con `EstadoFicha` para los estados y `BotonFichaIcono tamano="sm"` en los botones de la fila. Lo que aún no existe se escribe en `EntradaFicha` o `AreaFicha`, y una conversación es `BurbujasFicha` con `ResponderFicha`. `CeldaEditable` es una celda con su `InlineField`. Vacío: `VacioBloque`, una línea sin caja.
 - **Lo que el registro no tiene se quita**, sin inventarlo. Una página de otro registro se monta con las mismas piezas y sus datos: las columnas de una marca son su Instagram, su web y lo que se sabe de ella en la red.
 - **Rutas:** cada una se da de alta en `rutaDeRegistro` del portal, que es lo que usa la base para abrirla.
 

@@ -1,9 +1,26 @@
 "use client"
 
+import * as React from "react"
+import { cn } from "cn"
 import type { DefCampo, ValorCampo } from "@/lib/base/campos"
 import { InlineField, type InlineTipo, type ValorInline } from "@/components/app/inline-field"
 import { FichaCelda, FichaDato } from "./bloque"
 import { eurosFicha, fechaConAno } from "./formato"
+
+/** Lo que necesita `InlineField` dentro de un bloque: sin el aire que lleva en las fichas laterales. */
+export const EDITABLE_FICHA = "-mx-1 min-h-0 w-[calc(100%+0.5rem)] px-1 text-[14.5px] [&_button]:h-auto [&_button]:min-h-0 [&_svg]:hidden"
+
+/** Una celda con un dato que se edita en el sitio: su etiqueta, su valor y una nota debajo si hace falta. */
+export function CeldaEditable({ etiqueta, base, crece, nota, extra, className, ...campo }: React.ComponentProps<typeof InlineField> & { etiqueta: React.ReactNode; base?: number; crece?: number; nota?: React.ReactNode; extra?: React.ReactNode }) {
+  return (
+    <FichaCelda base={base} crece={crece} className="px-6 pt-4 pb-[18px]">
+      <FichaDato etiqueta={etiqueta} extra={extra}>
+        <InlineField {...campo} className={cn(EDITABLE_FICHA, className)} />
+      </FichaDato>
+      {nota && <div className="mt-1 text-[12.5px] text-ficha-tinta-3">{nota}</div>}
+    </FichaCelda>
+  )
+}
 
 const TIPO_INLINE: Partial<Record<DefCampo<unknown>["tipo"], InlineTipo>> = {
   texto: "texto",

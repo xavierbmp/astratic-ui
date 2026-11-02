@@ -55,9 +55,9 @@ export function BotonFicha({ tamano = "md", asChild, className, type, ...props }
 }
 
 /** Botón redondo de un solo icono (las flechas, el «…»). Lleva siempre `aria-label`. */
-export function BotonFichaIcono({ asChild, className, type, ...props }: React.ComponentProps<"button"> & { asChild?: boolean; "aria-label": string }) {
+export function BotonFichaIcono({ tamano = "md", asChild, className, type, ...props }: React.ComponentProps<"button"> & { tamano?: "md" | "sm"; asChild?: boolean; "aria-label": string }) {
   const Comp = asChild ? Slot.Root : "button"
-  return <Comp data-slot="boton-ficha" type={asChild ? undefined : (type ?? "button")} title={props["aria-label"]} className={cn(BASE, "size-10 flex-none justify-center rounded-full p-0", className)} {...props} />
+  return <Comp data-slot="boton-ficha" type={asChild ? undefined : (type ?? "button")} title={props["aria-label"]} className={cn(BASE, "flex-none justify-center rounded-full p-0", tamano === "md" ? "size-10" : "size-[30px] shadow-ficha-boton-sm [&_svg:not([class*='size-'])]:size-3.5", className)} {...props} />
 }
 
 /** Favorita y Semilla: los dos conmutadores de la barra. Encendidos, con su tinte. */
