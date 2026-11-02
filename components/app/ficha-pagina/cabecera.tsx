@@ -23,6 +23,7 @@ export function FichaCabecera({
   insignias,
   descripcion,
   derecha,
+  compacta,
   className,
   children,
 }: {
@@ -40,36 +41,38 @@ export function FichaCabecera({
   insignias?: React.ReactNode
   descripcion?: React.ReactNode
   derecha?: React.ReactNode
+  /** Con la portada más baja y la foto más pequeña, para cuando la cabecera comparte página con el trabajo (la cola de revisión). */
+  compacta?: boolean
   className?: string
   children?: React.ReactNode
 }) {
   return (
     <section data-slot="ficha-cabecera" className={cn("relative rounded-ficha-cabecera bg-ficha-superficie shadow-ficha", className)}>
       <div className="px-2 pt-2">
-        <div className="relative h-[92px] rounded-ficha-portada bg-ficha-portada bg-cover bg-[center_58%] bg-no-repeat dark:brightness-75" style={{ backgroundImage: `url('${portada}')` }}>
+        <div className={cn("relative rounded-ficha-portada bg-ficha-portada", compacta ? "h-[60px]" : "h-[92px]", " bg-cover bg-[center_58%] bg-no-repeat dark:brightness-75")} style={{ backgroundImage: `url('${portada}')` }}>
           {sobrePortada && <div className="absolute top-2.5 right-2.5 dark:brightness-[1.34]">{sobrePortada}</div>}
         </div>
       </div>
       <div className="flex flex-wrap items-start gap-x-[22px] gap-y-2 px-[26px]">
-        <FotoFicha foto={foto} nombre={nombre} iniciales={iniciales} />
-        <div className="min-w-0 flex-[1_1_300px] pt-3">
+        <FotoFicha foto={foto} nombre={nombre} iniciales={iniciales} compacta={compacta} />
+        <div className={cn("min-w-0 flex-[1_1_300px]", compacta ? "pt-2" : "pt-3")}>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <h1 className="m-0 min-w-0 text-[26px] leading-[1.15] font-medium tracking-[-0.02em]">{titulo ?? nombre}</h1>
+            <h1 className={cn("m-0 min-w-0 leading-[1.15] font-medium tracking-[-0.02em]", compacta ? "text-[22px]" : "text-[26px]")}>{titulo ?? nombre}</h1>
             {insignias}
           </div>
           {descripcion && <div className="mt-[3px] text-[14.5px] leading-normal text-pretty text-ficha-tinta-2">{descripcion}</div>}
         </div>
-        {derecha && <div className="flex items-center gap-3 pt-[18px]">{derecha}</div>}
+        {derecha && <div className={cn("flex items-center gap-3", compacta ? "pt-3" : "pt-[18px]")}>{derecha}</div>}
       </div>
       {children ?? <div className="h-[22px]" />}
     </section>
   )
 }
 
-function FotoFicha({ foto, nombre, iniciales }: { foto?: string | null; nombre: string; iniciales?: string }) {
+function FotoFicha({ foto, nombre, iniciales, compacta }: { foto?: string | null; nombre: string; iniciales?: string; compacta?: boolean }) {
   return (
-    <div className="relative z-[1] -mt-[50px] box-border size-[100px] flex-none rounded-full bg-ficha-superficie p-[5px]">
-      <div className="grid size-[90px] place-items-center overflow-hidden rounded-full bg-ficha-relleno-2 text-[28px] font-medium tracking-[-0.01em] text-ficha-tinta-2 shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.08)]">
+    <div className={cn("relative z-[1] box-border flex-none rounded-full bg-ficha-superficie p-[5px]", compacta ? "-mt-8 size-[72px]" : "-mt-[50px] size-[100px]")}>
+      <div className={cn("grid size-full place-items-center overflow-hidden rounded-full bg-ficha-relleno-2 font-medium", compacta ? "text-xl" : "text-[28px]", " tracking-[-0.01em] text-ficha-tinta-2 shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.08)]")}>
         {foto ? (
           // eslint-disable-next-line @next/next/no-img-element -- enlace firmado o externo: no pasa por el optimizador
           <img src={foto} alt={nombre} className="size-full object-cover" />

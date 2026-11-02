@@ -785,6 +785,7 @@
   --ficha-boton-semilla: linear-gradient(180deg, #213428, #1b2a21);
   --ficha-rayado: repeating-linear-gradient(135deg, #a0a0a0 0 1.5px, #3a3b3e 1.5px 4.5px);
   --ficha-rayado-fino: repeating-linear-gradient(135deg, #b0b0b0 0 1.5px, #3f4043 1.5px 4px);
+}
 
 /* La pestaña abierta de una base, como la de Chrome: se une al bloque de debajo con sus dos esquinas curvas hacia fuera. */
 .pestana-activa::before,
