@@ -20,7 +20,7 @@ export function TarjetaPerfil({ inicio, children, className }: { inicio: InicioR
         {inicio.portada && <Image src={inicio.portada} alt="" fill sizes="280px" unoptimized className="object-cover object-top" />}
       </div>
       <div className="relative z-[1] -mt-8 flex justify-center">
-        <FotoRegistro inicio={inicio} px={62} className="ring-[3px] ring-card" />
+        <FotoRegistro inicio={inicio} px={62} className="bg-superficie-hundida ring-[3px] ring-card" />
       </div>
       <div className="px-2 pt-1.5 text-center">
         <p className="truncate text-[15px] leading-5 font-medium tracking-[-0.01em] text-foreground">{inicio.nombre || "Sin nombre"}</p>
