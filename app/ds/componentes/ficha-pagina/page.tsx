@@ -72,6 +72,7 @@ export default function FichaPaginaPage() {
             ["CeldaPanel, CifraPanel, FilaBarra, BarrasSerie, MarcaEstimado", "Las celdas del panel de cifras. Lo estimado, rayado y con su marca a trazos."],
             ["PastillaFicha, PastillaEnlace, KeywordFicha", "Píldora de dato, enlace de la bio y keyword del color de su temática."],
             ["NotaFicha, PasosFicha, EscalaTarifa, VacioFicha", "Una nota con su inicial, los pasos de una secuencia, la escala de una tarifa y lo vacío."],
+            ["FichaEsqueleto", "Lo que se ve mientras carga la página."],
           ]}
         />
       </DocSection>

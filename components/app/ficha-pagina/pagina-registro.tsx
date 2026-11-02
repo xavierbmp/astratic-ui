@@ -27,7 +27,7 @@ export function useListaAbierta(clave: string, id: string) {
  * El marco entero de la página de un registro: la barra con el recorrido (o «Volver», si se llega sin lista), sus
  * acciones a la derecha y debajo sus bloques.
  */
-export function PaginaRegistro({ clave, id, ruta, volver, etiqueta, acciones, sinContenido, children }: { /** La clave con la que la base guarda su lista: «marca». */ clave: string; id: string; /** La página de otro registro del mismo tipo. */ ruta: (id: string) => string; /** Adónde lleva «Volver»: la base. */ volver: string; /** «marca»: para el nombre accesible de las flechas. */ etiqueta: string; acciones?: React.ReactNode; /** Para las páginas con pestañas propias debajo de la barra. */ sinContenido?: boolean; children: React.ReactNode }) {
+export function PaginaRegistro({ clave, id, ruta, volver, etiqueta, acciones, children }: { /** La clave con la que la base guarda su lista: «marca». */ clave: string; id: string; /** La página de otro registro del mismo tipo. */ ruta: (id: string) => string; /** Adónde lleva «Volver»: la base. */ volver: string; /** «marca»: para el nombre accesible de las flechas. */ etiqueta: string; acciones?: React.ReactNode; children: React.ReactNode }) {
   const router = useRouter()
   const recorrido = useListaAbierta(clave, id)
   return (
@@ -47,7 +47,7 @@ export function PaginaRegistro({ clave, id, ruta, volver, etiqueta, acciones, si
       >
         {acciones && <div className="flex flex-wrap items-center gap-1.5">{acciones}</div>}
       </FichaBarra>
-      {sinContenido ? children : <FichaContenido>{children}</FichaContenido>}
+      <FichaContenido>{children}</FichaContenido>
     </FichaPagina>
   )
 }
@@ -95,5 +95,21 @@ export function MasFicha({ children, className }: { children: React.ReactNode; c
       </DropdownMenuTrigger>
       <MenuFichaContenido className={cn("min-w-[250px]", className)}>{children}</MenuFichaContenido>
     </DropdownMenu>
+  )
+}
+
+/** Lo que se ve mientras carga la página de un registro: su marco, con la cabecera y tres bloques vacíos. */
+export function FichaEsqueleto() {
+  return (
+    <FichaPagina aria-busy>
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 pt-[60px] pb-24 md:px-7">
+        <div className="h-[320px] animate-pulse rounded-ficha-cabecera bg-ficha-superficie shadow-ficha" />
+        <div className="flex flex-wrap gap-4">
+          <div className="h-[420px] min-w-0 flex-[1_1_360px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
+          <div className="h-[420px] min-w-0 flex-[1.4_1_460px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
+          <div className="h-[420px] min-w-0 flex-[1_1_320px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
+        </div>
+      </div>
+    </FichaPagina>
   )
 }

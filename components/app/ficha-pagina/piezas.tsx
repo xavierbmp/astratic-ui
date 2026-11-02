@@ -224,11 +224,6 @@ export function LeyendaTarifa({ forma, children }: { forma: "tramo" | "abierta" 
   )
 }
 
-/** La rejilla de capturas o de imágenes de un perfil. */
-export function CuadriculaFicha({ columnas = 6, className, style, ...props }: React.ComponentProps<"div"> & { columnas?: number }) {
-  return <div className={cn("grid gap-1.5 px-5 pb-5", className)} style={{ gridTemplateColumns: `repeat(auto-fill,minmax(min(100%,${Math.round(1200 / columnas)}px),1fr))`, ...style }} {...props} />
-}
-
 /** Un mensaje suave para lo que aún no tiene datos: una línea, sin caja. */
 export function VacioFicha({ className, ...props }: React.ComponentProps<"p">) {
   return <p className={cn("m-0 py-2 text-[13.5px] text-ficha-tinta-3", className)} {...props} />
