@@ -75,7 +75,7 @@ function ValorFecha({ tramo, valor, onChange }: { tramo: boolean; valor: string 
   }
   return (
     <div className="flex min-w-0 flex-1 items-center divide-x">
-      <Popover open={abierto} onOpenChange={setAbierto}>
+      <Popover open={abierto} onOpenChange={setAbierto} modal>
         <PopoverTrigger asChild>
           <button type="button" className={cn(CAJA, "flex w-40 flex-none items-center justify-between gap-1 text-left hover:bg-muted/60")}>
             <span className="truncate">{actual.label}</span>

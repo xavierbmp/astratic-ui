@@ -89,7 +89,7 @@ export function SelectorCampo({ campos, value, onChange, className }: { campos: 
   const [abierto, setAbierto] = React.useState(false)
   const actual = campos.find((c) => c.id === value)
   return (
-    <Popover open={abierto} onOpenChange={setAbierto}>
+    <Popover open={abierto} onOpenChange={setAbierto} modal>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" role="combobox" aria-expanded={abierto} className={cn("h-8 w-40 flex-none justify-between gap-1.5 rounded-md px-2 text-[13px] font-normal", className)}>
           <span className="flex min-w-0 items-center gap-1.5">

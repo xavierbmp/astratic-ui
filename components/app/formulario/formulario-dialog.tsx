@@ -8,7 +8,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } fr
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { ReportTrigger } from "@/components/app/report-button"
 
-const ANCHOS = { sm: "sm:max-w-[480px]", md: "sm:max-w-[560px]", lg: "sm:max-w-[680px]" }
+const ANCHOS = { sm: "sm:max-w-[480px]", md: "sm:max-w-[560px]", lg: "sm:max-w-[680px]", xl: "sm:max-w-[840px]" }
 
 /**
  * Las esquinas de lo de dentro del formulario, con la escala de Astratic UI (radio base 10 px) aunque

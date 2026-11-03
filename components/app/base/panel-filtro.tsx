@@ -249,7 +249,7 @@ function SelectorOperador({ campo, value, onChange }: { campo: CampoMenu | undef
   const ops = campo ? operadoresDe(campo.tipo) : []
   const actual = ops.find((o) => o.value === value)
   return (
-    <Popover open={abierto} onOpenChange={setAbierto}>
+    <Popover open={abierto} onOpenChange={setAbierto} modal>
       <PopoverTrigger asChild>
         <button type="button" className="flex h-8 w-40 flex-none items-center justify-between gap-1 px-2 text-left hover:bg-muted/60">
           <span className="truncate">{actual?.label ?? "Elige"}</span>
