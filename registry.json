@@ -249,6 +249,7 @@
       "files": [
         { "path": "components/app/base/apariencia.tsx", "type": "registry:component" },
         { "path": "components/app/base/barra-base.tsx", "type": "registry:component" },
+        { "path": "components/app/base/barra-bloque.tsx", "type": "registry:component" },
         { "path": "components/app/base/barra-filtros.tsx", "type": "registry:component" },
         { "path": "components/app/base/base-datos.tsx", "type": "registry:component" },
         { "path": "components/app/controles-lateral.tsx", "type": "registry:component" },
@@ -364,6 +365,7 @@
         { "path": "components/app/ficha-pagina/piezas.tsx", "type": "registry:component" },
         { "path": "components/app/ficha-pagina/conversacion.tsx", "type": "registry:component" },
         { "path": "components/app/ficha-pagina/pagina-registro.tsx", "type": "registry:component" },
+        { "path": "components/app/ficha-pagina/lista-lateral.tsx", "type": "registry:component" },
         { "path": "components/app/ficha-pagina/campos.tsx", "type": "registry:component" },
         { "path": "components/app/ficha-pagina/formato.ts", "type": "registry:lib" },
         { "path": "lib/base/lista-abierta.ts", "type": "registry:lib" },
@@ -650,6 +652,7 @@
         { "path": "components/app/record-actions.tsx", "type": "registry:component" },
         { "path": "components/app/base/apariencia.tsx", "type": "registry:component" },
         { "path": "components/app/base/barra-base.tsx", "type": "registry:component" },
+        { "path": "components/app/base/barra-bloque.tsx", "type": "registry:component" },
         { "path": "components/app/base/barra-filtros.tsx", "type": "registry:component" },
         { "path": "components/app/base/base-datos.tsx", "type": "registry:component" },
         { "path": "components/app/controles-lateral.tsx", "type": "registry:component" },

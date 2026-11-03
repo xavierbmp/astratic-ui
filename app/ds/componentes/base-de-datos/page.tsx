@@ -187,7 +187,7 @@ export default function BaseDeDatosPage() {
         <Prose>
           <p>
             La base va dentro de <code>WorkGrid</code> y ocupa lo que queda de pantalla, a todo el ancho. Las cifras de la cabecera pueden filtrar la vista con <code>base.cambiar</code>. Lo que se configura de vez en cuando va en sus ajustes (<code>ajustes</code> y <code>useBloquesEnAjustes</code>). La ficha se abre encima o, si alguien lo elige en los ajustes, al lado (prop <code>ficha</code> con <code>usePanelFicha</code>). Las páginas con una vista propia que no es una base (un calendario a
-            medida) usan <code>BarraFiltros</code>: la misma barra, solo con la vista, el filtro y buscar.
+            medida) usan <code>BarraFiltros</code>: la misma barra, solo con la vista, el filtro y buscar. Las dos, y el encabezado de la página de un registro, se montan sobre <code>BarraBloque</code>: un solo encabezado de 48 px para todo bloque de trabajo.
           </p>
         </Prose>
         <CodeBlock code={USO} lang="tsx" />

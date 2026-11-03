@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Slot } from "radix-ui"
 import { ChevronLeftIcon, ChevronRightIcon, SproutIcon, StarIcon } from "lucide-react"
 import { cn } from "cn"
+import { Button } from "@/components/ui/button"
+import { BarraBloque } from "@/components/app/base/barra-bloque"
 
 /**
  * El marco de la página de un registro: el fondo y la tipografía de la ficha. Dentro van la barra de acciones
@@ -19,18 +20,14 @@ export function FichaContenido({ className, ...props }: React.ComponentProps<"ma
 }
 
 /**
- * La barra fija de arriba: a la izquierda el recorrido o la vuelta a la lista, a la derecha las acciones. En pantallas
- * estrechas las acciones bajan a su propia línea.
+ * El encabezado de la página de un registro: el mismo que el de una base (`BarraBloque`). A la izquierda el recorrido o
+ * la vuelta a la lista, a la derecha las acciones. Si no caben, las acciones bajan a su propia línea.
  */
-export function FichaBarra({ inicio, className, children, ...props }: Omit<React.ComponentProps<"header">, "children"> & { inicio?: React.ReactNode; children?: React.ReactNode }) {
+export function FichaBarra({ inicio, className, children, ...props }: Omit<React.ComponentProps<"div">, "children"> & { inicio?: React.ReactNode; children?: React.ReactNode }) {
   return (
-    <header data-slot="ficha-barra" className={cn("z-30 bg-ficha-fondo/85 backdrop-blur-[16px] backdrop-saturate-[1.4] md:sticky md:top-0", className)} {...props}>
-      <div className="mx-auto box-border flex max-w-[1440px] flex-wrap items-center gap-x-3.5 gap-y-2.5 px-4 py-2.5 md:px-7">
-        {inicio}
-        <div className="min-w-0 flex-1 basis-0" />
-        {children}
-      </div>
-    </header>
+    <BarraBloque data-slot="ficha-barra" inicio={inicio} className={cn("z-30 font-sans text-sm leading-normal", className)} {...props}>
+      {children}
+    </BarraBloque>
   )
 }
 
@@ -39,55 +36,35 @@ export function FichaGrupo({ className, ...props }: React.ComponentProps<"div">)
   return <div className={cn("flex flex-wrap items-center gap-1.5", className)} {...props} />
 }
 
-const BASE = "inline-flex cursor-pointer items-center whitespace-nowrap border-0 bg-(image:--ficha-boton) text-ficha-tinta shadow-ficha-boton outline-none transition-[background-image,transform] select-none hover:bg-(image:--ficha-boton-hover) hover:text-ficha-tinta focus-visible:ring-2 focus-visible:ring-ring/50 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:flex-none [&_svg:not([class*='size-'])]:size-[18px]"
-
-/** Botón en relieve de la ficha: píldora gris con icono, verbo y objeto. `sm` para los de dentro de un bloque. */
+/**
+ * Un botón de la página de un registro: el botón de siempre del design system (`Button` outline), con icono, verbo y
+ * objeto. `sm` para los de dentro de un bloque.
+ */
 export function BotonFicha({ tamano = "md", asChild, className, type, ...props }: React.ComponentProps<"button"> & { tamano?: "md" | "sm"; asChild?: boolean }) {
-  const Comp = asChild ? Slot.Root : "button"
-  return (
-    <Comp
-      data-slot="boton-ficha"
-      type={asChild ? undefined : (type ?? "button")}
-      className={cn(BASE, "justify-center gap-2 rounded-full font-medium", tamano === "md" ? "h-10 pr-3.5 pl-3 text-sm" : "h-[30px] gap-1.5 pr-3 pl-2.5 text-[13px] shadow-ficha-boton-sm [&_svg:not([class*='size-'])]:size-3.5", className)}
-      {...props}
-    />
-  )
+  return <Button data-slot="boton-ficha" variant="outline" size={tamano === "md" ? "sm" : "xs"} asChild={asChild} type={asChild ? undefined : (type ?? "button")} className={className} {...props} />
 }
 
-/** Botón redondo de un solo icono (las flechas, el «…»). Lleva siempre `aria-label`. */
+/** Botón de un solo icono (las flechas, el «…»). Lleva siempre `aria-label`. */
 export function BotonFichaIcono({ tamano = "md", asChild, className, type, ...props }: React.ComponentProps<"button"> & { tamano?: "md" | "sm"; asChild?: boolean; "aria-label": string }) {
-  const Comp = asChild ? Slot.Root : "button"
-  return <Comp data-slot="boton-ficha" type={asChild ? undefined : (type ?? "button")} title={props["aria-label"]} className={cn(BASE, "flex-none justify-center rounded-full p-0", tamano === "md" ? "size-10" : "size-[30px] shadow-ficha-boton-sm [&_svg:not([class*='size-'])]:size-3.5", className)} {...props} />
+  return <Button data-slot="boton-ficha" variant="outline" size={tamano === "md" ? "icon-sm" : "icon-xs"} asChild={asChild} type={asChild ? undefined : (type ?? "button")} title={props["aria-label"]} className={cn("flex-none", className)} {...props} />
 }
 
-/** Favorita y Semilla: los dos conmutadores de la barra. Encendidos, con su tinte. */
+/** Favorita y Semilla: los dos conmutadores de la barra. Encendidos, el icono relleno de su color. */
 export function BotonFavorita({ activa, className, ...props }: Omit<React.ComponentProps<"button">, "children"> & { activa: boolean }) {
   return (
-    <button
-      type="button"
-      aria-pressed={activa}
-      data-slot="boton-ficha"
-      className={cn(BASE, "h-10 gap-2 rounded-full pr-3.5 pl-3 text-sm font-medium", activa && "bg-(image:--ficha-boton-favorita) shadow-ficha-favorita hover:bg-(image:--ficha-boton-favorita)", className)}
-      {...props}
-    >
-      <StarIcon strokeWidth={1.8} className={cn(activa && "fill-ficha-favorita text-ficha-favorita")} aria-hidden />
+    <Button type="button" variant="outline" size="sm" aria-pressed={activa} data-slot="boton-ficha" className={cn(activa && "bg-muted", className)} {...props}>
+      <StarIcon className={cn(activa && "fill-ficha-favorita text-ficha-favorita")} aria-hidden />
       Favorita
-    </button>
+    </Button>
   )
 }
 
 export function BotonSemilla({ activa, className, ...props }: Omit<React.ComponentProps<"button">, "children"> & { activa: boolean }) {
   return (
-    <button
-      type="button"
-      aria-pressed={activa}
-      data-slot="boton-ficha"
-      className={cn(BASE, "h-10 gap-2 rounded-full pr-3.5 pl-3 text-sm font-medium", activa && "bg-(image:--ficha-boton-semilla) shadow-ficha-semilla hover:bg-(image:--ficha-boton-semilla)", className)}
-      {...props}
-    >
-      <SproutIcon strokeWidth={1.8} className={cn(activa && "fill-ficha-semilla-hoja text-ficha-semilla")} aria-hidden />
+    <Button type="button" variant="outline" size="sm" aria-pressed={activa} data-slot="boton-ficha" className={cn(activa && "bg-muted", className)} {...props}>
+      <SproutIcon className={cn(activa && "fill-ficha-semilla-hoja text-ficha-semilla")} aria-hidden />
       Semilla
-    </button>
+    </Button>
   )
 }
 
@@ -112,15 +89,15 @@ export function FichaRecorrido({
   etiqueta?: string
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       <BotonFichaIcono aria-label={`Anterior: ${etiqueta}`} disabled={!onAnterior} onClick={onAnterior}>
-        <ChevronLeftIcon strokeWidth={1.8} aria-hidden />
+        <ChevronLeftIcon aria-hidden />
       </BotonFichaIcono>
       <BotonFichaIcono aria-label={`Siguiente: ${etiqueta}`} disabled={!onSiguiente} onClick={onSiguiente}>
-        <ChevronRightIcon strokeWidth={1.8} aria-hidden />
+        <ChevronRightIcon aria-hidden />
       </BotonFichaIcono>
-      <div className="ml-1.5 text-sm whitespace-nowrap text-ficha-tinta-2">
-        <span className="font-medium text-ficha-tinta tabular-nums">
+      <div className="ml-1 text-[13px] whitespace-nowrap text-muted-foreground">
+        <span className="font-medium text-foreground tabular-nums">
           {posicion} de {total}
         </span>
         {vista ? ` en «${vista}»` : null}

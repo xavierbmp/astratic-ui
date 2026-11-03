@@ -55,12 +55,14 @@ export default function FichaPaginaPage() {
         <SpecTable
           columns={["Pieza", "Para qué"]}
           rows={[
-            ["PaginaRegistro", "El marco entero: fondo, barra fija con el recorrido o «Volver», acciones a la derecha y la columna de bloques."],
-            ["BotonFicha, BotonFichaIcono", "Botones en relieve de 40 px. `tamano=\"sm\"` para los de dentro de un bloque."],
-            ["BotonFavorita, BotonSemilla", "Conmutadores de la barra, con su tinte al encenderse."],
+            ["PaginaRegistro", "El marco entero, con el mismo bloque que una base: el encabezado con el recorrido o «Volver» y las acciones a la derecha, y debajo la columna de bloques. Con `inicioDe`, a la izquierda queda la lista de la que se viene para ir pasando de un registro a otro."],
+            ["FichaBarra", "El encabezado de la página: el mismo `BarraBloque` de la base, de 48 px y con una raya debajo."],
+            ["BloqueLista, ListaLateral, FilaLista", "Una lista con su registro al lado: el encabezado a todo el ancho, la lista a la izquierda con la celda de inicio de cada registro y el abierto a la derecha. Lo usan la página de un registro y las colas de trabajo como Revisión."],
+            ["BotonFicha, BotonFichaIcono", "Los botones de siempre del kit (`Button` outline): `sm` en el encabezado y `xs` dentro de un bloque (`tamano=\"sm\"`)."],
+            ["BotonFavorita, BotonSemilla", "Conmutadores del encabezado: encendidos, el icono relleno de su color."],
             ["BotonEstadoFicha", "La etapa encima de la portada, con su punto. Sin `onCambiar`, solo se lee."],
             ["MasFicha, MenuFichaOpcion", "El «…» y las opciones de los desplegables, con radio 20 y sombra amplia."],
-            ["FichaCabecera", "Portada, foto sobre su borde, nombre, una línea y un dato a la derecha. `compacta` cuando comparte página con el trabajo."],
+            ["FichaCabecera", "Portada, foto sobre su borde, nombre, una línea y un dato a la derecha. `compacta` cuando comparte página con el trabajo. Con `capturas`, en lugar de la portada van dos capturas del perfil, una al lado de la otra y a su alto."],
             ["FichaColumnas, FichaColumna", "Una columna por red o dato principal: su cuenta, su cifra grande y dos datos al pie."],
             ["FichaMetricas, FichaMetrica", "La banda gris de cifras al pie de la cabecera."],
             ["FichaBloque, FichaBloqueTitulo", "Un bloque: superficie clara, radio 28, sombra suave y sin borde."],

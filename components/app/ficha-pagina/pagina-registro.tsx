@@ -7,47 +7,96 @@ import { ArrowLeftIcon, ChevronDownIcon, EllipsisIcon } from "lucide-react"
 import { cn } from "cn"
 import { leerListaAbierta, vecinosEnLista, type ListaAbierta } from "@/lib/base/lista-abierta"
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import type { InicioRegistro } from "@/lib/base/campos"
 import { BotonFicha, BotonFichaIcono, FichaBarra, FichaContenido, FichaPagina, FichaRecorrido } from "./marco"
+import { BloqueLista, FilaLista, ListaLateral } from "./lista-lateral"
 import { MenuFichaContenido, MenuFichaOpcion, MenuFichaTitulo } from "./menu"
 
 /** La lista la deja la base antes de navegar: mientras se está en la página no cambia. */
 const sinAvisos = () => () => undefined
 
 /**
- * El recorrido que dejó la base al abrir un registro: su posición y sus vecinos en la vista de la que se viene. Vive en
- * el navegador, así que hasta montarse no hay lista: la página se pinta igual en el servidor, sin flechas.
+ * El recorrido que dejó la base al abrir un registro: su posición, sus vecinos y la lista entera de la vista de la que se
+ * viene. Vive en el navegador, así que hasta montarse no hay lista: la página se pinta igual en el servidor, sin flechas.
  */
 export function useListaAbierta(clave: string, id: string) {
   const crudo = React.useSyncExternalStore(sinAvisos, () => JSON.stringify(leerListaAbierta(clave)), () => "null")
   // Es lo que acaba de serializar la línea de arriba: siempre una lista o nada.
-  return React.useMemo(() => vecinosEnLista(JSON.parse(crudo) as ListaAbierta | null, id), [crudo, id])
+  return React.useMemo(() => {
+    const lista = JSON.parse(crudo) as ListaAbierta | null
+    const vecinos = vecinosEnLista(lista, id)
+    return vecinos && lista ? { ...vecinos, ids: lista.ids } : null
+  }, [crudo, id])
 }
 
 /**
- * El marco entero de la página de un registro: la barra con el recorrido (o «Volver», si se llega sin lista), sus
- * acciones a la derecha y debajo sus bloques.
+ * El marco entero de la página de un registro, con el mismo bloque que una base: arriba su encabezado (`FichaBarra`), con
+ * el recorrido (o «Volver», si se llega sin lista) y sus acciones a la derecha; debajo, sus bloques. Si se llega desde la
+ * base y la página sabe pintar sus filas (`inicioDe`), a la izquierda queda la lista de la que se viene para ir pasando.
  */
-export function PaginaRegistro({ clave, id, ruta, volver, etiqueta, acciones, children }: { /** La clave con la que la base guarda su lista: «marca». */ clave: string; id: string; /** La página de otro registro del mismo tipo. */ ruta: (id: string) => string; /** Adónde lleva «Volver»: la base. */ volver: string; /** «marca»: para el nombre accesible de las flechas. */ etiqueta: string; acciones?: React.ReactNode; children: React.ReactNode }) {
+export function PaginaRegistro({
+  clave,
+  id,
+  ruta,
+  volver,
+  etiqueta,
+  acciones,
+  inicioDe,
+  children,
+}: {
+  /** La clave con la que la base guarda su lista: «marca». */
+  clave: string
+  id: string
+  /** La página de otro registro del mismo tipo. */
+  ruta: (id: string) => string
+  /** Adónde lleva «Volver»: la base. */
+  volver: string
+  /** «marca»: para el nombre accesible de las flechas y de la lista. */
+  etiqueta: string
+  acciones?: React.ReactNode
+  /** La celda de inicio de cada registro de la lista, como en su base. Sin ella, o sin lista, no hay lateral. */
+  inicioDe?: (id: string) => InicioRegistro | null
+  children: React.ReactNode
+}) {
   const router = useRouter()
   const recorrido = useListaAbierta(clave, id)
+  const ir = (otro: string | null) => (otro ? () => router.push(ruta(otro)) : undefined)
+  const filas = recorrido && inicioDe ? recorrido.ids.flatMap((i) => {
+    const inicio = inicioDe(i)
+    return inicio ? [{ id: i, inicio }] : []
+  }) : []
   return (
-    <FichaPagina>
-      <FichaBarra
-        inicio={
-          recorrido ? (
-            <FichaRecorrido posicion={recorrido.posicion} total={recorrido.total} vista={recorrido.vista} etiqueta={etiqueta} onAnterior={recorrido.anterior ? () => router.push(ruta(recorrido.anterior ?? "")) : undefined} onSiguiente={recorrido.siguiente ? () => router.push(ruta(recorrido.siguiente ?? "")) : undefined} />
-          ) : (
-            <BotonFicha asChild>
-              <Link href={volver}>
-                <ArrowLeftIcon strokeWidth={1.8} aria-hidden /> Volver
-              </Link>
-            </BotonFicha>
-          )
+    <FichaPagina className="flex flex-col px-3 pt-3 pb-4 md:px-4 xl:h-[calc(100dvh-3rem)] xl:min-h-0 xl:flex-none">
+      <BloqueLista
+        barra={
+          <FichaBarra
+            inicio={
+              recorrido ? (
+                <FichaRecorrido posicion={recorrido.posicion} total={recorrido.total} vista={recorrido.vista} etiqueta={etiqueta} onAnterior={ir(recorrido.anterior)} onSiguiente={ir(recorrido.siguiente)} />
+              ) : (
+                <BotonFicha asChild>
+                  <Link href={volver}>
+                    <ArrowLeftIcon aria-hidden /> Volver
+                  </Link>
+                </BotonFicha>
+              )
+            }
+          >
+            {acciones}
+          </FichaBarra>
+        }
+        lista={
+          filas.length > 0 ? (
+            <ListaLateral etiqueta={`Lista: ${recorrido?.vista ?? etiqueta}`} abiertaId={id} pie={`${filas.length} en «${recorrido?.vista}»`}>
+              {filas.map((f) => (
+                <FilaLista key={f.id} inicio={f.inicio} activa={f.id === id} onAbrir={() => f.id !== id && router.push(ruta(f.id))} />
+              ))}
+            </ListaLateral>
+          ) : undefined
         }
       >
-        {acciones && <div className="flex flex-wrap items-center gap-1.5">{acciones}</div>}
-      </FichaBarra>
-      <FichaContenido>{children}</FichaContenido>
+        <FichaContenido className="max-w-none px-4 pt-4 md:px-5">{children}</FichaContenido>
+      </BloqueLista>
     </FichaPagina>
   )
 }
@@ -67,9 +116,9 @@ export function BotonEstadoFicha<T extends string>({ valor, opciones, onCambiar,
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <BotonFicha title={`Cambiar: ${titulo.toLowerCase()}`} className={cn("gap-[9px] pr-3.5 pl-4 text-[14.5px]", className)}>
+        <BotonFicha title={`Cambiar: ${titulo.toLowerCase()}`} className={cn("bg-card font-sans", className)}>
           {contenido}
-          <ChevronDownIcon className="size-4" strokeWidth={1.8} aria-hidden />
+          <ChevronDownIcon className="text-muted-foreground" aria-hidden />
         </BotonFicha>
       </DropdownMenuTrigger>
       <MenuFichaContenido>
@@ -101,13 +150,16 @@ export function MasFicha({ children, className }: { children: React.ReactNode; c
 /** Lo que se ve mientras carga la página de un registro: su marco, con la cabecera y tres bloques vacíos. */
 export function FichaEsqueleto() {
   return (
-    <FichaPagina aria-busy>
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 pt-[60px] pb-24 md:px-7">
-        <div className="h-[320px] animate-pulse rounded-ficha-cabecera bg-ficha-superficie shadow-ficha" />
-        <div className="flex flex-wrap gap-4">
-          <div className="h-[420px] min-w-0 flex-[1_1_360px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
-          <div className="h-[420px] min-w-0 flex-[1.4_1_460px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
-          <div className="h-[420px] min-w-0 flex-[1_1_320px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
+    <FichaPagina aria-busy className="flex flex-col px-3 pt-3 pb-4 md:px-4 xl:h-[calc(100dvh-3rem)] xl:min-h-0 xl:flex-none">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-card shadow-superficie">
+        <div className="h-12 flex-none border-b" />
+        <div className="flex flex-col gap-4 bg-ficha-fondo p-4 md:p-5">
+          <div className="h-[320px] animate-pulse rounded-ficha-cabecera bg-ficha-superficie shadow-ficha" />
+          <div className="flex flex-wrap gap-4">
+            <div className="h-[420px] min-w-0 flex-[1_1_360px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
+            <div className="h-[420px] min-w-0 flex-[1.4_1_460px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
+            <div className="h-[420px] min-w-0 flex-[1_1_320px] animate-pulse rounded-ficha bg-ficha-superficie shadow-ficha" />
+          </div>
         </div>
       </div>
     </FichaPagina>

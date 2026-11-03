@@ -18,6 +18,7 @@ const imagenSegura = (url: string | null | undefined) => (url && (/^https?:\/\//
  */
 export function FichaCabecera({
   portada,
+  capturas,
   sobrePortada,
   foto,
   nombre,
@@ -32,6 +33,11 @@ export function FichaCabecera({
 }: {
   /** La imagen de la portada. Sin ella, o si no es un enlace válido, la de serie. */
   portada?: string | null
+  /**
+   * Las capturas de su perfil, en lugar de la portada: dos, una al lado de la otra y a su alto, para que se lean (la
+   * cola de revisión). Con una sola, ocupa todo el ancho.
+   */
+  capturas?: string[]
   /** Lo que va encima de la portada, arriba a la derecha: el botón de la etapa. */
   sobrePortada?: React.ReactNode
   foto?: string | null
@@ -49,17 +55,28 @@ export function FichaCabecera({
   className?: string
   children?: React.ReactNode
 }) {
+  const conCapturas = (capturas ?? []).flatMap((u) => imagenSegura(u) ?? []).slice(0, 2)
   return (
     <section data-slot="ficha-cabecera" className={cn("relative rounded-ficha-cabecera bg-ficha-superficie shadow-ficha", className)}>
       <div className="px-2 pt-2">
-        <div className={cn("relative rounded-ficha-portada bg-ficha-portada", compacta ? "h-[60px]" : "h-[92px]")}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- enlace firmado o externo: no pasa por el optimizador */}
-          <img src={imagenSegura(portada) ?? PORTADA_FICHA} alt="" className="absolute inset-0 size-full rounded-ficha-portada object-cover object-[center_58%] dark:brightness-75" />
-          {sobrePortada && <div className="absolute top-2.5 right-2.5">{sobrePortada}</div>}
-        </div>
+        {conCapturas.length > 0 ? (
+          <div className={cn("relative grid gap-2", conCapturas.length > 1 && "grid-cols-2")}>
+            {conCapturas.map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element -- enlace firmado: no pasa por el optimizador
+              <img key={url} src={url} alt={`Captura ${i + 1} de su perfil`} className="max-h-[300px] w-full rounded-ficha-portada bg-ficha-portada object-cover object-top" />
+            ))}
+            {sobrePortada && <div className="absolute top-2.5 right-2.5">{sobrePortada}</div>}
+          </div>
+        ) : (
+          <div className={cn("relative rounded-ficha-portada bg-ficha-portada", compacta ? "h-[60px]" : "h-[92px]")}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- enlace firmado o externo: no pasa por el optimizador */}
+            <img src={imagenSegura(portada) ?? PORTADA_FICHA} alt="" className="absolute inset-0 size-full rounded-ficha-portada object-cover object-[center_58%] dark:brightness-75" />
+            {sobrePortada && <div className="absolute top-2.5 right-2.5">{sobrePortada}</div>}
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap items-start gap-x-[22px] gap-y-2 px-[26px]">
-        <FotoFicha foto={foto} nombre={nombre} iniciales={iniciales} compacta={compacta} />
+        <FotoFicha foto={foto} nombre={nombre} iniciales={iniciales} compacta={compacta} plana={conCapturas.length > 0} />
         <div className={cn("min-w-0 flex-[1_1_300px]", compacta ? "pt-2" : "pt-3")}>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <h1 className={cn("m-0 min-w-0 leading-[1.15] font-medium tracking-[-0.02em]", compacta ? "text-[22px]" : "text-[26px]")}>{titulo ?? nombre}</h1>
@@ -74,9 +91,10 @@ export function FichaCabecera({
   )
 }
 
-function FotoFicha({ foto, nombre, iniciales, compacta }: { foto?: string | null; nombre: string; iniciales?: string; compacta?: boolean }) {
+/** `plana`: debajo de las capturas, sin montarse sobre ellas para no tapar lo que se lee. */
+function FotoFicha({ foto, nombre, iniciales, compacta, plana }: { foto?: string | null; nombre: string; iniciales?: string; compacta?: boolean; plana?: boolean }) {
   return (
-    <div className={cn("relative z-[1] box-border flex-none rounded-full bg-ficha-superficie p-[5px]", compacta ? "-mt-8 size-[72px]" : "-mt-[50px] size-[100px]")}>
+    <div className={cn("relative z-[1] box-border flex-none rounded-full bg-ficha-superficie p-[5px]", plana ? "mt-3" : compacta ? "-mt-8" : "-mt-[50px]", compacta ? "size-[72px]" : "size-[100px]")}>
       <div className={cn("grid size-full place-items-center overflow-hidden rounded-full bg-ficha-relleno-2 font-medium", compacta ? "text-xl" : "text-[28px]", " tracking-[-0.01em] text-ficha-tinta-2 shadow-[inset_0_2px_6px_rgb(0_0_0_/_0.08)]")}>
         {imagenSegura(foto) ? (
           // eslint-disable-next-line @next/next/no-img-element -- enlace firmado o externo: no pasa por el optimizador

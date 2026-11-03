@@ -9,6 +9,7 @@ import type { DefCampo } from "@/lib/base/campos"
 import { camposApilables, camposDeFecha, camposOcultos, textoCampos, textoFiltro, type TipoVista, type VistaBase } from "@/lib/base/vistas"
 import type { CampoMenu } from "@/components/app/base/selector-campo"
 import { BotonBarra } from "@/components/app/base/boton-barra"
+import { BarraBloque } from "@/components/app/base/barra-bloque"
 import { AjustesBase, Buscador, MenuAltura, NombreVista, SelectorCampoVista, type AccionesVista, type AjusteDeBase, type FijasDeBase } from "@/components/app/base/controles-barra"
 import { PanelFiltro } from "@/components/app/base/panel-filtro"
 import { MenuCampos } from "@/components/app/base/menu-campos"
@@ -109,59 +110,58 @@ export function BarraBase<T>({
   const reglasColor = vista.color?.reglas?.length ?? 0
   const coloreado = !vista.color ? null : reglasColor ? `Coloreado por ${reglasColor} ${reglasColor === 1 ? "regla" : "reglas"}` : `Coloreado por ${nombreDe(vista.color.campo) ?? "un campo"}`
 
+  const inicio = (
+    <>
+      {lateral && (
+        <button type="button" aria-label={lateral.abierto ? `Ocultar ${lateral.nombre}` : `Ver ${lateral.nombre}`} title={lateral.abierto ? `Ocultar ${lateral.nombre}` : `Ver ${lateral.nombre}`} aria-pressed={lateral.abierto} onClick={lateral.onAlternar} className="hidden size-8 flex-none items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
+          <IconoPlegarLateral lado={lateral.lado} abierto={lateral.abierto} className="size-4" />
+        </button>
+      )}
+      <NombreVista vista={vista} acciones={acciones} fijas={fijas} enfocar={enfocarNombre} onEnfocado={onNombreEnfocado} />
+    </>
+  )
+  const centro = (
+    <>
+      {!fija && tipo === "kanban" && (
+        <SelectorCampoVista icono={Columns3Icon} texto={`Apilado por ${nombreDe(vista.apilar) ?? "…"}`} titulo="Las columnas salen de" campos={camposApilables(campos)} valor={vista.apilar} vacio="Crea un campo de selección única para repartir las tarjetas." onCambiar={(apilar) => onCambiar({ apilar })} />
+      )}
+      {!fija && tipo === "calendario" && (
+        <SelectorCampoVista icono={CalendarDaysIcon} texto={`Fecha: ${nombreDe(vista.fecha) ?? "…"}`} titulo="Cada registro va en el día de" campos={camposDeFecha(campos)} valor={vista.fecha} vacio="Crea un campo de fecha para ver los registros en el calendario." onCambiar={(fecha) => onCambiar({ fecha })} />
+      )}
+      {tiene("campos") && (
+        <MenuBarra icono={EyeOffIcon} texto={ocultos ? `${ocultos} ${ocultos === 1 ? "campo oculto" : "campos ocultos"}` : "Ocultar campos"} {...de("campos")}>
+          <MenuCampos vista={vista} campos={campos} onCambiar={(lista) => onCambiar({ campos: lista })} />
+        </MenuBarra>
+      )}
+      {!fija && (
+        <MenuBarra icono={ListFilterIcon} texto={filtrado ?? "Filtro"} activo={contarCondiciones(vista.filtro) > 0} {...de("filtro")}>
+          <PanelFiltro campos={camposMenu} value={vista.filtro} onChange={(filtro) => onCambiar({ filtro })} objeto={objeto} otrasVistas={otrasVistas} />
+        </MenuBarra>
+      )}
+      {tiene("grupos") && (
+        <MenuBarra icono={Rows3Icon} texto={vista.grupos.length ? textoCampos(vista.grupos.length, "Agrupados") : "Agrupar"} activo={vista.grupos.length > 0} {...de("grupos")}>
+          <MenuGrupos campos={camposMenu} grupos={vista.grupos} otrasVistas={otrasVistas} onCambiar={(grupos) => onCambiar({ grupos, plegados: [] })} onContraer={onContraer} onExpandir={onExpandir} />
+        </MenuBarra>
+      )}
+      {tiene("orden") && (
+        <MenuBarra icono={ArrowUpDownIcon} texto={vista.orden.length ? textoCampos(vista.orden.length, "Ordenado") : "Ordenar"} activo={vista.orden.length > 0} {...de("orden")}>
+          <MenuOrden campos={camposMenu} orden={vista.orden} otrasVistas={otrasVistas} onCambiar={(orden) => onCambiar({ orden })} />
+        </MenuBarra>
+      )}
+      {!fija && (
+        <MenuBarra icono={PaletteIcon} texto={coloreado ?? "Color"} activo={!!coloreado} {...de("color")}>
+          <MenuColor campos={camposMenu} color={vista.color} onCambiar={(color) => onCambiar({ color })} />
+        </MenuBarra>
+      )}
+      {!fija && tipo === "cuadricula" && <MenuAltura altura={vista.altura} onCambiar={onCambiar} />}
+      <Buscador valor={busqueda} onCambiar={onBuscar} />
+    </>
+  )
+
   return (
-    <div data-slot="barra-base" className="@container/barra flex-none border-b">
-      <div className="flex h-12 items-center gap-2 px-3 @3xl/barra:grid @3xl/barra:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-      <div className="flex max-w-[45%] min-w-0 flex-none items-center gap-1 @3xl/barra:max-w-none">
-        {lateral && (
-          <button type="button" aria-label={lateral.abierto ? `Ocultar ${lateral.nombre}` : `Ver ${lateral.nombre}`} title={lateral.abierto ? `Ocultar ${lateral.nombre}` : `Ver ${lateral.nombre}`} aria-pressed={lateral.abierto} onClick={lateral.onAlternar} className="hidden size-8 flex-none items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground md:inline-flex">
-            <IconoPlegarLateral lado={lateral.lado} abierto={lateral.abierto} className="size-4" />
-          </button>
-        )}
-        <NombreVista vista={vista} acciones={acciones} fijas={fijas} enfocar={enfocarNombre} onEnfocado={onNombreEnfocado} />
-      </div>
-
-      <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] @3xl/barra:justify-center">
-        {!fija && tipo === "kanban" && (
-          <SelectorCampoVista icono={Columns3Icon} texto={`Apilado por ${nombreDe(vista.apilar) ?? "…"}`} titulo="Las columnas salen de" campos={camposApilables(campos)} valor={vista.apilar} vacio="Crea un campo de selección única para repartir las tarjetas." onCambiar={(apilar) => onCambiar({ apilar })} />
-        )}
-        {!fija && tipo === "calendario" && (
-          <SelectorCampoVista icono={CalendarDaysIcon} texto={`Fecha: ${nombreDe(vista.fecha) ?? "…"}`} titulo="Cada registro va en el día de" campos={camposDeFecha(campos)} valor={vista.fecha} vacio="Crea un campo de fecha para ver los registros en el calendario." onCambiar={(fecha) => onCambiar({ fecha })} />
-        )}
-        {tiene("campos") && (
-          <MenuBarra icono={EyeOffIcon} texto={ocultos ? `${ocultos} ${ocultos === 1 ? "campo oculto" : "campos ocultos"}` : "Ocultar campos"} {...de("campos")}>
-            <MenuCampos vista={vista} campos={campos} onCambiar={(lista) => onCambiar({ campos: lista })} />
-          </MenuBarra>
-        )}
-        {!fija && (
-          <MenuBarra icono={ListFilterIcon} texto={filtrado ?? "Filtro"} activo={contarCondiciones(vista.filtro) > 0} {...de("filtro")}>
-            <PanelFiltro campos={camposMenu} value={vista.filtro} onChange={(filtro) => onCambiar({ filtro })} objeto={objeto} otrasVistas={otrasVistas} />
-          </MenuBarra>
-        )}
-        {tiene("grupos") && (
-          <MenuBarra icono={Rows3Icon} texto={vista.grupos.length ? textoCampos(vista.grupos.length, "Agrupados") : "Agrupar"} activo={vista.grupos.length > 0} {...de("grupos")}>
-            <MenuGrupos campos={camposMenu} grupos={vista.grupos} otrasVistas={otrasVistas} onCambiar={(grupos) => onCambiar({ grupos, plegados: [] })} onContraer={onContraer} onExpandir={onExpandir} />
-          </MenuBarra>
-        )}
-        {tiene("orden") && (
-          <MenuBarra icono={ArrowUpDownIcon} texto={vista.orden.length ? textoCampos(vista.orden.length, "Ordenado") : "Ordenar"} activo={vista.orden.length > 0} {...de("orden")}>
-            <MenuOrden campos={camposMenu} orden={vista.orden} otrasVistas={otrasVistas} onCambiar={(orden) => onCambiar({ orden })} />
-          </MenuBarra>
-        )}
-        {!fija && (
-          <MenuBarra icono={PaletteIcon} texto={coloreado ?? "Color"} activo={!!coloreado} {...de("color")}>
-            <MenuColor campos={camposMenu} color={vista.color} onCambiar={(color) => onCambiar({ color })} />
-          </MenuBarra>
-        )}
-        {!fija && tipo === "cuadricula" && <MenuAltura altura={vista.altura} onCambiar={onCambiar} />}
-        <Buscador valor={busqueda} onCambiar={onBuscar} />
-      </div>
-
-      <div className="flex min-w-0 flex-none items-center justify-end gap-1.5">
-        {accion}
-        <AjustesBase vista={vista} onCambiar={onCambiar} ajustes={ajustes} panelFicha={panelFicha} fija={fija} />
-      </div>
-      </div>
-    </div>
+    <BarraBloque data-slot="barra-base" inicio={inicio} centro={centro} className="bg-transparent">
+      {accion}
+      <AjustesBase vista={vista} onCambiar={onCambiar} ajustes={ajustes} panelFicha={panelFicha} fija={fija} />
+    </BarraBloque>
   )
 }
