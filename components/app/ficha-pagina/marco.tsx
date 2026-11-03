@@ -49,21 +49,21 @@ export function BotonFichaIcono({ tamano = "md", asChild, className, type, ...pr
   return <Button data-slot="boton-ficha" variant="outline" size={tamano === "md" ? "icon-sm" : "icon-xs"} asChild={asChild} type={asChild ? undefined : (type ?? "button")} title={props["aria-label"]} className={cn("flex-none", className)} {...props} />
 }
 
-/** Favorita y Semilla: los dos conmutadores de la barra. Encendidos, el icono relleno de su color. */
-export function BotonFavorita({ activa, className, ...props }: Omit<React.ComponentProps<"button">, "children"> & { activa: boolean }) {
+/** Favorita y Semilla: los dos conmutadores de la barra. Encendidos, el icono relleno de su color. `soloIcono` cuando la barra va llena (la cola de revisión). */
+export function BotonFavorita({ activa, soloIcono, className, ...props }: Omit<React.ComponentProps<"button">, "children"> & { activa: boolean; soloIcono?: boolean }) {
   return (
-    <Button type="button" variant="outline" size="sm" aria-pressed={activa} data-slot="boton-ficha" className={cn(activa && "bg-muted", className)} {...props}>
+    <Button type="button" variant="outline" size={soloIcono ? "icon-sm" : "sm"} aria-pressed={activa} aria-label={soloIcono ? "Favorita" : undefined} data-slot="boton-ficha" className={cn(activa && "bg-muted", className)} {...props}>
       <StarIcon className={cn(activa && "fill-ficha-favorita text-ficha-favorita")} aria-hidden />
-      Favorita
+      {!soloIcono && "Favorita"}
     </Button>
   )
 }
 
-export function BotonSemilla({ activa, className, ...props }: Omit<React.ComponentProps<"button">, "children"> & { activa: boolean }) {
+export function BotonSemilla({ activa, soloIcono, className, ...props }: Omit<React.ComponentProps<"button">, "children"> & { activa: boolean; soloIcono?: boolean }) {
   return (
-    <Button type="button" variant="outline" size="sm" aria-pressed={activa} data-slot="boton-ficha" className={cn(activa && "bg-muted", className)} {...props}>
+    <Button type="button" variant="outline" size={soloIcono ? "icon-sm" : "sm"} aria-pressed={activa} aria-label={soloIcono ? "Semilla" : undefined} data-slot="boton-ficha" className={cn(activa && "bg-muted", className)} {...props}>
       <SproutIcon className={cn(activa && "fill-ficha-semilla-hoja text-ficha-semilla")} aria-hidden />
-      Semilla
+      {!soloIcono && "Semilla"}
     </Button>
   )
 }
