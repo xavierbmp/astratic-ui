@@ -5,7 +5,7 @@
 // sale con su contexto (ruta, pantalla, tema, errores recientes y, si lo hay, el elemento con sus
 // contenedores del kit) para que quien lo arregle lo encuentre sin tener que preguntar.
 // Se abre también con ⇧⌘X, que funciona con una ficha o un diálogo abiertos (tapan la cabecera), y
-// con `ReportTrigger`, la misma bombilla en pequeño en la cabecera de cada ficha.
+// con `ReportTrigger` (`report-trigger.tsx`), la misma bombilla en pequeño en fichas, formularios y diálogos.
 
 import * as React from "react"
 import { InfoIcon, LightbulbIcon, SendIcon, SquareDashedMousePointerIcon, XIcon } from "lucide-react"
@@ -22,52 +22,19 @@ import { AttachmentsField, imageFiles, useAttachments, type ReportAttachment } f
 import { captureErrors, readContext, recentErrorCount, type ReportContext, type ReportElement } from "@/components/app/report-context"
 import { ElementPicker } from "@/components/app/report-picker"
 import { SentReports, type ReportItem } from "@/components/app/report-sent"
+import { apuntarAbridorReporte, ETIQUETA_SUGERENCIAS } from "@/components/app/report-trigger"
 
 export type { ReportAttachment, ReportAttachmentLink, ReportCanvasChange, ReportCanvasData, ReportRect } from "@/components/app/report-attachments"
 export type { ReportContext, ReportElement } from "@/components/app/report-context"
 export { reportStatus, type ReportItem, type ReportStatus } from "@/components/app/report-sent"
+export { ReportTrigger } from "@/components/app/report-trigger"
 
 // El lienzo pesa (captura de pantalla incluida): se descarga la primera vez que se abre.
 const ReportCanvas = React.lazy(() => import("@/components/app/report-canvas"))
 
 export type ReportDraft = { description: string; element: ReportElement | null; context: ReportContext; attachments: ReportAttachment[] }
 
-/** Nombre del botón: sirve igual para proponer un cambio que para contar un fallo. */
-const LABEL = "Sugerencias y problemas"
-
-// ---------- Abrirlo desde una ficha ----------
-
-// El `ReportButton` principal (el que lleva el atajo) se apunta aquí al montarse, para que
-// `ReportTrigger` abra su diálogo desde una ficha que tapa la cabecera.
-const openers = new Set<() => void>()
-const listeners = new Set<() => void>()
-const notify = () => listeners.forEach((l) => l())
-const subscribe = (l: () => void) => {
-  listeners.add(l)
-  return () => void listeners.delete(l)
-}
-const hasOpener = () => openers.size > 0
-
-/**
- * La bombilla en pequeño para la cabecera de una ficha (`DetailHeader` ya lo lleva): abre el diálogo
- * del `ReportButton` del shell, que la ficha tapa. Sin un `ReportButton` montado no se pinta.
- */
-export function ReportTrigger({ className }: { className?: string }) {
-  const available = React.useSyncExternalStore(subscribe, hasOpener, () => false)
-  if (!available) return null
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label={LABEL} className={cn("text-muted-foreground", className)} onClick={() => openers.values().next().value?.()}>
-          <LightbulbIcon />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        {LABEL} <Kbd>⇧⌘X</Kbd>
-      </TooltipContent>
-    </Tooltip>
-  )
-}
+const LABEL = ETIQUETA_SUGERENCIAS
 
 // ---------- Botón y diálogo ----------
 
@@ -133,12 +100,7 @@ export function ReportButton({
       setTab("new")
       show()
     }
-    openers.add(open)
-    notify()
-    return () => {
-      openers.delete(open)
-      notify()
-    }
+    return apuntarAbridorReporte(open)
   }, [shortcut, show])
 
   // El diálogo se esconde mientras se señala o se marca en el lienzo, y vuelve con el borrador intacto.
@@ -281,6 +243,7 @@ export function ReportButton({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
+          sugerencias={false}
           data-report-ui
           className={cn("max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-[480px]", dropping && "ring-2 ring-brand")}
           onOpenAutoFocus={(e) => {

@@ -7,6 +7,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 import { Button } from "@/components/ui/button"
 import { esDeUnAviso } from "@/components/ui/sonner"
 import { XIcon } from "lucide-react"
+import { ReportTrigger } from "@/components/app/report-trigger"
 
 function Dialog({
   ...props
@@ -52,10 +53,13 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  sugerencias = true,
   onInteractOutside,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  /** La bombilla de «Sugerencias y problemas» junto a la cruz: el diálogo tapa la del shell. */
+  sugerencias?: boolean
 }) {
   return (
     <DialogPortal>
@@ -73,6 +77,7 @@ function DialogContent({
         {...props}
       >
         {children}
+        {showCloseButton && sugerencias && <ReportTrigger className="absolute top-2 right-10" />}
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { cn } from "cn"
 import { CheckIcon, ChevronDownIcon, CircleHelpIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
@@ -31,6 +32,7 @@ export function PanelFiltro({
   otrasVistas,
   pie,
   frase,
+  className,
 }: {
   campos: CampoMenu[]
   value: GrupoCondiciones
@@ -43,6 +45,8 @@ export function PanelFiltro({
   pie?: React.ReactNode
   /** Lo que dice encima de las condiciones, si no es una vista («Le llega a quien cumple:»). */
   frase?: string
+  /** Dentro de un formulario: el ancho y el alto los pone su caja. */
+  className?: string
 }) {
   const n = contarCondiciones(value)
   const anadir = () => {
@@ -52,7 +56,7 @@ export function PanelFiltro({
   const anadirGrupo = () => onChange({ ...value, grupos: [...(value.grupos ?? []), { union: "y", condiciones: [] }] })
 
   return (
-    <div className="flex max-h-[70vh] w-[min(94vw,720px)] flex-col text-[13px]">
+    <div className={cn("flex max-h-[70vh] w-[min(94vw,720px)] flex-col text-[13px]", className)}>
       <div className="flex items-center gap-1 px-4 pt-3 text-muted-foreground">
         Filtro
         <Tooltip>

@@ -6,6 +6,7 @@ import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
+import { ReportTrigger } from "@/components/app/report-button"
 
 const ANCHOS = { sm: "sm:max-w-[480px]", md: "sm:max-w-[560px]", lg: "sm:max-w-[680px]" }
 
@@ -84,7 +85,8 @@ export function FormularioDialog({
 /**
  * Cabecera de un formulario: el icono del objeto en su recuadro, el título, una frase debajo y la
  * cruz. En un subformulario lleva la flecha de volver y la miga del formulario de debajo
- * («Nueva collab › Nueva marca»). `accion` va junto a la cruz (el engranaje de configurarlo).
+ * («Nueva collab › Nueva marca»). `accion` va junto a la cruz (el engranaje de configurarlo). Lleva siempre la
+ * bombilla de «Sugerencias y problemas»: el diálogo tapa la de la cabecera del portal.
  */
 export function FormularioCabecera({ icono: Icono, titulo, descripcion, migas, onVolver, accion }: { icono: LucideIcon; titulo: string; descripcion?: React.ReactNode; migas?: string; onVolver?: () => void; accion?: React.ReactNode }) {
   const activa = React.useContext(PantallaActiva)
@@ -112,6 +114,7 @@ export function FormularioCabecera({ icono: Icono, titulo, descripcion, migas, o
         {descripcion && <Descripcion className="mt-0.5 text-[13px] text-muted-foreground">{descripcion}</Descripcion>}
       </div>
       <div className="relative -mr-2 flex flex-none items-center gap-1">
+        <ReportTrigger />
         {accion}
         <DialogClose asChild>
           <Button type="button" variant="ghost" size="icon-sm" aria-label="Cerrar">
