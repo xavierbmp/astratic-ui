@@ -18,7 +18,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
  * `RanuraPantallaCompleta` del shell) o con la variante `completa:` de `globals.css` (`PageBody`), que mira el
  * `data-pantalla-completa` que pone este proveedor alrededor de la sidebar y la página.
  */
-type Estado = { activa: boolean; hayBloque: boolean; alternar: () => void; registrar: () => () => void; ranura: HTMLElement | null; setRanura: (el: HTMLElement | null) => void }
+type Estado = { activa: boolean; hayBloque: boolean; alternar: () => void; registrar: () => () => void; ranura: HTMLElement | null; setRanura: (el: HTMLElement | null) => void; ranuraAbierta: boolean; pedirRanura: () => () => void }
 
 const Contexto = React.createContext<Estado | null>(null)
 
@@ -26,6 +26,8 @@ export function PantallaCompletaProvider({ children }: { children: React.ReactNo
   const [guardada, setGuardada] = useLocalStorage("pantalla-completa", false)
   const [bloques, setBloques] = React.useState(0)
   const [ranura, setRanura] = React.useState<HTMLElement | null>(null)
+  // Páginas que llevan siempre su cabecera en la barra del shell (`PageHeader enBarra`), sin estar en pantalla completa.
+  const [pedidas, setPedidas] = React.useState(0)
   const { open, setOpen, isMobile } = useSidebar()
   const hayBloque = bloques > 0
   // En el móvil no hay sidebar fija ni sitio que ganar: allí no se activa.
@@ -48,7 +50,12 @@ export function PantallaCompletaProvider({ children }: { children: React.ReactNo
     return () => setBloques((n) => n - 1)
   }, [])
 
-  const valor = React.useMemo<Estado>(() => ({ activa, hayBloque, alternar: () => setGuardada(!activa), registrar, ranura, setRanura }), [activa, hayBloque, setGuardada, registrar, ranura])
+  const pedirRanura = React.useCallback(() => {
+    setPedidas((n) => n + 1)
+    return () => setPedidas((n) => n - 1)
+  }, [])
+  const ranuraAbierta = activa || pedidas > 0
+  const valor = React.useMemo<Estado>(() => ({ activa, hayBloque, alternar: () => setGuardada(!activa), registrar, ranura, setRanura, ranuraAbierta, pedirRanura }), [activa, hayBloque, setGuardada, registrar, ranura, ranuraAbierta, pedirRanura])
   // La marca que leen las piezas con `completa:`; `contents` para no tocar la maqueta de la sidebar.
   return (
     <Contexto.Provider value={valor}>
@@ -85,8 +92,8 @@ export function BotonPantallaCompleta() {
 
 /** El hueco de la barra del shell donde `PageHeader` pone sus pestañas y botones en pantalla completa. */
 export function RanuraPantallaCompleta() {
-  const { activa = false, setRanura } = React.useContext(Contexto) ?? {}
-  if (!activa) return null
+  const { ranuraAbierta = false, setRanura } = React.useContext(Contexto) ?? {}
+  if (!ranuraAbierta) return null
   // Las pestañas pisan el borde de la barra: sin su propia raya gris debajo.
   return <div ref={setRanura} className="flex min-w-0 flex-1 items-end self-stretch pl-2 [&_[data-slot=page-tabs]]:h-12 [&_[data-slot=page-tabs]]:shadow-none" />
 }
@@ -94,5 +101,14 @@ export function RanuraPantallaCompleta() {
 /** Dónde pintar la cabecera de la página en pantalla completa (fuera de ella, nada). */
 export function useRanuraPantallaCompleta() {
   const estado = React.useContext(Contexto)
-  return estado?.activa ? estado.ranura : null
+  return estado?.ranuraAbierta ? estado.ranura : null
+}
+
+/**
+ * La cabecera de esta página va siempre en la barra del shell, como en pantalla completa, para que el trabajo se lleve
+ * toda la altura (Xavier, 2026-11-05: el correo, «toda la pantalla es el mail»). Lo usa `PageHeader enBarra`.
+ */
+export function usePedirRanura(pedir: boolean) {
+  const pedirRanura = React.useContext(Contexto)?.pedirRanura
+  React.useEffect(() => (pedir ? pedirRanura?.() : undefined), [pedir, pedirRanura])
 }

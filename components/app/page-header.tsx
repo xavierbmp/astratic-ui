@@ -3,7 +3,7 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import { cn } from "cn"
-import { useBloqueDeTrabajo, useRanuraPantallaCompleta } from "@/components/app/pantalla-completa"
+import { useBloqueDeTrabajo, usePedirRanura, useRanuraPantallaCompleta } from "@/components/app/pantalla-completa"
 
 /** El hueco de la fila de vistas de una base, donde van los botones generales de la página. Lo reparte `PageBody`. */
 const RanuraBotones = React.createContext<{ nodo: HTMLElement | null; setNodo: (nodo: HTMLElement | null) => void } | null>(null)
@@ -19,6 +19,7 @@ export function PageHeader({
   tabs,
   stats,
   actions,
+  enBarra = false,
   className,
   ...props
 }: Omit<React.ComponentProps<"div">, "title"> & {
@@ -36,7 +37,13 @@ export function PageHeader({
    * pestañas o cifras, a la derecha de la fila de las pestañas; si no, junto al título.
    */
   actions?: React.ReactNode
+  /**
+   * La cabecera va siempre en la barra del shell, junto a las migas (sus pestañas y botones; el título no ocupa
+   * sitio), como en pantalla completa: para las páginas que se usan a toda la pantalla, como un correo.
+   */
+  enBarra?: boolean
 }) {
+  usePedirRanura(enBarra)
   const ranura = useRanuraPantallaCompleta()
   const huecoBase = React.useContext(RanuraBotones)?.nodo
   if (huecoBase && actions) {

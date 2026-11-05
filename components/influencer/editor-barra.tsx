@@ -57,7 +57,8 @@ function BotonEnlace({ editor, activo }: { editor: Editor; activo: boolean }) {
   const aplicar = () => {
     const limpia = url.trim()
     if (!limpia) editor.chain().focus().extendMarkRange("link").unsetLink().run()
-    else editor.chain().focus().extendMarkRange("link").setLink({ href: /^https?:\/\//.test(limpia) ? limpia : `https://${limpia}` }).run()
+    // Una variable (`{{alta}}`) va tal cual: se rellena al usar la plantilla con el enlace de cada persona.
+    else editor.chain().focus().extendMarkRange("link").setLink({ href: /^(https?:\/\/|mailto:|tel:|\{\{)/.test(limpia) ? limpia : `https://${limpia}` }).run()
     setAbierto(false)
   }
   return (
@@ -81,7 +82,7 @@ function BotonEnlace({ editor, activo }: { editor: Editor; activo: boolean }) {
             aplicar()
           }}
         >
-          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" aria-label="Dirección del enlace" autoFocus className="h-8" />
+          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://… o {{variable}}" aria-label="Dirección del enlace" autoFocus className="h-8" />
           <Button type="submit" size="sm">
             {url.trim() ? "Poner" : "Quitar"}
           </Button>
