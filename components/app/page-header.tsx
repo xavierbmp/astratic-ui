@@ -3,7 +3,7 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import { cn } from "cn"
-import { useRanuraPantallaCompleta } from "@/components/app/pantalla-completa"
+import { useBloqueDeTrabajo, useRanuraPantallaCompleta } from "@/components/app/pantalla-completa"
 
 /** El hueco de la fila de vistas de una base, donde van los botones generales de la página. Lo reparte `PageBody`. */
 const RanuraBotones = React.createContext<{ nodo: HTMLElement | null; setNodo: (nodo: HTMLElement | null) => void } | null>(null)
@@ -88,6 +88,8 @@ export function PageHeader({
 }
 
 export function PageBody({ className, ...props }: React.ComponentProps<"div">) {
+  // Toda página del shell puede ponerse en pantalla completa (Xavier, 2026-11-05, reporte cmw3eh06), no solo las de `WorkGrid`.
+  useBloqueDeTrabajo()
   const [nodo, setNodo] = React.useState<HTMLElement | null>(null)
   const ranura = React.useMemo(() => ({ nodo, setNodo }), [nodo])
   return (

@@ -10,8 +10,8 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
  * Pantalla completa de las páginas de operar (Xavier, 2026-10-23, reportes cmvlfay0 y cmvlkbo0): pliega la sidebar,
  * quita la cabecera de la página (título, descripción y cifras, también las de `WorkGrid`), lleva sus pestañas y sus
  * botones a la barra del shell, junto a las migas, y estrecha los laterales (el panel de información, las vistas de la
- * base), para que el bloque de trabajo (la base de datos) se lleve casi toda la pantalla. Solo existe donde hay un `WorkGrid`: el botón
- * sale en la cabecera del shell al montarse uno, y en las demás páginas todo se ve como siempre. Se recuerda en el
+ * base), para que el bloque de trabajo (la base de datos) se lleve casi toda la pantalla. Existe en toda página con `PageBody` (y con
+ * `WorkGrid`; Xavier, 2026-11-05, reporte cmw3eh06): el botón sale en la cabecera del shell al montarse uno. Se recuerda en el
  * navegador; al salir, la sidebar vuelve como estaba.
  *
  * Las piezas lo leen con `usePantallaCompleta` (`WorkGrid`, `LateralVistas`, `PageHeader`, que se pinta en la
@@ -64,13 +64,13 @@ export function usePantallaCompleta() {
   return React.useContext(Contexto)?.activa ?? false
 }
 
-/** Lo llama `WorkGrid`: mientras esté montado, la página puede ponerse en pantalla completa. */
+/** Lo llaman `PageBody` y `WorkGrid`: mientras haya uno montado, la página puede ponerse en pantalla completa. */
 export function useBloqueDeTrabajo() {
   const registrar = React.useContext(Contexto)?.registrar
   React.useEffect(() => registrar?.(), [registrar])
 }
 
-/** El botón de la cabecera del shell, solo en las páginas con bloque de trabajo y desde el escritorio. */
+/** El botón de la cabecera del shell, en las páginas del shell y desde el escritorio. */
 export function BotonPantallaCompleta() {
   const estado = React.useContext(Contexto)
   if (!estado?.hayBloque) return null

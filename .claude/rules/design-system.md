@@ -20,7 +20,7 @@ De arriba abajo, siempre lo mismo y cada cosa en su sitio (Xavier, 2026-11-02):
 
 **Fondo y superficies.** La página va sobre `background` (gris muy claro) y los bloques sobre `card`, sin borde y con `shadow-superficie`. Radio de los bloques 16 px; de las tarjetas de perfil, 20 px.
 
-**Pantalla completa** (Xavier, 2026-10-23, reporte cmvlfay0): toda página con `WorkGrid` tiene en la cabecera del shell el botón «Pantalla completa» (`components/app/pantalla-completa.tsx`, sale solo al montarse el `WorkGrid`, desde el escritorio). Pliega la sidebar, quita la cabecera de la página (título, descripción y cifras), sube sus pestañas y botones a la barra del shell, junto a las migas (`RanuraPantallaCompleta`; reporte cmvlkbo0). Se recuerda en el navegador y al salir todo vuelve como estaba.
+**Pantalla completa** (Xavier, 2026-10-23, reporte cmvlfay0): toda página del shell (con `PageBody`, y desde el 2026-11-05, reporte cmw3eh06, no solo las de `WorkGrid`) tiene en la cabecera del shell el botón «Pantalla completa» (`components/app/pantalla-completa.tsx`, sale solo al montarse `PageBody` o `WorkGrid`, desde el escritorio). Pliega la sidebar, quita la cabecera de la página (título, descripción y cifras), sube sus pestañas y botones a la barra del shell, junto a las migas (`RanuraPantallaCompleta`; reporte cmvlkbo0). Se recuerda en el navegador y al salir todo vuelve como estaba.
 
 Dashboards: cifras + grid de secciones de resumen. No hay página de Ajustes: ver «Configuración in situ».
 
