@@ -1,7 +1,7 @@
 # CLAUDE.md — astratic-ui
 
-> **Conocimiento:** todo vive en la bóveda `../../00_Brain/` (reglas de uso en `../../CLAUDE.md`). Sección de
-> este proyecto: `04-Devs/Design-System/Devs-Design-System-Contexto.md`. Este archivo solo añade lo propio del código.
+> **Conocimiento:** todo vive en la bóveda `../../00_Brain/` (reglas de uso en `../../CLAUDE.md` y en el manual `../../00_Brain/_CLAUDE.md`). Nota de este
+> proyecto: `wiki/projects/Design System Astratic UI.md` (y `wiki/concepts/Hijos y copias del kit.md`). Este archivo solo añade lo propio del código.
 
 Design system y kit de arranque de Astratic Network Devs para portales operativos. Este repo es a la vez la documentación (`/ds`), la demo (`/demo`), la plantilla que se clona para un cliente nuevo y el registry de shadcn (`registry.json` → `public/r`).
 
@@ -37,7 +37,7 @@ Design system y kit de arranque de Astratic Network Devs para portales operativo
 Seguir `content/nuevo-proyecto.md` de arriba abajo. Borrar `app/ds`, `app/demo`, `app/documentos`, `content`, `components/docs`, `components/document`, `registry.json`. Copiar `.claude/rules/design-system.md` tal cual.
 
 ## Consultar el código (Graphify)
-Hay un mapa del código en `graphify-out/` (fuera de git). Se rehace solo en segundo plano con cada commit, cambio de rama y merge, sin IA. Criterio completo en `Claude-Estandares-de-codigo` §12 (bóveda).
+Hay un mapa del código en `graphify-out/` (fuera de git). Se rehace solo en segundo plano con cada commit, cambio de rama y merge, sin IA. Criterio completo en `Reglas - Código` (bóveda, «Mapa del código (Graphify)»).
 - Antes de cambiar una pieza: `graphify affected "<archivo o función>"` (a qué afecta) y `graphify explain "<pieza>"` (qué usa y quién la usa, con `archivo:línea`).
 - Cómo se conectan dos piezas: `graphify path "A" "B"` (con `--undirected` si no sale).
 - `graphify query` solo con nombres de código, no con frases: con lenguaje libre trae ruido.
