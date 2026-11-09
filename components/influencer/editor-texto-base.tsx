@@ -7,6 +7,7 @@ import { cn } from "cn"
 import { PROSA } from "@/components/influencer/prosa"
 import { EditorBarra } from "@/components/influencer/editor-barra"
 import { ProveedorVariables, type ContextoVariables } from "@/components/influencer/editor-variable"
+import type { GrupoVariables } from "@/components/app/menu-variables"
 import { CLAVE_NOTAS, type MarcaNota } from "@/components/influencer/editor-notas"
 import { CLAVE_SUGERENCIAS, indiceEnTexto, rangoEnDoc, reemplazarEnDoc, textoDeDoc, type MarcaSugerencia } from "@/components/influencer/editor-sugerencias"
 import { extensionesEditor } from "@/components/influencer/editor-extensiones"
@@ -25,6 +26,8 @@ export type EditorTextoProps = {
   extra?: React.ReactNode
   /** Para la barra: `sticky top-0` la deja a la vista al bajar por un documento largo (su contenedor no puede recortar). */
   barraClassName?: string
+  /** Variables que se pueden poner dentro de la dirección de un enlace (`{{alta}}`), con el botón «Variable» de su popover. */
+  variablesEnlace?: GrupoVariables[]
   /** Variables de contrato: qué dato tiene cada una y si se ven los datos o los nombres. */
   variables?: ContextoVariables
   /** Notas de la marca ancladas al texto, numeradas como en el panel. */
@@ -70,6 +73,7 @@ export function EditorTextoBase({
   extra,
   barraClassName,
   variables,
+  variablesEnlace,
   notas,
   notaSeleccionada = null,
   onSeleccionarNota,
@@ -189,7 +193,7 @@ export function EditorTextoBase({
   return (
     <ProveedorVariables value={variables ?? { valores: {}, verDatos: false, etiqueta: (c) => c }}>
       <div data-slot="ws-editor" className={cn("flex min-h-0 flex-col", className)}>
-        {barra && editable && !sugiriendo && editor && <EditorBarra editor={editor} extra={extra} className={barraClassName} />}
+        {barra && editable && !sugiriendo && editor && <EditorBarra editor={editor} extra={extra} variablesEnlace={variablesEnlace} className={barraClassName} />}
         <div onMouseUp={citar} onClick={pulsar} onKeyDown={tecla} className={cn("min-h-0 flex-1 overflow-y-auto", "[&_.is-editor-empty:first-child]:before:pointer-events-none [&_.is-editor-empty:first-child]:before:float-left [&_.is-editor-empty:first-child]:before:h-0 [&_.is-editor-empty:first-child]:before:text-muted-foreground/70 [&_.is-editor-empty:first-child]:before:content-[attr(data-placeholder)]")}>
           <EditorContent editor={editor} className="h-full" />
         </div>

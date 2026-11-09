@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { MenuVariables, type GrupoVariables } from "@/components/app/menu-variables"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
@@ -50,10 +51,25 @@ function Boton({ icon: Icon, label, atajo, activo, disabled, onClick }: { icon: 
   )
 }
 
-/** Pide la dirección de un enlace en un popover (nunca `window.prompt`). Vacío lo quita. */
-function BotonEnlace({ editor, activo }: { editor: Editor; activo: boolean }) {
+/**
+ * Pide la dirección de un enlace en un popover (nunca `window.prompt`). Vacío lo quita. Con `variables`, el botón
+ * «Variable» pone una (`{{alta}}`) donde está el cursor de la dirección.
+ */
+function BotonEnlace({ editor, activo, variables }: { editor: Editor; activo: boolean; variables?: GrupoVariables[] }) {
   const [abierto, setAbierto] = React.useState(false)
   const [url, setUrl] = React.useState("")
+  const campo = React.useRef<HTMLInputElement>(null)
+  const ponerVariable = (clave: string) => {
+    const el = campo.current
+    const ini = el?.selectionStart ?? url.length
+    const fin = el?.selectionEnd ?? ini
+    const texto = `{{${clave}}}`
+    setUrl((u) => u.slice(0, ini) + texto + u.slice(fin))
+    requestAnimationFrame(() => {
+      el?.focus()
+      el?.setSelectionRange(ini + texto.length, ini + texto.length)
+    })
+  }
   const aplicar = () => {
     const limpia = url.trim()
     if (!limpia) editor.chain().focus().extendMarkRange("link").unsetLink().run()
@@ -82,7 +98,8 @@ function BotonEnlace({ editor, activo }: { editor: Editor; activo: boolean }) {
             aplicar()
           }}
         >
-          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://… o {{variable}}" aria-label="Dirección del enlace" autoFocus className="h-8" />
+          <Input ref={campo} value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://… o {{variable}}" aria-label="Dirección del enlace" autoFocus className="h-8" />
+          {variables && variables.length > 0 && <MenuVariables grupos={variables} onInsert={ponerVariable} size="xs" />}
           <Button type="submit" size="sm">
             {url.trim() ? "Poner" : "Quitar"}
           </Button>
@@ -96,7 +113,7 @@ function BotonEnlace({ editor, activo }: { editor: Editor; activo: boolean }) {
  * Barra del editor: deshacer, tipo de bloque, formato, listas, cita, alineación, enlace y limpiar. A
  * la derecha, lo propio de cada página (plantillas, variables, cláusulas).
  */
-export function EditorBarra({ editor, extra, className }: { editor: Editor; extra?: React.ReactNode; className?: string }) {
+export function EditorBarra({ editor, extra, variablesEnlace, className }: { editor: Editor; extra?: React.ReactNode; /** Las que se pueden poner en la dirección de un enlace. */ variablesEnlace?: GrupoVariables[]; className?: string }) {
   const estado = useEditorState({
     editor,
     selector: ({ editor: e }) => ({
@@ -147,7 +164,7 @@ export function EditorBarra({ editor, extra, className }: { editor: Editor; extr
       <Boton icon={ListOrderedIcon} label="Lista numerada" activo={estado.numerada} onClick={() => c().toggleOrderedList().run()} />
       <Boton icon={QuoteIcon} label="Cita" activo={estado.cita} onClick={() => c().toggleBlockquote().run()} />
       <Boton icon={estado.centro ? AlignLeftIcon : AlignCenterIcon} label={estado.centro ? "Alinear a la izquierda" : "Centrar"} onClick={() => c().setTextAlign(estado.centro ? "left" : "center").run()} />
-      <BotonEnlace editor={editor} activo={estado.enlace} />
+      <BotonEnlace editor={editor} activo={estado.enlace} variables={variablesEnlace} />
       <Boton icon={RemoveFormattingIcon} label="Quitar formato" onClick={() => c().unsetAllMarks().clearNodes().run()} />
       {extra && <div className="ml-auto flex items-center gap-1.5 pl-2">{extra}</div>}
     </div>
