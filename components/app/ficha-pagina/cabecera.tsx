@@ -35,7 +35,8 @@ export function FichaCabecera({
   portada?: string | null
   /**
    * Las capturas de su perfil, en lugar de la portada: dos, una al lado de la otra y a su alto, para que se lean (la
-   * cola de revisión). Con una sola, ocupa todo el ancho.
+   * cola de revisión). Con una sola, ocupa todo el ancho. Fuera de la compacta se ven enteras, sin tope de alto
+   * (reporte cmw24dup del workspace: «la cuadrícula se debe ver grande»).
    */
   capturas?: string[]
   /** Lo que va encima de la portada, arriba a la derecha: el botón de la etapa. */
@@ -63,7 +64,7 @@ export function FichaCabecera({
           <div className={cn("relative grid gap-2", conCapturas.length > 1 && "grid-cols-2")}>
             {conCapturas.map((url, i) => (
               // eslint-disable-next-line @next/next/no-img-element -- enlace firmado: no pasa por el optimizador
-              <img key={url} src={url} alt={`Captura ${i + 1} de su perfil`} className="max-h-[300px] w-full rounded-ficha-portada bg-ficha-portada object-cover object-top" />
+              <img key={url} src={url} alt={`Captura ${i + 1} de su perfil`} className={cn("w-full rounded-ficha-portada bg-ficha-portada object-cover object-top", compacta && "max-h-[300px]")} />
             ))}
             {sobrePortada && <div className="absolute top-2.5 right-2.5">{sobrePortada}</div>}
           </div>
