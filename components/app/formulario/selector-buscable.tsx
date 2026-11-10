@@ -91,7 +91,11 @@ export function SelectorBuscable({
     onChange(v)
     setAbierto(false)
   }
+  // Crear o cambiar una opción suele abrir otro formulario encima: al cerrarse, el foco no vuelve al selector (se iría
+  // detrás de ese formulario).
+  const sinDevolverFoco = React.useRef(false)
   const crear = () => {
+    sinDevolverFoco.current = true
     setAbierto(false)
     onCrear?.(busqueda)
   }
@@ -159,6 +163,10 @@ export function SelectorBuscable({
           e.preventDefault()
           entrada.current?.focus()
         }}
+        onCloseAutoFocus={(e) => {
+          if (sinDevolverFoco.current) e.preventDefault()
+          sinDevolverFoco.current = false
+        }}
       >
         <div className={cn("flex flex-none items-center gap-2 border-b group-data-[side=top]:border-t group-data-[side=top]:border-b-0", tamano === "md" ? "h-10 px-3" : "h-8 px-2")}>
           {busqueda || !elegida?.icono ? <SearchIcon className="size-4 flex-none text-muted-foreground" /> : elegida.icono}
@@ -211,6 +219,7 @@ export function SelectorBuscable({
                   className={cn("grid size-6 place-items-center rounded-md text-muted-foreground hover:bg-background hover:text-foreground", i === activo ? "opacity-100" : "opacity-0")}
                   onClick={(e) => {
                     e.stopPropagation()
+                    sinDevolverFoco.current = true
                     setAbierto(false)
                     onEditar(o.value)
                   }}
