@@ -119,10 +119,29 @@ export function AppShell({
   const [destino, setDestino] = React.useState<{ id: string; href: string; desde: string } | null>(null)
   const enCurso = destino?.desde === pathname ? destino : null
   const irA = (id: string, href: string) => setDestino({ id, href, desde: pathname })
-  // Al cambiar de página, el contenido vuelve arriba (lo que hacía la ventana cuando era ella la que se desplazaba).
+  // Lo que hacía la ventana cuando era ella la que se desplazaba: al ir a otra página, el contenido vuelve arriba (o a su
+  // #ancla); con Atrás o Adelante, a donde se estaba en esa página.
   const contenido = React.useRef<HTMLDivElement>(null)
+  const posiciones = React.useRef(new Map<string, number>())
+  const anterior = React.useRef(pathname)
+  const historial = React.useRef(false)
   React.useEffect(() => {
-    contenido.current?.scrollTo({ top: 0 })
+    const alVolver = () => {
+      historial.current = true
+    }
+    window.addEventListener("popstate", alVolver)
+    return () => window.removeEventListener("popstate", alVolver)
+  }, [])
+  React.useEffect(() => {
+    const caja = contenido.current
+    if (!caja || anterior.current === pathname) return
+    posiciones.current.set(anterior.current, caja.scrollTop)
+    anterior.current = pathname
+    const volviendo = historial.current
+    historial.current = false
+    if (volviendo) return void caja.scrollTo({ top: posiciones.current.get(pathname) ?? 0 })
+    if (window.location.hash) return
+    caja.scrollTo({ top: 0 })
   }, [pathname])
 
   // El módulo activo: el de la ruta más larga que contiene a `pathname`, contando también sus subpáginas, que
