@@ -7,6 +7,7 @@ import { cn } from "cn"
 import { AppShell } from "@/components/app/app-shell"
 import { Button } from "@/components/ui/button"
 import { DemoReportButton } from "@/components/docs/examples/report-demo"
+import { DemoNotasClaude } from "@/components/docs/examples/notas-demo"
 import { DESIGN_SYSTEMS, designSystemFor, type DesignSystemId } from "./design-systems"
 import { dsBrand, dsNav, dsUser, influencerBrand, influencerNav } from "./nav"
 
@@ -24,6 +25,7 @@ export function DsShell({ children }: { children: React.ReactNode }) {
       brand={SHELLS[current.id].brand}
       user={dsUser}
       nav={SHELLS[current.id].nav}
+      notas={<DemoNotasClaude />}
       report={<DemoReportButton />}
       headerEnd={
         <>

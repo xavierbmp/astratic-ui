@@ -33,7 +33,7 @@ function origenDe(marco: HTMLIFrameElement | null) {
   return { x: r.left + marco.clientLeft, y: r.top + marco.clientTop }
 }
 
-export function ElementPicker({ onPick, onCancel }: { onPick: (el: ReportElement) => void; onCancel: () => void }) {
+export function ElementPicker({ onPick, onCancel, aviso = "Haz clic en lo que falla" }: { onPick: (el: ReportElement) => void; onCancel: () => void; /** La frase de la píldora de arriba. */ aviso?: string }) {
   const [hover, setHover] = React.useState<{ rect: DOMRect; label: string } | null>(null)
   const current = React.useRef<{ el: Element; marco: HTMLIFrameElement | null } | null>(null)
 
@@ -145,7 +145,7 @@ export function ElementPicker({ onPick, onCancel }: { onPick: (el: ReportElement
         className="pointer-events-auto absolute top-3 left-1/2 flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-foreground py-1 pr-1 pl-3.5 text-sm whitespace-nowrap text-background shadow-pop"
       >
         <SquareDashedMousePointerIcon className="size-4" aria-hidden />
-        Haz clic en lo que falla
+        {aviso}
         <Button data-report-cancel size="xs" variant="secondary" className="rounded-full">
           Cancelar <Kbd>Esc</Kbd>
         </Button>

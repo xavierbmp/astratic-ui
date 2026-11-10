@@ -99,6 +99,23 @@
       ]
     },
     {
+      "name": "notas-claude",
+      "type": "registry:component",
+      "title": "Notas para Claude",
+      "description": "Chat de la cabecera, solo para administradores, para dejar datos operativos a Claude (no en directo): ventana abajo a la derecha, cada nota con su página y, si se quiere, un elemento señalado como en la bombilla; la respuesta de Claude sale en el mismo chat.",
+      "dependencies": ["lucide-react", "sonner"],
+      "registryDependencies": ["button", "kbd", "skeleton", "textarea", "tooltip", "badge"],
+      "files": [
+        { "path": "components/app/notas-claude.tsx", "type": "registry:component" },
+        { "path": "components/app/report-picker.tsx", "type": "registry:component" },
+        { "path": "components/app/report-context.ts", "type": "registry:component" },
+        { "path": "components/app/confirm-dialog.tsx", "type": "registry:component" },
+        { "path": "components/app/states.tsx", "type": "registry:component" },
+        { "path": "components/app/status-badge.tsx", "type": "registry:component" },
+        { "path": "lib/format.ts", "type": "registry:lib" }
+      ]
+    },
+    {
       "name": "report-button",
       "type": "registry:component",
       "title": "Sugerencias y problemas",

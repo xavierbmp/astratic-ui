@@ -84,6 +84,7 @@ export function AppShell({
   volver,
   userMenu,
   report,
+  notas,
   notifications,
   sidebarExtra,
   subpaginasEnMenu = false,
@@ -101,6 +102,8 @@ export function AppShell({
   userMenu?: React.ReactNode
   /** Botón «Sugerencias y problemas» (`ReportButton`) ya montado; va entre el buscador y la campana. */
   report?: React.ReactNode
+  /** El chat «Notas para Claude» (`NotasClaude`) ya montado, solo para administradores; va justo antes de la bombilla. */
+  notas?: React.ReactNode
   /** Botón de notificaciones ya montado; si no se pasa, se muestra el icono sin punto. */
   notifications?: React.ReactNode
   /**
@@ -355,6 +358,7 @@ export function AppShell({
                 <SearchIcon />
               </Button>
               <BotonPantallaCompleta />
+              {notas}
               {report}
               {notifications ?? (
                 <Button variant="ghost" size="icon" aria-label="Notificaciones">

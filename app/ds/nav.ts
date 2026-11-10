@@ -1,4 +1,4 @@
-import {
+import { BotMessageSquareIcon,
   BookOpenIcon,
   BookOpenTextIcon,
   BookTextIcon,
@@ -55,6 +55,7 @@ export const dsUser: CurrentUser = { name: "Astratic Devs", role: "Documentació
 export const componentPages: { slug: string; label: string; summary: string; icon: NavItem["icon"] }[] = [
   { slug: "shell", label: "Shell de aplicación", summary: "Sidebar, cabecera, migas, buscador ⌘K y usuario.", icon: PanelLeftIcon },
   { slug: "report-button", label: "Sugerencias y problemas", summary: "La bombilla de la cabecera: proponer un cambio o contar qué falla y señalarlo en la página.", icon: LightbulbIcon },
+  { slug: "notas-claude", label: "Notas para Claude", summary: "El chat de la cabecera para dejar datos del día a Claude, con la página y lo señalado.", icon: BotMessageSquareIcon },
   { slug: "page-header", label: "Cabecera de página", summary: "Título, descripción, pestañas de subpágina y acciones de página.", icon: HeadingIcon },
   { slug: "kpi", label: "Cifras (KPI)", summary: "Fila de tarjetas de cifra con delta y alerta.", icon: GaugeIcon },
   { slug: "section", label: "Sección", summary: "El bloque con cabecera, contador y acción.", icon: SquareIcon },
