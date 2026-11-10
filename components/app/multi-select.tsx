@@ -9,7 +9,9 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { StatusBadge } from "@/components/app/status-badge"
 import type { StatusTone } from "@/lib/status"
 
-export type MultiOption = { value: string; label: string; tone?: StatusTone }
+export type MultiOption = { value: string; label: string; tone?: StatusTone; /** Una segunda línea en la lista (un email, un cargo); también se busca en ella. */ detalle?: string }
+
+const sinAcentos = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "")
 
 /**
  * Selección múltiple con buscador, para etiquetas y líneas en formularios.
@@ -17,6 +19,10 @@ export type MultiOption = { value: string; label: string; tone?: StatusTone }
  * Las opciones se gestionan desde aquí mismo, como en Notion: con `onCreate`, escribir algo que no
  * existe ofrece crearlo; con `onManage`, el pie del desplegable abre su configuración (renombrar,
  * color, borrar).
+ *
+ * Con muchas opciones (los contactos de una cuenta), `limite` pinta solo las primeras que coinciden con lo
+ * escrito, con las elegidas siempre arriba, y `textoCrear` cambia el «Crear «…»» (por ejemplo, «Usar «…»»
+ * para una dirección escrita a mano).
  *
  * `variant="inline"` es la versión de las fichas: en reposo se leen las insignias, sin caja ni
  * flecha, y el desplegable se abre al pulsarlas (lo usa `InlineField`).
@@ -35,6 +41,8 @@ export function MultiSelect({
   variant = "default",
   defaultOpen = false,
   renderValue,
+  limite,
+  textoCrear = (t: string) => `Crear «${t}»`,
 }: {
   options: MultiOption[]
   value: string[]
@@ -52,6 +60,10 @@ export function MultiSelect({
   defaultOpen?: boolean
   /** `inline`: cómo se pintan en reposo los valores elegidos (insignias con su color). */
   renderValue?: (selected: MultiOption[]) => React.ReactNode
+  /** Cuántas opciones se pintan como mucho: se filtra aquí, sin acentos, por la etiqueta y el detalle. */
+  limite?: number
+  /** El texto de la opción de crear con lo escrito. */
+  textoCrear?: (texto: string) => string
 }) {
   const [open, setOpen] = React.useState(defaultOpen)
   const [busqueda, setBusqueda] = React.useState("")
@@ -62,7 +74,15 @@ export function MultiSelect({
   const selected = todas.filter((o) => value.includes(o.value))
   const toggle = (v: string) => onChange(value.includes(v) ? value.filter((x) => x !== v) : [...value, v])
   const texto = busqueda.trim()
-  const ofrecerCrear = Boolean(onCreate && texto && !todas.some((o) => o.label.toLowerCase() === texto.toLowerCase()))
+  const ofrecerCrear = Boolean(onCreate && texto && !todas.some((o) => o.label.toLowerCase() === texto.toLowerCase() || o.value.toLowerCase() === texto.toLowerCase()))
+  // Con tope, se filtra aquí (cmdk pintaría todas): las elegidas arriba y, detrás, las que coinciden.
+  const visibles = React.useMemo(() => {
+    if (!limite) return todas
+    const buscado = sinAcentos(texto)
+    const coincide = (o: MultiOption) => !buscado || sinAcentos(`${o.label} ${o.detalle ?? ""}`).includes(buscado)
+    const elegidas = todas.filter((o) => value.includes(o.value) && coincide(o))
+    return [...elegidas, ...todas.filter((o) => !value.includes(o.value) && coincide(o)).slice(0, Math.max(0, limite - elegidas.length))]
+  }, [limite, todas, texto, value])
 
   const crear = async () => {
     if (!onCreate || !texto || creando) return
@@ -142,19 +162,26 @@ export function MultiSelect({
         )}
       </PopoverTrigger>
       <PopoverContent className="w-(--radix-popover-trigger-width) min-w-56 p-0" align="start">
-        <Command>
+        <Command shouldFilter={!limite}>
           <CommandInput placeholder={onCreate ? "Buscar o crear…" : "Buscar…"} value={busqueda} onValueChange={setBusqueda} />
           <CommandList>
             {!ofrecerCrear && <CommandEmpty>{emptyText}</CommandEmpty>}
             <CommandGroup>
-              {todas.map((o) => {
+              {visibles.map((o) => {
                 const on = value.includes(o.value)
                 return (
-                  <CommandItem key={o.value} value={o.label} onSelect={() => toggle(o.value)}>
-                    <span className={cn("grid size-4 place-items-center rounded-[4px] border border-control", on && "border-primary bg-primary text-primary-foreground")}>
+                  <CommandItem key={o.value} value={o.detalle ? `${o.label} ${o.detalle}` : o.label} onSelect={() => toggle(o.value)}>
+                    <span className={cn("grid size-4 flex-none place-items-center rounded-[4px] border border-control", on && "border-primary bg-primary text-primary-foreground")}>
                       {on && <CheckIcon className="size-3" />}
                     </span>
-                    {o.label}
+                    {o.detalle ? (
+                      <span className="grid min-w-0">
+                        <span className="truncate">{o.label}</span>
+                        <span className="truncate text-xs text-muted-foreground">{o.detalle}</span>
+                      </span>
+                    ) : (
+                      o.label
+                    )}
                   </CommandItem>
                 )
               })}
@@ -163,7 +190,7 @@ export function MultiSelect({
               <CommandGroup forceMount>
                 <CommandItem forceMount value={`__crear__${texto}`} onSelect={() => void crear()} disabled={creando}>
                   {creando ? <Loader2Icon className="animate-spin" /> : <PlusIcon />}
-                  <span className="truncate">Crear «{texto}»</span>
+                  <span className="truncate">{textoCrear(texto)}</span>
                 </CommandItem>
               </CommandGroup>
             )}
