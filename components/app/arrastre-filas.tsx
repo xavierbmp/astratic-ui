@@ -11,7 +11,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core"
-import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { SortableContext, rectSortingStrategy, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
 /**
@@ -59,9 +59,16 @@ export function ArrastreFilas({ onSoltar, children }: { onSoltar: (s: Soltar) =>
   )
 }
 
-/** Un grupo donde se puede soltar, también vacío: su zona del final recibe lo que se suelta debajo de todo. */
-export function GrupoArrastrable({ grupoId, ids, children }: { grupoId: string; ids: string[]; children: React.ReactNode }) {
-  return <SortableContext items={ids.map((x) => claveDe(grupoId, x))} strategy={verticalListSortingStrategy}>{children}</SortableContext>
+/**
+ * Un grupo donde se puede soltar, también vacío: su zona del final recibe lo que se suelta debajo de todo. Con `rejilla`,
+ * sus elementos son tarjetas en varias columnas (se ordenan en las dos direcciones); sin ella, filas una debajo de otra.
+ */
+export function GrupoArrastrable({ grupoId, ids, rejilla, children }: { grupoId: string; ids: string[]; rejilla?: boolean; children: React.ReactNode }) {
+  return (
+    <SortableContext items={ids.map((x) => claveDe(grupoId, x))} strategy={rejilla ? rectSortingStrategy : verticalListSortingStrategy}>
+      {children}
+    </SortableContext>
+  )
 }
 
 /** La franja del final de un grupo, para soltar al final o en un grupo vacío. */
