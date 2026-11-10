@@ -151,7 +151,7 @@ export function AppShell({
     const contiene = (href: string) => pathname === href || pathname.startsWith(href + "/")
     for (const g of nav) {
       for (const it of g.items) {
-        const largo = Math.max(...[it.href, ...(it.tabs ?? []).map((t) => t.href)].map((h) => (contiene(h) ? h.length : -1)))
+        const largo = Math.max(...[it.href, ...(it.tabs ?? []).flatMap((t) => [t.href, ...(t.tabs ?? []).map((s) => s.href)])].map((h) => (contiene(h) ? h.length : -1)))
         if (largo >= 0 && (!best || largo > best.largo)) best = { group: g, item: it, largo }
       }
     }
