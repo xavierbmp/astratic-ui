@@ -20,6 +20,8 @@ De arriba abajo, siempre lo mismo y cada cosa en su sitio (Xavier, 2026-11-02):
 
 **Fondo y superficies.** La página va sobre `background` (gris muy claro) y los bloques sobre `card`, sin borde y con `shadow-superficie`. Radio de los bloques 16 px; de las tarjetas de perfil, 20 px.
 
+**Cabecera fija** (Xavier, 2026-11-10, reporte cmwb13p3): la barra del shell (migas, buscador, bombilla, campana) está siempre a la vista, como la sidebar. Lo que se desplaza es el contenido de debajo (`AppShell` lo envuelve en `contenido-shell`), así que lo que va pegado al bajar (`sticky top-0` de una barra de editor, `lg:sticky lg:top-4` de un lateral) se queda justo bajo la cabecera. Ninguna página se hace su propia barra fija encima.
+
 **Pantalla completa** (Xavier, 2026-10-23, reporte cmvlfay0): toda página del shell (con `PageBody`, y desde el 2026-11-05, reporte cmw3eh06, no solo las de `WorkGrid`) tiene en la cabecera del shell el botón «Pantalla completa» (`components/app/pantalla-completa.tsx`, sale solo al montarse `PageBody` o `WorkGrid`, desde el escritorio). Pliega la sidebar, quita la cabecera de la página (título, descripción y cifras), sube sus pestañas y botones a la barra del shell, junto a las migas (`RanuraPantallaCompleta`; reporte cmvlkbo0). Se recuerda en el navegador y al salir todo vuelve como estaba. **Cabecera en la barra** (Xavier, 2026-11-05): una página que se usa a toda la pantalla, como un correo, lleva `PageHeader enBarra`: sus botones y pestañas van siempre en la barra del shell y el título no ocupa sitio.
 
 Dashboards: cifras + grid de secciones de resumen. No hay página de Ajustes: ver «Configuración in situ».

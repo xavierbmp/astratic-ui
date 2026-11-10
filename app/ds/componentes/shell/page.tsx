@@ -51,7 +51,8 @@ export default async function ShellPage() {
             <>
               <strong>Cabecera de 48 px</strong> con <code>SidebarTrigger</code>, migas automáticas «Grupo › Página», y a la
               derecha el buscador, la bombilla de sugerencias y problemas (prop <code>report</code>), la campana, el{" "}
-              <code>ThemeToggle</code> y lo que pases en <code>headerEnd</code>.
+              <code>ThemeToggle</code> y lo que pases en <code>headerEnd</code>. Siempre fija: lo que se desplaza es el
+              contenido de debajo, así lo pegado al hacer scroll queda justo bajo ella.
             </>,
             <>
               <strong>Migas extra</strong> desde cualquier página con <code>useBreadcrumb([{"{ label, href }"}])</code>: el
@@ -123,7 +124,7 @@ export function RegistroPage({ record }: { record: { id: string; name: string } 
           columns={["Zona", "Medidas", "Qué contiene"]}
           rows={[
             ["Sidebar", "256 px, colapsa a 48 px. Fondo sidebar, borde derecho.", "Marca con monograma, grupos con etiqueta, ítems con icono, contador ámbar y usuario abajo."],
-            ["Cabecera", "48 px, borde inferior, padding horizontal 16 px.", "Botón de colapso, separador, migas; a la derecha buscador ⌘K (256 px), reportar un problema, campana, tema y headerEnd."],
+            ["Cabecera", "48 px, borde inferior, padding horizontal 16 px; fija, el contenido se desplaza debajo.", "Botón de colapso, separador, migas; a la derecha buscador ⌘K (256 px), reportar un problema, campana, tema y headerEnd."],
             ["Contenido", "El resto. Columna flex con min-h-0.", "Las páginas, que empiezan por PageBody."],
             ["Buscador", "CommandDialog centrado.", "Un grupo por grupo de navegación; al elegir, navega con router.push."],
           ]}

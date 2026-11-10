@@ -119,6 +119,11 @@ export function AppShell({
   const [destino, setDestino] = React.useState<{ id: string; href: string; desde: string } | null>(null)
   const enCurso = destino?.desde === pathname ? destino : null
   const irA = (id: string, href: string) => setDestino({ id, href, desde: pathname })
+  // Al cambiar de página, el contenido vuelve arriba (lo que hacía la ventana cuando era ella la que se desplazaba).
+  const contenido = React.useRef<HTMLDivElement>(null)
+  React.useEffect(() => {
+    contenido.current?.scrollTo({ top: 0 })
+  }, [pathname])
 
   // El módulo activo: el de la ruta más larga que contiene a `pathname`, contando también sus subpáginas, que
   // pueden vivir en otra ruta (una página que agrupa módulos que ya existían, como el IRM del admin de la red).
@@ -265,7 +270,12 @@ export function AppShell({
           </SidebarFooter>
         </Sidebar>
 
-        <SidebarInset className="min-w-0">
+        {/*
+          La cabecera siempre a la vista, como la sidebar (Xavier, 2026-11-10, reporte cmwb13p3): el shell ocupa la
+          pantalla y lo que se desplaza es el contenido de debajo, así lo que va pegado al hacer scroll (barras de
+          editores, laterales) se queda justo bajo la cabecera. Al imprimir, todo vuelve a fluir.
+        */}
+        <SidebarInset className="h-svh min-w-0 overflow-hidden print:h-auto print:overflow-visible">
           {/* En pantalla completa, las pestañas de una subpágina ya dicen dónde se está: la miga no lo repite. */}
           <header className="flex h-12 flex-none items-center gap-2 border-b px-4 completa:[&:has([data-subpagina])_[data-slot=breadcrumb]]:hidden">
             <SidebarTrigger className="-ml-1" />
@@ -336,7 +346,9 @@ export function AppShell({
               {headerEnd}
             </div>
           </header>
-          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+          <div ref={contenido} data-slot="contenido-shell" className="flex min-h-0 flex-1 flex-col overflow-y-auto print:overflow-visible">
+            {children}
+          </div>
         </SidebarInset>
 
         <CommandDialog open={paletteOpen} onOpenChange={setPaletteOpen} title="Buscar" description="Ir a una página">
