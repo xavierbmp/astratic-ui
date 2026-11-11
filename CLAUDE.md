@@ -3,6 +3,8 @@
 > **Conocimiento:** todo vive en la bóveda `../../00_Brain/` (reglas de uso en `../../CLAUDE.md` y en el manual `../../00_Brain/_CLAUDE.md`). Nota de este
 > proyecto: `wiki/projects/Design System Astratic UI.md` (y `wiki/concepts/Hijos y copias del kit.md`). Este archivo solo añade lo propio del código.
 
+> **Congelado para el admin de la red (2026-11-11).** La fuente única del design system del admin y del workspace es ahora `components/` del Workspace Influencers (`03_Influencers/02_Workspace Influencers`), con el catálogo en vivo en `/admin/design-system` y la comprobación de ESLint. Aquí no se crean ni se cambian piezas para el admin ni se copian al workspace (`ds:copiar` ya no existe). Este repo queda como referencia del Portal Astratic, que aún usa su copia vieja, hasta que se decida cómo lo consume.
+
 Design system y kit de arranque de Astratic Network Devs para portales operativos. Este repo es a la vez la documentación (`/ds`), la demo (`/demo`), la plantilla que se clona para un cliente nuevo y el registry de shadcn (`registry.json` → `public/r`).
 
 ## Lo no obvio
