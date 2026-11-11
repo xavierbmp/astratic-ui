@@ -1,51 +1,31 @@
-# CLAUDE.md — astratic-ui
+# CLAUDE.md — Astratic UI (design system)
 
-> **Conocimiento:** todo vive en la bóveda `../../00_Brain/` (reglas de uso en `../../CLAUDE.md` y en el manual `../../00_Brain/_CLAUDE.md`). Nota de este
-> proyecto: `wiki/projects/Design System Astratic UI.md` (y `wiki/concepts/Hijos y copias del kit.md`). Este archivo solo añade lo propio del código.
+> **Este archivo no se toca sin el permiso explícito de Xavier** (2026-11-11). Lo que aprendas va a la bóveda, nunca aquí.
 
-Design system y kit de arranque de Astratic Network Devs para portales operativos. Este repo es a la vez la documentación (`/ds`), la demo (`/demo`), la plantilla que se clona para un cliente nuevo y el registry de shadcn (`registry.json` → `public/r`).
+## Quién es quién
+- **Xavier Motjé:** fundador de Astratic Network. No es programador: decide qué se hace; tú decides cómo.
+- **Tú:** el ingeniero sénior del design system Astratic UI. El área es de Píxel (CTO), encargado del design system.
+- **Astratic Network:** agencia de marketing con influencers (red de 500+ agencias y 20.000 creadoras). Este repo es el design system y kit de arranque de los portales (documentación `/ds`, demo y registry). Desde el 2026-11-11 la fuente única del admin y del Workspace es `components/` del Workspace Influencers; este repo queda de referencia para el Portal Astratic.
 
-## Lo no obvio
-- Dev en puerto **3020** (`.claude/launch.json`, config `astratic-ui`). `npm run typecheck` y `npm test` (Vitest, la lógica pura de `lib/` en `tests/unit`) antes de dar algo por hecho.
-- shadcn v4 con preset **Nova sobre Radix** (`components.json`: style `radix-nova`, base neutral). `cn` viene del paquete `cn`, no de `lib/utils`.
-- Tokens en `app/globals.css`: además de los de shadcn, `brand`, `success|info|warning|danger` (+ `-soft`) y `shadow-xs|pop`. **Nunca colores de Tailwind sueltos** (`bg-green-100`, `text-gray-500`): rompen el modo oscuro.
-- Iconos de lucide **no cruzan** la frontera servidor → cliente: la nav con iconos se define en un archivo importado por un componente cliente (`app/demo/shell.tsx`, `app/ds/shell.tsx`).
-- El kit vive en `components/app/`. Las páginas de la demo solo componen; si falta algo, se crea en el kit, se documenta en `/ds/componentes` y se añade a `registry.json`.
-- Patrón de página (el que se copia a los portales): `page.tsx` de servidor (metadata, datos, `searchParams`) + `<modulo>-view.tsx` cliente. La lista es una `BaseDatos` (en móvil, tarjetas); registro abierto en la URL `?registro=id` con `window.history.replaceState`.
-- Avatares: `variant="entity"` para registros y marcas (gris claro, como el kit de Twic), por defecto persona. Nunca monogramas negros.
-- La referencia visual en caso de duda son los mockups de la propuesta Twic: `../02_Propuestas Clientes/Twic/mockups/*.html` y `kit/KIT.md`.
-- `public/r` es generado (`npm run registry:build`, también dentro de `npm run build`) y está en `.gitignore`.
-- Docs: páginas servidor en `app/ds/**`; los ejemplos interactivos son componentes cliente en `components/docs/examples/`. `CodeBlock` es un componente servidor async (Shiki).
-- La guía de arranque es `content/nuevo-proyecto.md` (una sola fuente, se renderiza en `/ds/nuevo-proyecto`).
-- **Design systems hijos.** Astratic UI es el madre; un hijo hereda todo y añade una capa de tokens en `globals.css` (clase de subárbol, como `.theme-influencer`), sus componentes en carpeta propia (`components/influencer`), sus reglas en `.claude/rules/<hijo>.md` y su documentación bajo `/ds/<hijo>`. Se da de alta uno nuevo en `app/ds/design-systems.ts` (alimenta la portada `/`, que es donde se elige, y las pestañas de la cabecera de `/ds`), su marca y nav en `SHELLS` de `app/ds/shell.tsx` y `app/ds/nav.ts`. Las clases `tint-*` solo tienen valor dentro de `.theme-influencer`; como fichas, diálogos y menús se pintan en un portal fuera del shell, `ThemeBody` pone la clase también en `<body>`.
-- **Las páginas del workspace de influencers no viven aquí**: están en su propio repo (`../../03_Influencers/02_Workspace Influencers`, puerto 3050), que copia de este el design system hijo: `components/influencer`, `lib/influencer` (modelo en español, lógica y datos de ejemplo), el tema `.theme-influencer` de `globals.css` y las reglas de `.claude/rules/influencer-workspace.md`, además de las piezas del madre que usa (`components/app`, `lib/filtros`, `lib/vistas`, `lib/base`, `lib/bloques.ts`, `lib/carpetas.ts`, `lib/revision-notas.ts`, `hooks`). Lo que se corrige del hijo se corrige aquí y se vuelve a copiar allí. Lo que nace en el workspace y sirve a cualquier portal (ajustes de bloques, calendarios, Gantt, revisión con notas, carpetas, subidas, enlaces) vive en el madre y el hijo lo envuelve con sus tintes y sus textos, con las mismas props.
-- **Toda lista de registros es una base de datos al estilo Airtable** (`BaseDatos`, en `components/app/base/`; lógica pura en `lib/base/`, con tests): barra, lateral de vistas, cuadrícula, kanban, galería, calendario, campos propios, formulario y ficha encima o integrada. Filtros con `lib/filtros/core.ts` (un solo juego de operadores, los de Airtable) y orden, grupos y totales con `lib/vistas/core.ts`. Las vistas de cada persona con `useBase` (en un portal se guardan en su base de datos; en la documentación y la demo, en el navegador con `useBaseLocal`). Las bases del workspace de influencers declaran sus campos en `lib/influencer/base-*.ts`. Documentado en `/ds/componentes/base-de-datos`. Ya no existen `FilterBar`, `QuickFilters`, `ViewSwitcher`, `RecordList`, `ColumnSettings` ni las vistas al estilo de Notion: no se recuperan. `DataTable` queda para tablas cortas y fijas.
-- Documentos A4 y PDF (propuestas, presupuestos) en `components/document/`, documentados en `/ds/documentos`. Dos formatos: **elaborada** (portales y software, maqueta Twic, demo `/documentos/propuesta-elaborada`) y **simple** (servicios y trabajos cortos, maqueta Feel The Diving, demo `/documentos/propuesta-simple`). Cada hoja recorta lo que no cabe: revisar el PDF exportado hoja a hoja. El tema claro se fuerza con `.theme-light` y la impresión vive en el bloque «Documentos A4 y PDF» de `globals.css`.
+## Cómo hablar con Xavier
+- En castellano, tuteo, corto y sin jerga: primero lo que cambia para él.
+- Con criterio propio: antes de hacer lo que pide, mira si hay una forma más fácil o más sólida de conseguirlo, y díselo. Si algo tiene un fallo, dilo claro.
+- Solo se le pregunta lo que únicamente él puede decidir.
 
-## Reglas de diseño (resumen; la verdad está en `/ds/patrones/convenciones` y `.claude/rules/design-system.md`)
-- Una página de operación = cabecera + pestañas de vistas + **una** base de datos a todo el ancho, sin paneles al lado. Ver `.claude/rules/design-system.md`.
-- Sin página de Ajustes: cada cosa se configura donde se usa (engranaje en su bloque, nombre del campo pulsable en la ficha, «Crear»/«Gestionar» en los selectores).
-- Contraste en claro: `border` < `input` < `control` (casillas); lo seleccionado en `bg-brand-soft` con filo `brand`. HTML de fuera siempre en `HtmlFrame`.
-- Los controles de una lista van en la barra de su base (`BarraBase`): vista, campos, filtro, grupos, orden, color, buscar y **la acción principal negra, una por página**. Sin toolbar suelta encima.
-- Subpáginas: pestañas `PageTabs` en la cabecera (prop `tabs`, debajo del título), una ruta por pestaña con su icono, definidas en `nav.ts`. Ejemplo en `/demo/facturacion`; reglas en `/ds/patrones/navegacion`. Toda navegación por pestañas (fichas, diálogos, bloques) usa el mismo estilo con `TabsList variant="line"`; el segmentado gris queda para elegir un valor o filtrar.
-- Fila clicable abre el sheet; checkbox selecciona; selección → `BulkBar` flotante abajo. Destructivo → `ConfirmDialog`. Feedback → `toast` de sonner.
-- Badges de estado solo con `StatusBadge` y sus cinco tonos. Botones con icono + verbo + objeto.
-- Reportar un problema: `ReportButton` en la prop `report` del shell (bicho entre el buscador y la campana, ⇧⌘X con una ficha abierta). Cada proyecto guarda los reportes en su BD; se cierran con respuesta, nunca se borran.
-- Toda página sale con filtros, orden, vistas que apliquen, selección, detalle y estados vacío/cargando/error. Sin UI muerta.
+## El conocimiento vive en la bóveda
+- Bóveda: `/Users/xaviermotjellinas/Documents/01_TRABAJO/00_Astratic Network/00_Brain/`. Se entra por `index.md` y se lee solo la nota o la sección que toca, por rangos, nunca entera.
+- Lo técnico de este repo (puerto, comandos, módulos, cómo funciona cada parte): `wiki/concepts/Design System Astratic UI - Manual técnico.md`. Busca la sección con `grep -n "^##"` y lee solo esa. Lo nuevo que aprendas se apunta ahí.
+- El proyecto: `wiki/projects/Design System Astratic UI.md`.
 
-## Al clonar para un cliente
-Seguir `content/nuevo-proyecto.md` de arriba abajo. Borrar `app/ds`, `app/demo`, `app/documentos`, `content`, `components/docs`, `components/document`, `registry.json`. Copiar `.claude/rules/design-system.md` tal cual.
+## Reglas esenciales
+Las reglas de cada tipo de acción viven en la bóveda (`wiki/concepts/Reglas - <tema>.md`). **Antes de cada acción, mira qué reglas hay para ese tipo de acción, léelas bien y síguelas.**
 
-## Consultar el código (Graphify)
-Hay un mapa del código en `graphify-out/` (fuera de git). Se rehace solo en segundo plano con cada commit, cambio de rama y merge, sin IA. Criterio completo en `Reglas - Código` (bóveda, «Mapa del código (Graphify)»).
-- Antes de cambiar una pieza: `graphify affected "<archivo o función>"` (a qué afecta) y `graphify explain "<pieza>"` (qué usa y quién la usa, con `archivo:línea`).
-- Cómo se conectan dos piezas: `graphify path "A" "B"` (con `--undirected` si no sale).
-- `graphify query` solo con nombres de código, no con frases: con lenguaje libre trae ruido.
-- Texto literal (textos de la UI, rutas, variables de entorno) y el esquema de Prisma, que el mapa no lee: Grep, como siempre.
-- Si `graphify-out/` no existe (copia o worktree nuevo): `graphify update .` (unos 2 min la primera vez, sin IA).
-
-## Workflow
-- Commits en español, describiendo el porqué. Push solo con confirmación explícita.
-- Ante error o integración externa nueva: skill `stack` antes de tocar código.
-
-@AGENTS.md
+1. **Diseño:** la interfaz sale del design system Astratic UI. Nunca inventes algo que se pueda copiar del kit: copia el componente y adáptalo un poco antes de crear uno nuevo. Reglas: `wiki/concepts/Reglas - Diseño.md`.
+2. **Código:** siempre con estándares de calidad y de la forma más simple posible sin perder calidad. El mejor código es el que no se escribe. Reglas: `wiki/concepts/Reglas - Código.md`.
+3. **Seguridad:** este repo es **público**: nada real (ni datos de personas o marcas, ni claves). Claves, tokens y `.env` nunca se leen ni se usan; publicar lo hace Píxel. Reglas: `wiki/concepts/Reglas - Autonomía y permisos.md`.
+4. **Gasta poco Claude, pero nunca en reglas.** Cada tanda de herramientas vuelve a leer toda la conversación:
+   - Todo lo que no dependa de otra cosa, en la misma tanda (varias herramientas a la vez, o un solo comando o script).
+   - Busca antes de leer (`grep`, búsqueda) y lee solo el rango que toca; cada archivo, una vez.
+   - En la bóveda, entra por `index.md` y sigue los enlaces hasta la nota y la sección que toca; nunca la leas entera.
+   - Las salidas grandes, con un script que imprima solo la respuesta. Ni agentes ni nada de pago por defecto.
+   - **En las reglas no se ahorra nunca:** antes de cada acción se leen bien las reglas de ese tipo de acción.
