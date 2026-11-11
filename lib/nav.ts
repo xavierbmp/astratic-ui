@@ -40,12 +40,21 @@ export type CurrentUser = {
   role: string
 }
 
-/** La subpágina activa: la pestaña con la ruta más larga que contiene a `pathname`. */
+/**
+ * La subpágina activa: la pestaña con la ruta más larga que contiene a `pathname`, contando también las rutas de sus
+ * propias pestañas (Collabs está activa en Contenidos, que es una de sus pestañas con otra ruta).
+ */
 export function activeTab(tabs: PageTab[], pathname: string) {
   let best: PageTab | undefined
+  let largo = -1
   for (const t of tabs) {
-    const match = pathname === t.href || pathname.startsWith(t.href + "/")
-    if (match && (!best || t.href.length > best.href.length)) best = t
+    for (const href of [t.href, ...(t.tabs ?? []).map((s) => s.href)]) {
+      const match = pathname === href || pathname.startsWith(href + "/")
+      if (match && href.length > largo) {
+        best = t
+        largo = href.length
+      }
+    }
   }
   return best
 }
