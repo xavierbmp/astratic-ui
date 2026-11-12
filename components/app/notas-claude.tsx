@@ -38,6 +38,14 @@ export type NotaItem = {
 
 const TITULO = "Notas para Claude"
 
+// El Mac de Xavier contesta en segundos (`scripts/puente-mac` del portal), así que con el chat abierto se mira cada poco
+// si ha llegado la respuesta: «pensando…» los primeros minutos y, si no llega, un aviso de que el Mac puede estar apagado.
+const CADA_MS = 3_000
+const PENSANDO_MS = 3 * 60_000
+const MIRAR_HASTA_MS = 15 * 60_000
+
+const sinRespuestaDesde = (n: NotaItem, ahora: number) => (n.respuesta ? null : ahora - Date.parse(n.creada))
+
 /** El nombre corto de un elemento señalado (su texto o su pieza del kit): se guarda con la nota. */
 export const nombreDeElemento = (el: ReportElement) => el.text.trim().slice(0, 80) || el.path.split(" › ").at(-1) || el.tag
 
@@ -114,15 +122,31 @@ export function NotasClaude({
   const [pagina, setPagina] = React.useState("")
   const fin = React.useRef<HTMLDivElement>(null)
 
+  const [ahora, setAhora] = React.useState(() => Date.now())
+
+  // Solo cambia la lista si ha cambiado algo, para no bajar el scroll en cada vistazo.
+  const poner = React.useCallback((nuevas: NotaItem[]) => setNotas((antes) => (JSON.stringify(antes) === JSON.stringify(nuevas) ? antes : nuevas)), [])
+
   const recargar = React.useCallback(async () => {
     setError(false)
     try {
-      setNotas(await cargar())
+      poner(await cargar())
+      setAhora(Date.now())
     } catch {
       setError(true)
     }
-  }, [cargar])
+  }, [cargar, poner])
 
+  // Mientras alguna nota reciente espera respuesta, se vuelve a mirar sin enseñar errores (el siguiente vistazo lo arregla).
+  const esperando = notas?.some((n) => (sinRespuestaDesde(n, ahora) ?? Infinity) < MIRAR_HASTA_MS) ?? false
+  React.useEffect(() => {
+    if (!abierto || !esperando) return
+    const reloj = setInterval(() => {
+      setAhora(Date.now())
+      cargar().then(poner, () => {})
+    }, CADA_MS)
+    return () => clearInterval(reloj)
+  }, [abierto, esperando, cargar, poner])
 
   React.useEffect(() => {
     fin.current?.scrollIntoView({ block: "end" })
@@ -182,7 +206,7 @@ export function NotasClaude({
             </span>
             <div className="min-w-0 flex-1">
               <h2 className="text-sm leading-snug font-semibold">{TITULO}</h2>
-              <p className="text-xs text-muted-foreground">Tarifas, emails o cualquier dato. Claude lo recoge en su repaso y te contesta aquí.</p>
+              <p className="text-xs text-muted-foreground">Tarifas, emails o cualquier dato. Claude te contesta aquí en unos segundos.</p>
             </div>
             <Button variant="ghost" size="icon-sm" aria-label="Minimizar" onClick={() => setAbierto(false)} className="-mr-1.5">
               <MinusIcon />
@@ -202,7 +226,7 @@ export function NotasClaude({
             ) : (
               <ul className="space-y-4">
                 {notas.map((n) => (
-                  <Nota key={n.id} nota={n} editar={editar} borrar={borrar} onCambio={recargar} />
+                  <Nota key={n.id} nota={n} esperando={sinRespuestaDesde(n, ahora)} editar={editar} borrar={borrar} onCambio={recargar} />
                 ))}
               </ul>
             )}
@@ -247,7 +271,7 @@ export function NotasClaude({
   )
 }
 
-function Nota({ nota, editar, borrar, onCambio }: { nota: NotaItem; editar: (id: string, texto: string) => Promise<string | void>; borrar: (id: string) => Promise<string | void>; onCambio: () => Promise<void> }) {
+function Nota({ nota, esperando, editar, borrar, onCambio }: { nota: NotaItem; /** Cuánto lleva sin respuesta, en ms (null si ya la tiene). */ esperando: number | null; editar: (id: string, texto: string) => Promise<string | void>; borrar: (id: string) => Promise<string | void>; onCambio: () => Promise<void> }) {
   const [editando, setEditando] = React.useState(false)
   const [borrador, setBorrador] = React.useState(nota.texto)
   const [quitar, setQuitar] = React.useState(false)
@@ -317,6 +341,24 @@ function Nota({ nota, editar, borrar, onCambio }: { nota: NotaItem; editar: (id:
             Claude{nota.respondida && ` · ${fmt.date(nota.respondida)}, ${fmt.time(nota.respondida)}`}
           </p>
           <p className="max-w-[90%] rounded-2xl rounded-bl-md bg-muted px-3 py-2 text-sm break-words whitespace-pre-wrap">{nota.respuesta}</p>
+        </div>
+      )}
+
+      {esperando !== null && esperando < MIRAR_HASTA_MS && (
+        <div className="flex flex-col items-start" aria-live="polite">
+          <p className="mb-0.5 text-[11px] text-muted-foreground">Claude</p>
+          {esperando < PENSANDO_MS ? (
+            <p className="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+              Pensando
+              <span aria-hidden className="inline-flex gap-0.5">
+                {[0, 150, 300].map((d) => (
+                  <span key={d} className="size-1 animate-bounce rounded-full bg-current" style={{ animationDelay: `${d}ms` }} />
+                ))}
+              </span>
+            </p>
+          ) : (
+            <p className="max-w-[90%] text-xs text-muted-foreground">Aún sin respuesta. Si tu Mac está apagado, Claude la contestará cuando lo enciendas.</p>
+          )}
         </div>
       )}
 
